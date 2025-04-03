@@ -2,15 +2,19 @@
 import { NextFunction,Request,Response } from "express";
 import IAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject,injectable } from "inversify";
+import IUserAuthService from "../../../services/user/interfaces/IUserAuthServices";
 
 
 @injectable()
 
 export default class AuthController implements IAuthCtrl {
 
-    constructor(){
-        
-    }
+    private _userService: IUserAuthService;
+
+    constructor( 
+        @inject("IUserAuthService") UserAuthService:IUserAuthService
+
+    ){ this._userService= UserAuthService}
 
     async userLogin(req:Request,res:Response):Promise<any>{
 
@@ -33,13 +37,18 @@ export default class AuthController implements IAuthCtrl {
     async userSignup(req:Request,res:Response,next:NextFunction):Promise<any>{
 
         try{
-            const {fullname,email,password,confirmPassword,phone,gender,dob,geoLocation} = req.body;
+            const {fullName,email,password,confirmPassword,phone,gender,dob,location} = req.body;
 
-            const userDetails = {fullname,email,password,confirmPassword,phone,gender,dob,geoLocation};
+            const userDetails = {fullName,email,password,confirmPassword,phone,gender,dob,location};
 
             console.log("user details is ",userDetails);
 
-            return res.status(200).json(userDetails)
+            const user =await this._userService.signup(userDetails);
+
+            console.log("user  is ",user);
+
+
+            return res.status(200).json(user)
 
         }catch(error){
             console.log(error);
