@@ -37,12 +37,12 @@ export default class AuthController implements IAuthCtrl {
     async userSignup(req:Request,res:Response,next:NextFunction):Promise<any>{
 
         try{
-            const {fullName,email,password,confirmPassword,phone,gender,dob,location} = req.body;
+            const {fullName,email,password,confirmPassword} = req.body;
 
-            const userDetails = {fullName,email,password,confirmPassword,phone,gender,dob,location};
+            const userDetails = {fullName,email,password,confirmPassword};
 
             console.log("user details is ",userDetails);
-
+            
             const user =await this._userService.signup(userDetails);
 
             console.log("user  is ",user);

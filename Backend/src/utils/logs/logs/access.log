@@ -1,0 +1,8 @@
+::1 - - [07/Apr/2025:11:11:28 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:11:17:14 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:12:23:16 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:12:26:42 +0000] "POST /api/user/signup HTTP/1.1" 500 31 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:12:27:27 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:12:32:10 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:12:34:22 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [07/Apr/2025:13:45:41 +0000] "POST /api/user/signup HTTP/1.1" 200 322 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"

@@ -7,16 +7,15 @@ const userSchema : Schema<IUserDocument> = new Schema ({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     profile: { type: String },
-    phone: { type: String, required: true },
+    phone: { type: String },
     location: {
         type: {
             type: String,
             enum: ["Point"],  
-            required: true,
+           
         },
         coordinates: {
             type: [Number],
-            required: true,
         }
     },
     gender: { type: String },

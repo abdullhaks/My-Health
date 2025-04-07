@@ -2,8 +2,9 @@ import express from 'express';
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
 import userRoutes from './src/routes/user/userRoutes';
-import logger from './src/utils/logger';
+import logger from './src/utils/logs/logger';
 import connectDB from './src/config/connectDB';
+import cors from 'cors';
 
 
 dotenv.config();
@@ -12,6 +13,13 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+app.use(cors({
+    origin: process.env.CLIENT_URL as string,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 
 
