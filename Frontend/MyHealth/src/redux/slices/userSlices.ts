@@ -1,44 +1,31 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface UserState {
-    id: string | null;
-    name: string;
-    email: string;
-    isAuthenticated: boolean;
-}
-
-const initialState: UserState = {
-    id: null,
-    name: '',
-    email: '',
-    isAuthenticated: false,
-
-};
+interface AuthState {
+    user: any;
+    accessToken: string | null;
+  }
+  
+  const initialState: AuthState = {
+    user: null,
+    accessToken: null,
+  };
 
 
 const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        login(state, action: PayloadAction<{ id: string; name: string; email: string }>) {
-            state.id = action.payload.id;
-            state.name = action.payload.name;
-            state.email = action.payload.email;
-            state.isAuthenticated = true;
-        },
-        logout(state) {
-            state.id = null;
-            state.name = '';
-            state.email = '';
-            state.isAuthenticated = false;
-        },
-        updateUser(state, action: PayloadAction<{ name?: string; email?: string }>) {
-            if (action.payload.name) {
-                state.name = action.payload.name;
-            }
-            if (action.payload.email) {
-                state.email = action.payload.email;
-            }
+          login: (state, action: PayloadAction<{ user: any; accessToken: string }>) => {
+            state.user = action.payload.user;
+            state.accessToken = action.payload.accessToken;
+          },
+          logout: (state) => {
+            state.user = null;
+            state.accessToken = null;
+          },
+          
+        updateUser(state, action: PayloadAction<any>) {
+            state.user = { ...state.user, ...action.payload };
         },
     },
 });

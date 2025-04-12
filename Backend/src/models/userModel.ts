@@ -21,6 +21,7 @@ const userSchema : Schema<IUserDocument> = new Schema ({
     gender: { type: String },
     dob: { type: Date },
     isBlocked: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
     bmi: { type: String },
     latestHealthSummary: { type: String },
     walletBalance: { type: Number, default: 0 },

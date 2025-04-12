@@ -57,5 +57,5 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
       console.log("Error deleting document:", error);
       return null;
     }
-  }
+  };
 };

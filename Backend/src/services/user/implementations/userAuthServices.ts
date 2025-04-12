@@ -9,6 +9,8 @@ import OtpModel from "../../../models/otpModel";
 import { generateOtpMail } from "../../../utils/generateOtpMail";
 import dotenv from 'dotenv';
 dotenv.config();
+import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
+import { Request, Response, NextFunction } from "express";
 
 
 const transporter = nodemailer.createTransport({
@@ -27,6 +29,47 @@ export default class UserAuthService implements IUserAuthService {
 
     }
 
+
+    async login(res:Response,userData:IUser):Promise<any>{
+        console.log("user data from service....",userData); 
+        if(!userData.email || !userData.password){
+            throw new Error("Please provide all required fields");
+        }
+
+        const existingUser = await this._userRepository.findByEmail(userData.email);
+
+        console.log("Existing user: ", existingUser);
+        if (existingUser) {
+            const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
+            if (!isPasswordValid) {
+                throw new Error("Invalid crendentials");
+            };
+            console.log("User logged in successfully: ", existingUser);
+
+            const accessToken = generateAccessToken({data:existingUser._id});
+            const refreshToken = generateRefreshToken({data:existingUser._id});
+
+            console.log("Access token: ", accessToken);
+            console.log("Refresh token: ", refreshToken);
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+              });
+
+              const {password, ...userWithoutPassword} = existingUser.toObject();
+         
+            return { message: "Login successful", user: userWithoutPassword ,accessToken};
+        } else {
+            throw new Error("invalid credentials");
+        }
+    
+
+
+    };
+
+
     async signup(userData:IUser): Promise<any> {
         console.log("user data from service....",userData);
 
@@ -40,6 +83,8 @@ export default class UserAuthService implements IUserAuthService {
         };
 
         const existingUser = await this._userRepository.findByEmail(userData.email);
+
+        console.log("Existing user: ", existingUser);
         if (existingUser) {
             throw new Error("User already exists");
         };
@@ -50,10 +95,13 @@ export default class UserAuthService implements IUserAuthService {
         const otp = generateOtp();
         console.log("Generated OTP: ", otp);
 
-        const otpResult = await this.sendMail(userData.email, otp);
-        console.log("OTP sent to email: ", userData.email, otpResult);
+        await this.sendMail(userData.email, otp);
+        console.log("OTP sent to email: ", userData.email);
 
-        return response;
+        return {
+            message: "Signup successful. OTP sent to email.",
+            email: userData.email, // send this to frontend
+          };
     };
 
 
@@ -82,7 +130,6 @@ export default class UserAuthService implements IUserAuthService {
                 }
                 console.log("Email sent: ", info.response);
             });
-            console.log("Email sent successfully: ", result);
 
         }catch(error){
             console.log(error);
@@ -92,4 +139,26 @@ export default class UserAuthService implements IUserAuthService {
 
 
     };
+
+    async verifyOtp(email:string, otp:string):Promise<any>{
+        const otpRecord = await this._userRepository.findLatestOtpByEmail(email);
+        console.log("OTP record: ", otpRecord);
+
+        if (!otpRecord) {
+            throw new Error("Invalid OTP or email");
+        }
+
+        const isOtpValid = otpRecord.otp === otp;
+        if (!isOtpValid) {
+            throw new Error("Invalid OTP");
+        }
+
+        const validateUser = await this._userRepository.verifyUser(email);
+
+        console.log("User verified: ", validateUser);
+
+        return { message: "OTP verified successfully" };
+    };
+
+
 }

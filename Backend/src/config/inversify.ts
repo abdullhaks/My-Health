@@ -1,5 +1,6 @@
 import { Container } from "inversify";
 import userModel from "../models/userModel";
+import OtpModel from "../models/otpModel";
 
 
 import AuthController from "../controllers/user/implementations/authCtrl";
@@ -13,6 +14,7 @@ import IUserRepository from "../repositories/interfaces/IUserRepository";
 
 const container = new Container();
 container.bind("userModel").toConstantValue(userModel);
+container.bind("otpModel").toConstantValue(OtpModel);
 
 container.bind<IAuthCtrl>("IAuthCtrl").to(AuthController);
 container.bind<IUserAuthService>("IUserAuthService").to(UserAuthService)

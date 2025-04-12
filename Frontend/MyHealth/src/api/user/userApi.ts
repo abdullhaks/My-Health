@@ -20,9 +20,15 @@ export const signupUser = async (userData: any) => {
 }
 export const loginUser = async (userData: any) => {
     try {
+
+        console.log("User data:", userData); // Log the user data
+        
         const response = await axios.post(`${apiUrl}/user/login`, userData, {
         withCredentials: true,
         });
+
+        console.log("Login response:", response.data); // Log the response data
+
         return response.data;
     } catch (error) {
         console.error("Error logging in user:", error);
@@ -32,6 +38,9 @@ export const loginUser = async (userData: any) => {
 
 export const verifyOtp = async (otpData: any) => {
     try {
+
+        console.log("OTP data:", otpData); // Log the OTP data;
+        
         const response = await axios.post(`${apiUrl}/user/verifyOtp`, otpData, {
         withCredentials: true,
         });

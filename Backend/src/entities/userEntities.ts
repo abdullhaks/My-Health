@@ -18,6 +18,7 @@ export interface IUserDocument extends Document{
     gender:string;
     dob:Date;
     isBlocked:boolean;
+    isVerified:boolean;
     bmi:string;
     latestHealthSummary:string;
     walletBalance:number;

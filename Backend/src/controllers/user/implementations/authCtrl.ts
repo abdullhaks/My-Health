@@ -21,10 +21,12 @@ export default class AuthController implements IAuthCtrl {
         try{
 
             const {email,password} = req.body;
-            const userData = {email,password};
-            console.log(" log in request is",req.body);
 
-            return res.status(200).json(userData);
+            const result =await this._userService.login(res,{email,password});
+
+            console.log("result is ",result);
+
+            return res.status(200).json(result);
 
         }catch(error){
             console.log(error);
@@ -65,6 +67,8 @@ export default class AuthController implements IAuthCtrl {
             const{otp,email} = req.body;
 
             console.log(`otp is ${otp} & email is ${email}`);
+
+            const otpRecord = await this._userService.verifyOtp(email,otp);
             return res.status(200).json({otp,email});
 
         }catch(error){

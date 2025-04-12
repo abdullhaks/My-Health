@@ -8,7 +8,9 @@ import PasswordInput from "../../sharedComponents/PasswordInput";
 import { useNavigate } from "react-router-dom";
 import {z} from "zod"
 import { useEffect, useState } from "react";
-
+import { loginUser } from "../../api/user/userApi";
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/slices/userSlices";
 
 const userLoginSchema = z.object({
   email: z.string().email("Invalid email address"), 
@@ -37,6 +39,7 @@ function UserLogin() {
     password: false,
   });
 
+  const dispatch = useDispatch();
 
     // Validate on change
     useEffect(() => {
@@ -65,10 +68,35 @@ function UserLogin() {
       }));
     };
   
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      // Do login logic here
-      console.log("Logging in with:", formData);
+      const result = userLoginSchema.safeParse(formData);
+    
+      if (!result.success) {
+        const errors: any = {};
+        result.error.errors.forEach((err) => {
+          errors[err.path[0]] = err.message;
+        });
+        setErrors(errors);
+        return;
+      }
+    
+      try {
+        const response = await loginUser(formData);
+        console.log("Login successful:", response);
+    
+        dispatch(login({
+          user: response.user,
+          accessToken: response.accessToken
+        }));
+
+        navigate("/user/dashboard"); // or wherever appropriate
+      } catch (error: any) {
+        console.error("Login failed:", error);
+    
+        // Show backend error message (customize as needed)
+        alert("invalid crendial...")
+      }
     };
 
   

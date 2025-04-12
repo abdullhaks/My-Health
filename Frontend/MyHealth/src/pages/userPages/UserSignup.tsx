@@ -104,18 +104,18 @@ function UserSignup() {
 
     try{
 
-      const data = await signupUser(formData)
+        await signupUser(formData)
       .then((response) => {
         console.log("Signup successful", response);
-        navigate("/user/login");
+        localStorage.setItem("email", response.email);
+        navigate("/user/otp");
       })
       .catch((error) => {
         console.error("Signup error", error);
         setErrors({ email: "Email already exists" });
       });
 
-    console.log("Signup Successful", data);
-    navigate("/user/otp");
+    
 
     }catch(error){
 
