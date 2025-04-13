@@ -13,6 +13,10 @@ import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from ".
 import { Request, Response, NextFunction } from "express";
 
 
+console.log("User auth service is running....");
+console.log("NODE_ENV: ", process.env.EMAIL_USER);
+console.log("NODE_ENV: ", process.env.EMAIL_PASS);
+
 const transporter = nodemailer.createTransport({
     service: "Gmail",
     auth: {user: process.env.EMAIL_USER,
@@ -30,44 +34,61 @@ export default class UserAuthService implements IUserAuthService {
     }
 
 
-    async login(res:Response,userData:IUser):Promise<any>{
-        console.log("user data from service....",userData); 
-        if(!userData.email || !userData.password){
-            throw new Error("Please provide all required fields");
+    async login(res: Response, userData: IUser): Promise<any> {
+        console.log("user data from service....", userData);
+      
+        if (!userData.email || !userData.password) {
+          throw new Error("Please provide all required fields");
         }
-
+      
         const existingUser = await this._userRepository.findByEmail(userData.email);
-
         console.log("Existing user: ", existingUser);
-        if (existingUser) {
-            const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
-            if (!isPasswordValid) {
-                throw new Error("Invalid crendentials");
-            };
-            console.log("User logged in successfully: ", existingUser);
-
-            const accessToken = generateAccessToken({data:existingUser._id});
-            const refreshToken = generateRefreshToken({data:existingUser._id});
-
-            console.log("Access token: ", accessToken);
-            console.log("Refresh token: ", refreshToken);
-
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-              });
-
-              const {password, ...userWithoutPassword} = existingUser.toObject();
-         
-            return { message: "Login successful", user: userWithoutPassword ,accessToken};
-        } else {
-            throw new Error("invalid credentials");
+      
+        if (!existingUser) {
+          throw new Error("Invalid credentials");
         }
-    
-
-
-    };
+      
+        const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
+        if (!isPasswordValid) {
+          throw new Error("Invalid credentials");
+        }
+      
+        if (existingUser.isBlocked) {
+          return {
+            user: { email: existingUser.email, isBlocked: true },
+            message: "User is blocked"
+          };
+        }
+      
+        if (!existingUser.isVerified) {
+          const otp = generateOtp();
+          await this.sendMail(existingUser.email, otp);
+          console.log("OTP sent to email: ", existingUser.email);
+      
+          return {
+            user: { email: existingUser.email, isVerified: false },
+            message: "User not verified, OTP sent"
+          };
+        }
+      
+        const accessToken = generateAccessToken({ data: existingUser._id });
+        const refreshToken = generateRefreshToken({ data: existingUser._id });
+      
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+      
+        const { password, ...userWithoutPassword } = existingUser.toObject();
+      
+        return {
+          message: "Login successful",
+          user: userWithoutPassword,
+          accessToken
+        };
+      }
+      
 
 
     async signup(userData:IUser): Promise<any> {

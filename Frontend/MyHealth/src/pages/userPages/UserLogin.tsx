@@ -11,6 +11,9 @@ import { useEffect, useState } from "react";
 import { loginUser } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/slices/userSlices";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const userLoginSchema = z.object({
   email: z.string().email("Invalid email address"), 
@@ -85,19 +88,41 @@ function UserLogin() {
         const response = await loginUser(formData);
         console.log("Login successful:", response);
     
+        // Check if user is blocked
+        if (response.user.isBlocked) {
+          toast.warning("Your account has been blocked. Please contact support.");
+          return;
+        }
+    
+        // Check if user is verified
+        if (!response.user.isVerified) {
+          toast.info("Please verify your account via OTP sent to your email.");
+          localStorage.setItem("email", response.user.email);
+          navigate("/user/otp");
+          return;
+        }
+    
         dispatch(login({
           user: response.user,
           accessToken: response.accessToken
         }));
-
-        navigate("/user/dashboard"); // or wherever appropriate
+    
+        toast.success("Logged in successfully");
+        navigate("/user/dashboard");
+    
       } catch (error: any) {
         console.error("Login failed:", error);
     
-        // Show backend error message (customize as needed)
-        alert("invalid crendial...")
+        if (error.response && error.response.status === 401) {
+          toast.error("Invalid email or password");
+          setErrors({ ...errors, password: "Invalid email or password" });
+        } else {
+          toast.error("Something went wrong. Please try again later.");
+          setErrors({ ...errors, email: " " });
+        }
       }
     };
+    
 
   
   return (
