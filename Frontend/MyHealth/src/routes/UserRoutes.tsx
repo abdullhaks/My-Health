@@ -11,7 +11,7 @@ import Profile from "../components/userComponents/UserProfile";
 const UserRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to="/user/login" />} />
       <Route path="/login" element={<UserLogin />} />
       <Route path="/signup" element={<UserSignup />} />
       <Route path="/forgetPassword" element={<UserForgetPassword />} />

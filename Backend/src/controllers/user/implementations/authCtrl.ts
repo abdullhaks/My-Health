@@ -26,11 +26,14 @@ export default class AuthController implements IAuthCtrl {
 
             console.log("result is ",result);
 
+            if(!result){
+                return res.status(401).json({msg:"Envalid credentials"});
+            }
             return res.status(200).json(result);
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"internal server error"});
+            return res.status(500).json({msg:"Envalid credentials"});
         }
         
     };

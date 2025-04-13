@@ -10,8 +10,8 @@ import {z} from "zod"
 import { useEffect, useState } from "react";
 import { loginUser } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/slices/userSlices";
-
+import { login } from "../../redux/slices/userSlices"
+import toast from "react-hot-toast";
 const userLoginSchema = z.object({
   email: z.string().email("Invalid email address"), 
   password: z.string().min(6, "Password must be at least 6 characters long"),
@@ -94,8 +94,7 @@ function UserLogin() {
       } catch (error: any) {
         console.error("Login failed:", error);
     
-        // Show backend error message (customize as needed)
-        alert("invalid crendial...")
+        toast.error(error.response?.data?.msg || "Envalid credentials!");
       }
     };
 
