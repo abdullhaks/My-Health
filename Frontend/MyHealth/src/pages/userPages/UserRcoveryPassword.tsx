@@ -1,4 +1,5 @@
 
+
 import Input from "../../sharedComponents/Input";
 import userLogin from "../../assets/userLogin.png"
 import applogoWhite from "../../assets/applogoWhite.png"
@@ -6,37 +7,44 @@ import Button from "../../sharedComponents/Button";
 import { useNavigate } from "react-router-dom";
 import {z} from "zod"
 import { useEffect, useState } from "react";
-import { forgetPassword } from "../../api/user/userApi";
+import { verifyRecoveryPassword } from "../../api/user/userApi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-const userEmailSchema = z.object({
-  email: z.string().email("Invalid email address"), 
-
+const userRecPassSchema = z.object({
+    recPass: z
+    .string()
+    .min(10, "Full name must be  10 characters")
+    .max(10,"Full name must be 10 characters")
+    .refine((val) => val.trim() === val, {
+      message: "No leading or trailing spaces allowed",
+    }),
 });
 
 
-function UserForgetPassword() {
+function UserRecoveryPassword() {
   
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
+    recPass: "",
   });
   const [errors, setErrors] = useState({  
-    email: "",
+    recPass: "",
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
 
   const [touched, setTouched] = useState({
-    email: false,
+    recPass: false,
   });
+
+  const email = localStorage.getItem("email") || "";
 
     // Validate on change
     useEffect(() => {
-      const result = userEmailSchema.safeParse(formData);
+      const result = userRecPassSchema.safeParse(formData);
       if (!result.success) {
         const errors: any = {};
         result.error.errors.forEach((err) => {
@@ -45,7 +53,7 @@ function UserForgetPassword() {
         setErrors(errors);
         setIsFormValid(false);
       } else {
-        setErrors({ email: ""});
+        setErrors({ recPass: ""});
         setIsFormValid(true);
       }
     }, [formData]);
@@ -62,45 +70,36 @@ function UserForgetPassword() {
     };
   
     const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      const result = userEmailSchema.safeParse(formData);
-    
-      if (!result.success) {
-        const errors: any = {};
-        result.error.errors.forEach((err) => {
-          errors[err.path[0]] = err.message;
-        });
-        setErrors(errors);
-        return;
-      }
-    
-      try {
-        const response = await forgetPassword(formData.email);
-        console.log("submit successful:", response);
-    
-        // Check if user is blocked
-        if (!response) {
-          toast.warning("sending recovey password has been failed.");
+        e.preventDefault();
+        const result = userRecPassSchema.safeParse(formData);
+      
+        if (!result.success) {
+          const errors: any = {};
+          result.error.errors.forEach((err) => {
+            errors[err.path[0]] = err.message;
+          });
+          setErrors(errors);
           return;
         }
-    
-    
-        // dispatch(login({
-        //   user: response.user,
-        //   accessToken: response.accessToken
-        // }));
-        localStorage.setItem("email", response.email);
-        toast.info("reset your password");
-        navigate("/user/resetPassword");
-    
-      } catch (error: any) {
-        console.error("Login failed:", error);
-    
+      
+        try {
+          const response = await verifyRecoveryPassword({
+            email,
+            recoveryCode: formData.recPass,
+          });
+      
+          if (response?.msg === "Recovery code verified successfully") {
+            toast.success("Recovery code verified!");
+            navigate("/user/resetPassword");
+          } else {
+            toast.error("Invalid recovery code");
+          }
+      
+        } catch (error: any) {
+          console.error("Verification failed:", error);
           toast.error("Something went wrong. Please try again later.");
-          setErrors({ ...errors, email: "Invalid email or password" });
-       
-      }
-    };
+        }
+      };
     
 
   
@@ -133,16 +132,16 @@ function UserForgetPassword() {
                   <form onSubmit={handleSubmit} className="space-y-4">
 
                   <Input
-                    id="email"
-                    name="email"
-                    label="Email Address"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
+                    id="recPass"
+                    name="recPass"
+                    label="recovery password"
+                    type="text"
+                    placeholder="Enter recovery password"
+                    value={formData.recPass}
                     onChange={handleChange}
                     required
-                    className={touched.email && errors.email ? "border-red-500" : ""}
-                    error={touched.email ? errors.email : ""}
+                    className={touched.recPass && errors.recPass ? "border-red-500" : ""}
+                    error={touched.recPass ? errors.recPass : ""}
                   />
 
                  
@@ -178,4 +177,4 @@ function UserForgetPassword() {
   );
 }
 
-export default UserForgetPassword;
+export default UserRecoveryPassword;

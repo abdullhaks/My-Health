@@ -3,14 +3,17 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IUser } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
-import generateOtp from "../../../utils/otp";
+import generateOtp from "../../../utils/helpers";
+import { generateRandomPassword } from "../../../utils/helpers";
 import nodemailer from "nodemailer";
 import OtpModel from "../../../models/otpModel";
+import RecoveryPasswordModel from "../../../models/recoveryPasswordModel";
 import { generateOtpMail } from "../../../utils/generateOtpMail";
 import dotenv from 'dotenv';
 dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
 import { Request, Response, NextFunction } from "express";
+import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 
 
 console.log("User auth service is running....");
@@ -182,4 +185,95 @@ export default class UserAuthService implements IUserAuthService {
     };
 
 
+
+    async resentOtp(email: string): Promise<any> {
+      if (!email) {
+        throw new Error("Email is required");
+      }
+    
+      const user = await this._userRepository.findByEmail(email);
+      if (!user) {
+        throw new Error("User not found");
+      }
+    
+      if (user.isVerified) {
+        throw new Error("User is already verified");
+      }
+    
+      const otp = generateOtp();
+    
+      // Save OTP to DB
+      const otpRecord = new OtpModel({
+        email,
+        otp,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+      });
+    
+      await otpRecord.save();
+    
+      // Send OTP email
+      const expirationTime = "2 minutes";
+      const mailOptions = generateOtpMail(email, otp, expirationTime);
+    
+      try {
+        await transporter.sendMail(mailOptions);
+        return { message: "OTP resent to your email" };
+      } catch (err) {
+        console.error("Error sending OTP:", err);
+        throw new Error("Failed to send OTP");
+      }
+    }
+    
+    async forgotPassword(email: string): Promise<any> {
+      if (!email) {
+        throw new Error("Email is required");
+      }
+    
+      const user = await this._userRepository.findByEmail(email);
+    
+      if (!user) {
+        throw new Error("User not found");
+      }
+    
+     
+      const recoveryPassword = generateRandomPassword(10);
+      console.log("Generated recovery password:", recoveryPassword);
+    
+  
+      const recoveryRecord = new RecoveryPasswordModel({
+        email,
+        recoveryPassword,
+        createdAt: Date.now(),
+      });
+    
+      await recoveryRecord.save();
+    
+   
+      const mailOptions = generateRecoveryPasswordMail(email, recoveryPassword);
+
+     
+    
+      try {
+        await transporter.sendMail(mailOptions);
+        return {
+          message: "Recovery password sent to your email",
+          email:user.email
+        };
+      } catch (error) {
+        console.error("Error sending recovery email:", error);
+        throw new Error("Failed to send recovery email");
+      }
+    }
+    
+
+    async verifyRecoveryPassword(email: string, recoveryCode: string): Promise<boolean> {
+      const record = await RecoveryPasswordModel.findOne({ email }).sort({ createdAt: -1 });
+    
+      if (!record) return false;
+    
+      const isMatch = record.recoveryPassword === recoveryCode;
+      return isMatch;
+    }
+    
 }

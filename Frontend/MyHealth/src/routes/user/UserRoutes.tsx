@@ -11,6 +11,7 @@ import UserResetPassword from "../../pages/userPages/UserResetPassword";
 import UserMain from "../../pages/userPages/UserMain";
 import Dashboard from "../../components/userComponents/UserDashboard";
 import Profile from "../../components/userComponents/UserProfile";
+import UserRcoveryPassword from "../../pages/userPages/UserRcoveryPassword";
 
 const UserRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const UserRoutes = () => {
         <Route path="/login" element={<UserLogin />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/forgetPassword" element={<UserForgetPassword />} />
+        <Route path="/recoverPassword" element={<UserRcoveryPassword/> } />
         <Route path="/otp" element={<UserOtpVerification />} />
         <Route path="/resetPassword" element={<UserResetPassword />} />
       </Route>

@@ -177,6 +177,8 @@ function UserLogin() {
                     error={touched.password ? errors.password : ""}
                   />
 
+                  <span onClick={()=> navigate("/user/forgetPassword")} className="text-blue-600 hover:underline cursor-pointer">forgot password</span>
+
                 <Button
                   type="submit"
                   text="Login"

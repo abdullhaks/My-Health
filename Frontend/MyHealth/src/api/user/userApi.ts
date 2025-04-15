@@ -50,18 +50,36 @@ export const verifyOtp = async (otpData: any) => {
         throw error;
     }
 };
+
 export const resentOtp = async (email: string) => {
     try {
-        const response = await axios.get(`${apiUrl}/user/resentOtp`, {
-            params: { email },
+      const response = await axios.get(`${apiUrl}/user/resentOtp`, {
+        params: { email },
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Error resending OTP:", error);
+      throw error.response?.data?.msg || "Something went wrong";
+    }
+  };
+
+  export const forgetPassword = async (email: string) => {
+    try {
+        const response = await axios.get(`${apiUrl}/user/forgotPassword`,{
+            params:{email},
             withCredentials: true,
         });
         return response.data;
-    } catch (error) {
-        console.error("Error resending OTP:", error);
+    }
+    catch (error) {
+        console.error("Error sending forgot password email:", error);
         throw error;
     }
 };
+  
+
+
 export const recoveryPassword = async (email: string) => {
     try {
         const response = await axios.get(`${apiUrl}/user/recoveryPassword`, {
@@ -73,7 +91,23 @@ export const recoveryPassword = async (email: string) => {
         console.error("Error recovering password:", error);
         throw error;
     }
+};
+
+export const verifyRecoveryPassword = async (userData:any)=>{
+
+    console.log("User data:", userData); // Log the user data
+        
+    const response = await axios.post(`${apiUrl}/user/login`, userData, {
+    withCredentials: true,
+    });
+
+    console.log("Login response:", response.data); // Log the response data
+
+    return response.data;
 }
+
+
+
 export const resetPassword = async (email: string, newPassword: string) => {
     try {
         const response = await axios.patch(`${apiUrl}/user/resetPassword/${email}`, { newPassword }, {
