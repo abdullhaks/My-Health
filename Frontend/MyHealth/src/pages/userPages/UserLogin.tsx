@@ -10,8 +10,11 @@ import {z} from "zod"
 import { useEffect, useState } from "react";
 import { loginUser } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/slices/userSlices"
-import toast from "react-hot-toast";
+import { login } from "../../redux/slices/userSlices";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 const userLoginSchema = z.object({
   email: z.string().email("Invalid email address"), 
   password: z.string().min(6, "Password must be at least 6 characters long"),
@@ -85,18 +88,42 @@ function UserLogin() {
         const response = await loginUser(formData);
         console.log("Login successful:", response);
     
+        // Check if user is blocked
+        if (response.user.isBlocked) {
+          toast.warning("Your account has been blocked. Please contact support.");
+          return;
+        }
+    
+        // Check if user is verified
+        if (!response.user.isVerified) {
+          toast.info("Please verify your account via OTP sent to your email.");
+          localStorage.setItem("email", response.user.email);
+          navigate("/user/otp");
+          return;
+        }
+    
         dispatch(login({
           user: response.user,
           accessToken: response.accessToken
         }));
-
-        navigate("/user/dashboard"); // or wherever appropriate
+    
+        toast.success("Logged in successfully");
+        navigate("/user/dashboard");
+    
       } catch (error: any) {
         console.error("Login failed:", error);
     
         toast.error(error.response?.data?.msg || "Envalid credentials!");
+        if (error.response && error.response.status === 401) {
+          toast.error("Invalid email or password");
+          setErrors({ ...errors, password: "Invalid email or password" });
+        } else {
+          toast.error("Something went wrong. Please try again later.");
+          setErrors({ ...errors, email: " " });
+        }
       }
     };
+    
 
   
   return (
@@ -150,6 +177,8 @@ function UserLogin() {
                     className={touched.password && errors.password ? "border-red-500" : ""}
                     error={touched.password ? errors.password : ""}
                   />
+
+                  <span onClick={()=> navigate("/user/forgetPassword")} className="text-blue-600 hover:underline cursor-pointer">forgot password</span>
 
                 <Button
                   type="submit"

@@ -1,37 +1,31 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
-import {
-  FaHome,
-  FaUserMd,
-  FaCalendarAlt,
-  FaFileMedical,
-  FaClipboardList,
-  FaUserFriends,
-  FaChartLine,
-  FaBell,
-  FaCog,
-  FaSignOutAlt,
-  FaBars,
-  FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
-  FaSearch,
-  FaEnvelope,
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import {FaHome,FaUserMd, FaCalendarAlt, FaFileMedical, FaClipboardList, FaUserFriends,FaChartLine, FaBell,
+  FaCog, FaSignOutAlt, FaBars, FaTimes,FaChevronLeft,FaChevronRight, FaSearch, FaEnvelope,
 } from "react-icons/fa";
 import applogoBlue from "../../assets/applogoblue.png";
 import defaultAvatar from "../../assets/avatar.png";
+import ConfirmModal from "../../sharedComponents/ConfirmModal";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/slices/userSlices";
 
 interface NavbarProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<NavbarProps> = ({ children }) => {
+
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [notificationCount, setNotificationCount] = useState(3);
   const [messageCount, setMessageCount] = useState(2);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const location = useLocation();
+
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,6 +44,13 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
 
   const toggleSidebar = () => {
     if (window.innerWidth < 768) {
@@ -159,17 +160,17 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
               <div className="space-y-1">{renderMenuItems(secondaryMenuItems)}</div>
             </div>
             <div className="border-t border-gray-200 my-2"></div>
-            <div className="px-1">
-              <Link
-                to="/logout"
-                className="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-gray-700 hover:bg-red-50 hover:text-red-600"
-                onClick={handleMobileLinkClick}
+            <div className="px-1 cursor-pointer" onClick={()=>{handleMobileLinkClick (); setShowConfirm(true);}}>
+              <p
+                className="flex items-center px-4 py-3  rounded-lg transition-all duration-200 text-gray-700 hover:bg-red-50 hover:text-red-600"
+                
+                aria-label="Logout"
               >
                 <span className="text-xl text-red-500">
                   <FaSignOutAlt />
                 </span>
                 {!collapsed && <span className="ml-3 font-medium">Logout</span>}
-              </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -245,9 +246,9 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
                     Settings
                   </Link>
                   <div className="border-t border-gray-100"></div>
-                  <Link to="/logout" className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                  <p  onClick={() => setShowConfirm(true)}  className="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer">
                     Sign out
-                  </Link>
+                  </p>
                 </div>
               </div>
             </div>
@@ -259,7 +260,18 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {showConfirm && (
+        <ConfirmModal
+          message="Are you sure you want to log out?"
+          onConfirm={handleLogout}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
+
+
     </div>
+    
   );
 };
 

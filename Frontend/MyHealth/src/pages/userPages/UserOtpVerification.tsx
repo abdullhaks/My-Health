@@ -4,6 +4,8 @@ import userLogin from "../../assets/userLogin.png";
 import applogoWhite from "../../assets/applogoWhite.png";
 import Button from "../../sharedComponents/Button";
 import { verifyOtp } from "../../api/user/userApi";
+import { resentOtp } from "../../api/user/userApi";
+import { toast } from "react-toastify";
 
 
 
@@ -32,10 +34,14 @@ function UserOtpVerification() {
     return () => clearInterval(interval);
   }, [resendDisabled, timer]);
 
-  const handleResendOTP = () => {
-    // Trigger resend OTP API
-    console.log("Resending OTP...");
-    setResendDisabled(true);
+  const handleResendOTP = async () => {
+    try {
+      await resentOtp(email);
+      toast.success("OTP resent to your email.");
+      setResendDisabled(true);
+    } catch (err: any) {
+      toast.error(err.toString());
+    }
   };
 
   

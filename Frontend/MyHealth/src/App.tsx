@@ -1,7 +1,10 @@
 import { Toaster } from 'react-hot-toast';
 import {BrowserRouter as Router , Routes , Route} from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import UserRoutes from './routes/UserRoutes';
+import UserRoutes from './routes/user/UserRoutes';
+
+
+
 
 
 function App() {

@@ -42,7 +42,7 @@ const handleTokenErrors = async (error: AxiosError) => {
     console.log("Token error trying to logout...",error);
     store.dispatch(logout());
     try {
-      const result = await userInstance.post("/employee-service/api/employee/logout");
+      const result = await userInstance.post("/user/logout");
       console.log("Logout successful:", result.data.message);
       
     //   toast.success(result.data.message);

@@ -3,15 +3,22 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IUser } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
-import generateOtp from "../../../utils/otp";
+import generateOtp from "../../../utils/helpers";
+import { generateRandomPassword } from "../../../utils/helpers";
 import nodemailer from "nodemailer";
 import OtpModel from "../../../models/otpModel";
+import RecoveryPasswordModel from "../../../models/recoveryPasswordModel";
 import { generateOtpMail } from "../../../utils/generateOtpMail";
 import dotenv from 'dotenv';
 dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
 import { Request, Response, NextFunction } from "express";
+import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 
+
+console.log("User auth service is running....");
+console.log("NODE_ENV: ", process.env.EMAIL_USER);
+console.log("NODE_ENV: ", process.env.EMAIL_PASS);
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -30,44 +37,61 @@ export default class UserAuthService implements IUserAuthService {
     }
 
 
-    async login(res:Response,userData:IUser):Promise<any>{
-        console.log("user data from service....",userData); 
-        if(!userData.email || !userData.password){
-            throw new Error("Please provide all required fields");
+    async login(res: Response, userData: IUser): Promise<any> {
+        console.log("user data from service....", userData);
+      
+        if (!userData.email || !userData.password) {
+          throw new Error("Please provide all required fields");
         }
-
+      
         const existingUser = await this._userRepository.findByEmail(userData.email);
-
         console.log("Existing user: ", existingUser);
-        if (existingUser) {
-            const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
-            if (!isPasswordValid) {
-                throw new Error("Invalid crendentials");
-            };
-            console.log("User logged in successfully: ", existingUser);
-
-            const accessToken = generateAccessToken({data:existingUser._id});
-            const refreshToken = generateRefreshToken({data:existingUser._id});
-
-            console.log("Access token: ", accessToken);
-            console.log("Refresh token: ", refreshToken);
-
-            res.cookie('refreshToken', refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-              });
-
-              const {password, ...userWithoutPassword} = existingUser.toObject();
-         
-            return { message: "Login successful", user: userWithoutPassword ,accessToken};
-        } else {
-            throw new Error("invalid credentials");
+      
+        if (!existingUser) {
+          throw new Error("Invalid credentials");
         }
-    
-
-
-    };
+      
+        const isPasswordValid = await bcrypt.compare(userData.password, existingUser.password);
+        if (!isPasswordValid) {
+          throw new Error("Invalid credentials");
+        }
+      
+        if (existingUser.isBlocked) {
+          return {
+            user: { email: existingUser.email, isBlocked: true },
+            message: "User is blocked"
+          };
+        }
+      
+        if (!existingUser.isVerified) {
+          const otp = generateOtp();
+          await this.sendMail(existingUser.email, otp);
+          console.log("OTP sent to email: ", existingUser.email);
+      
+          return {
+            user: { email: existingUser.email, isVerified: false },
+            message: "User not verified, OTP sent"
+          };
+        }
+      
+        const accessToken = generateAccessToken({ data: existingUser._id });
+        const refreshToken = generateRefreshToken({ data: existingUser._id });
+      
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+      
+        const { password, ...userWithoutPassword } = existingUser.toObject();
+      
+        return {
+          message: "Login successful",
+          user: userWithoutPassword,
+          accessToken
+        };
+      }
+      
 
 
     async signup(userData:IUser): Promise<any> {
@@ -161,4 +185,95 @@ export default class UserAuthService implements IUserAuthService {
     };
 
 
+
+    async resentOtp(email: string): Promise<any> {
+      if (!email) {
+        throw new Error("Email is required");
+      }
+    
+      const user = await this._userRepository.findByEmail(email);
+      if (!user) {
+        throw new Error("User not found");
+      }
+    
+      if (user.isVerified) {
+        throw new Error("User is already verified");
+      }
+    
+      const otp = generateOtp();
+    
+      // Save OTP to DB
+      const otpRecord = new OtpModel({
+        email,
+        otp,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+      });
+    
+      await otpRecord.save();
+    
+      // Send OTP email
+      const expirationTime = "2 minutes";
+      const mailOptions = generateOtpMail(email, otp, expirationTime);
+    
+      try {
+        await transporter.sendMail(mailOptions);
+        return { message: "OTP resent to your email" };
+      } catch (err) {
+        console.error("Error sending OTP:", err);
+        throw new Error("Failed to send OTP");
+      }
+    }
+    
+    async forgotPassword(email: string): Promise<any> {
+      if (!email) {
+        throw new Error("Email is required");
+      }
+    
+      const user = await this._userRepository.findByEmail(email);
+    
+      if (!user) {
+        throw new Error("User not found");
+      }
+    
+     
+      const recoveryPassword = generateRandomPassword(10);
+      console.log("Generated recovery password:", recoveryPassword);
+    
+  
+      const recoveryRecord = new RecoveryPasswordModel({
+        email,
+        recoveryPassword,
+        createdAt: Date.now(),
+      });
+    
+      await recoveryRecord.save();
+    
+   
+      const mailOptions = generateRecoveryPasswordMail(email, recoveryPassword);
+
+     
+    
+      try {
+        await transporter.sendMail(mailOptions);
+        return {
+          message: "Recovery password sent to your email",
+          email:user.email
+        };
+      } catch (error) {
+        console.error("Error sending recovery email:", error);
+        throw new Error("Failed to send recovery email");
+      }
+    }
+    
+
+    async verifyRecoveryPassword(email: string, recoveryCode: string): Promise<boolean> {
+      const record = await RecoveryPasswordModel.findOne({ email }).sort({ createdAt: -1 });
+    
+      if (!record) return false;
+    
+      const isMatch = record.recoveryPassword === recoveryCode;
+      return isMatch;
+    }
+    
 }
