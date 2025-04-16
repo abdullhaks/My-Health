@@ -1,9 +1,11 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import userReducer from '../slices/userSlices'
+import adminReducer from '../slices/adminSlices'
 
 const appReducer = combineReducers({
 
-    user:userReducer
+    user:userReducer,
+    admin:adminReducer
 });
 
 const rootReducer = (state:any, action:any)=>{
