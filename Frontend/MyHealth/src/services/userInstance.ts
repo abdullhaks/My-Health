@@ -1,9 +1,8 @@
 import axios , { AxiosError , AxiosInstance , InternalAxiosRequestConfig , AxiosResponse } from "axios";
-import {logoutUser} from "../redux/slices/userSlices"; 
+import { logoutUser } from "../redux/slices/userSlices";
 import { store } from "../redux/store/store";
 import { HttpStatusCode } from "../utils/enum";
-
-
+import { refreshToken,logoutUser as logout  } from "../api/user/userApi";
 
 declare module 'axios' {
     interface InternalAxiosRequestConfig {
@@ -17,34 +16,52 @@ export const userInstance: AxiosInstance = axios.create({
     withCredentials: true,      
 });
 
+
+userInstance.interceptors.request.use(
+    (config) => {
+      const accessToken = store.getState().user.accessToken;
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+
+
 const handleTokenRefresh = async (originalRequest: InternalAxiosRequestConfig) => {
-
     try{
+        const response =   await refreshToken();
+        const{accessToken} = response;
 
-        await userInstance.post("/user/refreshToken")
+        store.dispatch({
+            type: "user/login",
+            payload: {
+                admin: store.getState().user.user,
+                accessToken,
+              },
+        });
+
+        originalRequest.headers.set('Authorization', `Bearer ${accessToken}`);
+
         return userInstance(originalRequest);
 
     }catch(error) {
-
         await handleTokenErrors(error as AxiosError);
-        throw error;
-        
+        throw error;   
     }
-
-
-
-
-
 };
+
 
 
 const handleTokenErrors = async (error: AxiosError) => {
     console.log("Token error trying to logout...",error);
     store.dispatch(logoutUser());
     try {
-      const result = await userInstance.post("/user/logout");
-      console.log("Logout successful:", result.data.message);
-      
+      const result = await logout();
+      console.log("Logout user successful:", result.data.message);
+      localStorage.removeItem("userEmail");
     //   toast.success(result.data.message);
     } catch (logoutError) {
       console.error("Logout failed:", logoutError);
@@ -56,6 +73,7 @@ const handleTokenErrors = async (error: AxiosError) => {
     (response: AxiosResponse) => response,
     async (error: AxiosError) => {
         const originalRequest = error.config as InternalAxiosRequestConfig;
+        
         if (error.response?.status === HttpStatusCode.UNAUTHORIZED && !originalRequest.isRetry) {
             originalRequest.isRetry = true;
             return handleTokenRefresh(originalRequest);

@@ -172,5 +172,27 @@ export default class AuthController implements IAuthCtrl {
             return res.status(500).json({msg:"internal server error"});
 
         }
+    };
+
+
+    async refreshToken(req:Request,res:Response):Promise<any>{
+        try{
+
+            const {userRefreshToken} = req.cookies;
+
+            if(!userRefreshToken){
+                return res.status(401).json({msg:"refresh token not found"});
+            }
+
+            const result = await this._userService.refreshToken(userRefreshToken);
+
+            return res.status(200).json(result);
+
+
+        }catch(error){
+            console.log(error);
+            return res.status(500).json({msg:"internal server error"});
+
+        }
     }
 } 

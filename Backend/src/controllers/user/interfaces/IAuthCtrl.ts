@@ -17,7 +17,7 @@ export default interface IAuthCtrl{
 
     resetPassword(req:Request,res:Response):Promise<void>
 
-    
+    refreshToken(req:Request,res:Response):Promise<void>
 
 
 }

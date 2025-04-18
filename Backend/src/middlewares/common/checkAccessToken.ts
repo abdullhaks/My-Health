@@ -13,7 +13,12 @@ export function verifyAdminAccessToken (req: Request, res: Response, next: NextF
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string);
 
     console.log("Decoded token: ", decoded);
-    // (req as any).adminId = decoded.data;
+    if (typeof decoded !== "string" && "data" in decoded) {
+      (req as any).adminId = decoded.data;
+    } else {
+      res.status(401).json({ msg: "Invalid token structure" });
+      return;
+    }
     next();
   } catch (err) {
      res.status(401).json({ msg: "Invalid or expired token" });
