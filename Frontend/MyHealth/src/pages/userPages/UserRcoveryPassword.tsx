@@ -40,7 +40,7 @@ function UserRecoveryPassword() {
     recPass: false,
   });
 
-  const email = localStorage.getItem("email") || "";
+  const email = localStorage.getItem("userEmail") || "";
 
     // Validate on change
     useEffect(() => {

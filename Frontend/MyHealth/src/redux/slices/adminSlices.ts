@@ -11,25 +11,24 @@ interface AuthState {
   };
 
 
-const adminSlice = createSlice({
+  const adminSlice = createSlice({
     name: 'admin',
     initialState,
     reducers: {
-          login: (state, action: PayloadAction<{ admin: any; accessToken: string }>) => {
-            state.admin = action.payload.admin;
-            state.accessToken = action.payload.accessToken;
-          },
-          logout: (state) => {
-            state.admin = null;
-            state.accessToken = null;
-          },
-          
-        updateAdmin(state, action: PayloadAction<any>) {
-            state.admin = { ...state.admin, ...action.payload };
-        },
+      loginAdmin: (state, action: PayloadAction<{ admin: any; accessToken: string }>) => {
+        state.admin = action.payload.admin;
+        state.accessToken = action.payload.accessToken;
+      },
+      logoutAdmin: (state) => {
+        state.admin = null;
+        state.accessToken = null;
+      },
+      updateAdmin(state, action: PayloadAction<any>) {
+        state.admin = { ...state.admin, ...action.payload };
+      },
     },
-});
-
-export const { login, logout, updateAdmin } = adminSlice.actions;
+  });
+  
+  export const { loginAdmin, logoutAdmin, updateAdmin } = adminSlice.actions;
 
 export default adminSlice.reducer;

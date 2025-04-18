@@ -1,6 +1,7 @@
 import { Router } from "express";
 import container from "../../config/inversify";
 import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAuthCtrl";
+import {verifyAdminAccessToken} from "../../middlewares/admin/checkAccessToken";
 
 const adminRoutes = Router();
 
@@ -15,5 +16,7 @@ adminRoutes.get("/recoveryPassword",(req,res)=>authCtrl.getRecoveryPassword(req,
 adminRoutes.post("verifyRecoveryPassword")
 
 adminRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,res));
+
+adminRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 
 export default adminRoutes; 

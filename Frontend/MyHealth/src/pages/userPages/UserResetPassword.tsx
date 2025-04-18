@@ -89,7 +89,7 @@ function UserForgetPassword() {
         //   user: response.user,
         //   accessToken: response.accessToken
         // }));
-        localStorage.setItem("email", response.email);
+        localStorage.setItem("userEmail", response.email);
         toast.info("reset your password");
         navigate("/user/resetPassword");
     

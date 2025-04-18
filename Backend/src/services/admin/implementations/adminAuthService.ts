@@ -11,7 +11,7 @@ dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
 import { Request, Response, NextFunction } from "express";
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
-
+import {IResponseDTO} from "../../../dto/commonDTO";
 
 console.log("Admin auth service is running....");
 console.log("NODE_ENV: ", process.env.EMAIL_USER);
@@ -58,7 +58,7 @@ export default class AdminAuthService implements IAdminAuthService {
         const accessToken = generateAccessToken({ data: admin._id });
         const refreshToken = generateRefreshToken({ data: admin._id });
       
-        res.cookie("refreshToken", refreshToken, {
+        res.cookie("adminRefreshToken", refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -126,4 +126,20 @@ export default class AdminAuthService implements IAdminAuthService {
       return isMatch;
     }
     
+    async refreshToken(refreshToken: string): Promise<IResponseDTO> {
+
+      console.log("Refresh token from service: ", refreshToken);
+        if (!refreshToken) {
+           throw new Error("Refresh token not found" );
+        }
+    
+        const verified = verifyRefreshToken(refreshToken);
+        if (!verified) {
+           throw new Error("Invalid refresh token" );
+        }
+    
+        const accessToken = generateAccessToken({ data: verified.data });
+    
+        return { accessToken };
+    }
 }

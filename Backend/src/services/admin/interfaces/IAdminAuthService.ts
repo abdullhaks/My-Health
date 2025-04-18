@@ -7,4 +7,6 @@ export default interface IAdminAuthService {
     forgotPassword(email:string):Promise<any>
     verifyRecoveryPassword(email: string, recoveryCode: string): Promise<boolean>
     // getRecoveryPassword(email:string):Promise<any>
+    // resetPassword(email:string,password:string):Promise<any>
+    refreshToken(token:string):Promise<any>
 }

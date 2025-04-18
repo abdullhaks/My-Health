@@ -12,9 +12,9 @@ export default class AdminAuthController implements IAuthCtrl {
     private _adminService: IAdminAuthService;
 
     constructor( 
-        @inject("IAdminAuthService") AuthService:IAdminAuthService
+        @inject("IAdminAuthService") AdminAuthService:IAdminAuthService
 
-    ){ this._adminService= AuthService}
+    ){ this._adminService= AdminAuthService}
 
     async adminLogin(req:Request,res:Response):Promise<any>{
 
@@ -24,7 +24,7 @@ export default class AdminAuthController implements IAuthCtrl {
 
             console.log("email and password are ",email,password);
             
-            const result =await this._adminService.login(res,{email,password});
+            const result =await this._adminService.login(res,{email,password})
 
             console.log("result is ",result);
 
@@ -110,6 +110,28 @@ export default class AdminAuthController implements IAuthCtrl {
             const {password,confirmPassword} = req.body;
 
             return res.status(200).json({email,password,confirmPassword});
+
+        }catch(error){
+            console.log(error);
+            return res.status(500).json({msg:"internal server error"});
+
+        }
+    };
+
+
+    async refreshToken(req:Request,res:Response):Promise<any>{
+        try{
+
+            const {adminRefreshToken} = req.cookies;
+
+            if(!adminRefreshToken){
+                return res.status(401).json({msg:"refresh token not found"});
+            }
+
+            const result = await this._adminService.refreshToken(adminRefreshToken);
+
+            return res.status(200).json(result);
+
 
         }catch(error){
             console.log(error);

@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 
 function UserOtpVerification() {
   const navigate = useNavigate();
-  const email = localStorage.getItem("email") || "";
+  const email = localStorage.getItem("userEmail") || "";
   const [resendDisabled, setResendDisabled] = useState(false);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);

@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useEffect, useState } from "react";
 import { loginAdmin } from "../../api/admin/adminApi"; 
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/slices/adminSlices"; 
+import { loginAdmin as login, logoutAdmin } from "../../redux/slices/adminSlices"; 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -78,7 +78,7 @@ function AdminLogin() {
       const response = await loginAdmin(formData);
       console.log("Admin login success:", response);
 
-
+      dispatch(logoutAdmin());
       dispatch(
         login({
           admin: response.admin,

@@ -1,52 +1,36 @@
 const apiUrl = import.meta.env.VITE_API_URL;
 // import {message} from "antd";
-import axios from "axios";
-
+import { adminInstance } from "../../services/adminInstance";
 console.log(`API URL: ${apiUrl}`);
 
 
 
 export const loginAdmin = async (adminData: any) => {
     try {
-
-        console.log("User data:", adminData); // Log the user data
-        
-        const response = await axios.post(`${apiUrl}/admin/login`, adminData, {
-        withCredentials: true,
-        });
-
-        console.log("Login response:", response.data); // Log the response data
-
+        const response = await adminInstance.post("/admin/login", adminData);
         return response.data;
     } catch (error) {
-        console.error("Error logging in user:", error);
+        console.error("Error logging in admin:", error);
         throw error;
     }
-    }
+};
 
-
-
-  export const forgetPassword = async (email: string) => {
+export const forgetPassword = async (email: string) => {
     try {
-        const response = await axios.get(`${apiUrl}/admin/forgotPassword`,{
-            params:{email},
-            withCredentials: true,
+        const response = await adminInstance.get("/admin/forgotPassword", {
+            params: { email },
         });
         return response.data;
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error sending forgot password email:", error);
         throw error;
     }
 };
-  
-
 
 export const recoveryPassword = async (email: string) => {
     try {
-        const response = await axios.get(`${apiUrl}/admin/recoveryPassword`, {
+        const response = await adminInstance.get("/admin/recoveryPassword", {
             params: { email },
-            withCredentials: true,
         });
         return response.data;
     } catch (error) {
@@ -55,29 +39,44 @@ export const recoveryPassword = async (email: string) => {
     }
 };
 
-export const verifyRecoveryPassword = async (adminData:any)=>{
-
-    console.log("User data:",adminData); // Log the user data
-        
-    const response = await axios.post(`${apiUrl}/admin/login`, adminData, {
-    withCredentials: true,
-    });
-
-    console.log("Login response:", response.data); // Log the response data
-
-    return response.data;
-}
-
-
+export const verifyRecoveryPassword = async (adminData: any) => {
+    try {
+        const response = await adminInstance.post("/admin/login", adminData);
+        return response.data;
+    } catch (error) {
+        console.error("Error verifying recovery password:", error);
+        throw error;
+    }
+};
 
 export const resetPassword = async (email: string, newPassword: string) => {
     try {
-        const response = await axios.patch(`${apiUrl}/admin/resetPassword/${email}`, { newPassword }, {
-            withCredentials: true,
-        });
+        const response = await adminInstance.patch(`/admin/resetPassword/${email}`, { newPassword });
         return response.data;
     } catch (error) {
         console.error("Error resetting password:", error);
         throw error;
     }
 };
+
+export const refreshToken = async () => {
+    try {
+        const response = await adminInstance.post("/admin/refreshToken");
+        return response.data;
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        throw error;
+    }
+};
+
+export const logoutAdmin = async () => {
+    try {
+        const response = await adminInstance.post("/admin/logout");
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out admin:", error);
+        throw error;
+    }
+};
+
+

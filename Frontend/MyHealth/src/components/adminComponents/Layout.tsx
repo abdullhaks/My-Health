@@ -8,7 +8,7 @@ import applogoBlue from "../../assets/applogoblue.png";
 import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
 import { useDispatch } from "react-redux";
-import { logout } from "../../redux/slices/userSlices";
+import { logoutAdmin } from "../../redux/slices/adminSlices";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -42,7 +42,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
   }, []);
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutAdmin());
     navigate("/admin/login");
   };
 

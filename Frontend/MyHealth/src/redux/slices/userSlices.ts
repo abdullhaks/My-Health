@@ -11,25 +11,24 @@ interface AuthState {
   };
 
 
-const userSlice = createSlice({
+  const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-          login: (state, action: PayloadAction<{ user: any; accessToken: string }>) => {
-            state.user = action.payload.user;
-            state.accessToken = action.payload.accessToken;
-          },
-          logout: (state) => {
-            state.user = null;
-            state.accessToken = null;
-          },
-          
-        updateUser(state, action: PayloadAction<any>) {
-            state.user = { ...state.user, ...action.payload };
-        },
+      loginUser: (state, action: PayloadAction<{ user: any; accessToken: string }>) => {
+        state.user = action.payload.user;
+        state.accessToken = action.payload.accessToken;
+      },
+      logoutUser: (state) => {
+        state.user = null;
+        state.accessToken = null;
+      },
+      updateUser(state, action: PayloadAction<any>) {
+        state.user = { ...state.user, ...action.payload };
+      },
     },
-});
-
-export const { login, logout, updateUser } = userSlice.actions;
+  });
+  
+  export const { loginUser, logoutUser, updateUser } = userSlice.actions;
 
 export default userSlice.reducer;
