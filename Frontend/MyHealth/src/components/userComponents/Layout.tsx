@@ -4,9 +4,9 @@ import {FaHome,FaUserMd, FaCalendarAlt, FaFileMedical, FaClipboardList, FaUserFr
   FaCog, FaSignOutAlt, FaBars, FaTimes,FaChevronLeft,FaChevronRight, FaSearch, FaEnvelope,
 } from "react-icons/fa";
 import applogoBlue from "../../assets/applogoblue.png";
-import defaultAvatar from "../../assets/avatar.png";
+// import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/slices/userSlices";
 
 interface NavbarProps {
@@ -25,7 +25,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
+  const user = useSelector((state:any) => state.user.user);
 
   useEffect(() => {
     const handleResize = () => {
@@ -235,7 +235,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
               <div className="relative group">
                 <button className="flex items-center focus:outline-none">
                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-blue-600">
-                    <img src={defaultAvatar} alt="User profile" className="w-full h-full object-cover" />
+                    <img src={user.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"} alt="User profile" className="w-full h-full object-cover" />
                   </div>
                 </button>
                 <div className="absolute right-0 mt-0.5 w-48 bg-gray-200 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">

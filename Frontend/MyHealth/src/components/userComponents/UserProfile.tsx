@@ -1,5 +1,5 @@
 import {  useState } from "react";
-import avatar from "../../assets/avatar.png";
+// import avatar from "../../assets/avatar.png";
 import { FiEdit, FiCopy } from "react-icons/fi";
 import EditProfileModal from "./EditProfile";
 import ChangePasswordModal from "./ChangePassword";
@@ -95,7 +95,7 @@ const UserProfile = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
             <div className="relative">
               <img
-                src={avatar}
+                src={profileData.profile || `https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png`}
                 alt="Profile"
                 className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-blue-100"
               />
