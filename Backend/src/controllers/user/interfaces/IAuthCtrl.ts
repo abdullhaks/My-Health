@@ -1,6 +1,6 @@
 import { NextFunction,Request,Response } from "express";
 
-export default interface IAuthCtrl{
+export default interface IUserAuthCtrl{
     userLogin(req:Request,res:Response):Promise<void>
 
     userSignup(req:Request,res:Response,next:NextFunction):Promise<void>

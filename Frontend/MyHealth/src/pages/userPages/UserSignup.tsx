@@ -107,7 +107,7 @@ function UserSignup() {
         await signupUser(formData)
       .then((response) => {
         console.log("Signup successful", response);
-        localStorage.setItem("email", response.email);
+        localStorage.setItem("userEmail", response.email);
         navigate("/user/otp");
       })
       .catch((error) => {

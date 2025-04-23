@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { loginUser } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { loginUser as login, logoutUser } from "../../redux/slices/userSlices";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
 
@@ -90,13 +90,13 @@ function UserLogin() {
     
         // Check if user is blocked
         if (response.user.isBlocked) {
-          toast.warning("Your account has been blocked. Please contact support.");
+          toast.error("Your account has been blocked. Please contact support.");
           return;
         }
     
         // Check if user is verified
         if (!response.user.isVerified) {
-          toast.info("Please verify your account via OTP sent to your email.");
+          toast.error("Please verify your account via OTP sent to your email.");
           localStorage.setItem("userEmail", response.user.email);
           navigate("/user/otp");
           return;

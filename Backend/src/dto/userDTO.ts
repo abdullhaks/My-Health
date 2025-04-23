@@ -5,6 +5,7 @@ import { Document,Types } from "mongoose";
 export interface ILocation {
     type: "Point";
     coordinates:[number,number];
+    text:string;
 }
 export interface IUserDocument extends Document{
 

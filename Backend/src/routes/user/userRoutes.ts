@@ -1,10 +1,13 @@
 import { Router } from "express";
 import container from "../../config/inversify";
-import IAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
+import IUserAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
+import IUserProfileCtrl from "../../controllers/user/interfaces/IprofileCtrl";
+
 
 const userRoutes = Router();
 
-const authCtrl = container.get<IAuthCtrl>("IAuthCtrl");
+const authCtrl = container.get<IUserAuthCtrl>("IUserAuthCtrl");
+const profileCtrl = container.get<IUserProfileCtrl>("IUserProfileCtrl");
 
 userRoutes.post("/login",(req,res)=>authCtrl.userLogin(req,res));
 
@@ -21,5 +24,7 @@ userRoutes.get("/recoveryPassword",(req,res)=>authCtrl.getRecoveryPassword(req,r
 userRoutes.post("verifyRecoveryPassword")
 
 userRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,res));
+
+userRoutes.patch("/updateProfile/:id",( req,res)=>profileCtrl.updateProfile(req,res));
 
 export default userRoutes; 

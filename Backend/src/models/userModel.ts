@@ -16,7 +16,8 @@ const userSchema : Schema<IUserDocument> = new Schema ({
         },
         coordinates: {
             type: [Number],
-        }
+        },
+        text: { type: String,default: "" },
     },
     gender: { type: String },
     dob: { type: Date },

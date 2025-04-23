@@ -1,19 +1,23 @@
-import { useState } from "react";
+import {  useState } from "react";
 import avatar from "../../assets/avatar.png";
 import { FiEdit, FiCopy } from "react-icons/fi";
 import EditProfileModal from "./EditProfile";
 import ChangePasswordModal from "./ChangePassword";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { updateProfile } from "../../api/user/userApi";
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../redux/slices/userSlices";
+
 
 const UserProfile = () => {
+
+  const user = useSelector((state:any) => state.user.user);
+  const dispatch = useDispatch();
+
+  console.log("User profile data: ", user);
   // State for user profile data
-  const [profileData, setProfileData] = useState({
-    fullName: "Stevan Dux",
-    location: "Kochi,Kerala",
-    dateOfBirth: "1996-04-03", // Format for date input
-    phoneNumber: "+ 91 2387428345",
-    gender: "male",
-    walletBalance: "200"
-  });
+  const [profileData , setProfileData] = useState(user);
 
   // State for modals
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
@@ -23,24 +27,30 @@ const UserProfile = () => {
   const handleCopyReferID = () => {
     navigator.clipboard.writeText("www.myhealth.com/id:asrerefjaadlfj3422");
     // You could add a toast notification here
-    alert("Refer ID copied to clipboard!");
+    toast.success("Refer ID copied to clipboard!");
   };
 
   const handleCopyMHID = () => {
     navigator.clipboard.writeText("2342422");
     // You could add a toast notification here
-    alert("MH ID copied to clipboard!");
+    toast.success("MH ID copied to clipboard!");
   };
 
   // Function to handle profile update
-  const handleProfileUpdate = (updatedData:any) => {
-    setProfileData({
-      ...profileData,
-      ...updatedData
-    });
+  const handleProfileUpdate = async(updatedData:any) => {
+
+    console.log("data for update....",updatedData)
+    const response = await updateProfile(updatedData,user._id);
+    console.log("Profile update response:", response);
+    const { updatedUser } = response;
+
+    dispatch(updateUser(updatedUser))
+    
+    setProfileData(updatedUser);
+
     // Here you would typically make an API call to update the profile
     console.log("Profile updated:", updatedData);
-    alert("Profile updated successfully!");
+    toast .success("Profile updated successfully!");
   };
 
   // Function to handle password change
@@ -65,11 +75,15 @@ const UserProfile = () => {
   };
   
   // Format date for display (from YYYY-MM-DD to DD/MM/YYYY)
-  const formatDate = (dateString:any) => {
+  const formatDate = (dateString: string) => {
     if (!dateString) return "";
-    const [year, month, day] = dateString.split("-");
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
+  
 
   return (
     <div className="w-full max-w-4xl mx-auto py-8 px-4">
@@ -92,7 +106,7 @@ const UserProfile = () => {
               
               <div className="mt-2 text-sm text-gray-500 space-y-1">
                 <div className="flex items-center gap-2 justify-center md:justify-start">
-                  <span>refer id : www.myhealth.com/id:asrerefjaadlfj3422</span>
+                  <span>refer id : www.myhealth.com/id:{profileData._id}</span>
                   <button 
                     onClick={handleCopyReferID}
                     className="text-blue-500 hover:text-blue-700 cursor-pointer"
@@ -134,32 +148,32 @@ const UserProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-4">
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Location</p>
-              <p className="text-base">{profileData.location}</p>
+              <p className="text-base">{profileData.location.text || "not provided" }</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Date Of Birth</p>
-              <p className="text-base">{formatDate(profileData.dateOfBirth)}</p>
+              <p className="text-base">{formatDate(profileData.dob) || "not provided"}</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Age</p>
-              <p className="text-base">{calculateAge(profileData.dateOfBirth)}</p>
+              <p className="text-base">{calculateAge(profileData.dob) || "not provided"}</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Phone Number</p>
-              <p className="text-base">{profileData.phoneNumber}</p>
+              <p className="text-base">{profileData.phone || "not provided"}</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Email Address</p>
-              <p className="text-base">Email@gmail.com</p>
+              <p className="text-base">{profileData.email || "not provided"}</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Gender</p>
-              <p className="text-base">{profileData.gender}</p>
+              <p className="text-base">{profileData.gender || "not provided"}</p>
             </div>
           </div>
         </div>
@@ -200,8 +214,8 @@ const UserProfile = () => {
         initialData={{
           fullName: profileData.fullName,
           location: profileData.location,
-          dateOfBirth: profileData.dateOfBirth,
-          phoneNumber: profileData.phoneNumber,
+          dob: profileData.dob,
+          phone: profileData.phone,
           gender: profileData.gender
         }}
       />

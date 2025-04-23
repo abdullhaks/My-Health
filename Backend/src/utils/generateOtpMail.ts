@@ -11,7 +11,8 @@ export const generateOtpMail = (email:string ,otp: string, expirationTime : stri
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9;">
                 <div style="text-align: center;">
-                    <img src={appLogoBlue} alt="MyHealth" style="width: 150px; height: auto; margin-bottom: 20px;" />
+                    <img src="https://i.postimg.cc/zGFDwNVq/app-logo-blue.png" alt="MyHealth" style="width: 150px; height: auto; margin-bottom: 20px;" />
+                    <h1 style="color: #2196F3;">MyHealth</h1>
                 </div>
                 <h2 style="color: #333; text-align: center;">Your OTP for Verification</h2>
                 <p style="font-size: 16px; color: #555; text-align: center;">

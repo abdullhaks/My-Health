@@ -238,7 +238,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
                     <img src={defaultAvatar} alt="User profile" className="w-full h-full object-cover" />
                   </div>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                <div className="absolute right-0 mt-0.5 w-48 bg-gray-200 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
                   <Link to="/user/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
                     Your Profile
                   </Link>

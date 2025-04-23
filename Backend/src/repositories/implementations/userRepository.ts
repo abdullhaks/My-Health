@@ -4,6 +4,7 @@ import OtpModel from "../../models/otpModel";
 import { IUserDocument } from "../../entities/userEntities";
 import BaseRepository from "./baseRepository";
 import IUserRepository from "../interfaces/IUserRepository";
+import { UpdateQuery } from "mongoose";
 
 @injectable()
 
@@ -11,7 +12,7 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
 
     constructor(
         @inject("userModel") private _userModel: any,
-        @inject("otpModel") private _otpModel: any // <-- inject otpModel
+        @inject("otpModel") private _otpModel: any 
     ) {
         super(_userModel);
     }

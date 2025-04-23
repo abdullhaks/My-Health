@@ -50,6 +50,7 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
       return null;
     }
   }
+  
   async delete(id: string): Promise<T | null> {
     try {
       return await this._model.findByIdAndDelete(id).exec();

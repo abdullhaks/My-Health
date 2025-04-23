@@ -1,13 +1,13 @@
 
 import { NextFunction,Request,Response } from "express";
-import IAuthCtrl from "../interfaces/IAuthCtrl";
+import IUserAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject,injectable } from "inversify";
 import IUserAuthService from "../../../services/user/interfaces/IUserAuthServices";
 
 
 @injectable()
 
-export default class AuthController implements IAuthCtrl {
+export default class UserAuthController implements IUserAuthCtrl {
 
     private _userService: IUserAuthService;
 

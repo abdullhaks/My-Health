@@ -1,6 +1,8 @@
 import { message } from "antd";
 import { userInstance } from "../../services/userInstance";
 
+
+
 export const signupUser = async (userData: any) => {
   try {
     const response = await userInstance.post("/user/signup", userData);
@@ -100,6 +102,22 @@ export const refreshToken = async () => {
     return response.data;
   } catch (error) {
     console.error("Error refreshing token:", error);
+    throw error;
+  }
+};
+
+export const updateProfile = async (userData: any,userId:string) => {
+  try {
+
+    console.log("User data for update:", userData);
+    
+    const response = await userInstance.patch(`/user/updateProfile/${userId}`, userData, {
+    
+    });
+    return response.data;
+  }
+  catch (error) {
+    console.error("Error updating profile:", error);
     throw error;
   }
 };
