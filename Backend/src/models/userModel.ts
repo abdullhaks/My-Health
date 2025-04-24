@@ -20,7 +20,7 @@ const userSchema : Schema<IUserDocument> = new Schema ({
         text: { type: String,default: "" },
     },
     gender: { type: String },
-    dob: { type: Date },
+    dob: { type: String },
     isBlocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     bmi: { type: String },

@@ -122,6 +122,21 @@ export const updateProfile = async (userData: any,userId:string) => {
   }
 };
 
+export const updateProfileImage = async(formData:any, userId:string) =>{
+
+  for (const [key, value] of formData.entries()) {
+    console.log(`api side...${key}:`, value,userId);
+  }
+
+  const response = await userInstance.patch(`user/updateDp/${userId}`,formData,{
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
+  console.log("response from api is ", response)
+  return response.data;
+}
+
 export const logoutUser = async () => {
   try {
     const response = await userInstance.post("/user/logout");

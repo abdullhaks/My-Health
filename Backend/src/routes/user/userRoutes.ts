@@ -1,8 +1,8 @@
 import { Router } from "express";
 import container from "../../config/inversify";
 import IUserAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
-import IUserProfileCtrl from "../../controllers/user/interfaces/IprofileCtrl";
-
+import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
+import { upload } from "../../middlewares/common/multer";
 
 const userRoutes = Router();
 
@@ -26,5 +26,7 @@ userRoutes.post("verifyRecoveryPassword")
 userRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,res));
 
 userRoutes.patch("/updateProfile/:id",( req,res)=>profileCtrl.updateProfile(req,res));
+
+userRoutes.patch("/updateDp/:id" ,upload.single("profile"), (req,res)=>profileCtrl.updateDp(req,res));
 
 export default userRoutes; 

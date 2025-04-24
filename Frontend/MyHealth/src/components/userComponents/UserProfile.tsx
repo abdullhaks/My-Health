@@ -1,11 +1,12 @@
 import {  useState } from "react";
 // import avatar from "../../assets/avatar.png";
-import { FiEdit, FiCopy } from "react-icons/fi";
+import { FiEdit, FiCopy, FiCamera} from "react-icons/fi";
 import EditProfileModal from "./EditProfile";
 import ChangePasswordModal from "./ChangePassword";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { updateProfile } from "../../api/user/userApi";
+import { updateProfileImage } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/userSlices";
 
@@ -15,14 +16,64 @@ const UserProfile = () => {
   const user = useSelector((state:any) => state.user.user);
   const dispatch = useDispatch();
 
-  console.log("User profile data: ", user);
-  // State for user profile data
   const [profileData , setProfileData] = useState(user);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
 
   // State for modals
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   
+
+  //image update...........
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    console.log("e.target is ",e.target.files?.[0])
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCancelImageUpdate = () => {
+    setSelectedImage(null);
+    setPreviewImage(null);
+  };
+
+  const handleSaveImage = async () => {
+    if (!selectedImage) return;
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+
+  
+      formData.append("profile", selectedImage);
+
+      const response = await updateProfileImage(formData, user._id); // implement this API call
+
+      console.log("response is............ ",response)
+      const updatedUser  = response.updatedUser;
+
+      console.log("updatedUser is ",updatedUser);
+      
+      dispatch(updateUser(updatedUser));
+      setProfileData(updatedUser);
+
+      toast.success("Profile image updated!");
+    } catch (error) {
+      toast.error("Failed to update image.");
+    } finally {
+      setIsUploading(false);
+      handleCancelImageUpdate();
+    }
+  };
+
+
   // Function to handle copy operations
   const handleCopyReferID = () => {
     navigator.clipboard.writeText("www.myhealth.com/id:asrerefjaadlfj3422");
@@ -75,14 +126,14 @@ const UserProfile = () => {
   };
   
   // Format date for display (from YYYY-MM-DD to DD/MM/YYYY)
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  // const formatDate = (dateString: string) => {
+  //   if (!dateString) return "";
+  //   const date = new Date(dateString);
+  //   const day = String(date.getDate()).padStart(2, "0");
+  //   const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  //   const year = date.getFullYear();
+  //   return `${day}/${month}/${year}`;
+  // };
   
 
   return (
@@ -93,13 +144,41 @@ const UserProfile = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-6">My Profile</h1>
           
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
-            <div className="relative">
+             <div className="relative w-32 h-32">
               <img
-                src={profileData.profile || `https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png`}
+                src={previewImage || profileData.profile || `https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png`}
                 alt="Profile"
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-blue-100"
+                className="w-full h-full rounded-full object-cover border-4 border-blue-100"
               />
+              <label className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow cursor-pointer hover:bg-gray-100">
+                <FiCamera />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+              </label>
             </div>
+
+            {selectedImage && (
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <button
+                  onClick={handleSaveImage}
+                  disabled={isUploading}
+                  className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition text-sm"
+                >
+                  {isUploading ? "Saving..." : "Save"}
+                </button>
+                <button
+                  onClick={handleCancelImageUpdate}
+                  disabled={isUploading}
+                  className="bg-gray-300 text-gray-800 px-4 py-1 rounded hover:bg-gray-400 transition text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
             
             <div className="flex flex-col text-center md:text-left">
               <h2 className="text-xl md:text-2xl font-semibold text-gray-800">{profileData.fullName}</h2>
@@ -148,12 +227,12 @@ const UserProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-4">
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Location</p>
-              <p className="text-base">{profileData.location.text || "not provided" }</p>
+              <p className="text-base">{profileData?.location?.text || "not provided" }</p>
             </div>
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Date Of Birth</p>
-              <p className="text-base">{formatDate(profileData.dob) || "not provided"}</p>
+              <p className="text-base">{profileData.dob || "not provided"}</p>
             </div>
             
             <div className="space-y-1">

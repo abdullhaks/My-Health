@@ -114,7 +114,6 @@ function UserLogin() {
       } catch (error: any) {
         console.error("Login failed:", error);
     
-        toast.error(error.response?.data?.msg || "Envalid credentials!");
         if (error.response && error.response.status === 401) {
           toast.error("Invalid email or password");
           setErrors({ ...errors, password: "Invalid email or password" });

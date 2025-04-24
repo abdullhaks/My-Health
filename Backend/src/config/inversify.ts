@@ -7,7 +7,7 @@ import adminModel from "../models/adminModel";
 import UserAuthController from "../controllers/user/implementations/authCtrl";
 import IUserAuthCtrl from "../controllers/user/interfaces/IAuthCtrl";
 import UserProfileController from "../controllers/user/implementations/profileCtrl";
-import IUserProfileCtrl from "../controllers/user/interfaces/IprofileCtrl";
+import IUserProfileCtrl from "../controllers/user/interfaces/IProfileCtrl";
 
 import AdminAuthController from "../controllers/admin/implementations/authCtrl";
 import IAdminAuthCtrl from "../controllers/admin/interfaces/IAuthCtrl";
