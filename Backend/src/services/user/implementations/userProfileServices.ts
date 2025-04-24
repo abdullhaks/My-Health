@@ -5,15 +5,9 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import AWS from 'aws-sdk';
 import path from "path"
 import sharp from "sharp"
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
-
-AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-    region: "ap-south-1", 
-});
-
-const s3 = new AWS.S3();
 
 @injectable()
 export default class UserProfileService implements IUserProfileService {
@@ -51,40 +45,24 @@ export default class UserProfileService implements IUserProfileService {
 
    
 
-    async updateUserDp(userId: string, updatedFields: any, file: Express.Multer.File | undefined): Promise<any> {
-        try {
-          let imageUrl = "";
-      
-          if (file) {
-            const jpegBuffer = await sharp(file.buffer)
-            .jpeg({ quality: 90 }) // you can adjust quality here
-            .toBuffer();
-            const fileName = `users/profile-images/${userId}.jpeg`;
-      
-            const uploadParams = {
-              Bucket: "myhealth-app-storage",
-              Key: fileName,
-              Body: jpegBuffer,
-              ContentType: file.mimetype,
-            };
-      
-            console.log("Uploading to S3 with params:", uploadParams);
-            const uploadResult = await s3.upload(uploadParams).promise();
-            console.log("S3 upload result:", uploadResult);
-      
-            imageUrl = uploadResult.Location;
-          }
-      
-          const updatePayload = {
-            ...updatedFields,
-            ...(imageUrl && { profile: imageUrl }),
-          };
-      
-          const updatedUser = await this._userRepository.update(userId, updatePayload);
-          return updatedUser;
-        } catch (error: any) {
-          console.error("Service error:", error);
-          throw new Error("Failed to update profile");
+    async updateUserDp(userId: string, updatedFields: any, fileKey: string | undefined): Promise<any> {
+      try {
+        const updatePayload = {
+          ...updatedFields,
+          ...(fileKey && { profile: fileKey }),
+        };
+    
+        const updatedUser = await this._userRepository.update(userId, updatePayload);
+
+        if(updatedUser){
+          updatedUser.profile = await getSignedImageURL(updatedUser.profile)
         }
+        
+        return updatedUser;
+      } catch (error: any) {
+        console.error("Service error:", error);
+        throw new Error("Failed to update profile");
       }
+    }
+    
 }

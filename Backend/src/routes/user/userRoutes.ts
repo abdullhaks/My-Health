@@ -2,7 +2,7 @@ import { Router } from "express";
 import container from "../../config/inversify";
 import IUserAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
 import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
-import { upload } from "../../middlewares/common/multer";
+import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 
 const userRoutes = Router();
 
@@ -27,6 +27,7 @@ userRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,r
 
 userRoutes.patch("/updateProfile/:id",( req,res)=>profileCtrl.updateProfile(req,res));
 
-userRoutes.patch("/updateDp/:id" ,upload.single("profile"), (req,res)=>profileCtrl.updateDp(req,res));
+userRoutes.patch("/updateDp/:id" , upload.single("profile"),
+uploadToS3("users/profile-images",true), (req,res)=>profileCtrl.updateDp(req,res));
 
 export default userRoutes; 

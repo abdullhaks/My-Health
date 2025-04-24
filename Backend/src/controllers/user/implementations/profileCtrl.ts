@@ -45,13 +45,13 @@ export default class UserProfileController implements IUserProfileCtrl {
         try{
             const { id } = req.params;
             const updatedFields = req.body;
-            const file = req.file;
+            const uploadedImageKey = req.body.uploadedImageKey
 
             console.log("USER ID IS ",req.params,id);
             console.log("updatedField is ",updatedFields);
-            console.log("file is ",file);
+            console.log("uploadedImageKey is ",uploadedImageKey);
 
-            const updatedUser = await this._profileService.updateUserDp(id, updatedFields, file);
+            const updatedUser = await this._profileService.updateUserDp(id, updatedFields, uploadedImageKey);
 
             res.status(200).json({updatedUser});
 

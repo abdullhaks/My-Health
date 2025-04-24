@@ -15,7 +15,7 @@ import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from ".
 import { Request, Response, NextFunction } from "express";
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
-
+import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
 console.log("User auth service is running....");
 console.log("NODE_ENV: ", process.env.EMAIL_USER);
@@ -86,6 +86,7 @@ export default class UserAuthService implements IUserAuthService {
       
         const { password, ...userWithoutPassword } = existingUser.toObject();
       
+        userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
         return {
           message: "Login successful",
           user: userWithoutPassword,
