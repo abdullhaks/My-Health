@@ -1,27 +1,42 @@
-import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import { verifyAccessToken } from "../../utils/jwt";
 
-export function verifyAdminAccessToken (req: Request, res: Response, next: NextFunction):void {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-     res.status(401).json({ msg: "Access token missing" });
-     return
-  }
+export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {
+  return (req: Request, res: Response, next: NextFunction): void | any => {
 
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET as string);
+    if (req.path.includes("/refreshToken")) return next();
+    
+    const {userAccessToken} = req.cookies;
+    console.log("token is..... ",userAccessToken);
 
-    console.log("Decoded token: ", decoded);
-    if (typeof decoded !== "string" && "data" in decoded) {
-      (req as any).adminId = decoded.data;
-    } else {
-      res.status(401).json({ msg: "Invalid token structure" });
-      return;
+    if (!userAccessToken) {
+      return res.status(401).json({ msg: "Access token missing" });
     }
-    next();
-  } catch (err) {
-     res.status(401).json({ msg: "Invalid or expired token" });
-     return
-  }
-};
+
+   
+
+    try {
+      const decoded = verifyAccessToken(userAccessToken);
+
+    console.log("decoded is..... ",decoded);
+
+    if(!decoded){
+      return res.status(401).json({ msg: "Access token expired or invalid" });
+      
+    }
+      if (decoded.role !== role) {
+        return res.status(403).json({ msg: "Forbidden: Role mismatch" });
+
+      }
+
+      next();
+    } catch (err) {
+      console.error("Access token error:", err);
+      return res.status(403).json({ msg: "Forbidden: Role mismatch" });
+
+    }
+  };
+}
+
+// 👇 This line solves your TS error
+export { verifyAccessToken };

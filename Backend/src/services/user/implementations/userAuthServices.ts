@@ -74,27 +74,39 @@ export default class UserAuthService implements IUserAuthService {
             message: "User not verified, OTP sent"
           };
         }
-      
-        const accessToken = generateAccessToken({ data: existingUser._id });
-        const refreshToken = generateRefreshToken({ data: existingUser._id });
+       
+        const accessToken = generateAccessToken({ id: existingUser._id.toString(), role: "user" });
+        const refreshToken = generateRefreshToken({ id: existingUser._id.toString(), role: "user" });
       
         res.cookie("userRefreshToken", refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          secure: false, 
           maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
         });
+
+        
+        res.cookie("userAccessToken", accessToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false, 
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
+        }); 
       
         const { password, ...userWithoutPassword } = existingUser.toObject();
       
+        if(userWithoutPassword.profile){
         userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+        };
+
         return {
           message: "Login successful",
           user: userWithoutPassword,
-          accessToken
         };
       }
       
-
 
     async signup(userData:IUser): Promise<any> {
         console.log("user data from service....",userData);
@@ -282,17 +294,23 @@ export default class UserAuthService implements IUserAuthService {
     
           console.log("Refresh token from service: ", refreshToken);
             if (!refreshToken) {
-               throw new Error("Refresh token not found" );
+               throw new Error("refresh token not found" );
             }
         
             const verified = verifyRefreshToken(refreshToken);
+
+            console.log("is verified from refresh token auth service...",verified);
+
             if (!verified) {
                throw new Error("Invalid refresh token" );
             }
         
-            const accessToken = generateAccessToken({ data: verified.data });
+            console.log("verified is ", verified);
+            const accessToken = generateAccessToken({ id: verified.id, role: verified.role });
+
+            console.log("new access token is ...............",accessToken);
         
-            return { accessToken };
+            return {accessToken} ;
         }
     
 }

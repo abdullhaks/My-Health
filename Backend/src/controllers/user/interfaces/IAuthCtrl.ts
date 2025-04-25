@@ -3,6 +3,8 @@ import { NextFunction,Request,Response } from "express";
 export default interface IUserAuthCtrl{
     userLogin(req:Request,res:Response):Promise<void>
 
+    userLogout(req:Request,res:Response):Promise<any>
+
     userSignup(req:Request,res:Response,next:NextFunction):Promise<void>
 
     verifyOtp(req:Request,res:Response):Promise<void>

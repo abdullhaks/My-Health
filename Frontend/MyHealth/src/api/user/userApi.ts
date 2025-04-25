@@ -99,6 +99,9 @@ export const resetPassword = async (email: string, newPassword: string) => {
 export const refreshToken = async () => {
   try {
     const response = await userInstance.post("/user/refreshToken");
+
+    console.log("user api response is ",response);
+
     return response.data;
   } catch (error) {
     console.error("Error refreshing token:", error);
@@ -139,8 +142,8 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
 
 export const logoutUser = async () => {
   try {
-    const response = await userInstance.post("/user/logout");
-    return response.data;
+    await userInstance.post("/user/logout");
+    // return response.data;
   } catch (error) {
     console.error("Error logging out user:", error);
     throw error;

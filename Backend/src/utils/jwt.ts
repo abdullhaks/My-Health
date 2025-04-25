@@ -6,20 +6,21 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET as string
 const ACCESS_TOKEN_SECRET= process.env.ACCESS_TOKEN_SECRET as string
 
-export const generateAccessToken = (data: object): string => {
+export const generateAccessToken = (data: { id: string; role: "user" | "admin" | "doctor" }): string => {
     
     return jwt.sign(
-        data, 
+        { id: data.id, role: data.role }, 
         ACCESS_TOKEN_SECRET,
-        { expiresIn: '2m' }
+        { expiresIn: '30s' }
     );
 };
 
-export const generateRefreshToken = (data: object): string => {
+export const generateRefreshToken = (data: { id: string; role: "user" | "admin" | "doctor" }): string => {
+    
     return jwt.sign(
-        data, 
+        { id: data.id, role: data.role },  
         REFRESH_TOKEN_SECRET,
-        { expiresIn: '5m' }
+        { expiresIn: '2m' }
     );
 };
 

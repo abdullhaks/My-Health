@@ -1,7 +1,7 @@
 import { Router } from "express";
 import container from "../../config/inversify";
 import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAuthCtrl";
-import {verifyAdminAccessToken} from "../../middlewares/common/checkAccessToken";
+import { verifyAccessToken } from "../../middlewares/common/checkAccessToken";
 
 const adminRoutes = Router();
 

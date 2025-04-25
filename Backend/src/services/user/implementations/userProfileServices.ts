@@ -27,6 +27,9 @@ export default class UserProfileService implements IUserProfileService {
             if(updatedUser){
                 const { password, ...userWithoutPassword } = updatedUser.toObject();
       
+                if(userWithoutPassword.profile){
+                  userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+                }
             return {
             message: "updated successful",
             updatedUser: userWithoutPassword,

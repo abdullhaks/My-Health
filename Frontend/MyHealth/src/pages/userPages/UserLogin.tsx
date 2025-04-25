@@ -105,7 +105,6 @@ function UserLogin() {
         dispatch(logoutUser());
         dispatch(login({
           user: response.user,
-          accessToken: response.accessToken
         }));
     
         toast.success("Logged in successfully");

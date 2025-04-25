@@ -55,8 +55,8 @@ export default class AdminAuthService implements IAdminAuthService {
       
        
       
-        const accessToken = generateAccessToken({ data: admin._id });
-        const refreshToken = generateRefreshToken({ data: admin._id });
+        const accessToken = generateAccessToken({ id: admin._id.toString(), role: "admin" });
+        const refreshToken = generateRefreshToken({ id: admin._id.toString(), role: "admin" });
       
         res.cookie("adminRefreshToken", refreshToken, {
           httpOnly: true,
@@ -138,7 +138,7 @@ export default class AdminAuthService implements IAdminAuthService {
            throw new Error("Invalid refresh token" );
         }
     
-        const accessToken = generateAccessToken({ data: verified.data });
+        const accessToken = generateAccessToken({ id: verified.id, role: verified.role });
     
         return { accessToken };
     }
