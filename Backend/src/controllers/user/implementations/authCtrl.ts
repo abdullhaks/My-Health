@@ -37,6 +37,7 @@ export default class UserAuthController implements IUserAuthCtrl {
         httpOnly: true,
         sameSite: "strict",
         secure: false, 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
         path: "/"
       });
 
@@ -44,10 +45,12 @@ export default class UserAuthController implements IUserAuthCtrl {
         httpOnly: true,
         sameSite: "strict",
         secure: false, 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
         path: "/"
       });
 
-      return res.status(200)
+       res.status(200)
+
     } catch (error) {
       console.log(error);
     }
