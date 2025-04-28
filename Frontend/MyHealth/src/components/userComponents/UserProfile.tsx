@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 // import avatar from "../../assets/avatar.png";
 import { FiEdit, FiCopy, FiCamera} from "react-icons/fi";
 import EditProfileModal from "./EditProfile";
@@ -6,6 +6,7 @@ import ChangePasswordModal from "./ChangePassword";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { updateProfile } from "../../api/user/userApi";
+import { changePassword } from "../../api/user/userApi";
 import { updateProfileImage } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/userSlices";
@@ -105,10 +106,25 @@ const UserProfile = () => {
   };
 
   // Function to handle password change
-  const handlePasswordChange = (passwordData:any) => {
-    // Here you would typically make an API call to change the password
+  const handlePasswordChange = async (passwordData:any) => {
+   
+    try{
     console.log("Password change requested:", passwordData);
-    alert("Password changed successfully!");
+    const response = await changePassword (passwordData,user._id);
+    console.log("password change response is ", response);
+
+    if(!response){
+      toast.error("changin password has been failed")
+      return
+    }
+
+    toast.success("password changed")
+
+    }catch(error){
+      toast.error("changin password has been failed")
+    }
+    
+
   };
 
   // Calculate age from date of birth

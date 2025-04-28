@@ -30,6 +30,8 @@ userRoutes.post("/verifyRecoveryPassword",(req,res)=>authCtrl.verifyRecoveryPass
 
 userRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,res));
 
+userRoutes.patch("/changePassword/:id",(req,res)=>profileCtrl.changePassword(req,res))
+
 userRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("user"),( req,res)=>profileCtrl.updateProfile(req,res));
 
 userRoutes.patch("/updateDp/:id" ,verifyAccessTokenMidleware("user"), upload.single("profile"),

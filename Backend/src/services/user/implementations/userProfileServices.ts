@@ -7,6 +7,8 @@ import path from "path"
 import sharp from "sharp"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
+import bcrypt from "bcryptjs"
+import UserRepository from "../../../repositories/implementations/userRepository";
 
 
 @injectable()
@@ -66,6 +68,48 @@ export default class UserProfileService implements IUserProfileService {
         console.error("Service error:", error);
         throw new Error("Failed to update profile");
       }
+    };
+
+    async changePassword(id: string, data: any): Promise<any> {
+      try {
+        const existingUser = await this._userRepository.findOne({ _id: id });
+        console.log("Existing user: ", existingUser);
+    
+        if (!existingUser) {
+          throw new Error("Invalid credentials");
+        }
+    
+        console.log(data.currentPassword === "ABDULLHa#786");
+        console.log("current password is", data.currentPassword);
+    
+        // Corrected the argument order for bcrypt.compare
+        const isPasswordValid = await bcrypt.compare(data.currentPassword, existingUser.password);
+    
+        console.log("bcrypt comparison is ", isPasswordValid);
+    
+        if (!isPasswordValid) {
+          throw new Error("Invalid credentials");
+        }
+    
+        // Check if new password matches confirm password
+        if (data.newPassword !== data.confirmPassword) {
+          throw new Error("New password and confirm password do not match");
+        }
+    
+        // Hash the new password and update it
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(data.newPassword, salt);
+    
+        console.log("after hashing newPassword is", hashedNewPassword);
+    
+        return await this._userRepository.update(existingUser._id.toString(), { password: hashedNewPassword });
+    
+      } catch (error) {
+        console.error("profile service error:", error);
+        throw new Error("Failed to change password");
+      }
     }
+    
+    
     
 }

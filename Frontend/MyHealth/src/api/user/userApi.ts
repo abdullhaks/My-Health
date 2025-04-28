@@ -115,6 +115,24 @@ export const resetPassword = async (email: string, formData: any) => {
   }
 };
 
+
+export const changePassword = async (data:any ,userId:string)=>{
+  console.log("new password....",data,userId);
+
+  try{
+    const response = await userInstance.patch(`/user/changePassword/${userId}`,{
+      data
+    });
+
+    console.log("resop......",response);
+    return response != null;
+    
+  }catch(error){
+    console.error("Error in change password :", error);
+    throw error;
+  }
+}
+
 export const refreshToken = async () => {
   try {
     const response = await userInstance.post("/user/refreshToken");

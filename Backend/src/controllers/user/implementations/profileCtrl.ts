@@ -62,6 +62,29 @@ export default class UserProfileController implements IUserProfileCtrl {
         }
     
 
+    };
+
+
+    async changePassword(req:Request,res:Response):Promise<any>{
+
+        try{
+            const {id} = req.params;
+            const data = req.body.data;
+
+            console.log("id and data is ",id,data);
+            const response = await this._profileService.changePassword(id,data);
+
+            if(!response){
+            return res.status(403).json({ msg: "password changing has been failed" });
+            };
+
+            return res.status(200).json({msg:"password changed"})
+
+        }catch(error){
+            console.log(error);
+            res.status(500).json({ msg: "internal server error" });
+        }
+
     }
 
 }

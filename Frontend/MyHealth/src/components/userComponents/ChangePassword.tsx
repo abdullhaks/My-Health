@@ -1,5 +1,26 @@
-import { useState } from "react";
-import { FiX, FiEye, FiEyeOff } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiX } from "react-icons/fi";
+import { z } from "zod";
+import PasswordInput from '../../sharedComponents/PasswordInput'; 
+
+// Schema for change password validation
+const changePasswordSchema = z.object({
+  currentPassword: z.string()
+    .min(8, "invalid password")
+    .refine((val) => val.trim() === val, {
+      message: "No leading or trailing spaces allowed",
+    }),
+  newPassword: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[@$!%*?&#]/, "Include at least one special character"),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -13,73 +34,81 @@ interface PasswordData {
   confirmPassword: string;
 }
 
+type ChangePasswordData = z.infer<typeof changePasswordSchema>;
+
 const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalProps) => {
-  const [formData, setFormData] = useState<PasswordData>({
+  const [formData, setFormData] = useState<ChangePasswordData>({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-  
-  const [errors, setErrors] = useState<Partial<PasswordData>>({});
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [errors, setErrors] = useState<Partial<Record<keyof ChangePasswordData, string>>>({});
+  const [touched, setTouched] = useState<Record<keyof ChangePasswordData, boolean>>({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
-    // Clear error for this field when user types
-    if (errors[name as keyof PasswordData]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: undefined
-      }));
-    }
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<PasswordData> = {};
-    
-    if (!formData.currentPassword.trim()) {
-      newErrors.currentPassword = "Current password is required";
+  useEffect(() => {
+    const result = changePasswordSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof ChangePasswordData, string>> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof ChangePasswordData;
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+    } else {
+      setErrors({});
     }
-    
-    if (!formData.newPassword.trim()) {
-      newErrors.newPassword = "New password is required";
-    } else if (formData.newPassword.length < 8) {
-      newErrors.newPassword = "Password must be at least 8 characters";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.newPassword)) {
-      newErrors.newPassword = "Password must include uppercase, lowercase, and numbers";
-    }
-    
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (validateForm()) {
-      onSave(formData);
-      onClose();
-      
-      // Reset form
-      setFormData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+
+    const result = changePasswordSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof ChangePasswordData, string>> = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof ChangePasswordData;
+        fieldErrors[field] = err.message;
       });
+      setErrors(fieldErrors);
+      setTouched({
+        currentPassword: true,
+        newPassword: true,
+        confirmPassword: true,
+      });
+      return;
     }
+
+    onSave(formData);
+    onClose();
+    setFormData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setTouched({
+      currentPassword: false,
+      newPassword: false,
+      confirmPassword: false,
+    });
   };
 
   if (!isOpen) return null;
@@ -97,94 +126,44 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
             <FiX size={24} />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6">
           <div className="space-y-4">
-            <div>
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Current Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  id="currentPassword"
-                  name="currentPassword"
-                  value={formData.currentPassword}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.currentPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-              {errors.currentPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
-              )}
-            </div>
-            
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showNewPassword ? "text" : "password"}
-                  id="newPassword"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.newPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-              {errors.newPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>
-              )}
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-              )}
-            </div>
+
+            {/* Current Password */}
+            <PasswordInput
+              id="currentPassword"
+              label="Current Password"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleChange}
+              error={touched.currentPassword ? errors.currentPassword :""}
+            />
+
+            {/* New Password */}
+            <PasswordInput
+              id="newPassword"
+              label="New Password"
+              name="newPassword"
+              value={formData.newPassword}
+              onChange={handleChange}
+              error={touched.newPassword ? errors.newPassword:""}
+            />
+
+            {/* Confirm Password */}
+            <PasswordInput
+              id="confirmPassword"
+              label="Confirm Password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={touched.confirmPassword ? errors.confirmPassword : ""}
+              
+
+            />
+
           </div>
-          
+
           <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
