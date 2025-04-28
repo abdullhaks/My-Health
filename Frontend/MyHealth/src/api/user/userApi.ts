@@ -91,7 +91,7 @@ export const recoveryPassword = async (email: string) => {
 export const verifyRecoveryPassword = async (userData: any) => {
   try {
     console.log("User data:", userData);
-    const response = await userInstance.post("/user/login", userData);
+    const response = await userInstance.post("/user/verifyRecoveryPassword", userData);
     console.log("Login response:", response.data);
     return response.data;
   } catch (error) {
@@ -100,11 +100,14 @@ export const verifyRecoveryPassword = async (userData: any) => {
   }
 };
 
-export const resetPassword = async (email: string, newPassword: string) => {
+export const resetPassword = async (email: string, formData: any) => {
   try {
     const response = await userInstance.patch(`/user/resetPassword/${email}`, {
-      newPassword,
+      formData,
     });
+
+    console.log("response is ",response.data);
+    
     return response.data;
   } catch (error) {
     console.error("Error resetting password:", error);

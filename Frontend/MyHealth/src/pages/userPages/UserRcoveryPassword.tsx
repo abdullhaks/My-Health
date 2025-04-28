@@ -88,7 +88,9 @@ function UserRecoveryPassword() {
             recoveryCode: formData.recPass,
           });
       
-          if (response?.msg === "Recovery code verified successfully") {
+          console.log("response is ",response);
+
+          if (response) {
             toast.success("Recovery code verified!");
             navigate("/user/resetPassword");
           } else {
@@ -127,7 +129,7 @@ function UserRecoveryPassword() {
                 
                 
                 <div className="w-full md:w-1/2 p-8 rounded-lg bg-white">
-                  <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Forgot Password</h2>
+                  <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Recovery Password</h2>
                   
                   <form onSubmit={handleSubmit} className="space-y-4">
 

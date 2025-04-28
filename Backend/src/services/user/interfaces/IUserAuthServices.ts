@@ -9,7 +9,7 @@ export default interface IUserAuthService {
     resentOtp(email:string):Promise<any>
     forgotPassword(email:string):Promise<any>
     verifyRecoveryPassword(email: string, recoveryCode: string): Promise<boolean>
-    // getRecoveryPassword(email:string):Promise<any>
+    resetPassword(email:string , newPassword:string):Promise<any>
     refreshToken(token:string):Promise<any>
     getMe(email:String):Promise<any>
 }

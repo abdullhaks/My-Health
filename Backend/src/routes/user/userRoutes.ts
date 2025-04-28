@@ -26,7 +26,7 @@ userRoutes.get("/forgotPassword",(req,res)=>authCtrl.forgotPassword(req,res));
 
 userRoutes.get("/recoveryPassword",(req,res)=>authCtrl.getRecoveryPassword(req,res));
 
-userRoutes.post("verifyRecoveryPassword")
+userRoutes.post("/verifyRecoveryPassword",(req,res)=>authCtrl.verifyRecoveryPassword(req,res));
 
 userRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,res));
 

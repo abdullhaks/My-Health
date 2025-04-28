@@ -1,42 +1,58 @@
 
-import Input from "../../sharedComponents/Input";
 import userLogin from "../../assets/userLogin.png"
 import applogoWhite from "../../assets/applogoWhite.png"
 import Button from "../../sharedComponents/Button";
 import { useNavigate } from "react-router-dom";
 import {z} from "zod"
 import { useEffect, useState } from "react";
-import { forgetPassword } from "../../api/user/userApi";
+import { resetPassword } from "../../api/user/userApi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PasswordInput from "../../sharedComponents/PasswordInput";
 
 
-const userEmailSchema = z.object({
-  email: z.string().email("Invalid email address"), 
+const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/\d/, "Password must contain at least one digit")
+      .regex(/[@$!%*?&#]/, "Include at least one special character"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-});
 
-
-function UserForgetPassword() {
+function UserResetPassword() {
   
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
+    newPassword: "",
+    confirmPassword:""
   });
   const [errors, setErrors] = useState({  
-    email: "",
+    newPassword: "",
+    confirmPassword:""
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
 
   const [touched, setTouched] = useState({
-    email: false,
+    newPassword: false,
+    confirmPassword:false
   });
+
+  const email = localStorage.getItem("userEmail") || "";
 
     // Validate on change
     useEffect(() => {
-      const result = userEmailSchema.safeParse(formData);
+      const result = resetPasswordSchema.safeParse(formData);
       if (!result.success) {
         const errors: any = {};
         result.error.errors.forEach((err) => {
@@ -45,7 +61,7 @@ function UserForgetPassword() {
         setErrors(errors);
         setIsFormValid(false);
       } else {
-        setErrors({ email: ""});
+        setErrors({ newPassword: "",confirmPassword:""});
         setIsFormValid(true);
       }
     }, [formData]);
@@ -63,7 +79,7 @@ function UserForgetPassword() {
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      const result = userEmailSchema.safeParse(formData);
+      const result = resetPasswordSchema.safeParse(formData);
     
       if (!result.success) {
         const errors: any = {};
@@ -75,29 +91,23 @@ function UserForgetPassword() {
       }
     
       try {
-        const response = await forgetPassword(formData.email);
+        const response = await resetPassword(email,formData);
         console.log("submit successful:", response);
     
         // Check if user is blocked
         if (!response) {
-          toast.warning("sending recovey password has been failed.");
+          toast.warning("resetin password has been failed.");
           return;
         }
     
-    
-        // dispatch(login({
-        //   user: response.user,
-        //   accessToken: response.accessToken
-        // }));
-        localStorage.setItem("userEmail", response.email);
-        toast.info("reset your password");
-        navigate("/user/resetPassword");
+        toast.info("password reset successfuly");
+        navigate("/user/login");
     
       } catch (error: any) {
         console.error("Login failed:", error);
     
           toast.error("Something went wrong. Please try again later.");
-          setErrors({ ...errors, email: "Invalid email or password" });
+          setErrors({ ...errors, newPassword: "Invalid email or password" });
        
       }
     };
@@ -132,18 +142,25 @@ function UserForgetPassword() {
                   
                   <form onSubmit={handleSubmit} className="space-y-4">
 
-                  <Input
-                    id="email"
-                    name="email"
-                    label="Email Address"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className={touched.email && errors.email ? "border-red-500" : ""}
-                    error={touched.email ? errors.email : ""}
-                  />
+                  <PasswordInput
+                  id="password"
+                  name="newPassword"
+                  label="Password"
+                  placeholder="Enter your password"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  error={touched.newPassword ? errors.newPassword : ""}
+                />
+
+                <PasswordInput
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  error={touched.confirmPassword ? errors.confirmPassword : ""}
+                />
 
                  
 
@@ -178,4 +195,4 @@ function UserForgetPassword() {
   );
 }
 
-export default UserForgetPassword;
+export default UserResetPassword;

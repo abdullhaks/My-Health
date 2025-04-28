@@ -193,10 +193,23 @@ export default class UserAuthController implements IUserAuthCtrl {
 
   async resetPassword(req: Request, res: Response): Promise<any> {
     try {
-      const { email } = req.params;
-      const { password, confirmPassword } = req.body;
 
-      return res.status(200).json({ email, password, confirmPassword });
+      console.log("body is from reser password ",req.body);
+
+      const { email } = req.params;
+      const { newPassword, confirmPassword } = req.body.formData;
+
+      if(newPassword != confirmPassword){
+        return res.status(403).json({ msg: "invalid inputs" });
+      }
+      const response = this._userService.resetPassword(email, newPassword);
+
+      if(!response){
+        return res.status(403).json({ msg: "user not found" });
+      };
+      
+      return res.status(200).json({ msg:"password updated" });
+
     } catch (error) {
       console.log(error);
       return res.status(500).json({ msg: "internal server error" });

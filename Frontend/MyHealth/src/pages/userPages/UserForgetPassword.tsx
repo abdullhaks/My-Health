@@ -94,7 +94,7 @@ function UserForgetPassword() {
         // }));
         localStorage.setItem("userEmail", response.email);
         toast.info("reset your password");
-        navigate("/user/resetPassword");
+        navigate("/user/recoverPassword");
     
       } catch (error: any) {
         console.error("Login failed:", error);

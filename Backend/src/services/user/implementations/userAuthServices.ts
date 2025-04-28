@@ -288,6 +288,28 @@ export default class UserAuthService implements IUserAuthService {
       return isMatch;
     }
 
+    async resetPassword(email:string , newPassword:string):Promise<any>{
+
+      console.log("email is from rest passwered",email);
+      console.log("new pasword is from rest passwered",newPassword);
+
+
+      const user = await this._userRepository.findByEmail(email);
+
+      console.log("user is from rest passwered",user);
+      if(!user){
+        throw new Error ("user not found..!")
+      }
+     
+      const salt = await bcrypt.genSalt(10);
+      newPassword = await bcrypt.hash(newPassword, salt);
+
+      console.log("after hashing newPassword is from rest passwered",newPassword);
+
+      return  await this._userRepository.update(user._id.toString(),{password:newPassword})
+
+    }
+
       async refreshToken(refreshToken: string): Promise<IResponseDTO> {
     
           console.log("Refresh token from service: ", refreshToken);
