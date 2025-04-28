@@ -35,4 +35,16 @@ userRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("user"),( req,r
 userRoutes.patch("/updateDp/:id" ,verifyAccessTokenMidleware("user"), upload.single("profile"),
 uploadToS3("users/profile-images",true), (req,res)=>profileCtrl.updateDp(req,res));
 
+
+userRoutes.get("/google", authCtrl.googleLoginRedirect); 
+userRoutes.get("/google/callback", authCtrl.googleCallback); 
+
+userRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
+
+
+
+
+
+
+
 export default userRoutes; 

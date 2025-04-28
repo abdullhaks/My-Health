@@ -1,5 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
-
+import dotenv from "dotenv";
+dotenv.config();
 
 
 
@@ -7,6 +8,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET as string
 const ACCESS_TOKEN_SECRET= process.env.ACCESS_TOKEN_SECRET as string
 
 export const generateAccessToken = (data: { id: string; role: "user" | "admin" | "doctor" }): string => {
+    
     
     return jwt.sign(
         { id: data.id, role: data.role }, 
@@ -17,6 +19,7 @@ export const generateAccessToken = (data: { id: string; role: "user" | "admin" |
 
 export const generateRefreshToken = (data: { id: string; role: "user" | "admin" | "doctor" }): string => {
     
+
     return jwt.sign(
         { id: data.id, role: data.role },  
         REFRESH_TOKEN_SECRET,

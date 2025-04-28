@@ -21,5 +21,9 @@ export default interface IUserAuthCtrl{
 
     refreshToken(req:Request,res:Response):Promise<void>
 
+    googleLoginRedirect (req: Request, res: Response): Promise<any>
 
+    googleCallback (req: Request, res: Response):Promise <any>
+
+    getMe(req:Request,res:Response):Promise<any>
 }

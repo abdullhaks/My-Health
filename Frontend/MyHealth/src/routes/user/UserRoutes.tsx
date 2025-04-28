@@ -12,6 +12,7 @@ import UserMain from "../../pages/userPages/UserMain";
 import Dashboard from "../../components/userComponents/UserDashboard";
 import Profile from "../../components/userComponents/UserProfile";
 import UserRcoveryPassword from "../../pages/userPages/UserRcoveryPassword";
+import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
 
 const UserRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const UserRoutes = () => {
         <Route path="/recoverPassword" element={<UserRcoveryPassword/> } />
         <Route path="/otp" element={<UserOtpVerification />} />
         <Route path="/resetPassword" element={<UserResetPassword />} />
+        <Route path="/google-success" element={<GoogleSuccess />} />
       </Route>
 
       {/* Protected Routes */}

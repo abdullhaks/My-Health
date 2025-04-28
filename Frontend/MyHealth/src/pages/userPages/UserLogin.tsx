@@ -192,6 +192,9 @@ function UserLogin() {
                         text="Login with Google"
                         icon={<FcGoogle />}
                         className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-200"
+                        onClick={() => {
+                          window.location.href = "http://localhost:3000/api/user/google";
+                        }}
                     />
         
         

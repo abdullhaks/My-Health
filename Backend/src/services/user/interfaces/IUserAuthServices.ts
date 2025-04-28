@@ -11,4 +11,5 @@ export default interface IUserAuthService {
     verifyRecoveryPassword(email: string, recoveryCode: string): Promise<boolean>
     // getRecoveryPassword(email:string):Promise<any>
     refreshToken(token:string):Promise<any>
+    getMe(email:String):Promise<any>
 }

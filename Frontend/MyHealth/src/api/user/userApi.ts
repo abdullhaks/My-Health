@@ -14,6 +14,22 @@ export const signupUser = async (userData: any) => {
   }
 };
 
+export const getMe = async ()=>{
+  try{
+
+    console.log("get me calling......")
+    const response = await userInstance.get("/user/me");
+    console.log("me me me...",response.data);
+
+    return response.data
+  }catch(error){
+    console.error("Error signing up user:", error);
+    throw error;
+  }
+  
+
+}
+
 export const loginUser = async (userData: any) => {
   try {
     const response = await userInstance.post("/user/login", userData);

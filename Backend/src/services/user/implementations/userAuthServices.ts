@@ -83,7 +83,6 @@ export default class UserAuthService implements IUserAuthService {
           sameSite: "strict",
           secure: false, 
           maxAge: 7 * 24 * 60 * 60 * 1000,
-          path: "/",
         });
 
         
@@ -92,7 +91,6 @@ export default class UserAuthService implements IUserAuthService {
           sameSite: "strict",
           secure: false, 
           maxAge: 7 * 24 * 60 * 60 * 1000,
-          path: "/",
         }); 
       
         const { password, ...userWithoutPassword } = existingUser.toObject();
@@ -311,6 +309,34 @@ export default class UserAuthService implements IUserAuthService {
             console.log("new access token is ...............",accessToken);
         
             return {accessToken} ;
+        };
+
+
+        async getMe(email: string):Promise<any>{
+         
+          console.log("get me email....",email);
+
+          if(!email){
+            throw new Error("Invalid credentials");
+          }
+          const existingUser = await this._userRepository.findByEmail(email);
+          console.log("Existing user: ", existingUser);
+        
+          if (!existingUser) {
+            throw new Error("Invalid credentials");
+          }
+
+          const { password, ...userWithoutPassword } = existingUser.toObject();
+      
+          if(userWithoutPassword.profile){
+          userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+          };
+  
+          return {
+            message: "Login successful",
+            user: userWithoutPassword,
+          };
+        
         }
     
 }

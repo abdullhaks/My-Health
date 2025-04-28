@@ -2,7 +2,7 @@ import React from "react";
 
 interface ButtonProps {
   text: string;
-  onClick?: () => void;
+  onClick?: () => any;
   type?: "button" | "submit";
   className?: string;
   width?: string;
