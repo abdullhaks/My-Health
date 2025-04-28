@@ -4,7 +4,6 @@ import OtpModel from "../../models/otpModel";
 import { IUserDocument } from "../../entities/userEntities";
 import BaseRepository from "./baseRepository";
 import IUserRepository from "../interfaces/IUserRepository";
-import { UpdateQuery } from "mongoose";
 
 @injectable()
 

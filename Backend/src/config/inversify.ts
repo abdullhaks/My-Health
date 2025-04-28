@@ -2,6 +2,7 @@ import { Container } from "inversify";
 import userModel from "../models/userModel";
 import OtpModel from "../models/otpModel";
 import adminModel from "../models/adminModel";
+import doctorModel from "../models/doctorModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -11,6 +12,9 @@ import IUserProfileCtrl from "../controllers/user/interfaces/IProfileCtrl";
 
 import AdminAuthController from "../controllers/admin/implementations/authCtrl";
 import IAdminAuthCtrl from "../controllers/admin/interfaces/IAuthCtrl";
+
+import DoctorAuthController from "../controllers/doctor/implementations/authCtrl";
+import IDoctorAuthCtrl from "../controllers/doctor/interfaces/IAuthCtrl";
 //.................................................................................
 
 //services.....................................................................
@@ -22,13 +26,22 @@ import IUserProfileService from "../services/user/interfaces/IuserProfileService
 
 import AdminAuthService from "../services/admin/implementations/adminAuthService";
 import IAdminAuthService from "../services/admin/interfaces/IAdminAuthService";
+
+import DoctorAuthService from "../services/doctor/implementations/doctorAuthServices";
+import IDoctorAuthService from "../services/doctor/interfaces/IDoctorAuthServices";
+
 //.................................................................................
 
 //repositories......................................................................
 import UserRepository from "../repositories/implementations/userRepository";
 import IUserRepository from "../repositories/interfaces/IUserRepository";
+
 import AdminRepository from "../repositories/implementations/adminRepository";
 import IAdminRepository from "../repositories/interfaces/IAdminRepository";
+
+import DoctorRepository from "../repositories/implementations/doctorRepository";
+import IDoctorRepository from "../repositories/interfaces/IDoctorRepository";
+
 //.................................................................................
 
 
@@ -37,6 +50,7 @@ const container = new Container();
 container.bind("userModel").toConstantValue(userModel);
 container.bind("otpModel").toConstantValue(OtpModel);
 container.bind("adminModel").toConstantValue(adminModel);
+container.bind("doctorModel").toConstantValue(doctorModel);
 //...................................................................
 
 
@@ -45,10 +59,22 @@ container.bind<IUserProfileCtrl>("IUserProfileCtrl").to(UserProfileController);
 
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 
+container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
+
+
+
+
+
 container.bind<IUserAuthService>("IUserAuthService").to(UserAuthService)
 container.bind<IUserProfileService>("IUserProfileService").to(UserProfileService);
 
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
+
+container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService)
+
+
+
+
 
 container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);

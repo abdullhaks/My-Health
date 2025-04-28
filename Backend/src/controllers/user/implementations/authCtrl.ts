@@ -6,10 +6,9 @@ import IUserAuthService from "../../../services/user/interfaces/IUserAuthService
 
 //..................temp
 import axios from "axios";
-import jwt from "jsonwebtoken";
 import User from "../../../models/userModel"; 
 import { generateAccessToken, generateRefreshToken } from "../../../utils/jwt";
-import { TooManyParts } from "@aws-sdk/client-s3";
+
 
 
 @injectable()
