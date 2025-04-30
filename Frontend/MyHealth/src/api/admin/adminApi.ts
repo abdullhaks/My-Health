@@ -81,13 +81,17 @@ export const logoutAdmin = async () => {
 
 
 export const getUsers = async (search: string, page: number, limit: number) => {
+
+    console.log("serach,page,and limit from api",search,page,limit);
     try {
 
         const response = await adminInstance.get("/admin/users", {
             params: { search, page, limit }
         });
+
+        console.log("response from api..",response);
         return response.data;
-    } catch (error) {
+    } catch (error) { 
         console.error("Error logging out admin:", error);
         throw error;
     }

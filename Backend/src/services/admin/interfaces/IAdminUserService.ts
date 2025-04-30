@@ -2,7 +2,7 @@
 
 export default interface IAdminUserService {
 
-    getUsers():Promise<any>
+    getUsers(page:number,search:string | undefined,limit:number):Promise<any>
 
 
 }

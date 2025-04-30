@@ -16,8 +16,18 @@ export default class AdminUserController implements IAdminUserCtrl {
 
     async getUsers(req:Request,res:Response):Promise<any>{
 
-        console.log("reqest.params from get users...",req.params);
+        const { page, search, limit } = req.query;
+        console.log("reqest.params from get users...", search, page, limit);
 
+        const pageNumber = page ? parseInt(page as string, 10) : 1;
+        const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+
+        const result = await this._adminService.getUsers(pageNumber, search as string | undefined, limitNumber);
+
+        if(!result){
+            return res.status(401).json({msg:"Envalid credentials"});
+        }
+        return res.status(200).json(result);
     }
 
 }

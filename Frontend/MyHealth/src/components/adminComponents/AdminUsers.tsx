@@ -7,7 +7,7 @@ import { getUsers } from "../../api/admin/adminApi";
 
 interface User {
   _id: string;
-  name: string;
+  fullName: string;
   email: string;
   isBlocked: boolean;
 }
@@ -19,14 +19,16 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const limit = 5;
+  const limit = 3;
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const response = await getUsers( search, page, limit );
-      setUsers(response.data.users);
-      setTotalPages(Math.ceil(response.data.totalCount / limit));
+
+      console.log("users are........",response);
+      setUsers(response.users);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load users");
@@ -104,7 +106,7 @@ const AdminUsers = () => {
               ) : (
                 users.map((user) => (
                   <tr key={user._id} className="border-b">
-                    <td className="py-3 px-4">{user.name}</td>
+                    <td className="py-3 px-4">{user.fullName}</td>
                     <td className="py-3 px-4">{user.email}</td>
                     <td className="py-3 px-4">
                       {user.isBlocked ? (

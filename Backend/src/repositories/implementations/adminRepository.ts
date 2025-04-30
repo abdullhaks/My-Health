@@ -10,6 +10,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
 
     constructor(
         @inject("adminModel") private _adminModel: any,
+        @inject("userModel") private _userModel: any,
     ) {
         super(_adminModel);
     }
@@ -27,5 +28,34 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
     };
 
 
+    async getUsers(page: number, search: string | undefined, limit: number): Promise<any> {
+        try {
+            const query: any = {};
+
+            if (search) {
+                query.$or = [
+                    { fullName: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } }
+                ];
+            }
+
+            const skip = (page - 1) * limit;
+
+            const users = await this._userModel
+                .find(query)
+                .skip(skip)
+                .limit(limit);
+
+                const total = await this._userModel.countDocuments(query);
+            return {
+                users,
+                totalPages: Math.ceil(total / limit),
+            };
+            return users;
+        } catch (error) {
+            console.log(error);
+            throw new Error("Failed to fetch users");
+        }
+    }
 
 }
