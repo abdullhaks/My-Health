@@ -2,7 +2,7 @@
 
 export default interface IAdminDoctorService {
 
-    getDoctors():Promise<any>
+    getDoctors(page:number,search:string | undefined,limit:number): Promise<any>
 
 
 }

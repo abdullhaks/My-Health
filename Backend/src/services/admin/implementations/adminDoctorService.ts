@@ -1,4 +1,3 @@
-
 import { inject, injectable } from "inversify";
 import IAdminDoctorService from "../interfaces/IAdminDoctorService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
@@ -12,9 +11,15 @@ export default class AdminDoctorService implements IAdminDoctorService {
     }
 
 
-    async getDoctors(): Promise<any> {
+    async getDoctors(page:number,search:string | undefined,limit:number): Promise<any> {
 
-        
+        const response =await this._adminRepository.getDoctors(page,search,limit)
+
+        if(!response){
+            throw new Error ("doctors not found..!")
+        };
+
+        return response
 
     }
 

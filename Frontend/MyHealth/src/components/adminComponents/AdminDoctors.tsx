@@ -1,20 +1,19 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaLock, FaUnlock, FaSearch } from "react-icons/fa";
+import { FaLock, FaUnlock, FaSearch ,FaCheck} from "react-icons/fa";
 import { getDoctors } from "../../api/admin/adminApi";
 
 interface Doctor {
   _id: string;
-  name: string;
+  fullName: string;
   email: string;
   isBlocked: boolean;
-  isVerifiedByAdmin:number
+  adminVerified:number
 }
 
-const AdminUsers = () => {
-  const [users, setUsers] = useState<Doctor[]>([]);
+const AdminDoctors = () => {
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -26,11 +25,11 @@ const AdminUsers = () => {
     try {
       setLoading(true);
       const response = await getDoctors( search, page, limit );
-      setUsers(response.data.users);
-      setTotalPages(Math.ceil(response.data.totalCount / limit));
+      setDoctors(response.doctors);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load users");
+      toast.error("Failed to load doctors");
     } finally {
       setLoading(false);
     }
@@ -39,12 +38,12 @@ const AdminUsers = () => {
   const handleBlockUnblock = async (id: string, isBlocked: boolean) => {
     try {
       const url = isBlocked
-        ? `/api/admin/users/${id}/unblock`
-        : `/api/admin/users/${id}/block`;
+        ? `/api/admin/doctors/${id}/unblock`
+        : `/api/admin/doctors/${id}/block`;
 
       await axios.patch(url, {}, { withCredentials: true });
 
-      toast.success(`User ${isBlocked ? "unblocked" : "blocked"} successfully`);
+      toast.success(`Doctors ${isBlocked ? "unblocked" : "blocked"} successfully`);
       fetchDoctors(); // Refresh the list
     } catch (error) {
       console.error(error);
@@ -64,7 +63,7 @@ const AdminUsers = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-semibold text-green-700 mb-4">Manage Users</h1>
+      <h1 className="text-2xl font-semibold text-green-700 mb-4">Manage Doctors</h1>
 
       <form onSubmit={handleSearch} className="flex items-center mb-6">
         <input
@@ -96,32 +95,41 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {doctors.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-6 text-gray-400">
                     No users found.
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
-                  <tr key={user._id} className="border-b">
-                    <td className="py-3 px-4">{user.name}</td>
-                    <td className="py-3 px-4">{user.email}</td>
+                doctors.map((doctor) => (
+                  <tr key={doctor._id} className="border-b">
+                    <td className="py-3 px-4">Dr.{doctor.fullName}</td>
+                    <td className="py-3 px-4">{doctor.email}</td>
+                    
+
                     <td className="py-3 px-4">
-                      {user.isBlocked ? (
-                        <span className="text-red-500 font-semibold">Blocked</span>
+                      {doctor.adminVerified === 0 ? (
+                        <button className="px-4 py-1 rounded-md text-white bg-blue-500 hover:bg-blue-700">
+                          <span className="flex items-center justify-center">
+                            <FaCheck className="mr-1" /> Verify
+                          </span>
+                        </button>
+                      ) : doctor.adminVerified === 1 ? (
+                        <span className="text-green-600 font-semibold">Verified</span>
                       ) : (
-                        <span className="text-green-600 font-semibold">Active</span>
+                        <span className="text-red-600 font-semibold">Rejected</span>
                       )}
                     </td>
+
                     <td className="py-3 px-4 text-center">
                       <button
-                        onClick={() => handleBlockUnblock(user._id, user.isBlocked)}
+                        onClick={() => handleBlockUnblock(doctor._id, doctor.isBlocked)}
                         className={`px-4 py-1 rounded-md text-white ${
-                          user.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
+                          doctor.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
                         }`}
                       >
-                        {user.isBlocked ? (
+                        {doctor.isBlocked ? (
                           <span className="flex items-center justify-center">
                             <FaUnlock className="mr-1" /> Unblock
                           </span>
@@ -166,4 +174,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers;
+export default AdminDoctors;

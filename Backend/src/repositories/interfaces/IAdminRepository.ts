@@ -7,4 +7,5 @@ export default interface IAdminRepository extends BaseRepository<IAdminDocument>
 
     findByEmail(email:string):Promise<IAdminDocument>;
     getUsers (page:number,search:string | undefined,limit:number):Promise<any>
+    getDoctors(page: number, search: string | undefined, limit: number): Promise<any>
 } 

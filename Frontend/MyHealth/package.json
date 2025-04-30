@@ -15,6 +15,7 @@
     "@tailwindcss/vite": "^4.1.1",
     "antd": "^5.24.6",
     "axios": "^1.8.4",
+    "lucide-react": "^0.503.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
@@ -22,6 +23,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.0",
     "react-toastify": "^11.0.5",
+    "recharts": "^2.15.3",
     "redux-persist": "^6.0.0",
     "zod": "^3.24.2"
   },

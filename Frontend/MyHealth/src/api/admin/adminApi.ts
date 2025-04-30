@@ -89,10 +89,10 @@ export const getUsers = async (search: string, page: number, limit: number) => {
             params: { search, page, limit }
         });
 
-        console.log("response from api..",response);
+        console.log("users response from api..",response);
         return response.data;
     } catch (error) { 
-        console.error("Error logging out admin:", error);
+        console.error("error in fetchin users");
         throw error;
     }
 };
@@ -104,6 +104,7 @@ export const getDoctors= async(search:string,page:number , limit:number)=>{
             params:{search,page,limit}
         })
 
+        console.log("doctors response from api..",response);
         return response.data
     }catch(error){
         console.log("error in fetchin doctors");

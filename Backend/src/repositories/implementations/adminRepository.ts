@@ -11,6 +11,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
     constructor(
         @inject("adminModel") private _adminModel: any,
         @inject("userModel") private _userModel: any,
+        @inject("doctorModel") private _doctorModel:any
     ) {
         super(_adminModel);
     }
@@ -51,11 +52,41 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
                 users,
                 totalPages: Math.ceil(total / limit),
             };
-            return users;
         } catch (error) {
             console.log(error);
             throw new Error("Failed to fetch users");
         }
-    }
+    };
+
+
+    async getDoctors(page: number, search: string | undefined, limit: number): Promise<any> {
+        try {
+            const query: any = {};
+
+            if (search) {
+                query.$or = [
+                    { fullName: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } }
+                ];
+            }
+
+            const skip = (page - 1) * limit;
+
+            const doctors = await this._doctorModel
+                .find(query)
+                .skip(skip)
+                .limit(limit);
+
+                const total = await this._doctorModel.countDocuments(query);
+            return {
+                doctors,
+                totalPages: Math.ceil(total / limit),
+            };
+         
+        } catch (error) {
+            console.log(error);
+            throw new Error("Failed to fetch doctors");
+        }
+    };
 
 }

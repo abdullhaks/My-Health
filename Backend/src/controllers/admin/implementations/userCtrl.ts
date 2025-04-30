@@ -25,7 +25,7 @@ export default class AdminUserController implements IAdminUserCtrl {
         const result = await this._adminService.getUsers(pageNumber, search as string | undefined, limitNumber);
 
         if(!result){
-            return res.status(401).json({msg:"Envalid credentials"});
+            return res.status(401).json({msg:"fetching users has been fialed "});
         }
         return res.status(200).json(result);
     }

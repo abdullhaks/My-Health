@@ -16,8 +16,18 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
 
     async getDoctors(req:Request,res:Response):Promise<any>{
 
-        console.log("reqest.params from get doctors...",req.params);
+        const { page, search, limit } = req.query;
+        console.log("reqest.params from get users...", search, page, limit);
 
+        const pageNumber = page ? parseInt(page as string, 10) : 1;
+        const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+
+        const result = await this._adminService.getDoctors(pageNumber, search as string | undefined, limitNumber);
+
+        if(!result){
+            return res.status(401).json({msg:"fetching doctors has been fialed "});
+        }
+        return res.status(200).json(result);
     }
 
 }
