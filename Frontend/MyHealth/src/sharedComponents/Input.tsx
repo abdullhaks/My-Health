@@ -2,8 +2,8 @@ interface InputProps {
   label?: string;
   placeholder?: string;
   name?: string;
-  type?: string;
-  value?: string;
+  type?: string ;
+  value?: any;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
   height?: string;
@@ -17,7 +17,7 @@ const Input: React.FC<InputProps> = ({
   label,
   name,
   placeholder,
-  type = "text",
+  type= "text" ,
   value,
   onChange,
   className = "",

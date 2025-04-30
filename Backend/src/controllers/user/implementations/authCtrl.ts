@@ -64,14 +64,12 @@ export default class UserAuthController implements IUserAuthCtrl {
         httpOnly: true,
         sameSite: "strict",
         secure: false, 
-        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.clearCookie("userAccessToken" , {
         httpOnly: true,
         sameSite: "strict",
         secure: false, 
-        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
        res.status(200)

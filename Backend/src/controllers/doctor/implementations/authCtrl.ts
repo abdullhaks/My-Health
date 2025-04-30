@@ -32,4 +32,71 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
     }
   };
 
+
+  async doctorSignup(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> {
+    try {
+
+      const {
+        fullName,
+        email,
+        password,
+        graduation,
+        category,
+        registerNo,
+      } = req.body;
+  
+  
+      // Important: Parse nested fields manually
+      // const parsedLocation = JSON.parse(location);
+      const parsedSpecializations = [];
+  
+      let i = 0;
+      while (req.body[`specializations[${i}][title]`]) {
+        parsedSpecializations.push({
+          title: req.body[`specializations[${i}][title]`],
+          certificate:(req.files as unknown as { [key: string]: File[] })?.[`specializations[${i}][certificate]`]?.[0],
+        });
+        i++;
+      }
+  
+      
+  
+      const doctor = {
+        fullName,
+        email,
+        password,
+        graduation,
+        category,
+        registerNo,
+      }
+
+      
+      const registrationCertificate = (req.files as unknown as { [key: string]: File[] })?.registrationCertificate?.[0];
+      const graduationCertificate = (req.files as unknown as { [key: string]: File[] })?.graduationCertificate?.[0];
+      const verificationId = (req.files as unknown as { [key: string]: File[] })?.verificationId?.[0];
+  
+      const certificates = {
+        registrationCertificate,
+        graduationCertificate,
+        verificationId
+      }
+
+      console.log("file are",registrationCertificate,graduationCertificate,verificationId)
+      // Now you have everything properly parsed.
+      // Save to DB or upload to S3 as needed
+      const response = await this._doctorService.signup(doctor,certificates,parsedSpecializations)
+  
+      return res.status(201).json({ message: "Doctor signed up successfully!" });
+
+      
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ msg: "internal server error" });
+    }
+  }
+
 }

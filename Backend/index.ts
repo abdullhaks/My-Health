@@ -6,6 +6,7 @@ import logger from './src/utils/logs/logger';
 import connectDB from './src/config/connectDB';
 import cors from 'cors';
 import adminRoutes from './src/routes/admin/adminRoutes';
+import doctorRoutes from './src/routes/doctor/doctorRoutes';
 
 
 dotenv.config();
@@ -33,8 +34,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(logger);
 
-app.use("/api/user",userRoutes)
+app.use("/api/user",userRoutes);
 app.use("/api/admin",adminRoutes);
+app.use("/api/doctor",doctorRoutes);
 
 
 app.listen(port,()=>{

@@ -55,7 +55,7 @@ const UserProfile = () => {
   
       formData.append("profile", selectedImage);
 
-      const response = await updateProfileImage(formData, user._id); // implement this API call
+      const response = await updateProfileImage(formData, user._id); 
 
       console.log("response is............ ",response)
       const updatedUser  = response.updatedUser;

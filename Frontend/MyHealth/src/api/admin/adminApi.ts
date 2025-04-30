@@ -80,3 +80,34 @@ export const logoutAdmin = async () => {
 };
 
 
+export const getUsers = async (search: string, page: number, limit: number) => {
+    try {
+
+        const response = await adminInstance.get("/admin/users", {
+            params: { search, page, limit }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error logging out admin:", error);
+        throw error;
+    }
+};
+
+export const getDoctors= async(search:string,page:number , limit:number)=>{
+    try{
+
+        const response = await adminInstance.get("/admin/doctors" ,{
+            params:{search,page,limit}
+        })
+
+        return response.data
+    }catch(error){
+        console.log("error in fetchin doctors");
+        throw error
+        
+    }
+}
+
+
+
+

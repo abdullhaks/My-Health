@@ -16,7 +16,14 @@ doctorRoutes.post("/login",(req,res)=>authCtrl.doctorLogin(req,res));
 
 // doctorRoutes.post("/logout",(req,res)=>authCtrl.doctorLogout(req,res))
 
-// doctorRoutes.post("/signup",(req,res,next)=>authCtrl.doctorSignup(req,res,next));
+doctorRoutes.post("/signup",
+    upload.fields([
+        { name: "registrationCertificate", maxCount: 1 },
+        { name: "graduationCertificate", maxCount: 1 },
+        { name: "verificationId", maxCount: 1 },
+        { name: "specializations[0][certificate]", maxCount: 1 },
+      ]),
+      (req,res,next)=>authCtrl.doctorSignup(req,res,next));
 
 // doctorRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 

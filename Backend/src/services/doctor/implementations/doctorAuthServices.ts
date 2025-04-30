@@ -3,7 +3,7 @@ import { Response } from "express";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { IUser } from "../../../dto/userDTO";
-import {IDoctor} from "../../../dto/doctorDto"
+import {IDoctor} from "../../../dto/doctorDTO"
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
 import generateOtp from "../../../utils/helpers";
@@ -17,7 +17,7 @@ dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
-import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
+import { getSignedImageURL, uploadFileToS3 } from "../../../middlewares/common/uploadS3";
 
 console.log("User auth service is running....");
 console.log("NODE_ENV: ", process.env.EMAIL_USER);
@@ -146,5 +146,76 @@ export default class DoctorAuthService implements IDoctorAuthService {
 
 
 
+              async signup(doctor:Partial<IDoctor>,certificates:any,parsedSpecializations:any): Promise<any> {
+                  console.log("user data from service....",doctor);
+          
+                  const existingUser = await this._doctorRepository.findOne({email:doctor.email});
+          
+                  console.log("Existing user: ", existingUser);
+                  if (existingUser) {
+                      throw new Error("User already exists");
+                  };
+
+                  const graduationCertUrl = await uploadFileToS3(
+                    certificates.graduationCertificate.buffer,
+                    certificates.graduationCertificate.originalname,
+                    "doctors/graduation-certificates",
+                    certificates.graduationCertificate.mimetype
+                  );
+              
+                  const registrationCertUrl = await uploadFileToS3(
+                    certificates.registrationCertificate.buffer,
+                    certificates.registrationCertificate.originalname,
+                    "doctors/registration-certificates",
+                    certificates.registrationCertificate.mimetype
+                  );
+              
+                  const verificationIdUrl = await uploadFileToS3(
+                    certificates.verificationId.buffer,
+                    certificates.verificationId.originalname,
+                    "doctors/verification-Ids",
+                    certificates.verificationId.mimetype
+                  );
+              
+                  
+          
+                  if(doctor.password){
+                      const salt = await bcrypt.genSalt(10);
+                      doctor.password = await bcrypt.hash(doctor.password, salt);
+                  };
+
+                  const newDoctor = {
+                    fullName: doctor.fullName,
+                    email: doctor.email,
+                    password: doctor.password, 
+                    graduation: doctor.graduation,
+                    graduationCertificate: graduationCertUrl,
+                    category: doctor.category,
+                    registerNo: doctor.registerNo,
+                    registrationCertificate: registrationCertUrl,
+                    experience: doctor.experience,
+                    verificationId: verificationIdUrl,
+                  };
+          
+                  
+          
+                  const response = await this._doctorRepository.create(newDoctor);
+                  
+                  console.log("doctor response from service is ",response);
+          
+                  const otp = generateOtp();
+                  console.log("Generated OTP: ", otp);
+          
+                  if (!doctor.email) {
+                      throw new Error("Doctor email is required");
+                  }
+                  await this.sendMail(doctor.email, otp);
+                  console.log("OTP sent to email: ", doctor.email);
+          
+                  return {
+                      message: "Signup successful. OTP sent to email.",
+                      email: doctor.email, 
+                    };
+              };
 
 }

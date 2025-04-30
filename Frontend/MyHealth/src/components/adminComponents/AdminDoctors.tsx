@@ -3,17 +3,18 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaLock, FaUnlock, FaSearch } from "react-icons/fa";
-import { getUsers } from "../../api/admin/adminApi";
+import { getDoctors } from "../../api/admin/adminApi";
 
-interface User {
+interface Doctor {
   _id: string;
   name: string;
   email: string;
   isBlocked: boolean;
+  isVerifiedByAdmin:number
 }
 
 const AdminUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<Doctor[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -21,10 +22,10 @@ const AdminUsers = () => {
 
   const limit = 5;
 
-  const fetchUsers = async () => {
+  const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await getUsers( search, page, limit );
+      const response = await getDoctors( search, page, limit );
       setUsers(response.data.users);
       setTotalPages(Math.ceil(response.data.totalCount / limit));
     } catch (error) {
@@ -44,7 +45,7 @@ const AdminUsers = () => {
       await axios.patch(url, {}, { withCredentials: true });
 
       toast.success(`User ${isBlocked ? "unblocked" : "blocked"} successfully`);
-      fetchUsers(); // Refresh the list
+      fetchDoctors(); // Refresh the list
     } catch (error) {
       console.error(error);
       toast.error("Action failed");
@@ -54,11 +55,11 @@ const AdminUsers = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    fetchUsers();
+    fetchDoctors();
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchDoctors();
   }, [page]);
 
   return (

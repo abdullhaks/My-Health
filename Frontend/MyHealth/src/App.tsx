@@ -3,6 +3,8 @@ import {BrowserRouter as Router , Routes , Route} from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import UserRoutes from './routes/user/UserRoutes';
 import AdminRoutes from './routes/admin/AdminRoutes';
+import DoctorRoutes from './routes/doctor/DoctorRoutes'
+
 
 
 
@@ -18,7 +20,7 @@ function App() {
       {/* Main Application Routes */}
       <Routes>
         <Route path="/user/*" element={<UserRoutes />} />
-        <Route path="/doctor/*" element={<UserRoutes />} />
+        <Route path="/doctor/*" element={<DoctorRoutes />} />
         <Route path="/admin/*" element={<AdminRoutes />} />
 
         <Route path="/*" element={<UserRoutes />} />

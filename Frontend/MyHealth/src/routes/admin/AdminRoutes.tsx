@@ -26,6 +26,7 @@ const UserRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<AdminMain />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
           <Route path="profile" element={<AdminUsers />} />
         </Route>
       </Route>

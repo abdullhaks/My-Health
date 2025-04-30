@@ -9,7 +9,7 @@
 
         key: 'root',
         storage,
-        whitelist: ['user','admin'], 
+        whitelist: ['user','admin','doctor'], 
     }
 
     const persistedReducer = persistReducer(persistConfig, rootReducer);
