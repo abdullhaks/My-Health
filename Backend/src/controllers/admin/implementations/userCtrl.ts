@@ -28,6 +28,43 @@ export default class AdminUserController implements IAdminUserCtrl {
             return res.status(401).json({msg:"fetching users has been fialed "});
         }
         return res.status(200).json(result);
-    }
+    };
+
+    async block(req:Request,res:Response):Promise<any>{
+
+        const {id} = req.params;
+
+        console.log("user id for block...",id);
+
+        const result = this._adminService.block(id);
+
+        console.log("resposne form user blocking ctrl..",result);
+
+        if(!result){
+            return res.status(401).json({msg:"blocking users has been fialed "});
+        }
+        return res.status(200).json(result);
+
+    };
+
+
+    
+
+    async unblock(req:Request,res:Response):Promise<any>{
+
+        const {id} = req.params;
+
+        console.log("user id for block...",id);
+
+        const result = this._adminService.unblock(id);
+
+        console.log("resposne form user blocking ctrl..",result);
+
+        if(!result){
+            return res.status(401).json({msg:"blocking users has been fialed "});
+        }
+        return res.status(200).json(result);
+
+    };
 
 }

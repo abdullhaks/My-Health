@@ -3,6 +3,7 @@ import adminModel from "../../models/adminModel";
 import { IAdminDocument } from "../../entities/adminEntities";
 import BaseRepository from "./baseRepository";
 import IAdminRepository from "../interfaces/IAdminRepository";
+import { truncates } from "bcryptjs";
 
 @injectable()
 
@@ -88,5 +89,33 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
             throw new Error("Failed to fetch doctors");
         }
     };
+
+    async blockUser(id:string):Promise<any>{
+        try{
+
+            const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:true}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+
+
+        }catch(error){
+            console.log(error);
+            throw new Error("user blockig has beeb failed")
+        }
+    };
+
+
+    async unblockUser(id:string):Promise<any>{
+        try{
+
+            const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:false}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+
+        }catch(error){
+            console.log(error);
+            throw new Error("user blockig has beeb failed")
+        }
+    }
 
 }

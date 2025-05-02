@@ -14,13 +14,31 @@ export default class AdminUserService implements IAdminUserService {
     async getUsers(page:number,search:string | undefined,limit:number): Promise<any> {
 
         const response =await this._adminRepository.getUsers(page,search,limit)
-
-        if(!response){
-            throw new Error ("users not found..!")
-        };
-
         return response
 
-    }
+    };
+
+    async block(id:string):Promise<any>{
+            
+            console.log("id from block....",id);
+            const response = await this._adminRepository.blockUser(id)
+
+            console.log("blocked result is ",response);
+            
+            return response; 
+
+    };
+
+    async unblock(id:string):Promise<any>{
+            
+        console.log("id from block....",id);
+        const response = await this._adminRepository.unblockUser(id)
+
+        console.log("blocked result is ",response);
+        
+        return response; 
+
+    };
+
 
 }

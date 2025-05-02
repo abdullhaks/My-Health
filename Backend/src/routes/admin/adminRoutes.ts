@@ -26,7 +26,10 @@ adminRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 
 adminRoutes.get("/users",(req,res)=>userCtrl.getUsers(req,res));
 
-adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res))
+adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
+adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
+
+adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
 
 
 
