@@ -111,6 +111,24 @@ export const getDoctors= async(search:string,page:number , limit:number)=>{
         throw error
         
     }
+};
+
+export const manageUsers = async(id:string,isBlocked:boolean)=>{
+
+    try{
+        const url = isBlocked
+        ? `/admin/users/${id}/unblock`
+        : `/admin/users/${id}/block`;
+    
+        const response = await adminInstance.patch(url)
+    
+        console.log("user management response from api..",response);
+        return response.data
+    }catch(error){
+        console.log("error in manage users");
+        throw error
+    }
+
 }
 
 

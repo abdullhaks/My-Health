@@ -1,9 +1,10 @@
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { manageUsers } from "../../api/admin/adminApi";
 import { toast } from "react-toastify";
 import { FaLock, FaUnlock, FaSearch } from "react-icons/fa";
 import { getUsers } from "../../api/admin/adminApi";
+import { Popconfirm } from "antd";
 
 interface User {
   _id: string;
@@ -39,14 +40,21 @@ const AdminUsers = () => {
 
   const handleBlockUnblock = async (id: string, isBlocked: boolean) => {
     try {
-      const url = isBlocked
-        ? `/api/admin/users/${id}/unblock`
-        : `/api/admin/users/${id}/block`;
+      
+      const response = await manageUsers(id, isBlocked);
 
-      await axios.patch(url, {}, { withCredentials: true });
 
+      if(!response){
+      toast.success(`User ${isBlocked ? "unblocked" : "blocked"} failed`);
+
+      }
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === id ? { ...user, isBlocked: !isBlocked } : user
+        )
+      );
       toast.success(`User ${isBlocked ? "unblocked" : "blocked"} successfully`);
-      fetchUsers(); // Refresh the list
+
     } catch (error) {
       console.error(error);
       toast.error("Action failed");
@@ -116,8 +124,19 @@ const AdminUsers = () => {
                       )}
                     </td>
                     <td className="py-3 px-4 text-center">
+
+
+                    <Popconfirm
+                        title="Manage user"
+                        description ={`Are you sure to ${user.isBlocked ? "unblock" : "block"}  this user?`}
+                        onConfirm={() => handleBlockUnblock(user._id, user.isBlocked)}
+                        // onCancel={cancel}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+
+
                       <button
-                        onClick={() => handleBlockUnblock(user._id, user.isBlocked)}
                         className={`px-4 py-1 rounded-md text-white ${
                           user.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
                         }`}
@@ -132,6 +151,12 @@ const AdminUsers = () => {
                           </span>
                         )}
                       </button>
+
+
+                    </Popconfirm>
+
+
+
                     </td>
                   </tr>
                 ))
