@@ -429,3 +429,9 @@
 ::1 - - [03/May/2025:10:03:02 +0000] "GET /api/admin/doctor/6810678b58586d367370dd86 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
 >>>>>>> Stashed changes
 >>>>>>> admin-doctors
+::1 - - [03/May/2025:12:42:36 +0000] "GET /api/admin/users?search=&page=1&limit=3 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [03/May/2025:12:42:36 +0000] "GET /api/admin/users?search=&page=1&limit=3 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [03/May/2025:12:42:40 +0000] "GET /api/admin/doctors?search=&page=1&limit=5 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [03/May/2025:12:42:40 +0000] "GET /api/admin/doctors?search=&page=1&limit=5 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [03/May/2025:12:42:42 +0000] "GET /api/admin/doctor/6810678b58586d367370dd86 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+::1 - - [03/May/2025:12:42:43 +0000] "GET /api/admin/doctor/6810678b58586d367370dd86 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
