@@ -64,16 +64,6 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
       newErrors.fullName = "Full name is required";
     }
 
-    // if (!formData.location?.text || formData.location.coordinates.some(coord => isNaN(coord))) {
-    //   newErrors.locationText = "Please select a valid city from the suggestions";
-    // }
-
-    // if (!formData.phone?.trim()) {
-    //   newErrors.phone = "Phone number is required";
-    // } else if (!/^\+?[0-9\s]{10,15}$/.test(formData.phone.replace(/\s/g, ""))) {
-    //   newErrors.phone = "Invalid phone number format";
-    // }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

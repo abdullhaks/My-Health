@@ -30,4 +30,40 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
         return res.status(200).json(result);
     }
 
+    async getDoctor(req:Request,res:Response):Promise<any>{
+
+        const {id} = req.params;
+        const response = await this._adminService.getDoctor(id);
+
+        if(!response){
+            return res.status(401).json({msg:"fetching doctor has been fialed "});
+        };
+
+        return res.status(200).json(response);
+    };
+
+    async verifyDoctor(req:Request , res:Response):Promise<any>{
+
+        const {id} = req.params;
+        const response = await this._adminService.verifyDoctor(id);
+        if(!response){
+            return res.status(401).json({msg:"verifying doctor has been failed "});
+        };
+
+        return res.status(200).json(response);
+
+    };
+
+
+    async declineDoctor(req:Request , res:Response):Promise<any>{
+
+        const {id} = req.params;
+        const response = await this._adminService.declineDoctor(id);
+        if(!response){
+            return res.status(401).json({msg:"declining doctor has been failed "});
+        };
+
+        return res.status(200).json(response);
+    };
+
 }

@@ -12,7 +12,7 @@ import { logoutAdmin } from "../../redux/slices/adminSlices";
 
 interface NavbarProps {
   children: React.ReactNode;
-}
+};
 
 const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);

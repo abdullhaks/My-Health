@@ -11,6 +11,7 @@ import AdminMain from "../../pages/adminPages/AdminMain";
 import AdminDashboard from "../../components/adminComponents/AdminDashboard";
 import AdminUsers from "../../components/adminComponents/AdminUsers";
 import AdminDoctors from "../../components/adminComponents/AdminDoctors";
+import AdminDoctorDetails from "../../components/adminComponents/AdminDoctorDetails";
 
 const UserRoutes = () => {
   return (
@@ -29,6 +30,7 @@ const UserRoutes = () => {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="doctors" element={<AdminDoctors />} />
+          <Route path="doctor/:id" element={<AdminDoctorDetails/>} />
         </Route>
       </Route>
 
