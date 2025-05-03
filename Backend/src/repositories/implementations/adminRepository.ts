@@ -3,15 +3,8 @@ import adminModel from "../../models/adminModel";
 import { IAdminDocument } from "../../entities/adminEntities";
 import BaseRepository from "./baseRepository";
 import IAdminRepository from "../interfaces/IAdminRepository";
-<<<<<<< HEAD
-import { truncates } from "bcryptjs";
-=======
-<<<<<<< Updated upstream
-=======
-import { truncates } from "bcryptjs";
 import doctorModel from "../../models/doctorModel";
->>>>>>> Stashed changes
->>>>>>> admin-doctors
+
 
 @injectable()
 
@@ -97,12 +90,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
             throw new Error("Failed to fetch doctors");
         }
     };
-
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
-
+    
     async getDoctor(id:string):Promise<any>{
 
         try{
@@ -117,7 +105,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
     };
     
 
->>>>>>> admin-doctors
+
     async blockUser(id:string):Promise<any>{
         try{
 
@@ -128,11 +116,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
 
         }catch(error){
             console.log(error);
-<<<<<<< HEAD
             throw new Error("user blockig has beeb failed")
-=======
-            throw new Error("user blockig has been failed")
->>>>>>> admin-doctors
         }
     };
 
@@ -146,15 +130,10 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
 
         }catch(error){
             console.log(error);
-<<<<<<< HEAD
             throw new Error("user blockig has beeb failed")
         }
     }
 
-=======
-            throw new Error("user blockig has been failed")
-        }
-    }
 
 
     async verifyDoctor(id:string):Promise<any>{
@@ -186,6 +165,4 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
         }
     }
 
->>>>>>> Stashed changes
->>>>>>> admin-doctors
 }

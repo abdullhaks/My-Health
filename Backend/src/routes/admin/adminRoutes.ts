@@ -26,22 +26,18 @@ adminRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 
 adminRoutes.get("/users",(req,res)=>userCtrl.getUsers(req,res));
 
-<<<<<<< HEAD
 adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
 adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
 
 adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
-=======
-<<<<<<< Updated upstream
+
 adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res))
-=======
 adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
 adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
->>>>>>> admin-doctors
 
 adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
 adminRoutes.get("/doctor/:id",(req,res)=>doctorCtrl.getDoctor(req,res)) 
->>>>>>> Stashed changes
+
 
 adminRoutes.patch("/doctor/:id/verify",(req,res)=>doctorCtrl.verifyDoctor(req,res))
 adminRoutes.patch("/doctor/:id/decline",(req,res)=>doctorCtrl.declineDoctor(req,res))
