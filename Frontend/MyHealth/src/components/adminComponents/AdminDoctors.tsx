@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FaLock, FaUnlock, FaSearch ,FaCheck} from "react-icons/fa";
+import { FaLock, FaUnlock, FaSearch } from "react-icons/fa";
 import { getDoctors } from "../../api/admin/adminApi";
+import { Link } from "react-router-dom";
 
 interface Doctor {
   _id: string;
@@ -110,15 +111,27 @@ const AdminDoctors = () => {
 
                     <td className="py-3 px-4">
                       {doctor.adminVerified === 0 ? (
-                        <button className="px-4 py-1 rounded-md text-white bg-blue-500 hover:bg-blue-700">
-                          <span className="flex items-center justify-center">
-                            <FaCheck className="mr-1" /> Verify
-                          </span>
-                        </button>
+                          <Link
+                            to={`/admin/doctor/${doctor._id}`}
+                            className="text-blue-600 underline font-semibold hover:text-blue-800"
+                          >
+                          Verify
+                          </Link>
+                    
                       ) : doctor.adminVerified === 1 ? (
-                        <span className="text-green-600 font-semibold">Verified</span>
+                        <Link
+                            to={`/admin/doctor/${doctor._id}`}
+                            className="text-green-600 underline font-semibold hover:text-green-800"
+                          >
+                          Verified
+                        </Link>
                       ) : (
-                        <span className="text-red-600 font-semibold">Rejected</span>
+                        <Link
+                            to={`/admin/doctor/${doctor._id}`}
+                            className="text-red-600 underline font-semibold hover:text-red-800"
+                          >
+                          Rejected
+                        </Link>
                       )}
                     </td>
 

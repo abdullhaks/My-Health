@@ -113,23 +113,52 @@ export const getDoctors= async(search:string,page:number , limit:number)=>{
     }
 };
 
-export const manageUsers = async(id:string,isBlocked:boolean)=>{
-
-    try{
+export const manageUsers = async (id: string, isBlocked: boolean) => {
+    try {
         const url = isBlocked
-        ? `/admin/users/${id}/unblock`
-        : `/admin/users/${id}/block`;
-    
-        const response = await adminInstance.patch(url)
-    
-        console.log("user management response from api..",response);
-        return response.data
-    }catch(error){
-        console.log("error in manage users");
-        throw error
-    }
+            ? `/admin/users/${id}/unblock`
+            : `/admin/users/${id}/block`;
 
-}
+        const response = await adminInstance.patch(url);
+
+        console.log("user management response from api..", response);
+        return response.data;
+    } catch (error) {
+        console.log("error in manage users");
+        throw error;
+    }
+};
+
+export const doctorDetails = async (id: string) => {
+    try {
+        const response = await adminInstance.get(`/admin/doctor/${id}`);
+        return response.data;
+    } catch (error) {
+        console.log("error in get doctor details");
+        throw error;
+    }
+};
+
+export const verifyDoctor = async (id: string) => {
+    try {
+        const response = await adminInstance.patch(`/admin/doctor/${id}/verify`);
+        return response.data;
+    } catch (error) {
+        console.log("error in verify doctor");
+        throw error;
+    }
+};
+
+export const declineDoctor = async (id: string) => {
+    try {
+        const response = await adminInstance.patch(`/admin/doctor/${id}/decline`);
+        return response.data;
+    } catch (error) {
+        console.log("error in verify doctor");
+        throw error;
+    }
+};
+
 
 
 

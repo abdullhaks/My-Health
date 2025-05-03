@@ -3,7 +3,15 @@ import adminModel from "../../models/adminModel";
 import { IAdminDocument } from "../../entities/adminEntities";
 import BaseRepository from "./baseRepository";
 import IAdminRepository from "../interfaces/IAdminRepository";
+<<<<<<< HEAD
 import { truncates } from "bcryptjs";
+=======
+<<<<<<< Updated upstream
+=======
+import { truncates } from "bcryptjs";
+import doctorModel from "../../models/doctorModel";
+>>>>>>> Stashed changes
+>>>>>>> admin-doctors
 
 @injectable()
 
@@ -90,6 +98,26 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
         }
     };
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+=======
+
+    async getDoctor(id:string):Promise<any>{
+
+        try{
+
+            const response = await this._doctorModel.findOne({_id:id});
+            return response
+
+        }catch(error){
+            console.log(error);
+            throw new Error("Fialed to find doctor");
+        }
+    };
+    
+
+>>>>>>> admin-doctors
     async blockUser(id:string):Promise<any>{
         try{
 
@@ -100,7 +128,11 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
 
         }catch(error){
             console.log(error);
+<<<<<<< HEAD
             throw new Error("user blockig has beeb failed")
+=======
+            throw new Error("user blockig has been failed")
+>>>>>>> admin-doctors
         }
     };
 
@@ -114,8 +146,46 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
 
         }catch(error){
             console.log(error);
+<<<<<<< HEAD
             throw new Error("user blockig has beeb failed")
         }
     }
 
+=======
+            throw new Error("user blockig has been failed")
+        }
+    }
+
+
+    async verifyDoctor(id:string):Promise<any>{
+        try{
+
+            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:1});
+            console.log("doctor verifying....",resp);
+            
+            return resp;
+
+        }catch(error){
+            console.log(error);
+            throw new Error ("doctor verifying has been failed")
+        }
+    };
+
+
+    async declineDoctor(id:string):Promise<any>{
+        try{
+
+            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:3});
+            console.log("doctor declining....",resp);
+            
+            return resp;
+
+        }catch(error){
+            console.log(error);
+            throw new Error ("doctor declining has been failed")
+        }
+    }
+
+>>>>>>> Stashed changes
+>>>>>>> admin-doctors
 }

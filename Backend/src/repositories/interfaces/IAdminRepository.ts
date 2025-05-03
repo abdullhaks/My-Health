@@ -8,6 +8,17 @@ export default interface IAdminRepository extends BaseRepository<IAdminDocument>
     findByEmail(email:string):Promise<IAdminDocument>;
     getUsers (page:number,search:string | undefined,limit:number):Promise<any>
     getDoctors(page: number, search: string | undefined, limit: number): Promise<any>
+<<<<<<< HEAD
     blockUser(id:string):Promise<any>
     unblockUser(id:string):Promise<any>
+=======
+<<<<<<< Updated upstream
+=======
+    getDoctor(id:string):Promise<any>
+    blockUser(id:string):Promise<any>
+    unblockUser(id:string):Promise<any>
+    verifyDoctor(id:string):Promise<any>
+    declineDoctor(id:string):Promise<any>
+>>>>>>> Stashed changes
+>>>>>>> admin-doctors
 } 

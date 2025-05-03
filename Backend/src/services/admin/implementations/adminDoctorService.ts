@@ -21,6 +21,35 @@ export default class AdminDoctorService implements IAdminDoctorService {
 
         return response
 
+    };
+
+    async getDoctor(id:string):Promise<any>{
+        const response = await this._adminRepository.getDoctor(id);
+        if(!response){
+            throw new Error ("doctor not found..!")
+
+        };
+
+        return response;
+    }
+
+    async verifyDoctor(id:string):Promise<any>{
+        const response = await this._adminRepository.verifyDoctor(id);
+
+        if(!response){
+            throw new Error ("doctor verifying failed");
+        };
+        return response;
+    }
+
+
+    async declineDoctor(id:string):Promise<any>{
+        const response = await this._adminRepository.declineDoctor(id);
+
+        if(!response){
+            throw new Error ("doctor verifying failed");
+        };
+        return response;
     }
 
 }
