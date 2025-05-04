@@ -6,5 +6,7 @@ export default interface IAdminDoctorService {
     getDoctor(id:string):Promise<any>
     verifyDoctor(id:string):Promise<any>
     declineDoctor(id:string):Promise<any>
+    block(id:string):Promise<any>
+    unblock(id:string):Promise<any>
 
 }

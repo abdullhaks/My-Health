@@ -15,4 +15,6 @@ export default interface IAdminRepository extends BaseRepository<IAdminDocument>
     unblockUser(id:string):Promise<any>
     verifyDoctor(id:string):Promise<any>
     declineDoctor(id:string):Promise<any>
+    blockDoctor(id:string):Promise<any>
+    unblockDoctor(id:string):Promise<any>
 } 

@@ -5,4 +5,6 @@
         getDoctor(req:Request,res:Response):Promise<any>
         verifyDoctor(req:Request , res:Response):Promise<any>
         declineDoctor(req:Request , res:Response):Promise<any>
+        block(req:Request,res:Response):Promise<any>
+        unblock(req:Request,res:Response):Promise<any>
     }

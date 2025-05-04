@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { FaLock, FaUnlock, FaSearch } from "react-icons/fa";
 import { getDoctors } from "../../api/admin/adminApi";
+import { manageDoctors } from "../../api/admin/adminApi";
 import { Link } from "react-router-dom";
+import { Popconfirm } from "antd";
 
 interface Doctor {
   _id: string;
@@ -38,14 +39,21 @@ const AdminDoctors = () => {
 
   const handleBlockUnblock = async (id: string, isBlocked: boolean) => {
     try {
-      const url = isBlocked
-        ? `/api/admin/doctors/${id}/unblock`
-        : `/api/admin/doctors/${id}/block`;
+      
+      const response = await manageDoctors(id, isBlocked);
 
-      await axios.patch(url, {}, { withCredentials: true });
 
-      toast.success(`Doctors ${isBlocked ? "unblocked" : "blocked"} successfully`);
-      fetchDoctors(); // Refresh the list
+      if(!response){
+      toast.success(`Doctor ${isBlocked ? "unblocked" : "blocked"} failed`);
+
+      }
+      setDoctors((prevDoctor) =>
+        prevDoctor.map((doctor) =>
+          doctor._id === id ? { ...doctor, isBlocked: !isBlocked } : doctor
+        )
+      );
+      toast.success(`Doctor ${isBlocked ? "unblocked" : "blocked"} successfully`);
+
     } catch (error) {
       console.error(error);
       toast.error("Action failed");
@@ -136,22 +144,40 @@ const AdminDoctors = () => {
                     </td>
 
                     <td className="py-3 px-4 text-center">
-                      <button
-                        onClick={() => handleBlockUnblock(doctor._id, doctor.isBlocked)}
-                        className={`px-4 py-1 rounded-md text-white ${
-                          doctor.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
-                        }`}
-                      >
-                        {doctor.isBlocked ? (
-                          <span className="flex items-center justify-center">
-                            <FaUnlock className="mr-1" /> Unblock
-                          </span>
-                        ) : (
-                          <span className="flex items-center justify-center">
-                            <FaLock className="mr-1" /> Block
-                          </span>
-                        )}
-                      </button>
+
+
+                      <Popconfirm
+                            title="Manage user"
+                            description ={`Are you sure to ${doctor.isBlocked ? "unblock" : "block"}  this doctor?`}
+                            onConfirm={() => handleBlockUnblock(doctor._id, doctor.isBlocked)}
+                            // onCancel={cancel}
+                            okText="Yes"
+                            cancelText="No"
+                          >
+
+
+                          <button
+                            className={`px-4 py-1 rounded-md text-white ${
+                              doctor.isBlocked ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
+                            }`}
+                          >
+                            {doctor.isBlocked ? (
+                              <span className="flex items-center justify-center">
+                                <FaUnlock className="mr-1" /> Unblock
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center">
+                                <FaLock className="mr-1" /> Block
+                              </span>
+                            )}
+                          </button>
+                      
+                      
+                      </Popconfirm>
+
+
+
+
                     </td>
                   </tr>
                 ))

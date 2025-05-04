@@ -29,11 +29,6 @@ adminRoutes.get("/users",(req,res)=>userCtrl.getUsers(req,res));
 adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
 adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
 
-adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
-
-adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res))
-adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
-adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
 
 adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
 adminRoutes.get("/doctor/:id",(req,res)=>doctorCtrl.getDoctor(req,res)) 
@@ -41,5 +36,8 @@ adminRoutes.get("/doctor/:id",(req,res)=>doctorCtrl.getDoctor(req,res))
 
 adminRoutes.patch("/doctor/:id/verify",(req,res)=>doctorCtrl.verifyDoctor(req,res))
 adminRoutes.patch("/doctor/:id/decline",(req,res)=>doctorCtrl.declineDoctor(req,res))
+
+adminRoutes.patch("/doctors/:id/block",(req,res)=>doctorCtrl.block(req,res))
+adminRoutes.patch("/doctors/:id/unblock",(req,res)=>doctorCtrl.unblock(req,res))
 
 export default adminRoutes; 

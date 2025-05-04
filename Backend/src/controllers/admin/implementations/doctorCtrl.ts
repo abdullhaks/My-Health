@@ -66,4 +66,43 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
         return res.status(200).json(response);
     };
 
+
+
+    async block(req:Request,res:Response):Promise<any>{
+
+        const {id} = req.params;
+
+        console.log("user id for block...",id);
+
+        const result = this._adminService.block(id);
+
+        console.log("resposne form doctor blocking ctrl..",result);
+
+        if(!result){
+            return res.status(401).json({msg:"blocking doctors has been fialed "});
+        }
+        return res.status(200).json(result);
+
+    };
+
+
+    
+
+    async unblock(req:Request,res:Response):Promise<any>{
+
+        const {id} = req.params;
+
+        console.log("doctor id for block...",id);
+
+        const result = this._adminService.unblock(id);
+
+        console.log("resposne form doctor blocking ctrl..",result);
+
+        if(!result){
+            return res.status(401).json({msg:"blocking doctors has been fialed "});
+        }
+        return res.status(200).json(result);
+
+    };
+
 }

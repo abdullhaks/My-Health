@@ -163,6 +163,33 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
             console.log(error);
             throw new Error ("doctor declining has been failed")
         }
-    }
+    };
+
+
+    async blockDoctor(id:string):Promise<any>{
+        try{
+            const resp =await this._doctorModel.findByIdAndUpdate(id, {isBlocked:true}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+
+
+        }catch(error){
+            console.log(error);
+            throw new Error("doctor blockig has beeb failed")
+        }
+    };
+
+
+    async unblockDoctor(id:string):Promise<any>{
+        try{
+            const resp =await this._doctorModel.findByIdAndUpdate(id, {isBlocked:false}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+
+        }catch(error){
+            console.log(error);
+            throw new Error("doctor blockig has beeb failed")
+        }
+    };
 
 }

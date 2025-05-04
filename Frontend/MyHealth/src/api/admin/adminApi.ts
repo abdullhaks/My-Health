@@ -129,6 +129,23 @@ export const manageUsers = async (id: string, isBlocked: boolean) => {
     }
 };
 
+
+export const manageDoctors = async (id: string, isBlocked: boolean) => {
+    try {
+        const url = isBlocked
+            ? `/admin/doctors/${id}/unblock`
+            : `/admin/doctors/${id}/block`;
+
+        const response = await adminInstance.patch(url);
+
+        console.log("doctor management response from api..", response);
+        return response.data;
+    } catch (error) {
+        console.log("error in manage doctors");
+        throw error;
+    }
+};
+
 export const doctorDetails = async (id: string) => {
     try {
         const response = await adminInstance.get(`/admin/doctor/${id}`);
