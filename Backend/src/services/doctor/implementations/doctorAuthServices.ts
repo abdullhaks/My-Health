@@ -41,48 +41,56 @@ export default class DoctorAuthService implements IDoctorAuthService {
 
 
     async login (res:Response ,doctorData: Partial<IDoctor>): Promise<any> {
-        console.log("user data from service....", doctorData);
+        console.log("doctor data from service....", doctorData);
       
         if (!doctorData.email || !doctorData.password) {
           throw new Error("Please provide all required fields");
         }
       
-        const existingUser = await this._doctorRepository.findOne({email:doctorData.email});
-        console.log("Existing user: ", existingUser);
+        const existingDoctor = await this._doctorRepository.findOne({email:doctorData.email});
+        console.log("Existing doctor: ", existingDoctor);
       
-        if (!existingUser) {
+        if (!existingDoctor) {
           throw new Error("Invalid credentials");
         }
       
-        const isPasswordValid = await bcrypt.compare(doctorData.password, existingUser.password);
+        const isPasswordValid = await bcrypt.compare(doctorData.password, existingDoctor.password);
         if (!isPasswordValid) {
           throw new Error("Invalid credentials");
         }
       
-        if (existingUser.isBlocked) {
+        if (existingDoctor.isBlocked) {
           return {
-            user: { email: existingUser.email, isBlocked: true },
-            message: "User is blocked"
+            doctor: existingDoctor,
+            message: "doctor is blocked"
           };
         };
 
 
       
-        if (!existingUser.isVerified) {
+        if (!existingDoctor.isVerified) {
           const otp = generateOtp();
-          await this.sendMail(existingUser.email, otp);
-          console.log("OTP sent to email: ", existingUser.email);
+          await this.sendMail(existingDoctor.email, otp);
+          console.log("OTP sent to email: ", existingDoctor.email);
       
           return {
-            user: { email: existingUser.email, isVerified: false },
-            message: "User not verified, OTP sent"
+            doctor: existingDoctor,
+            message: "doctor not verified, OTP sent"
           };
-        }
+        };
+
+
+        if (existingDoctor.adminVerified==0 || existingDoctor.adminVerified==3) {
+          return {
+            doctor: existingDoctor,
+            message: "doctor credential not verified"
+          };
+        };
        
-        const accessToken = generateAccessToken({ id: existingUser._id.toString(), role: "user" });
-        const refreshToken = generateRefreshToken({ id: existingUser._id.toString(), role: "user" });
+        const accessToken = generateAccessToken({ id: existingDoctor._id.toString(), role: "doctor" });
+        const refreshToken = generateRefreshToken({ id: existingDoctor._id.toString(), role: "doctor" });
       
-        res.cookie("userRefreshToken", refreshToken, {
+        res.cookie("doctorRefreshToken", refreshToken, {
           httpOnly: true,
           sameSite: "strict",
           secure: false, 
@@ -90,22 +98,22 @@ export default class DoctorAuthService implements IDoctorAuthService {
         });
 
         
-        res.cookie("userAccessToken", accessToken, {
+        res.cookie("doctorAccessToken", accessToken, {
           httpOnly: true,
           sameSite: "strict",
           secure: false, 
           maxAge: 7 * 24 * 60 * 60 * 1000,
         }); 
       
-        const { password, ...userWithoutPassword } = existingUser.toObject();
+        const { password, ...doctorWithoutPassword } = existingDoctor.toObject();
       
-        if(userWithoutPassword.profile){
-        userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+        if(doctorWithoutPassword.profile){
+        doctorWithoutPassword.profile = await getSignedImageURL(doctorWithoutPassword.profile)
         };
 
         return {
           message: "Login successful",
-          user: userWithoutPassword,
+          doctor: doctorWithoutPassword,
         };
       };
 
@@ -217,5 +225,67 @@ export default class DoctorAuthService implements IDoctorAuthService {
                       email: doctor.email, 
                     };
               };
+
+
+              async verifyOtp(email:string, otp:string):Promise<any>{
+                      const otpRecord = await this._doctorRepository.findLatestOtpByEmail(email);
+                      console.log("OTP record: ", otpRecord);
+              
+                      if (!otpRecord) {
+                          throw new Error("Invalid OTP or email");
+                      }
+              
+                      const isOtpValid = otpRecord.otp === otp;
+                      if (!isOtpValid) {
+                          throw new Error("Invalid OTP");
+                      }
+              
+                      const validateUser = await this._doctorRepository.verifyDoctor(email);
+              
+                      console.log("User verified: ", validateUser);
+              
+                      return { message: "OTP verified successfully" };
+                  };
+              
+              
+              
+                  async resentOtp(email: string): Promise<any> {
+                    if (!email) {
+                      throw new Error("Email is required");
+                    }
+                  
+                    const user = await this._doctorRepository.findByEmail(email);
+                    if (!user) {
+                      throw new Error("User not found");
+                    }
+                  
+                    if (user.isVerified) {
+                      throw new Error("User is already verified");
+                    }
+                  
+                    const otp = generateOtp();
+                  
+                    // Save OTP to DB
+                    const otpRecord = new OtpModel({
+                      email,
+                      otp,
+                      createdAt: Date.now(),
+                      expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+                    });
+                  
+                    await otpRecord.save();
+                  
+                    // Send OTP email
+                    const expirationTime = "2 minutes";
+                    const mailOptions = generateOtpMail(email, otp, expirationTime);
+                  
+                    try {
+                      await transporter.sendMail(mailOptions);
+                      return { message: "OTP resent to your email" };
+                    } catch (err) {
+                      console.error("Error sending OTP:", err);
+                      throw new Error("Failed to send OTP");
+                    }
+                  }
 
 }

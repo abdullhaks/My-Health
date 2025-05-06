@@ -23,13 +23,13 @@ doctorRoutes.post("/signup",
         { name: "verificationId", maxCount: 1 },
         { name: "specializations[0][certificate]", maxCount: 1 },
       ]),
-      (req,res,next)=>authCtrl.doctorSignup(req,res,next));
+      (req,res)=>authCtrl.doctorSignup(req,res));
 
 // doctorRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 
-// doctorRoutes.post("/verifyOtp",(req,res)=>authCtrl.verifyOtp(req,res));
+doctorRoutes.post("/verifyOtp",(req,res)=>authCtrl.verifyOtp(req,res));
 
-// doctorRoutes.get("/resentOtp",(req,res)=>authCtrl.resentOtp(req,res));
+doctorRoutes.get("/resentOtp",(req,res)=>authCtrl.resentOtp(req,res));
 
 // doctorRoutes.get("/forgotPassword",(req,res)=>authCtrl.forgotPassword(req,res));
 

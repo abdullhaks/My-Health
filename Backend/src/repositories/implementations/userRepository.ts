@@ -30,8 +30,6 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
 
 
     async create(userData : IUserDocument):Promise<IUserDocument>{
-
-
         try{
             
         const user = await this._userModel.create(userData);
@@ -41,9 +39,7 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
             console.log(error);
             console.error("error in saving user data");
             throw new Error("Error in saving user data ");
-
         }
-
     }
 
 

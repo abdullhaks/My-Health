@@ -33,21 +33,10 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   };
 
 
-  async doctorSignup(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<any> {
+  async doctorSignup(req: Request,res: Response,): Promise<any> {
     try {
 
-      const {
-        fullName,
-        email,
-        password,
-        graduation,
-        category,
-        registerNo,
-      } = req.body;
+      const { fullName, email, password, graduation, category, registerNo, } = req.body;
   
   
       // Important: Parse nested fields manually
@@ -65,13 +54,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   
       
   
-      const doctor = {
-        fullName,
-        email,
-        password,
-        graduation,
-        category,
-        registerNo,
+      const doctor = {fullName, email, password, graduation, category, registerNo,
       }
 
       
@@ -97,6 +80,38 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       console.log(error);
       return res.status(500).json({ msg: "internal server error" });
     }
-  }
+  };
+
+
+  async verifyOtp(req: Request, res: Response): Promise<any> {
+      try {
+        const { otp, email } = req.body;
+  
+        console.log(`otp is ${otp} & email is ${email}`);
+  
+        const otpRecord = await this._doctorService.verifyOtp(email, otp);
+        return res.status(200).json({ otp, email });
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({ msg: "internal server error" });
+      }
+    }
+  
+    async resentOtp(req: Request, res: Response): Promise<any> {
+      try {
+        const { email } = req.query;
+        if (!email || typeof email !== "string") {
+          return res.status(400).json({ msg: "Email is required" });
+        }
+  
+        const result = await this._doctorService.resentOtp(email);
+        return res.status(200).json(result);
+      } catch (error: any) {
+        console.error(error);
+        return res
+          .status(500)
+          .json({ msg: error.message || "Internal server error" });
+      }
+    }
 
 }

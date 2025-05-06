@@ -9,14 +9,14 @@ import PasswordInput from "../../sharedComponents/PasswordInput";
 import { useNavigate } from "react-router-dom";
 import {z} from "zod"
 import { useEffect, useState } from "react";
-import { loginUser } from "../../api/user/userApi";
+import { loginDoctor } from "../../api/doctor/doctorApi";
 import { useDispatch } from "react-redux";
-import { loginUser as login, logoutUser } from "../../redux/slices/userSlices";
+import { loginDoctor as login, logoutDoctor } from "../../redux/slices/doctorSlices";
 import toast from "react-hot-toast";
 import "react-toastify/dist/ReactToastify.css";
 
 
-const userLoginSchema = z.object({
+const doctorLoginSchema = z.object({
   email: z.string().email("Invalid email address"), 
   password: z.string().min(6, "Password must be at least 6 characters long"),
 
@@ -47,7 +47,7 @@ function DoctorLogin() {
 
     // Validate on change
     useEffect(() => {
-      const result = userLoginSchema.safeParse(formData);
+      const result = doctorLoginSchema.safeParse(formData);
       if (!result.success) {
         const errors: any = {};
         result.error.errors.forEach((err) => {
@@ -74,7 +74,7 @@ function DoctorLogin() {
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      const result = userLoginSchema.safeParse(formData);
+      const result = doctorLoginSchema.safeParse(formData);
     
       if (!result.success) {
         const errors: any = {};
@@ -86,30 +86,40 @@ function DoctorLogin() {
       }
     
       try {
-        const response = await loginUser(formData);
+        const response = await loginDoctor(formData);
         console.log("Login successful:", response);
+
+
+        if (!response.doctor.isVerified) {
+          toast.error("Please verify your account via OTP sent to your email.");
+          localStorage.setItem("doctorEmail", response.doctor.email);
+          navigate("/doctor/otp");
+          return;
+        }
     
         // Check if user is blocked
-        if (response.user.isBlocked) {
+        if (response.doctor.isBlocked) {
           toast.error("Your account has been blocked. Please contact support.");
           return;
         }
     
-        // Check if user is verified
-        if (!response.user.isVerified) {
-          toast.error("Please verify your account via OTP sent to your email.");
-          localStorage.setItem("userEmail", response.user.email);
-          navigate("/user/otp");
+        if(response.doctor.adminVerified == 0){
+          toast.error("Your signup credentials waiting for verification proccess.please be patient");
+          return;
+        }
+
+        if(response.doctor.adminVerified == 3){
+          toast.error(`Your signup credentials declined in verifiation process. Please check email ${response.doctor.email}`);
           return;
         }
         
-        dispatch(logoutUser());
+        dispatch(logoutDoctor());
         dispatch(login({
-          user: response.user,
+          doctor: response.doctor,
         }));
     
         toast.success("Logged in successfully");
-        navigate("/user/dashboard");
+        navigate("/doctor/dashboard");
     
       } catch (error: any) {
         console.error("Login failed:", error);

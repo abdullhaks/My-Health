@@ -20,6 +20,58 @@ export const signupDoctor = async (doctorData: any) => {
   }
 };
 
+export const getMe = async ()=>{
+  try{
+
+    console.log("get me calling......")
+    const response = await doctorInstance.get("/doctor/me");
+    console.log("me me me...",response.data);
+
+    return response.data
+  }catch(error){
+    console.error("Error signing up user:", error);
+    throw error;
+  }
+  
+
+}
+
+export const loginDoctor = async (doctorData: any) => {
+  try {
+    const response = await doctorInstance.post("/doctor/login", doctorData);
+    console.log("Login response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error logging in user:", error);
+    throw error;
+  }
+};
+
+
+export const verifyDoctorOtp = async (otpData: any) => {
+  try {
+    console.log("OTP data:", otpData);
+    const response = await doctorInstance.post("/doctor/verifyOtp", otpData);
+    return response.data;
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    throw error;
+  }
+};
+
+export const resendDoctorOtp = async (email: string) => {
+  try {
+    const response = await doctorInstance.get("/doctor/resentOtp", {
+      params: { email },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error resending OTP:", error);
+    throw error.response?.data?.msg || "Something went wrong";
+  }
+};
+
+
 export const refreshToken = async () => {
   try {
     const response = await doctorInstance.post("/doctor/refreshToken");

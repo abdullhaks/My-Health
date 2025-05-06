@@ -25,6 +25,7 @@ export interface IDoctorDocument extends Document{
     dob:string;
     isBlocked:boolean;
     isVerified:boolean;
+    premiumMembership:boolean;
     adminVerified:number;
     rejectionReason:string;
     graduation:string;
