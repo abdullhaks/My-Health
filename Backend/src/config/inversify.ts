@@ -20,6 +20,9 @@ import IAdminDoctorCtrl from "../controllers/admin/interfaces/IDoctorCtrl";
 
 import DoctorAuthController from "../controllers/doctor/implementations/authCtrl";
 import IDoctorAuthCtrl from "../controllers/doctor/interfaces/IAuthCtrl";
+import DoctorProfileController from "../controllers/doctor/implementations/profileCtrl";
+import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
+
 //.................................................................................
 
 //services.....................................................................
@@ -38,6 +41,9 @@ import IAdminDoctorService from "../services/admin/interfaces/IAdminDoctorServic
 
 import DoctorAuthService from "../services/doctor/implementations/doctorAuthServices";
 import IDoctorAuthService from "../services/doctor/interfaces/IDoctorAuthServices";
+import IDoctorProfileService from "../services/doctor/interfaces/IDoctorProfileSevices";
+import DoctorProfileService from "../services/doctor/implementations/doctorProfileService";
+
 
 //.................................................................................
 
@@ -50,6 +56,7 @@ import IAdminRepository from "../repositories/interfaces/IAdminRepository";
 
 import DoctorRepository from "../repositories/implementations/doctorRepository";
 import IDoctorRepository from "../repositories/interfaces/IDoctorRepository";
+
 
 //.................................................................................
 
@@ -71,6 +78,9 @@ container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
 container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
 
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
+container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
+
+
 
 
 
@@ -84,7 +94,7 @@ container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
 container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService);
 
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService)
-
+container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService)
 
 
 

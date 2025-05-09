@@ -7,6 +7,7 @@ import connectDB from './src/config/connectDB';
 import cors from 'cors';
 import adminRoutes from './src/routes/admin/adminRoutes';
 import doctorRoutes from './src/routes/doctor/doctorRoutes';
+import { stripeWebhookController } from './src/controllers/common/implementations/payment';
 
 
 dotenv.config();
@@ -30,6 +31,13 @@ app.get("/",(req,res)=>{
 
 connectDB();
 
+app.post(
+    "/api/webhook",
+    express.raw({ type: "application/json" }),
+    stripeWebhookController
+  );
+  
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(logger);
@@ -37,6 +45,8 @@ app.use(logger);
 app.use("/api/user",userRoutes);
 app.use("/api/admin",adminRoutes);
 app.use("/api/doctor",doctorRoutes);
+
+
 
 
 app.listen(port,()=>{

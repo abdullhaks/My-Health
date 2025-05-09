@@ -13,6 +13,7 @@
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@geoapify/geocoder-autocomplete": "^2.1.0",
     "@reduxjs/toolkit": "^2.6.1",
+    "@stripe/react-stripe-js": "^3.7.0",
     "@tailwindcss/vite": "^4.1.1",
     "antd": "^5.24.9",
     "axios": "^1.8.4",

@@ -1,10 +1,31 @@
-import React from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { handlePayment } from "../../api/doctor/doctorApi";
+import { useSelector } from "react-redux";
 
 interface Props {
   onClose: () => void;
 }
 
 const SubscriptionModal: React.FC<Props> = ({ onClose }) => {
+
+  const doctor = useSelector((state: any) => state.doctor.doctor);
+
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+  const handleCheckout = async (priceId: string) => {
+    const data = await handlePayment(priceId,{doctorId:doctor._id,type:"subscription",role:"doctor"});
+  
+    console.log("payment data is ",data);
+
+    const stripe = await stripePromise;
+    // stripe?.redirectToCheckout({ sessionId: data.sessionId });
+    if(stripe){
+      window.location.href = data.url; 
+    }
+
+    
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 bg-opacity-40 px-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-xl">
@@ -44,8 +65,12 @@ const SubscriptionModal: React.FC<Props> = ({ onClose }) => {
                     ? "bg-gray-700 text-white cursor-default"
                     : "bg-white text-black hover:bg-gray-100 transition cursor-pointer"
                 }`}
+
+                onClick={()=>handleCheckout(idx===1?"price_1RM4jDCsbZ91FBD8CubcmsMs":"price_1RM4z8CsbZ91FBD8stOSw1Lu")}
               >
                 {plan.btn}
+
+                
               </button>
             </div>
           ))}

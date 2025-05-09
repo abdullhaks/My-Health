@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import IDoctorAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorAuthService from "../../../services/doctor/interfaces/IDoctorAuthServices";

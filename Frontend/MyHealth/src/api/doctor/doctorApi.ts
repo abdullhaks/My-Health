@@ -94,3 +94,17 @@ export const logoutDoctor = async () => {
     throw error;
   }
 };
+
+export const handlePayment = async (priceId:any,metadata:any) =>{
+  try{
+
+    const response = await doctorInstance.post("doctor/stripe/create-checkout-session",{priceId,metadata});
+
+    return response.data;
+
+  }catch(error) {
+
+    console.log("Error in handle stripe payment :",error);
+    throw error;
+  }
+}
