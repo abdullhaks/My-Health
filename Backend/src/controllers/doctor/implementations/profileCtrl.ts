@@ -47,6 +47,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
           });
       
           console.log("Session details:", session);
+          console.log("i am here");
           return res.status(200).json({ url: session.url });
         } catch (err) {
           console.error("Stripe error:", err);

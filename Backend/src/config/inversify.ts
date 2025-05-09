@@ -3,6 +3,7 @@ import userModel from "../models/userModel";
 import OtpModel from "../models/otpModel";
 import adminModel from "../models/adminModel";
 import doctorModel from "../models/doctorModel";
+import subscriptionModel from "../models/subscriptionModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -22,6 +23,10 @@ import DoctorAuthController from "../controllers/doctor/implementations/authCtrl
 import IDoctorAuthCtrl from "../controllers/doctor/interfaces/IAuthCtrl";
 import DoctorProfileController from "../controllers/doctor/implementations/profileCtrl";
 import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
+
+
+// import PaymentController from "../controllers/common/implementations/paymentCtrl"
+import IPaymentCtrl from "../controllers/common/interfaces/IPaymentCtrl";
 
 //.................................................................................
 
@@ -45,6 +50,9 @@ import IDoctorProfileService from "../services/doctor/interfaces/IDoctorProfileS
 import DoctorProfileService from "../services/doctor/implementations/doctorProfileService";
 
 
+import PaymentService from "../services/common/implementations/paymentService";
+import IPaymentService from "../services/common/interfaces/IPaymentService";
+
 //.................................................................................
 
 //repositories......................................................................
@@ -57,6 +65,9 @@ import IAdminRepository from "../repositories/interfaces/IAdminRepository";
 import DoctorRepository from "../repositories/implementations/doctorRepository";
 import IDoctorRepository from "../repositories/interfaces/IDoctorRepository";
 
+import PaymentRepository from "../repositories/implementations/paymentRepository";
+import IPaymentRepository from "../repositories/interfaces/IPaymentRepository";
+
 
 //.................................................................................
 
@@ -67,6 +78,8 @@ container.bind("userModel").toConstantValue(userModel);
 container.bind("otpModel").toConstantValue(OtpModel);
 container.bind("adminModel").toConstantValue(adminModel);
 container.bind("doctorModel").toConstantValue(doctorModel);
+container.bind("subscriptionModel").toConstantValue(subscriptionModel);
+
 //...................................................................
 
 
@@ -81,8 +94,12 @@ container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 
 
+// container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController)
 
 
+
+
+//......................................................................
 
 
 
@@ -96,13 +113,16 @@ container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService)
 container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService)
 
+container.bind<IPaymentService>("IPaymentService").to(PaymentService);
+
+//..............................................................................
 
 
 
 container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);
 container.bind<IDoctorRepository>("IDoctorRepository").to(DoctorRepository)
-
+container.bind<IPaymentRepository>("IPaymentRepository").to(PaymentRepository);
 
 
 export default container;
