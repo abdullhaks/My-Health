@@ -7,8 +7,12 @@ import connectDB from './src/config/connectDB';
 import cors from 'cors';
 import adminRoutes from './src/routes/admin/adminRoutes';
 import doctorRoutes from './src/routes/doctor/doctorRoutes';
-import { stripeWebhookController } from './src/controllers/common/implementations/payment';
+// import { stripeWebhookController } from './src/controllers/common/implementations/paymentCtrl';
+import IPaymentCtrl from './src/controllers/common/interfaces/IPaymentCtrl';
+import container from './src/config/inversify';
 
+
+const paymentCtrl = container.get<IPaymentCtrl>("IPaymentCtrl")
 
 dotenv.config();
 
@@ -34,7 +38,7 @@ connectDB();
 app.post(
     "/api/webhook",
     express.raw({ type: "application/json" }),
-    stripeWebhookController
+    (req, res) => paymentCtrl.stripeWebhookController(req, res)
   );
   
 

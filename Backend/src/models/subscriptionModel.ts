@@ -6,7 +6,7 @@ const subscriptionSchema: Schema<ISubscriptionDocument> = new Schema({
   stripeCustomerId: { type: String, required: true },
   stripeInvoiceId: { type: String },
   stripeInvoiceUrl: { type: String },
-  status: {
+  subscriptionStatus: {
     type: String,
     enum: ['active', 'canceled', 'past_due', 'unpaid'],
     default: 'active',
@@ -15,7 +15,6 @@ const subscriptionSchema: Schema<ISubscriptionDocument> = new Schema({
   interval: { type: String, enum: ['month', 'year'], required: true },
   amount: { type: Number, required: true },
   subscribedAt: { type: Date, required: true },
-  currentPeriodEnd: { type: Number, required: true },
   doctor: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
 }, { timestamps: true });
 

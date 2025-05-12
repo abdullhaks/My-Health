@@ -11,6 +11,7 @@ import DoctorOtpVerification from "../../pages/doctorPages/DoctorOtpVerification
 // import DoctorResetPassword from "../../pages/DoctorPages/DoctorResetPassword";
 import DoctorMain from "../../pages/doctorPages/DoctorMain";
 import Dashboard from "../../components/doctorComponents/DoctorDashboard";
+import PaymentSuccess from "../../components/doctorComponents/DoctorPaymentSuccess";
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
 // import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
@@ -33,7 +34,7 @@ const DoctorRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DoctorMain />}>
           <Route path="dashboard" element={<Dashboard />} />
-          {/* <Route path="profile" element={<Profile />} /> */}
+          <Route path="payment-success" element={<PaymentSuccess />} />
         </Route>
       </Route>
 

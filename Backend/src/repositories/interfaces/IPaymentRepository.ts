@@ -1,8 +1,8 @@
 import BaseRepository from "../implementations/baseRepository";
-import { IDoctorDocument } from "../../entities/doctorEntities";
+import { ISubscriptionDocument } from "../../entities/subscriptionEntities";
 
 
-export default interface IPaymentRepository extends BaseRepository<IDoctorDocument>{
+export default interface IPaymentRepository extends BaseRepository<ISubscriptionDocument>{
 
     
 

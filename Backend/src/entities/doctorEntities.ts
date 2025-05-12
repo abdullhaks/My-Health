@@ -26,6 +26,7 @@ export interface IDoctorDocument extends Document{
     isBlocked:boolean;
     isVerified:boolean;
     premiumMembership:boolean;
+    subscriptionId:string;
     adminVerified:number;
     rejectionReason:string;
     graduation:string;

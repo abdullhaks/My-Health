@@ -25,7 +25,7 @@ import DoctorProfileController from "../controllers/doctor/implementations/profi
 import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
 
 
-// import PaymentController from "../controllers/common/implementations/paymentCtrl"
+import PaymentController from "../controllers/common/implementations/paymentCtrl"
 import IPaymentCtrl from "../controllers/common/interfaces/IPaymentCtrl";
 
 //.................................................................................
@@ -94,7 +94,7 @@ container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 
 
-// container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController)
+container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController)
 
 
 

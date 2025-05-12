@@ -38,6 +38,7 @@ const doctorSchema : Schema<IDoctorDocument> = new Schema ({
     verificationId:{ type: String },
     walletBalance: { type: Number, default: 0 },
     premiumMembership:{type:Boolean , default:false},
+    subscriptionId:{type:String},
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 

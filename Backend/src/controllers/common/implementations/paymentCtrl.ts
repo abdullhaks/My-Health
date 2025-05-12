@@ -1,7 +1,54 @@
 
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import Stripe from "stripe";
 import stripe from "../../../middlewares/common/stripe";
+import IPaymentCtrl from "../interfaces/IPaymentCtrl";
+import { inject,injectable } from "inversify";
+import IPaymentService from "../../../services/common/interfaces/IPaymentService";
+
+
+@injectable()
+export default class PaymentController implements IPaymentCtrl {
+private _paymentService: IPaymentService;
+
+  constructor(@inject("IPaymentService")PaymentService:IPaymentService ){
+    this._paymentService = PaymentService
+  }
+
+
+  async stripeWebhookController (req:Request , res:Response):Promise<any>{
+
+    const sig = req.headers["stripe-signature"] as string;
+    let event: Stripe.Event;
+
+    try{
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+
+
+      const response =await this._paymentService.handleWebhookEvent(event)
+
+      if (response) return  res.status(200).json({ received: true })
+      else return res.status(401).json({ msg: "Webhook signature verification failed..." });
+
+    }catch(error){
+      console.error("Webhook signature verification failed.", error);
+      return res.status(400).send(`Webhook Error: ${(error as Error).message}`);
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
 
 export const stripeWebhookController = async (req: Request, res: Response):Promise<any> => {
     const sig = req.headers["stripe-signature"] as string;

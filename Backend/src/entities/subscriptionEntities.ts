@@ -6,11 +6,11 @@ export interface ISubscriptionDocument extends Document {
     stripeCustomerId: string;
     stripeInvoiceId?: string;
     stripeInvoiceUrl?: string;
-    status: 'active' | 'canceled' | 'past_due' | 'unpaid';
+    subscriptionStatus: 'active' | 'canceled' | 'past_due' | 'unpaid';
     priceId: string;
     interval: 'month' | 'year';
     amount: number;
     subscribedAt: Date;
     currentPeriodEnd: number;
-    doctor: Types.ObjectId;
+    doctor: Types.ObjectId | string
   }

@@ -1,18 +1,19 @@
 import { injectable , inject } from "inversify";
-import { IDoctorDocument } from "../../entities/doctorEntities";
 import BaseRepository from "./baseRepository";
 import IPaymentRepository from "../interfaces/IPaymentRepository";
+import { ISubscriptionDocument } from "../../entities/subscriptionEntities";
+
 
 @injectable()
 
-export default class PaymentRepository extends BaseRepository<IDoctorDocument> implements IPaymentRepository{
+export default class PaymentRepository extends BaseRepository<ISubscriptionDocument> implements IPaymentRepository{
 
     constructor(
-        @inject("doctorModel") private _doctorModel: any,
+        @inject("subscriptionModel") private _subscriptionModel: any,
         
       
     ) {
-        super(_doctorModel);
+        super(_subscriptionModel);
     }
 
 
