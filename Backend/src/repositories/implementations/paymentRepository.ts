@@ -16,5 +16,6 @@ export default class PaymentRepository extends BaseRepository<ISubscriptionDocum
         super(_subscriptionModel);
     }
 
+    
 
 }

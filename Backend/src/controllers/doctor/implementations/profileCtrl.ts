@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import IDoctorProfileCtrl from "../interfaces/IProfileCtrl";
 import { inject, injectable } from "inversify";
-import IDoctorProfileService from "../../../services/doctor/interfaces/IDoctorAuthServices";
+import IDoctorProfileService from "../../../services/doctor/interfaces/IDoctorProfileSevices";
 import stripe, { makePayment } from "../../../middlewares/common/stripe"
 
 
@@ -11,8 +11,8 @@ import stripe, { makePayment } from "../../../middlewares/common/stripe"
 export default class DoctorProfileController implements IDoctorProfileCtrl {
   private _doctorService: IDoctorProfileService;
 
-  constructor(@inject("IDoctorAuthService") DoctorAuthService: IDoctorProfileService) {
-    this._doctorService = DoctorAuthService;
+  constructor(@inject("IDoctorProfileService") DoctorProfileService: IDoctorProfileService) {
+    this._doctorService = DoctorProfileService;
   }
 
 
@@ -53,6 +53,25 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
           console.error("Stripe error:", err);
           return res.status(500).json({ message: "Payment session creation failed" });
         }
+      };
+
+
+      async verifyingSubscription(req: Request, res: Response): Promise<any>{
+
+        const {sessionId} = req.body;
+        console.log("sessoin id is ...",sessionId);
+
+        try{
+
+          const response = await this._doctorService.verifySubscription(sessionId)
+
+          return res.status(200).json(response);
+
+        }catch(error){
+          console.error("Stripe error:", error);
+          return res.status(500).json({ message: "Subscription verification failed" });
+        }
+
       }
 
 }

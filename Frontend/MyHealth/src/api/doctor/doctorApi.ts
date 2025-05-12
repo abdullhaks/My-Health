@@ -98,7 +98,7 @@ export const logoutDoctor = async () => {
 export const handlePayment = async (priceId:any,metadata:any) =>{
   try{
 
-    const response = await doctorInstance.post("doctor/stripe/create-checkout-session",{priceId,metadata});
+    const response = await doctorInstance.post("/doctor/stripe/create-checkout-session",{priceId,metadata});
 
     return response.data;
 
@@ -107,4 +107,17 @@ export const handlePayment = async (priceId:any,metadata:any) =>{
     console.log("Error in handle stripe payment :",error);
     throw error;
   }
+}
+
+export const verifySubscription = async (sessionId:string) =>{
+try{
+
+  const response = await doctorInstance.post("/doctor/verifySubscription",{sessionId});
+
+  return response.data;
+
+}catch(error){
+  console.log("Error in verify subscription.. :",error);
+    throw error;
+}
 }

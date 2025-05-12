@@ -52,6 +52,7 @@ doctorRoutes.get("/resentOtp",(req,res)=>authCtrl.resentOtp(req,res));
 // doctorRoutes.get("/google/callback", authCtrl.googleCallback); 
 
 doctorRoutes.post("/stripe/create-checkout-session", profileCtrl.createCheckoutSession); 
+doctorRoutes.post("/verifySubscription",(req,res)=> profileCtrl.verifyingSubscription(req,res)); 
 
 
 // doctorRoutes.get("/me", authCtrl.getMe.bind(authCtrl));

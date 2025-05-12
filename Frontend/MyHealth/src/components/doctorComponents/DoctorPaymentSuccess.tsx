@@ -1,12 +1,18 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {  useState } from 'react';
 import { CheckCircle } from 'lucide-react';
-// import axios from 'axios';
+import { verifySubscription } from '../../api/doctor/doctorApi';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { updateDoctor } from '../../redux/slices/doctorSlices';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const dispatch = useDispatch();
+
+  console.log("session id is.......",sessionId);
+  
   const [verifying, setVerifying] = useState(false);
   const navigate = useNavigate();
 
@@ -14,11 +20,20 @@ const PaymentSuccess = () => {
     if (!sessionId) return toast.error('Missing session ID');
     try {
       setVerifying(true);
-    //   const response = await axios.post('/api/doctor/verify-payment', { sessionId });
+      const response = await verifySubscription(sessionId);
+
+      if(!response){
+        toast.error('Subscription verification failed.');
+        return
+      };
+      
+      console.log("respnse of subscription verification...",response.doctor._doc);
+
+      dispatch(updateDoctor(response.doctor._doc));
       toast.success('Payment verified successfully!');
       navigate('/doctor/dashboard');
     } catch (error) {
-      toast.error('Payment verification failed.');
+      toast.error('Subscription verification failed.');
     } finally {
       setVerifying(false);
     }
@@ -38,7 +53,7 @@ const PaymentSuccess = () => {
         <button
           onClick={handleVerifyPayment}
           disabled={verifying}
-          className={`mt-6 w-full py-3 text-white font-semibold rounded-xl bg-gradient-to-r from-purple-700 to-pink-500 hover:opacity-90 transition ${
+          className={`mt-6 w-full py-3 cursor-pointer text-white font-semibold rounded-xl bg-gradient-to-r from-purple-700 to-pink-500 hover:opacity-90 transition ${
             verifying ? 'opacity-60 cursor-not-allowed' : ''
           }`}
         >

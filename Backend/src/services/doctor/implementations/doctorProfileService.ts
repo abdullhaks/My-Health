@@ -18,6 +18,7 @@ import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from ".
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
 import { getSignedImageURL, uploadFileToS3 } from "../../../middlewares/common/uploadS3";
+import IPaymentRepository from "../../../repositories/interfaces/IPaymentRepository";
 
 console.log("User auth service is running....");
 console.log("NODE_ENV: ", process.env.EMAIL_USER);
@@ -35,11 +36,38 @@ const transporter = nodemailer.createTransport({
 @injectable()
 export default class DoctorProfileService implements IDoctorProfileService {
 
-    constructor(@inject("IDoctorRepository") private _doctorRepository:IDoctorRepository){
+    constructor(
+        @inject("IDoctorRepository") private _doctorRepository:IDoctorRepository,
+        @inject("IPaymentRepository") private _paymentRepository:IPaymentRepository
+
+){
 
     }
 
 
+    async verifySubscription (sessionId:string): Promise<any>{
+
+        console.log("session id from verifySubscription",sessionId);
+
+        const verification = await this._paymentRepository.findOne({sessionId:sessionId});
+        if(!verification){
+            throw new Error("subscription verification failed");
+        };
+
+        const doctor = await this._doctorRepository.findOne({_id:verification.doctor});
+
+        if (!doctor) {
+            throw new Error("Doctor not found in subcription verification");
+        }
+        const { password, ...doctorWithoutPassword } = doctor;
+
+        return {
+          message: "subscription verification success",
+          doctor: doctorWithoutPassword,
+        };
+
+    }
+    
 
 
 

@@ -2,6 +2,7 @@ import mongoose, { Schema, Types } from "mongoose";
 import { ISubscriptionDocument } from "../entities/subscriptionEntities";
 
 const subscriptionSchema: Schema<ISubscriptionDocument> = new Schema({
+  sessionId:{ type: String, required: true },
   stripeSubscriptionId: { type: String, required: true },
   stripeCustomerId: { type: String, required: true },
   stripeInvoiceId: { type: String },

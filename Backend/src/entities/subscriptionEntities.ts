@@ -2,6 +2,7 @@ import { Document,Types } from "mongoose";
 
 
 export interface ISubscriptionDocument extends Document {
+    sessionId:string;
     stripeSubscriptionId: string;
     stripeCustomerId: string;
     stripeInvoiceId?: string;
@@ -11,6 +12,5 @@ export interface ISubscriptionDocument extends Document {
     interval: 'month' | 'year';
     amount: number;
     subscribedAt: Date;
-    currentPeriodEnd: number;
-    doctor: Types.ObjectId | string
+    doctor: Types.ObjectId | string |undefined
   }

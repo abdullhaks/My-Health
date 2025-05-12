@@ -4,11 +4,16 @@ import IPaymentRepository from "../../../repositories/interfaces/IPaymentReposit
 import Stripe from "stripe";
 import stripe from "../../../middlewares/common/stripe";
 import { ISubscriptionDocument } from "../../../entities/subscriptionEntities";
+import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 
 @injectable()
 export default class PaymentService implements IPaymentService {
 
-    constructor(@inject("IPaymentRepository") private _paymentRepository:IPaymentRepository){
+    constructor(
+      @inject("IPaymentRepository") private _paymentRepository:IPaymentRepository,
+      @inject("IDoctorRepository") private _doctorRepository:IDoctorRepository
+
+    ){
 
     }
 
@@ -37,6 +42,7 @@ export default class PaymentService implements IPaymentService {
   console.log("invoice data is ",invoice);
               
   const subscriptionData: Partial<ISubscriptionDocument> = {
+    sessionId:session.id,
     stripeSubscriptionId: subscription.id,
     stripeCustomerId: session.customer as string,
     stripeInvoiceId: invoice.id || undefined,
@@ -61,6 +67,18 @@ export default class PaymentService implements IPaymentService {
                     console.log("session data after webhook event ",session);
                     const subResp = await this._paymentRepository.create(subscriptionData);
                     console.log("subResp....is...",subResp);
+                    if (subscriptionData.doctor) {
+                      const docResp = await this._doctorRepository.update(subscriptionData.doctor.toString(),
+                        { premiumMembership:true,
+                          subscriptionId:subscriptionData.stripeSubscriptionId
+                        }
+                      );
+                    console.log("docResp....is...",docResp);
+                      
+                    } else {
+                      console.error("Doctor ID is undefined.");
+                      throw new Error("Invalid doctor ID.");
+                    }
                  
                 // await this._paymentRepository.
                   break;
