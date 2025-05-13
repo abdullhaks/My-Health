@@ -186,3 +186,23 @@ export const logoutUser = async () => {
     throw error;
   }
 };
+
+
+export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, page, limit }: any) => {
+  try {
+    const response = await userInstance.get("/user/doctors", {
+      params: {
+        search: searchTerm,
+        location,
+        category,
+        sort: sortBy,
+        page,
+        limit,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error in fetching doctors:", error);
+    throw error;
+  }
+};

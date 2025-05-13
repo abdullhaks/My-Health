@@ -13,6 +13,7 @@ import Dashboard from "../../components/userComponents/UserDashboard";
 import Profile from "../../components/userComponents/UserProfile";
 import UserRcoveryPassword from "../../pages/userPages/UserRcoveryPassword";
 import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
+import Doctors from "../../components/userComponents/UserDoctors";
 
 const UserRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const UserRoutes = () => {
         <Route path="/" element={<UserMain />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="doctors" element={<Doctors/>} />
         </Route>
       </Route>
 

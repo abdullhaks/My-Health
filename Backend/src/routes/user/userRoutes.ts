@@ -4,11 +4,13 @@ import IUserAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
 import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
+import IUserAppointmentController from "../../controllers/user/interfaces/IAppointmentCtrl";
 
 const userRoutes = Router();
 
 const authCtrl = container.get<IUserAuthCtrl>("IUserAuthCtrl");
 const profileCtrl = container.get<IUserProfileCtrl>("IUserProfileCtrl");
+const appointmentCtrl = container.get<IUserAppointmentController>("IUserAppointmentController")
 
 userRoutes.post("/login",(req,res)=>authCtrl.userLogin(req,res));
 
@@ -42,6 +44,9 @@ userRoutes.get("/google", authCtrl.googleLoginRedirect);
 userRoutes.get("/google/callback", authCtrl.googleCallback); 
 
 userRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
+
+userRoutes.get("/doctors", (req,res)=>appointmentCtrl.fetchingDoctors(req,res));
+
 
 
 

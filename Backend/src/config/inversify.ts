@@ -10,6 +10,9 @@ import UserAuthController from "../controllers/user/implementations/authCtrl";
 import IUserAuthCtrl from "../controllers/user/interfaces/IAuthCtrl";
 import UserProfileController from "../controllers/user/implementations/profileCtrl";
 import IUserProfileCtrl from "../controllers/user/interfaces/IProfileCtrl";
+import UserAppointmentController from "../controllers/user/implementations/appointmentCtrl";
+import IUserAppointmentController from "../controllers/user/interfaces/IAppointmentCtrl";
+
 
 import AdminAuthController from "../controllers/admin/implementations/authCtrl";
 import IAdminAuthCtrl from "../controllers/admin/interfaces/IAuthCtrl";
@@ -35,6 +38,8 @@ import UserAuthService from "../services/user/implementations/userAuthServices";
 import IUserAuthService from "../services/user/interfaces/IUserAuthServices";
 import UserProfileService from "../services/user/implementations/userProfileServices";
 import IUserProfileService from "../services/user/interfaces/IuserProfileServices";
+import UserAppointmentService from "../services/user/implementations/userAppointmentServices";
+import IUserAppointmentService from "../services/user/interfaces/IUserAppointmentServices";
 
 
 import AdminAuthService from "../services/admin/implementations/adminAuthService";
@@ -68,6 +73,8 @@ import IDoctorRepository from "../repositories/interfaces/IDoctorRepository";
 import PaymentRepository from "../repositories/implementations/paymentRepository";
 import IPaymentRepository from "../repositories/interfaces/IPaymentRepository";
 
+import AppointmentRepository from "../repositories/implementations/appointmentRepository";
+import IAppointmentRepository from "../repositories/interfaces/IAppointmentRepository";
 
 //.................................................................................
 
@@ -85,6 +92,7 @@ container.bind("subscriptionModel").toConstantValue(subscriptionModel);
 
 container.bind<IUserAuthCtrl>("IUserAuthCtrl").to(UserAuthController);
 container.bind<IUserProfileCtrl>("IUserProfileCtrl").to(UserProfileController);
+container.bind<IUserAppointmentController>("IUserAppointmentController").to(UserAppointmentController)
 
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
@@ -105,6 +113,7 @@ container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController)
 
 container.bind<IUserAuthService>("IUserAuthService").to(UserAuthService)
 container.bind<IUserProfileService>("IUserProfileService").to(UserProfileService);
+container.bind<IUserAppointmentService>("IUserAppointmentService").to(UserAppointmentService);
 
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
@@ -123,6 +132,7 @@ container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);
 container.bind<IDoctorRepository>("IDoctorRepository").to(DoctorRepository)
 container.bind<IPaymentRepository>("IPaymentRepository").to(PaymentRepository);
+container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository)
 
 
 export default container;
