@@ -62,7 +62,7 @@ export const uploadToS3 =
       Key: key,
     });
   
-    return await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // 1 hr expiry
+    return await getSignedUrl(s3Client, command, { expiresIn: 604800 }); // 1 hr expiry
   };
 
 

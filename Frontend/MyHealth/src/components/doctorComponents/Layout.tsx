@@ -3,11 +3,11 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUserFriends, FaCalendarCheck, FaComments, FaChartBar,
   FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight,
-  FaSearch, FaBell, FaEnvelope
+  FaSearch, FaBell, FaEnvelope,
+  FaUser
 } from "react-icons/fa";
 import { GiRoyalLove } from "react-icons/gi"; 
 import applogoBlue from "../../assets/applogoblue.png";
-import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutDoctor } from "../../redux/slices/doctorSlices";
@@ -79,7 +79,9 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
       path: "/doctor/reports",
       icon: <FaChartBar />,
       premium: true
-    }
+    },
+    { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
+
   ];
 
   const renderMenuItems = () => {
@@ -218,7 +220,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
               <div className="relative group">
                 <button className="flex items-center focus:outline-none">
                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-600">
-                    <img src={defaultAvatar} alt="Doctor Profile" className="w-full h-full object-cover" />
+                    <img src={doctor.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png" } alt="Doctor Profile" className="w-full h-full object-cover" />
                   </div>
                 </button>
                 <div className="absolute right-0 mt-0.5 w-48 bg-gray-200 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">

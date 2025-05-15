@@ -6,31 +6,33 @@ import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 
-
-
 const doctorRoutes = Router();
 
 const authCtrl = container.get<IDoctorAuthCtrl>("IDoctorAuthCtrl");
 const profileCtrl = container.get<IDoctorProfileCtrl>("IDoctorProfileCtrl");
 
-doctorRoutes.post("/login",(req,res)=>authCtrl.doctorLogin(req,res));
+doctorRoutes.post("/login", (req, res) => authCtrl.doctorLogin(req, res));
 
 // doctorRoutes.post("/logout",(req,res)=>authCtrl.doctorLogout(req,res))
 
-doctorRoutes.post("/signup",
-    upload.fields([
-        { name: "registrationCertificate", maxCount: 1 },
-        { name: "graduationCertificate", maxCount: 1 },
-        { name: "verificationId", maxCount: 1 },
-        { name: "specializations[0][certificate]", maxCount: 1 },
-      ]),
-      (req,res)=>authCtrl.doctorSignup(req,res));
+doctorRoutes.post(
+  "/signup",
+  upload.fields([
+    { name: "registrationCertificate", maxCount: 1 },
+    { name: "graduationCertificate", maxCount: 1 },
+    { name: "verificationId", maxCount: 1 },
+    { name: "specializations[0][certificate]", maxCount: 1 },
+  ]),
+  (req, res) => authCtrl.doctorSignup(req, res)
+);
 
-// doctorRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
+doctorRoutes.post("/refreshToken", (req, res) =>
+  authCtrl.refreshToken(req, res)
+);
 
-doctorRoutes.post("/verifyOtp",(req,res)=>authCtrl.verifyOtp(req,res));
+doctorRoutes.post("/verifyOtp", (req, res) => authCtrl.verifyOtp(req, res));
 
-doctorRoutes.get("/resentOtp",(req,res)=>authCtrl.resentOtp(req,res));
+doctorRoutes.get("/resentOtp", (req, res) => authCtrl.resentOtp(req, res));
 
 // doctorRoutes.get("/forgotPassword",(req,res)=>authCtrl.forgotPassword(req,res));
 
@@ -44,23 +46,25 @@ doctorRoutes.get("/resentOtp",(req,res)=>authCtrl.resentOtp(req,res));
 
 // doctorRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("doctor"),( req,res)=>profileCtrl.updateProfile(req,res));
 
-// doctorRoutes.patch("/updateDp/:id" ,verifyAccessTokenMidleware("doctor"), upload.single("profile"),
-// uploadToS3("doctors/profile-images",true), (req,res)=>profileCtrl.updateDp(req,res));
+doctorRoutes.patch(
+  "/updateDp/:id",
+  upload.single("profile"),
+  verifyAccessTokenMidleware("doctor"),
+  uploadToS3("doctors/profile-images", true),
+  (req, res) => profileCtrl.updateDp(req, res)
+);
 
+// doctorRoutes.get("/google", authCtrl.googleLoginRedirect);
+// doctorRoutes.get("/google/callback", authCtrl.googleCallback);
 
-// doctorRoutes.get("/google", authCtrl.googleLoginRedirect); 
-// doctorRoutes.get("/google/callback", authCtrl.googleCallback); 
-
-doctorRoutes.post("/stripe/create-checkout-session", profileCtrl.createCheckoutSession); 
-doctorRoutes.post("/verifySubscription",(req,res)=> profileCtrl.verifyingSubscription(req,res)); 
-
+doctorRoutes.post(
+  "/stripe/create-checkout-session",
+  profileCtrl.createCheckoutSession
+);
+doctorRoutes.post("/verifySubscription", (req, res) =>
+  profileCtrl.verifyingSubscription(req, res)
+);
 
 // doctorRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
 
-
-
-
-
-
-
-export default doctorRoutes; 
+export default doctorRoutes;

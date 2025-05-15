@@ -79,10 +79,8 @@ function AdminLogin() {
       console.log("Admin login success:", response);
 
       dispatch(logoutAdmin());
-      dispatch(
-        login({
-          admin: response.admin,
-          accessToken: response.accessToken,
+      dispatch(login({
+          admin: response.admin
         })
       );
 

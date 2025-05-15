@@ -112,6 +112,41 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           .status(500)
           .json({ msg: error.message || "Internal server error" });
       }
-    }
+    };
+
+
+      async refreshToken(req: Request, res: Response): Promise<any> {
+        try {
+          const { doctorRefreshToken } = req.cookies;
+    
+          if (!doctorRefreshToken) {
+            return res.status(403).json({ msg: "refresh token not found" });
+          }
+    
+          const result = await this._doctorService.refreshToken(doctorRefreshToken);
+    
+          console.log("result from ctrl is ...", result);
+    
+          if (!result) {
+            return res.status(401).json({ msg: "Refresh token expired" });
+          }
+    
+          const {accessToken} = result
+    
+          console.log("result from ctrl is afrt destructr...", accessToken);
+    
+          res.cookie("doctorAccessToken", accessToken, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: false, 
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+          });
+    
+          return res.status(200).json(result);
+        } catch (error) {
+          console.log(error);
+          return res.status(500).json({ msg: "internal server error" });
+        }
+      };
 
 }

@@ -5,7 +5,7 @@ const subscriptionSchema: Schema<ISubscriptionDocument> = new Schema({
   sessionId:{ type: String, required: true },
   stripeSubscriptionId: { type: String, required: true },
   stripeCustomerId: { type: String, required: true },
-  stripeInvoiceId: { type: String },
+  stripeInvoiceId: { type: String }, 
   stripeInvoiceUrl: { type: String },
   subscriptionStatus: {
     type: String,

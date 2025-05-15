@@ -70,5 +70,24 @@ export default class DoctorProfileService implements IDoctorProfileService {
     
 
 
+    async updateDoctorDp(userId: string, updatedFields: any, fileKey: string | undefined): Promise<any> {
+      try {
+        const updatePayload = {
+          ...updatedFields,
+          ...(fileKey && { profile: fileKey }),
+        };
+    
+        const updatedUser = await this._doctorRepository.update(userId, updatePayload);
+
+        if(updatedUser){
+          updatedUser.profile = await getSignedImageURL(updatedUser.profile)
+        }
+        
+        return updatedUser;
+      } catch (error: any) {
+        console.error("Service error:", error);
+        throw new Error("Failed to update profile");
+      }
+    };
 
 }

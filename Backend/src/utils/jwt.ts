@@ -23,7 +23,7 @@ export const generateRefreshToken = (data: { id: string; role: "user" | "admin" 
     return jwt.sign(
         { id: data.id, role: data.role },  
         REFRESH_TOKEN_SECRET,
-        { expiresIn: '2m' }
+        { expiresIn: '1d' }
     );
 };
 

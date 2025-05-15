@@ -13,6 +13,7 @@ import DoctorMain from "../../pages/doctorPages/DoctorMain";
 import Dashboard from "../../components/doctorComponents/DoctorDashboard";
 import PaymentSuccess from "../../components/doctorComponents/DoctorPaymentSuccess";
 import DoctorAppointments from "../../components/doctorComponents/DoctorAppointments";
+import DoctorProfile from "../../components/doctorComponents/DoctorProfile";
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
 // import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
@@ -35,13 +36,14 @@ const DoctorRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<DoctorMain />}>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile" element={<DoctorProfile />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
           <Route path="manageAppointments" element={<DoctorAppointments />} />
         </Route>
       </Route>
 
       {/* Catch All */}
-      <Route path="*" element={<Navigate to="/doctor" />} />
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   );
 };

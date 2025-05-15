@@ -20,6 +20,7 @@ const UserRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route element={<PublicRoute />}>
+        <Route path="/" element={<UserLogin />} />
         <Route path="/login" element={<UserLogin />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/forgetPassword" element={<UserForgetPassword />} />
@@ -39,7 +40,7 @@ const UserRoutes = () => {
       </Route>
 
       {/* Catch All */}
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   );
 };

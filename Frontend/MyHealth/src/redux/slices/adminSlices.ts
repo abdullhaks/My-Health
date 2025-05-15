@@ -2,12 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
     admin: any;
-    accessToken: string | null;
   }
   
   const initialState: AuthState = {
     admin: null,
-    accessToken: null,
   };
 
 
@@ -15,13 +13,11 @@ interface AuthState {
     name: 'admin',
     initialState,
     reducers: {
-      loginAdmin: (state, action: PayloadAction<{ admin: any; accessToken: string }>) => {
+      loginAdmin: (state, action: PayloadAction<{ admin: any;}>) => {
         state.admin = action.payload.admin;
-        state.accessToken = action.payload.accessToken;
       },
       logoutAdmin: (state) => {
         state.admin = null;
-        state.accessToken = null;
       },
       updateAdmin(state, action: PayloadAction<any>) {
         state.admin = { ...state.admin, ...action.payload };

@@ -6,17 +6,40 @@ export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {
 
     if (req.path.includes("/refreshToken")) return next();
     
-    const {userAccessToken} = req.cookies;
-    console.log("token is..... ",userAccessToken);
 
+    let token;
+    if(role==="user"){
+      const {userAccessToken} = req.cookies;
+    console.log("token is..... ",userAccessToken);
+    token=userAccessToken;
     if (!userAccessToken) {
       return res.status(401).json({ msg: "Access token missing" });
     }
+    }
+
+    if(role==="admin"){
+      const {adminAccessToken} = req.cookies;
+    console.log("token is..... ",adminAccessToken);
+    token=adminAccessToken;
+    if (!adminAccessToken) {
+      return res.status(401).json({ msg: "Access token missing" });
+    }
+    }
+
+    if(role==="doctor"){
+      const {doctorAccessToken} = req.cookies;
+    console.log("token is..... ",doctorAccessToken);
+    token=doctorAccessToken;
+    if (!doctorAccessToken) {
+      return res.status(401).json({ msg: "Access token missing" });
+    }
+    }
+    
 
    
 
     try {
-      const decoded = verifyAccessToken(userAccessToken);
+      const decoded = verifyAccessToken(token);
 
     console.log("decoded is..... ",decoded);
 

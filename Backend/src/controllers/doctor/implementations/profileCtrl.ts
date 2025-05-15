@@ -72,6 +72,32 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
           return res.status(500).json({ message: "Subscription verification failed" });
         }
 
-      }
+      };
+
+
+
+      async updateDp (req:Request,res:Response):Promise<any> {
+
+        try{
+            const { id } = req.params;
+            const updatedFields = req.body;
+            const uploadedImageKey = req.body.uploadedImageKey
+
+            console.log("Doctor ID IS ",req.params,id);
+            console.log("updatedField is ",updatedFields);
+            console.log("uploadedImageKey is ",uploadedImageKey);
+
+            const updatedDoctor = await this._doctorService.updateDoctorDp(id, updatedFields, uploadedImageKey);
+
+            res.status(200).json({updatedDoctor});
+
+    
+        }catch(error){
+            console.log(error);
+            res.status(500).json({ msg: "internal server error" });
+        }
+    
+
+    };
 
 }

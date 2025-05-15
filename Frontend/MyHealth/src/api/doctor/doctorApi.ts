@@ -121,3 +121,57 @@ try{
     throw error;
 }
 }
+
+
+export const changePassword = async (data:any ,userId:string)=>{
+  console.log("new password....",data,userId);
+
+  try{
+    const response = await doctorInstance.patch(`/doctor/changePassword/${userId}`,{
+      data
+    });
+
+    console.log("resop......",response);
+    return response != null;
+    
+  }catch(error){
+    console.error("Error in change password :", error);
+    throw error;
+  }
+}
+
+
+export const updateDoctorProfile = async (userData: any,userId:string) => {
+  try {
+
+    console.log("User data for update:", userData);
+    
+    const response = await doctorInstance.patch(`/doctor/updateProfile/${userId}`, userData, {
+    
+    });
+    return response.data;
+  }
+  catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+};
+
+export const updateProfileImage = async(formData:any, userId:string) =>{
+
+  try{
+  console.log("doctor dp changin api is working......")
+    const response = await doctorInstance.patch(`/doctor/updateDp/${userId}`,formData,{
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+    console.log("response from api is ", response)
+    return response.data;
+
+  }catch(error){
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+  
+};

@@ -53,6 +53,7 @@ export default class AdminAuthService implements IAdminAuthService {
           throw new Error("Invalid credentials");
         }
       
+        
        
       
         const accessToken = generateAccessToken({ id: admin._id.toString(), role: "admin" });
@@ -60,16 +61,23 @@ export default class AdminAuthService implements IAdminAuthService {
       
         res.cookie("adminRefreshToken", refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          secure: false,
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
+
+        res.cookie("adminAccessToken", accessToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false, 
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        }); 
       
         const { password, ...userWithoutPassword } = admin.toObject();
       
         return {
           message: "Login successful",
           admin: userWithoutPassword,
-          accessToken
         };
       }
       
