@@ -90,4 +90,35 @@ export default class DoctorProfileService implements IDoctorProfileService {
       }
     };
 
+
+ async updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<any> {
+        
+        console.log("user data is ",userData);
+        console.log("user id from service ",userId);
+
+        try {
+            const updatedUser = await this._doctorRepository.update(userId, userData);
+            console.log("Updated user: ", updatedUser);
+
+            if(updatedUser){
+                const { password, ...userWithoutPassword } = updatedUser.toObject();
+      
+                if(userWithoutPassword.profile){
+                  userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+                }
+            return {
+            message: "updated successful",
+            updatedDoctor: userWithoutPassword,
+            };
+           
+            }
+
+            
+        } catch (error) {
+            console.error("Error updating user profile:", error);
+            throw new Error("Failed to update user profile");
+        }
+    };
+
+
 }

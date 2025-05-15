@@ -44,7 +44,7 @@ doctorRoutes.get("/resentOtp", (req, res) => authCtrl.resentOtp(req, res));
 
 // doctorRoutes.patch("/changePassword/:id",(req,res)=>profileCtrl.changePassword(req,res))
 
-// doctorRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("doctor"),( req,res)=>profileCtrl.updateProfile(req,res));
+doctorRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("doctor"),( req,res)=>profileCtrl.updateProfile(req,res));
 
 doctorRoutes.patch(
   "/updateDp/:id",

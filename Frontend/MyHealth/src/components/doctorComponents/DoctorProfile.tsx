@@ -9,6 +9,14 @@ import { updateDoctor } from "../../redux/slices/doctorSlices";
 
 const DoctorProfile = () => {
   const doctor = useSelector((state: any) => state.doctor.doctor);
+
+  const initial:any = {fullName:doctor.fullName,
+                    location:doctor.location,
+                    dob:doctor.dob,
+                    phone:doctor.phone,
+                    gender:doctor.gender,
+                    experience:doctor.experience};;
+                    
   const dispatch = useDispatch();
 
   const [profileData, setProfileData] = useState(doctor);
@@ -135,7 +143,7 @@ const DoctorProfile = () => {
           <div className="self-start mt-4 md:mt-0">
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded hover:bg-gray-100"
+              className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded hover:bg-gray-100 cursor-pointer"
             >
               <FiEdit />
               Edit
@@ -193,7 +201,7 @@ const DoctorProfile = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500">Medical Reg. No</p>
-            <p>{profileData.registrationNumber || "Not provided"}</p>
+            <p>{profileData.registerNo || "Not provided"}</p>
           </div>
         </div>
 
@@ -219,7 +227,7 @@ const DoctorProfile = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleProfileUpdate}
-        initialData={profileData}
+        initialData={initial}
       />
 
       {/* Change Password Modal */}

@@ -100,4 +100,27 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
     };
 
+
+       async updateProfile(req: Request, res: Response): Promise<any> {
+        try {
+           console.log("user data is ",req.body);
+           console.log("user id is ",req.params.id);
+
+            const userData = req.body;
+            const dobStr = new Date(userData.dob).toLocaleDateString();
+
+            const [month, day, year] = dobStr.split("/");
+            userData.dob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+            const userId = req.params.id;
+            const result = await this._doctorService.updateProfile(userId,userData);
+
+            return res.status(200).json(result);
+        }catch (error) {
+            console.log(error);
+            res.status(500).json({ msg: "internal server error" });
+        }
+
+    };
+
 }

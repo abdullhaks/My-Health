@@ -43,7 +43,7 @@ const DoctorRoutes = () => {
       </Route>
 
       {/* Catch All */}
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="*" element={<Navigate to="/doctor/login" />} />
     </Routes>
   );
 };

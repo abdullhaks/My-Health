@@ -35,7 +35,7 @@ const UserRoutes = () => {
       </Route>
 
       {/* Catch All */}
-      <Route path="*" element={<Navigate to="/admin" />} />
+      <Route path="*" element={<Navigate to="/admin/login" />} />
     </Routes>
   );
 };
