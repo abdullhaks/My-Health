@@ -29,6 +29,8 @@
     "recharts": "^2.15.3",
     "redux-persist": "^6.0.0",
     "rrule": "^2.8.1",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

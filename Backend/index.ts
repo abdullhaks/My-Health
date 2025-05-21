@@ -1,4 +1,7 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import { setupSocket } from './src/middlewares/common/socket';
 import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
 import userRoutes from './src/routes/user/userRoutes';
@@ -10,6 +13,7 @@ import doctorRoutes from './src/routes/doctor/doctorRoutes';
 // import { stripeWebhookController } from './src/controllers/common/implementations/paymentCtrl';
 import IPaymentCtrl from './src/controllers/common/interfaces/IPaymentCtrl';
 import container from './src/config/inversify';
+import { errorHandler } from './src/middlewares/common/errorMiddleware';
 
 
 const paymentCtrl = container.get<IPaymentCtrl>("IPaymentCtrl")
@@ -19,6 +23,15 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+const server = http.createServer(app); // 👈 Create server
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+    credentials: true
+  }
+});
+setupSocket(io, container); // 👈 Pass to setup
 
 
 app.use(cors({
@@ -51,9 +64,12 @@ app.use("/api/admin",adminRoutes);
 app.use("/api/doctor",doctorRoutes);
 
 
+// Error handling middleware should be added after all other middleware and routes
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    errorHandler(err, req, res, next);
+});
 
-
-app.listen(port,()=>{
+server.listen(port,()=>{
     console.log(`MyHealth is running on port 3000 http://localhost:${port}`);
 });
 

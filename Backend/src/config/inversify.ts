@@ -4,6 +4,8 @@ import OtpModel from "../models/otpModel";
 import adminModel from "../models/adminModel";
 import doctorModel from "../models/doctorModel";
 import subscriptionModel from "../models/subscriptionModel";
+import conversationModel from "../models/subscriptionModel";
+import messageModel from "../models/messageModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -28,8 +30,13 @@ import DoctorProfileController from "../controllers/doctor/implementations/profi
 import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
 
 
+
 import PaymentController from "../controllers/common/implementations/paymentCtrl"
 import IPaymentCtrl from "../controllers/common/interfaces/IPaymentCtrl";
+import ConversationController from "../controllers/common/implementations/conversationCtrl";
+import IConversationCtrl from "../controllers/common/interfaces/IConversationCtrl";
+import MessageController from "../controllers/common/implementations/messageCtrl";
+import IMessageCtrl from "../controllers/common/interfaces/IMessageCtrl";
 
 //.................................................................................
 
@@ -57,6 +64,10 @@ import DoctorProfileService from "../services/doctor/implementations/doctorProfi
 
 import PaymentService from "../services/common/implementations/paymentService";
 import IPaymentService from "../services/common/interfaces/IPaymentService";
+import ConversationService from "../services/common/implementations/conversationService";
+import IConversationService from "../services/common/interfaces/IConversationService";
+import MessageService from "../services/common/implementations/messageService";
+import IMessageService from "../services/common/interfaces/IMessageService";
 
 //.................................................................................
 
@@ -76,6 +87,12 @@ import IPaymentRepository from "../repositories/interfaces/IPaymentRepository";
 import AppointmentRepository from "../repositories/implementations/appointmentRepository";
 import IAppointmentRepository from "../repositories/interfaces/IAppointmentRepository";
 
+import ConversationRepository from "../repositories/implementations/conversationRepository";
+import IConversationRepository from "../repositories/interfaces/IConversationRepository";
+
+import MessageRepository from "../repositories/implementations/messageRepository";
+import IMessageRepository from "../repositories/interfaces/IMessageRepository";
+
 //.................................................................................
 
 
@@ -86,6 +103,8 @@ container.bind("otpModel").toConstantValue(OtpModel);
 container.bind("adminModel").toConstantValue(adminModel);
 container.bind("doctorModel").toConstantValue(doctorModel);
 container.bind("subscriptionModel").toConstantValue(subscriptionModel);
+container.bind("conversationModel").toConstantValue(conversationModel);
+container.bind("messageModel").toConstantValue(messageModel);
 
 //...................................................................
 
@@ -102,7 +121,9 @@ container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 
 
-container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController)
+container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
+container.bind<IConversationCtrl>("IConversationCtrl").to(ConversationController)
+container.bind<IMessageCtrl>("IMessageCtrl").to(MessageController)
 
 
 
@@ -123,6 +144,9 @@ container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService)
 container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService)
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
+container.bind<IConversationService>("IConversationService").to(ConversationService);
+container.bind<IMessageService>("IMessageService").to(MessageService);
+
 
 //..............................................................................
 
@@ -132,7 +156,9 @@ container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);
 container.bind<IDoctorRepository>("IDoctorRepository").to(DoctorRepository)
 container.bind<IPaymentRepository>("IPaymentRepository").to(PaymentRepository);
-container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository)
+container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository);
+container.bind<IConversationRepository>("IConversationRepository").to(ConversationRepository);
+container.bind<IMessageRepository>("IMessageRepository").to(MessageRepository);
 
 
 export default container;

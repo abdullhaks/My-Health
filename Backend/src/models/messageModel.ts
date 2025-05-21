@@ -1,0 +1,13 @@
+import mongoose, { Schema, Document } from 'mongoose';
+import { IMessageDocument } from '../entities/messageEntities';
+
+
+const MessageSchema = new Schema<IMessageDocument>({
+  conversationId: { type: String, required: true },
+  senderId: { type: String, required: true },
+  content: { type: String, required: true },
+  timestamp: { type: String, default: () => new Date().toISOString() },
+  readBy: { type: [String], default: [] },
+});
+
+export default mongoose.model<IMessageDocument>('Message', MessageSchema);

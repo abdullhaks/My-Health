@@ -175,3 +175,35 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
   }
   
 };
+
+export const getDoctorConversations = async (doctorId: string) => {
+  try {
+    const response = await doctorInstance.get(`/doctor/conversation/${doctorId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
+    throw error;
+  }
+};
+
+
+export const getDoctorMessages = async (conversationId: string) => {
+  try {
+    const response = await doctorInstance.get(`/doctor/message/${conversationId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    throw error;
+  }
+};
+
+
+export const sendDoctorMessage = async (messageData: any) => {
+  try {
+    const response = await doctorInstance.post('/doctor/message', messageData);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending message:", error);
+    throw error;
+  }
+};

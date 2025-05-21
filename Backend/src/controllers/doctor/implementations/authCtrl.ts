@@ -1,7 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response ,NextFunction } from "express";
 import IDoctorAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorAuthService from "../../../services/doctor/interfaces/IDoctorAuthServices";
+import { createError } from "../../../middlewares/common/errorMiddleware";
 
 
 
@@ -14,7 +15,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
     this._doctorService = DoctorAuthService;
   }
 
-  async doctorLogin(req: Request, res:Response): Promise<any> {
+  async doctorLogin(req: Request, res:Response ,next:NextFunction): Promise<any> {
     try {
       const { email, password } = req.body;
 
@@ -23,17 +24,20 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       console.log("result is ", result);
 
       if (!result) {
-        return res.status(401).json({ msg: "Envalid credentials" });
+        throw createError(400, 'Envalid credentials', 'INVALID_DATA');
+        // return res.status(401).json({ msg: "Envalid credentials" });
       }
       return res.status(200).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "Envalid credentials" });
+      throw createError(500, 'Envalid credentials', 'INVALID_DATA');
+      next(error);
+      // return res.status(500).json({ msg: "Envalid credentials" });
     }
   };
 
 
-  async doctorSignup(req: Request,res: Response,): Promise<any> {
+  async doctorSignup(req: Request,res: Response,next:NextFunction): Promise<any> {
     try {
 
       const { fullName, email, password, graduation, category, registerNo, } = req.body;
@@ -83,7 +87,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   };
 
 
-  async verifyOtp(req: Request, res: Response): Promise<any> {
+  async verifyOtp(req: Request, res: Response ,next:NextFunction): Promise<any> {
       try {
         const { otp, email } = req.body;
   
@@ -97,7 +101,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       }
     }
   
-    async resentOtp(req: Request, res: Response): Promise<any> {
+    async resentOtp(req: Request, res: Response,next:NextFunction): Promise<any> {
       try {
         const { email } = req.query;
         if (!email || typeof email !== "string") {
@@ -115,7 +119,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
     };
 
 
-      async refreshToken(req: Request, res: Response): Promise<any> {
+      async refreshToken(req: Request, res: Response,next:NextFunction): Promise<any> {
         try {
           const { doctorRefreshToken } = req.cookies;
     
