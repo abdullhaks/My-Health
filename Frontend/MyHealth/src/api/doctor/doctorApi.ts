@@ -200,6 +200,9 @@ export const getDoctorMessages = async (conversationId: string) => {
 
 export const sendDoctorMessage = async (messageData: any) => {
   try {
+
+    console.log("massage data in api ...",messageData);
+    
     const response = await doctorInstance.post('/doctor/message', messageData);
     return response.data;
   } catch (error) {

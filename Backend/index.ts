@@ -24,14 +24,14 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const server = http.createServer(app); // 👈 Create server
+const server = http.createServer(app); 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URL as string || 'http://localhost:5173',
     credentials: true
   }
 });
-setupSocket(io, container); // 👈 Pass to setup
+setupSocket(io, container); 
 
 
 app.use(cors({

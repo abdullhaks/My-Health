@@ -38,7 +38,7 @@ doctorRoutes.post("/verifyOtp", (req, res,next) => authCtrl.verifyOtp(req, res,n
 
 doctorRoutes.get("/resentOtp", (req, res,next) => authCtrl.resentOtp(req, res,next));
 
-doctorRoutes.patch("/updateProfile/:id",( req,res)=>profileCtrl.updateProfile(req,res));
+doctorRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("doctor"),( req,res)=>profileCtrl.updateProfile(req,res));
 
 doctorRoutes.patch(
   "/updateDp/:id",
@@ -61,18 +61,32 @@ doctorRoutes.post("/verifySubscription", (req, res) =>
 
 // doctorRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
 
-
-doctorRoutes.get('/doctor/conversation/:doctorId', (req,res)=>
-conversationCtrl.getConversations(req,res)
+doctorRoutes.post(
+  "/conversation",
+  verifyAccessTokenMidleware("doctor"),
+  (req, res) => conversationCtrl.createConversation(req, res)
 );
 
-doctorRoutes.get('/doctor/message/:conversationId',(req,res)=>
-messageCtrl.getMessages(req,res)
+
+doctorRoutes.get(
+  "/conversation/:doctorId",
+  verifyAccessTokenMidleware("doctor"),
+  (req, res) => conversationCtrl.getConversations(req, res)
 );
 
-doctorRoutes.post('/doctor/message',(req,res)=>
-messageCtrl.sendMessage(req,res)
-)
+doctorRoutes.get(
+  "/message/:conversationId",
+  verifyAccessTokenMidleware("doctor"),
+  (req, res) => messageCtrl.getMessages(req, res)
+);
+
+doctorRoutes.post(
+  "/message",
+  verifyAccessTokenMidleware("doctor"),
+  // uploadMiddleware.single("file"),
+  // uploadToS3("chat-files", true),
+  (req, res) => messageCtrl.sendMessage(req, res)
+);
 
 export default doctorRoutes;
 

@@ -8,6 +8,7 @@ const MessageSchema = new Schema<IMessageDocument>({
   content: { type: String, required: true },
   timestamp: { type: String, default: () => new Date().toISOString() },
   readBy: { type: [String], default: [] },
+  status:{type:String , dafault:"sending"}
 });
 
 export default mongoose.model<IMessageDocument>('Message', MessageSchema);

@@ -8,27 +8,47 @@ export default class MessageRepository
   extends BaseRepository<IMessageDocument>
   implements IMessageRepository
 {
-  constructor(@inject("messageModel") private _messageModel: any) {
+  constructor(
+    @inject("messageModel") private _messageModel: any,
+    @inject("conversationModel") private _conversationModel: any
+  )
+               {
     super(_messageModel);
   }
 
 async createMessage(data: Partial<IMessageDocument>): Promise<IMessageDocument> {
-  return await this._messageModel.create({
-    ...data,
-    timestamp: data.timestamp || new Date().toISOString(),
-  });
-}
+
+  // (!data.content && !data.fileUrl) if documents in chat.....
+    if (!data.conversationId || !data.senderId || !data.content  ) {
+      throw new Error("Conversation ID, sender ID, and content are required");
+    }
+    const message = await this._messageModel.create({
+      ...data,
+      timestamp: data.timestamp || new Date().toISOString(),
+      status: data.status || "sent",
+    });
+    await this._conversationModel.findByIdAndUpdate(data.conversationId, {
+      $set: { updatedAt: new Date() },
+    });
+    return message;
+  }
 
   async getMessagesByConversation(conversationId: string): Promise<IMessageDocument[]> {
-    return await this._messageModel.find({ conversationId }).sort({ createdAt: 1 });
+    if (!conversationId) {
+      throw new Error("Conversation ID is required");
+    }
+    return await this._messageModel.find({ conversationId }).sort({ timestamp: 1 });
   }
 
   async markMessagesAsSeen(conversationId: string, userId: string): Promise<void> {
-  await this._messageModel.updateMany(
-    { conversationId, senderId: { $ne: userId }, readBy: { $ne: userId } },
-    { $push: { readBy: userId } }
-  );
-}
+    if (!conversationId || !userId) {
+      throw new Error("Conversation ID and user ID are required");
+    }
+    await this._messageModel.updateMany(
+      { conversationId, senderId: { $ne: userId }, readBy: { $ne: userId } },
+      { $addToSet: { readBy: userId }, $set: { status: "read" } }
+    );
+  }
 
 
 }

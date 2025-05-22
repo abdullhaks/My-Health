@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IDoctorAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorAuthService from "../../../services/doctor/interfaces/IDoctorAuthServices";
@@ -148,5 +148,19 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           return res.status(500).json({ msg: "internal server error" });
         }
       };
+
+
+      async getRefreshToken(req:Request , res:Response , next:NextFunction):Promise<any>{
+
+        try{
+        const doctorRefreshToken = req.cookies.doctorRefreshToken
+        return res.status(200).json(doctorRefreshToken);
+
+        }catch(error){
+          console.log(error);
+          return res.status(500).json({ msg: "internal server error" });
+        }
+
+      }
 
 }

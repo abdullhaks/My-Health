@@ -7,4 +7,5 @@ export interface IMessageDocument extends Document {
   content: string;
   timestamp: string
   readBy: [string];
+  status:string;
 }

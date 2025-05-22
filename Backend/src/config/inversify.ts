@@ -4,7 +4,7 @@ import OtpModel from "../models/otpModel";
 import adminModel from "../models/adminModel";
 import doctorModel from "../models/doctorModel";
 import subscriptionModel from "../models/subscriptionModel";
-import conversationModel from "../models/subscriptionModel";
+import conversationModel from "../models/conversationModel";
 import messageModel from "../models/messageModel";
 
 //controllers..................................................................

@@ -30,6 +30,7 @@ export const generateRefreshToken = (data: { id: string; role: "user" | "admin" 
 export const verifyRefreshToken = (token: string): JwtPayload | null => {
     try {
         const decoded=jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtPayload; 
+
         return decoded;
     } catch {
         return null;
@@ -39,7 +40,11 @@ export const verifyRefreshToken = (token: string): JwtPayload | null => {
 
 export const verifyAccessToken = (token: string): JwtPayload | null => {
     try {
-        return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtPayload; 
+        console.log("token is...sforfksdjflds",token)
+        const decoded= jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtPayload; 
+        console.log("decoded is...sforfksdjflds",decoded)
+        return decoded;
+
     } catch {
         return null;
     }
