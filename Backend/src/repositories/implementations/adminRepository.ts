@@ -61,7 +61,7 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
     };
 
 
-    async getDoctors(page: number, search: string | undefined, limit: number): Promise<any> {
+    async getDoctors(page: number, search: string | undefined, limit: number,onlyPremium:boolean): Promise<any> {
         try {
             const query: any = {};
 
@@ -70,6 +70,10 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
                     { fullName: { $regex: search, $options: "i" } },
                     { email: { $regex: search, $options: "i" } }
                 ];
+            }
+
+            if (onlyPremium) {
+                query.premiumMembership = true;
             }
 
             const skip = (page - 1) * limit;
@@ -151,17 +155,17 @@ export default class AdminRepository extends BaseRepository<IAdminDocument> impl
     };
 
 
-    async declineDoctor(id:string):Promise<any>{
+    async declineDoctor(id:string,reason:string):Promise<any>{
         try{
 
-            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:3});
+            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:3,rejectionReason:reason});
             console.log("doctor declining....",resp);
             
             return resp;
 
         }catch(error){
             console.log(error);
-            throw new Error ("doctor declining has been failed")
+            throw new Error ("doctor declining has been failed") 
         }
     };
 

@@ -20,13 +20,15 @@ const AdminDoctors = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [onlyPremium, setOnlyPremium] = useState(false);
+
 
   const limit = 5;
 
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await getDoctors( search, page, limit );
+      const response = await getDoctors( search, page, limit ,onlyPremium);
       setDoctors(response.doctors);
       setTotalPages(response.totalPages);
     } catch (error) {
@@ -82,12 +84,24 @@ const AdminDoctors = () => {
           placeholder="Search by name or email"
           className="border border-gray-300 p-2 rounded-l-md w-full max-w-md focus:outline-none focus:ring-2 focus:ring-green-500"
         />
+
+       
         <button
           type="submit"
           className="bg-green-600 text-white p-2 rounded-r-md hover:bg-green-700"
         >
           <FaSearch />
         </button>
+
+      <label className="ml-4 flex items-center text-sm">
+      <input
+        type="checkbox"
+        checked={onlyPremium}
+        onChange={(e) => setOnlyPremium(e.target.checked)}
+        className="mr-2"
+      />
+      Show only premium doctors
+    </label>
       </form>
 
       {loading ? (

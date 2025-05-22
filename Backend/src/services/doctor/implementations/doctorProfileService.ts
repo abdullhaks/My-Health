@@ -97,7 +97,7 @@ export default class DoctorProfileService implements IDoctorProfileService {
         console.log("user id from service ",userId);
 
         try {
-            const updatedUser = await this._doctorRepository.update(userId, userData);
+            const updatedUser = await this._doctorRepository.update(userId.toString(), userData);
             console.log("Updated user: ", updatedUser);
 
             if(updatedUser){

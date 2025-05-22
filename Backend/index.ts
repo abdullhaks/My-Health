@@ -64,7 +64,7 @@ app.use("/api/admin",adminRoutes);
 app.use("/api/doctor",doctorRoutes);
 
 
-// Error handling middleware should be added after all other middleware and routes
+// Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     errorHandler(err, req, res, next);
 });

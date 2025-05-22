@@ -97,11 +97,11 @@ export const getUsers = async (search: string, page: number, limit: number) => {
     }
 };
 
-export const getDoctors= async(search:string,page:number , limit:number)=>{
+export const getDoctors= async(search:string,page:number , limit:number ,onlyPremium:boolean)=>{
     try{
 
         const response = await adminInstance.get("/admin/doctors" ,{
-            params:{search,page,limit}
+            params:{search,page,limit,onlyPremium} 
         })
 
         console.log("doctors response from api..",response);
@@ -166,9 +166,9 @@ export const verifyDoctor = async (id: string) => {
     }
 };
 
-export const declineDoctor = async (id: string) => {
+export const declineDoctor = async (id: string, reason: string ) => {
     try {
-        const response = await adminInstance.patch(`/admin/doctor/${id}/decline`);
+        const response = await adminInstance.patch(`/admin/doctor/${id}/decline`,{reason});
         return response.data;
     } catch (error) {
         console.log("error in verify doctor");

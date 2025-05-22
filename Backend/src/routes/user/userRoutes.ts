@@ -45,7 +45,7 @@ userRoutes.get("/google/callback", authCtrl.googleCallback);
 
 userRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
 
-userRoutes.get("/doctors", (req,res)=>appointmentCtrl.fetchingDoctors(req,res));
+userRoutes.get("/doctors",verifyAccessTokenMidleware("user"), (req,res)=>appointmentCtrl.fetchingDoctors(req,res));
 
 
 

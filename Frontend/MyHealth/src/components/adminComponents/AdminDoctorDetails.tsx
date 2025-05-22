@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FaCheckCircle, FaTimesCircle, FaLock, FaUnlock } from "react-icons/fa";
-import { doctorDetails } from "../../api/admin/adminApi";
-import { verifyDoctor } from "../../api/admin/adminApi";
-import { declineDoctor } from "../../api/admin/adminApi";
-import { Popconfirm } from "antd";
-
+import { doctorDetails, verifyDoctor, declineDoctor } from "../../api/admin/adminApi";
+import { Popconfirm, Input } from "antd";
+import toast from "react-hot-toast";
 
 interface DoctorDetails {
   _id: string;
@@ -13,7 +11,7 @@ interface DoctorDetails {
   email: string;
   isBlocked: boolean;
   isVerified: boolean;
-  profile:string;
+  profile: string;
   adminVerified: number;
   graduation: string;
   graduationCertificate: string;
@@ -29,43 +27,46 @@ const AdminDoctorDetails = () => {
   const { id } = useParams();
   const [doctor, setDoctor] = useState<DoctorDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rejectReason, setRejectReason] = useState(""); // State for rejection reason
 
-  const handleVerify = async (id:string) => {
-    console.log(id);
-    
+  const handleVerify = async (id: string) => {
     try {
-      await verifyDoctor(id)
-      setDoctor(prev => prev ? { ...prev, adminVerified: 1 } : prev);
+      await verifyDoctor(id);
+      setDoctor(prev => (prev ? { ...prev, adminVerified: 1 } : prev));
+      toast.success("Doctor verified successfully");
     } catch (err) {
       console.error("Verification failed:", err);
+      toast.error("Failed to verify doctor");
     }
   };
-  
-  const handleDecline = async (id:string) => {
 
-    console.log(id);
-    
+  const handleDecline = async (id: string) => {
+    if (!rejectReason.trim()) {
+      toast.error("Please provide a reason for rejection");
+      return;
+    }
     try {
-      await declineDoctor(id);
-      setDoctor(prev => prev ? { ...prev, adminVerified: 2 } : prev);
+      await declineDoctor(id, rejectReason );
+      setDoctor(prev => (prev ? { ...prev, adminVerified: 2 } : prev));
+      toast.success("Doctor declined successfully");
+      setRejectReason(""); // Clear the input
     } catch (err) {
       console.error("Decline failed:", err);
+      toast.error("Failed to decline doctor");
     }
   };
- 
-  
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
-        if(id){
-        const res = await doctorDetails(id);
-
-        console.log("res from friend end....",res);
-        setDoctor(res);
+        if (id) {
+          const res = await doctorDetails(id);
+          console.log("Response from frontend:", res);
+          setDoctor(res);
         }
       } catch (err) {
         console.error("Failed to load doctor:", err);
+        toast.error("Failed to load doctor details");
       } finally {
         setLoading(false);
       }
@@ -82,8 +83,12 @@ const AdminDoctorDetails = () => {
       <div className="flex flex-col md:flex-row items-start gap-6">
         {/* Profile Section */}
         <div className="w-full md:w-1/3 flex justify-center">
-          <div className="w-40 h-40  bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
-          <img src={doctor.profile?doctor.profile :"https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"} alt="User profile" className="w-full h-full object-cover" />
+          <div className="w-40 h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
+            <img
+              src={doctor.profile ? doctor.profile : "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
+              alt="User profile"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
@@ -151,57 +156,58 @@ const AdminDoctorDetails = () => {
             >
               View Verification ID
             </a>
-
-
-
           </div>
 
           {doctor.adminVerified === 0 ? (
             <div className="flex flex-col sm:flex-row gap-8 mt-2">
+              <Popconfirm
+                title="Decline Doctor"
+                description={
+                  <div>
+                    <p>Please provide a reason for rejection:</p>
+                    <Input
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="Enter rejection reason"
+                      className="mt-2"
+                    />
+                  </div>
+                }
+                onConfirm={() => handleDecline(doctor._id)}
+                onCancel={() => setRejectReason("")} // Clear input on cancel
+                okText="Submit"
+                cancelText="Cancel"
+              >
+                <button
+                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                >
+                  Decline
+                </button>
+              </Popconfirm>
 
               <Popconfirm
-                                      title="Decline Doctor"
-                                      description ={`Are you sure to Decline this Doctor?`}
-                                      onConfirm={() => handleDecline(doctor._id)}
-                                      // onCancel={cancel}
-                                      okText="Yes"
-                                      cancelText="No"
-                                    >
-              
-            <button
-                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-            >
-                Decline
-            </button>
-
-            </Popconfirm>
-
-            <Popconfirm
                 title="Verify Doctor"
-                description ={`Are you sure to Verify this Doctor?`}
+                description="Are you sure to verify this doctor?"
                 onConfirm={() => handleVerify(doctor._id)}
-                // onCancel={cancel}
                 okText="Yes"
                 cancelText="No"
               >
-
-            <button
-                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-            >
-                Verify
-            </button>
-            </Popconfirm>
-            
+                <button
+                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Verify
+                </button>
+              </Popconfirm>
             </div>
-        ) : doctor.adminVerified === 1 ? (
+          ) : doctor.adminVerified === 1 ? (
             <span className="text-green-600 font-semibold flex items-center">
-            <FaCheckCircle className="mr-1" /> Verified
+              <FaCheckCircle className="mr-1" /> Verified
             </span>
-        ) : (
+          ) : (
             <span className="text-red-600 font-semibold flex items-center">
-            <FaTimesCircle className="mr-1" /> Rejected
+              <FaTimesCircle className="mr-1" /> Rejected
             </span>
-        )}
+          )}
         </div>
       </div>
     </div>

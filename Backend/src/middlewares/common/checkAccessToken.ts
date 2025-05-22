@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../../utils/jwt";
+import userModel from "../../models/userModel";
 
 export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {
-  return (req: Request, res: Response, next: NextFunction): void | any => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void | any> => {
 
     if (req.path.includes("/refreshToken")) return next();
     
@@ -52,6 +53,22 @@ export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {
 
       }
 
+  if(role==="user"){
+
+       const user = await userModel.findById(decoded.id).select('isBlocked');
+    if (!user) {
+      return res.status(404).json({ success: false, error: { message: 'User not found' } });
+    }
+
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        error: { message: 'User is blocked. Please contact support.' }
+      });
+    }
+
+  }
+
       next();
     } catch (err) {
       console.error("Access token error:", err);
@@ -61,5 +78,5 @@ export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {
   };
 }
 
-// 👇 This line solves your TS error
+
 export { verifyAccessToken };

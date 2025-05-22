@@ -107,10 +107,14 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
            console.log("user id is ",req.params.id);
 
             const userData = req.body;
+
+            if(userData.dob){
             const dobStr = new Date(userData.dob).toLocaleDateString();
 
             const [month, day, year] = dobStr.split("/");
             userData.dob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+            }
+           
 
             const userId = req.params.id;
             const result = await this._doctorService.updateProfile(userId,userData);

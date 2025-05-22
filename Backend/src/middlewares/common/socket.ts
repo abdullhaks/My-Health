@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import { verifyAccessToken } from "../../middlewares/common/checkAccessToken";
 import { Container } from "inversify";
 import IMessageService from "../../services/common/interfaces/IMessageService";
 

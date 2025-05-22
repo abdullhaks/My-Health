@@ -16,13 +16,14 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
 
     async getDoctors(req:Request,res:Response):Promise<any>{
 
-        const { page, search, limit } = req.query;
+        const { page, search, limit ,onlyPremium} = req.query;
         console.log("reqest.params from get users...", search, page, limit);
 
         const pageNumber = page ? parseInt(page as string, 10) : 1;
         const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+        const onlyPremiumBool = onlyPremium === 'true' ? true : false;
 
-        const result = await this._adminService.getDoctors(pageNumber, search as string | undefined, limitNumber);
+        const result = await this._adminService.getDoctors(pageNumber, search as string | undefined, limitNumber, onlyPremiumBool);
 
         if(!result){
             return res.status(401).json({msg:"fetching doctors has been fialed "});
@@ -58,7 +59,10 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
     async declineDoctor(req:Request , res:Response):Promise<any>{
 
         const {id} = req.params;
-        const response = await this._adminService.declineDoctor(id);
+        const {reason} = req.body;
+
+        console.log("reson is..........",reason);
+        const response = await this._adminService.declineDoctor(id,reason);
         if(!response){
             return res.status(401).json({msg:"declining doctor has been failed "});
         };

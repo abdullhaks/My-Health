@@ -31,6 +31,9 @@ function DoctorLogin() {
     email: "",
     password: "",
   });
+
+  const [reason,setReason] = useState("");
+
   const [errors, setErrors] = useState({  
     email: "",
     password: "",
@@ -86,6 +89,7 @@ function DoctorLogin() {
       }
     
       try {
+        setReason("");
         const response = await loginDoctor(formData);
         console.log("Login successful:", response);
 
@@ -109,7 +113,8 @@ function DoctorLogin() {
         }
 
         if(response.doctor.adminVerified == 3){
-          toast.error(`Your signup credentials declined in verifiation process. Please check email ${response.doctor.email}`);
+          setReason(response.message);
+          toast.error(response.message);
           return;
         }
         
@@ -188,6 +193,8 @@ function DoctorLogin() {
                     error={touched.password ? errors.password : ""}
                   />
 
+
+                  <p className="text-red-700">{reason}</p>
                   <span onClick={()=> navigate("/user/forgetPassword")} className="text-blue-600 hover:underline cursor-pointer">forgot password</span>
 
                 <Button

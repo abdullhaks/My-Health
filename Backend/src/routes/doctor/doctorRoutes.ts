@@ -38,7 +38,7 @@ doctorRoutes.post("/verifyOtp", (req, res,next) => authCtrl.verifyOtp(req, res,n
 
 doctorRoutes.get("/resentOtp", (req, res,next) => authCtrl.resentOtp(req, res,next));
 
-doctorRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("doctor"),( req,res)=>profileCtrl.updateProfile(req,res));
+doctorRoutes.patch("/updateProfile/:id",( req,res)=>profileCtrl.updateProfile(req,res));
 
 doctorRoutes.patch(
   "/updateDp/:id",
@@ -50,9 +50,11 @@ doctorRoutes.patch(
 
 
 doctorRoutes.post(
-  "/stripe/create-checkout-session",
+  "/stripe/create-checkout-session", 
+  verifyAccessTokenMidleware("doctor"),
   profileCtrl.createCheckoutSession
 );
+
 doctorRoutes.post("/verifySubscription", (req, res) =>
   profileCtrl.verifyingSubscription(req, res)
 );
@@ -60,7 +62,7 @@ doctorRoutes.post("/verifySubscription", (req, res) =>
 // doctorRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
 
 
-doctorRoutes.get('/doctor/:doctorId', (req,res)=>
+doctorRoutes.get('/doctor/conversation/:doctorId', (req,res)=>
 conversationCtrl.getConversations(req,res)
 );
 
@@ -73,3 +75,4 @@ messageCtrl.sendMessage(req,res)
 )
 
 export default doctorRoutes;
+

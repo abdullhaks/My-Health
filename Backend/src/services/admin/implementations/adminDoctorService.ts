@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import IAdminDoctorService from "../interfaces/IAdminDoctorService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
+import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
 
 @injectable()
@@ -13,11 +14,13 @@ export default class AdminDoctorService implements IAdminDoctorService {
     page: number,
     search: string | undefined,
     limit: number
+    ,onlyPremium:boolean
   ): Promise<any> {
     const response = await this._adminRepository.getDoctors(
       page,
       search,
-      limit
+      limit,
+      onlyPremium
     );
 
     if (!response) {
@@ -33,7 +36,11 @@ export default class AdminDoctorService implements IAdminDoctorService {
       throw new Error("doctor not found..!");
     }
 
-    return response;
+    const { password, ...userWithoutPassword } = response.toObject();
+            if (userWithoutPassword.profile) {
+              userWithoutPassword.profile = await getSignedImageURL(response.profile);
+            }
+    return userWithoutPassword;
   }
 
   async verifyDoctor(id: string): Promise<any> {
@@ -45,8 +52,8 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-  async declineDoctor(id: string): Promise<any> {
-    const response = await this._adminRepository.declineDoctor(id);
+  async declineDoctor(id: string,reason:string): Promise<any> {
+    const response = await this._adminRepository.declineDoctor(id,reason);
 
     if (!response) {
       throw new Error("doctor verifying failed");

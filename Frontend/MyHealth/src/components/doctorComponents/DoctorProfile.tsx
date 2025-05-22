@@ -9,17 +9,12 @@ import { updateDoctor } from "../../redux/slices/doctorSlices";
 
 const DoctorProfile = () => {
   const doctor = useSelector((state: any) => state.doctor.doctor);
-
-  const initial:any = {fullName:doctor.fullName,
-                    location:doctor.location,
-                    dob:doctor.dob,
-                    phone:doctor.phone,
-                    gender:doctor.gender,
-                    experience:doctor.experience};;
                     
   const dispatch = useDispatch();
 
-  const [profileData, setProfileData] = useState(doctor);
+  const {profile , ...rest}= doctor;
+
+  const [profileData, setProfileData] = useState(rest);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -77,6 +72,9 @@ const DoctorProfile = () => {
   const handleProfileUpdate = async (updatedData: any) => {
     try {
       const response = await updateDoctorProfile(updatedData, doctor._id);
+
+      console.log("response is ",response);
+      
       dispatch(updateDoctor(response.updatedDoctor));
       setProfileData(response.updatedDoctor);
       toast.success("Profile updated successfully!");
@@ -227,7 +225,7 @@ const DoctorProfile = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleProfileUpdate}
-        initialData={initial}
+        initialData={rest}
       />
 
       {/* Change Password Modal */}

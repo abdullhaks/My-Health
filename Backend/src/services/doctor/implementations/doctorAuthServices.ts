@@ -76,12 +76,21 @@ export default class DoctorAuthService implements IDoctorAuthService {
     }
 
     if (
-      existingDoctor.adminVerified == 0 ||
-      existingDoctor.adminVerified == 3
-    ) {
+      existingDoctor.adminVerified == 0 ) {
+
       return {
         doctor: existingDoctor,
-        message: "doctor credential not verified",
+        message: `doctor credential not verified.`,
+      };
+    }
+
+    if (existingDoctor.adminVerified == 3) {
+
+      await this._doctorRepository.delete(existingDoctor._id.toString());
+
+      return {
+        doctor: existingDoctor,
+        message: `doctor credential not verified.${existingDoctor.rejectionReason}`,
       };
     }
 
