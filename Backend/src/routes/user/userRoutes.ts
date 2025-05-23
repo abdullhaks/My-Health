@@ -5,12 +5,18 @@ import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 import IUserAppointmentController from "../../controllers/user/interfaces/IAppointmentCtrl";
+import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
+import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
 
 const userRoutes = Router();
 
 const authCtrl = container.get<IUserAuthCtrl>("IUserAuthCtrl");
 const profileCtrl = container.get<IUserProfileCtrl>("IUserProfileCtrl");
-const appointmentCtrl = container.get<IUserAppointmentController>("IUserAppointmentController")
+const appointmentCtrl = container.get<IUserAppointmentController>("IUserAppointmentController");
+const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
+const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl")
+
+
 
 userRoutes.post("/login",(req,res)=>authCtrl.userLogin(req,res));
 
@@ -47,7 +53,31 @@ userRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
 
 userRoutes.get("/doctors",verifyAccessTokenMidleware("user"), (req,res)=>appointmentCtrl.fetchingDoctors(req,res));
 
+userRoutes.post(
+  "/conversation",
+  verifyAccessTokenMidleware("user"),
+  (req, res) => conversationCtrl.createConversation(req, res)
+);
 
+
+userRoutes.get(
+  "/conversation/:doctorId",
+  verifyAccessTokenMidleware("user"),
+  (req, res) => conversationCtrl.getConversations(req, res)
+);
+
+userRoutes.get(
+  "/message/:conversationId",
+  verifyAccessTokenMidleware("user"),
+  (req, res) => messageCtrl.getMessages(req, res)
+);
+
+
+userRoutes.post(
+  "/message",
+  verifyAccessTokenMidleware("user"),
+  (req, res) => messageCtrl.sendMessage(req, res)
+);
 
 
 

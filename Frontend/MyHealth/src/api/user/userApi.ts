@@ -206,3 +206,25 @@ export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, 
     throw error;
   }
 };
+
+
+export const getUserConversations = async (userId: string) => {
+  try {
+    const response = await userInstance.get(`/user/conversation/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
+    throw error;
+  }
+};
+
+
+export const getUserMessages = async (conversationId: string) => {
+  try {
+    const response = await userInstance.get(`/user/message/${conversationId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    throw error;
+  }
+};
