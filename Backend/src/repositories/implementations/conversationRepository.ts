@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { IConversationDocument } from "../../entities/conversationEntities";
 import BaseRepository from "./baseRepository";
 import IConversationRepository from "../interfaces/IConversationRepository";
+import { getSignedImageURL } from "../../middlewares/common/uploadS3";
 
 @injectable()
 export default class ConversationRepository
@@ -28,7 +29,7 @@ export default class ConversationRepository
     });
   }
 
-  async getUserConversations(userId: string): Promise<IConversationDocument[]> {
+  async getUserConversations(userId: string): Promise<any[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }
@@ -40,13 +41,19 @@ export default class ConversationRepository
         select: "_id fullName profile",
         model: "User",
       });
-    return conversations.map((conv: any) => ({
-      _id: conv._id,
-      participants: conv.members.map((member: any) => ({
-        userId: member._id,
-        name: member.fullName,
-        avatar: member.profile,
-      })),
-    }));
+
+    // Await all avatar URLs before returning
+    return Promise.all(
+      conversations.map(async (conv: any) => ({
+        _id: conv._id,
+        participants: await Promise.all(
+          conv.members.map(async (member: any) => ({
+            userId: member._id,
+            name: member.fullName,
+            avatar: await getSignedImageURL(member.profile),
+          }))
+        ),
+      }))
+    );
   }
 }
