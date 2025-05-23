@@ -1,12 +1,14 @@
+
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { FiSend, FiCheck, FiCheckCircle, FiPaperclip } from "react-icons/fi";
+import { FiSend, FiCheck, FiCheckCircle } from "react-icons/fi";
 import { BsEmojiSmile } from "react-icons/bs";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { getDoctorConversations, getDoctorMessages, sendDoctorMessage } from "../../api/doctor/doctorApi";
 import { message } from "antd";
 import axios from "axios";
+import doodle from "../../assets/bg_print.png";
 
 interface Message {
   _id: string;
@@ -16,23 +18,18 @@ interface Message {
   timestamp: string;
   readBy: string[];
   status: "sent" | "delivered" | "read";
-  fileUrl?: string;
-}
-
-interface Participant {
-  userId: string;
-  name: string;
-  avatar: string;
-}
-
-interface Conversation {
-  _id: string;
-  participants: Participant[];
 }
 
 interface User {
   _id: string;
   fullName: string;
+  profile?: string;
+}
+
+interface Conversation {
+  _id: string;
+  members: [any]; 
+  lastMessage?: string;
 }
 
 const DoctorChat = () => {
@@ -44,39 +41,43 @@ const DoctorChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typingUser, setTypingUser] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [users, setUsers] = useState<User[]>([{_id: "6808e21a670e6cfc73176507", fullName: "luthfi ks" }]);
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-
-  async function getRefreshtoken (){
+  const getAccessToken = async () => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/doctor/refreshToken",
         {},
         { withCredentials: true }
       );
-
-      console.log("token response socket...",response)
-      return response.data.accessToken; // Assuming the response contains { accessToken }
+      console.log("Token response:", response.data);
+      return response.data.accessToken;
     } catch (error) {
-      console.error("Failed to refresh token:", error);
+      console.error("Failed to fetch access token:", error);
       message.error("Session expired. Please log in again.");
       throw error;
     }
-  }
+  };
 
-  // Initialize socket with authentication
   useEffect(() => {
     const setupSocket = async () => {
       if (!doctorId) return;
 
-      const token = await getRefreshtoken();
+      let token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("doctorAccessToken="))
+        ?.split("=")[1];
 
-      console.log("tocken in fortend...........", token);
+      if (!token) {
+        token = await getAccessToken();
+      }
+
+      console.log("Token in frontend:", token);
 
       const socket = io("http://localhost:3000", {
         transports: ["websocket"],
@@ -86,9 +87,19 @@ const DoctorChat = () => {
 
       socketRef.current = socket;
 
-      socket.on("connect_error", (err) => {
-        console.error("Socket connection error:", err);
-        message.error("Failed to connect to chat server");
+      socket.on("connect_error", async (err) => {
+        console.error("Socket connection error:", err.message);
+        if (err.message.includes("Invalid or expired token")) {
+          try {
+            const newToken = await getAccessToken();
+            socket.auth = { token: newToken };
+            socket.connect();
+          } catch {
+            message.error("Failed to reconnect. Please log in again.");
+          }
+        } else {
+          message.error("Failed to connect to chat server: " + err.message);
+        }
       });
 
       socket.on("error", ({ message }) => {
@@ -97,50 +108,48 @@ const DoctorChat = () => {
       });
 
       socket.emit("join", doctorId);
+
+      return () => {
+        socket.disconnect();
+      };
     };
 
     setupSocket();
-
     return () => {
       socketRef.current?.disconnect();
     };
   }, [doctorId]);
 
-
-
-
- useEffect(() => {
+  useEffect(() => {
     const fetchConversations = async () => {
+      if (!doctorId) return;
+      setLoading(true);
       try {
         const res = await getDoctorConversations(doctorId);
-
-        console.log("fetched conversations are.....",res);
+        console.log("Fetched conversations:", res);
         setConversations(res);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);
         message.error("Failed to load conversations. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    // const fetchUsers = async () => {
-    //   try {
-    //     const res = await axios.get("http://localhost:3000/api/user/all", { withCredentials: true });
-    //     setUsers(res.data);
-    //   } catch (err) {
-    //     console.error("Failed to fetch users:", err);
-    //     message.error("Failed to load users. Please try again.");
-    //   }
-    // };
+    // Temporarily hardcoded users until /api/user/all is implemented
+    setUsers([
+      { _id: "6808e21a670e6cfc73176507", fullName: "Luthfi KS" },
+    ]);
 
     if (doctorId) {
       fetchConversations();
-      // fetchUsers();
     }
   }, [doctorId]);
 
   useEffect(() => {
     const fetchMessages = async () => {
       if (!currentChat) return;
+      setLoading(true);
       try {
         const res = await getDoctorMessages(currentChat._id);
         setMessages(res);
@@ -148,6 +157,8 @@ const DoctorChat = () => {
       } catch (err) {
         console.error("Failed to fetch messages:", err);
         message.error("Failed to fetch messages. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -178,7 +189,8 @@ const DoctorChat = () => {
 
     const handleTyping = ({ userId, role, conversationId }: { userId: string; role: string; conversationId: string }) => {
       if (currentChat._id === conversationId) {
-        setTypingUser(`${role} is typing...`);
+        const user = users.find((u) => u._id === userId);
+        setTypingUser(`${user?.fullName || role} is typing...`);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
       }
@@ -201,17 +213,17 @@ const DoctorChat = () => {
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
     };
-  }, [currentChat]);
+  }, [currentChat, users]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() && !file) return;
+    if (!newMessage.trim()) return;
     if (!currentChat) return;
 
-    const formData = new FormData();
-    formData.append("conversationId", currentChat._id);
-    formData.append("senderId", doctorId);
-    formData.append("content", newMessage);
-    if (file) formData.append("file", file);
+    const messageData = {
+      senderId: doctorId,
+      conversationId: currentChat._id,
+      content: newMessage,
+    };
 
     const tempMessage: Message = {
       _id: uuidv4(),
@@ -221,19 +233,19 @@ const DoctorChat = () => {
       timestamp: new Date().toISOString(),
       readBy: [doctorId],
       status: "sent",
-      fileUrl: file ? URL.createObjectURL(file) : undefined,
     };
+
+    console.log("tempMessage is ", tempMessage);
 
     setMessages((prev) => [...prev, tempMessage]);
     setNewMessage("");
-    setFile(null);
 
     try {
-      const sentMessage = await sendDoctorMessage(formData);
-      socketRef.current?.emit("sendMessage", sentMessage);
-    } catch (error) {
+      socketRef.current?.emit("sendMessage", messageData);
+    } catch (error: any) {
       console.error("Message send failed:", error);
-      message.error("Failed to send message. Please try again.");
+      console.log("Error response:", error.response?.data);
+      message.error(error.response?.data?.message || "Failed to send message. Please try again.");
       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
     }
   };
@@ -245,17 +257,14 @@ const DoctorChat = () => {
     }
 
     try {
-
-      console.log("doctorid and selected user is ",doctorId, selectedUser);
+      console.log("doctorId and selected user:", doctorId, selectedUser);
       const response = await axios.post(
         "http://localhost:3000/api/doctor/conversation",
         { userIds: [doctorId, selectedUser] },
         { withCredentials: true }
       );
       const newConversation = response.data;
-
-      console.log("new conversation is ",response.data);
-      
+      console.log("New conversation:", newConversation);
       setConversations((prev) => [...prev, newConversation]);
       setCurrentChat(newConversation);
       setSelectedUser("");
@@ -274,136 +283,185 @@ const DoctorChat = () => {
     }, 3000);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.size > 5 * 1024 * 1024) {
-        message.error("File size must be less than 5MB");
-        return;
-      }
-      if (!selectedFile.type.match(/image\/(jpeg|jpg|png)|application\/pdf/)) {
-        message.error("Only images (JPEG, JPG, PNG) or PDFs are allowed");
-        return;
-      }
-      setFile(selectedFile);
-    }
+  const getUserDetails = (userId: string) => {
+    const user = users.find((u) => u._id === userId);
+    return {
+      name: user?.fullName || "Unknown User",
+      avatar: user?.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png",
+    };
   };
 
-  const filteredConversations = conversations.filter((c) =>
-    c.participants.find((p) => p.userId !== doctorId)?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredConversations = conversations.filter((c) => {
+    console.log("Conversation:", c); // Debug log
+    if (!c.members || !Array.isArray(c.members)) {
+      console.warn("Invalid conversation, missing or invalid members:", c);
+      return false;
+    }
+    const otherUserId = c.members.find((id) => id !== doctorId);
+    if (!otherUserId) {
+      console.warn("No other user found in conversation:", c);
+      return false;
+    }
+    const { name } = getUserDetails(otherUserId);
+    return name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      {/* Sidebar */}
-      <div className="w-1/4 border-r border-gray-300 p-4">
-        <input
-          type="text"
-          placeholder="Search patients..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full mb-4 p-2 border rounded"
-        />
-        <div className="mb-4">
-          <select
-            value={selectedUser}
-            onChange={(e) => setSelectedUser(e.target.value)}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Select a user to start a conversation</option>
-            {users.map((user) => (
-              <option key={user._id} value={user._id}>
-                {user.fullName}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleCreateConversation}
-            className="mt-2 w-full p-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Start Conversation
-          </button>
+    <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
+      {/* Conversation Sidebar */}
+      <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col">
+        {/* Search and New Chat Section */}
+        <div className="p-4 border-b border-gray-200">
+          <input
+            type="text"
+            placeholder="Search patients..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+          />
+          <div className="mt-4">
+            <select
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+              className="w-full p-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Select a user to start a conversation</option>
+              {users.map((user) => (
+                <option key={user._id} value={user._id}>
+                  {user.fullName}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={handleCreateConversation}
+              className="mt-2 w-full py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Starting..." : "Start Conversation"}
+            </button>
+          </div>
         </div>
-        <ul>
-          {filteredConversations.map((c) => {
-            const other = c.participants.find((p) => p.userId !== doctorId);
-            return (
-              <li
-                key={c._id}
-                className={`p-2 cursor-pointer rounded hover:bg-gray-200 ${
-                  currentChat?._id === c._id ? "bg-gray-200" : ""
-                }`}
-                onClick={() => setCurrentChat(c)}
-              >
-                <div className="flex items-center space-x-2">
-                  <img
-                    src={other?.avatar}
-                    alt={other?.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <span>{other?.name}</span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        {/* Conversation List */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="p-4 text-gray-500 text-sm">Loading conversations...</div>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {conversations.map((c) => {
+                
+                return c.members.map((m)=>{
+                const { name, avatar } =m
+                return (
+                  <li
+                    key={c._id}
+                    className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
+                      currentChat?._id === c._id ? "bg-green-50" : ""
+                    }`}
+                    onClick={() => setCurrentChat(c)}
+                  >
+                    <img
+                      src={avatar}
+                      alt={name}
+                      className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
+                      {/* <p className="text-xs text-gray-500 truncate">{c.lastMessage || "No messages yet"}</p> */}
+                    </div>
+                  </li>
+                );
+
+                })
+              })}
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* Chat Window */}
-      <div className="flex-1 flex flex-col p-4">
+      <div className="flex-1 flex flex-col bg-gray-50">
         {currentChat ? (
           <>
-            <div className="flex-1 overflow-y-auto space-y-2 pr-4">
-              {messages.map((msg) => (
-                <div
-                  key={msg._id}
-                  className={`flex ${msg.senderId === doctorId ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`p-2 rounded-lg max-w-xs ${
-                      msg.senderId === doctorId ? "bg-green-500 text-white" : "bg-gray-200 text-black"
-                    }`}
-                  >
-                    {msg.content}
-                    {msg.fileUrl && (
-                      <div className="mt-2">
-                        {msg.fileUrl.match(/\.(jpeg|jpg|png)$/i) ? (
-                          <img src={msg.fileUrl} alt="Attachment" className="max-w-full rounded" />
-                        ) : (
-                          <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">
-                            Download File
-                          </a>
-                        )}
-                      </div>
-                    )}
-                    {msg.senderId === doctorId && (
-                      <span className="ml-2 text-sm inline-flex items-center">
-                        {msg.status === "read" ? (
-                          <FiCheckCircle className="text-blue-300" />
-                        ) : msg.status === "delivered" ? (
-                          <FiCheck className="text-gray-300" />
-                        ) : (
-                          <FiCheck />
-                        )}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {typingUser && <div className="text-gray-500">{typingUser}</div>}
-              <div ref={messagesEndRef} />
+            {/* Chat Header */}
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3 sticky top-0 z-5 shadow-sm">
+              <img
+                src={currentChat.members[0].avatar|| "Unknown User"}
+                alt={currentChat.members[0].name}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {currentChat.members[0].name}
+                </p>
+                {typingUser && <p className="text-xs text-green-600">{typingUser}</p>}
+              </div>
             </div>
 
-            <div className="flex items-center p-2 border-t">
-              <BsEmojiSmile className="mx-2 text-xl cursor-pointer" />
-              <label className="mx-2 text-xl cursor-pointer">
-                <FiPaperclip />
-                <input type="file" hidden onChange={handleFileChange} accept="image/*,application/pdf" />
-              </label>
+            {/* Message Container */}
+            <div
+              className="flex-1 overflow-y-auto p-4"
+              style={{
+                backgroundImage: `url(${doodle})`,
+                backgroundSize: "400px",
+                backgroundRepeat: "repeat",
+                backgroundColor: "rgba(245, 245, 245, 0.9)",
+              }}
+            >
+              {loading ? (
+                <div className="text-center text-gray-500 text-sm">Loading messages...</div>
+              ) : (
+                <div className="space-y-2">
+                  {messages.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`flex ${
+                        msg.senderId === doctorId ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`relative max-w-xs p-3 rounded-lg shadow-sm ${
+                          msg.senderId === doctorId
+                            ? "bg-green-500 text-white"
+                            : "bg-white text-gray-900"
+                        }`}
+                      >
+                        {/* Message Tail */}
+                        <div
+                          className={`absolute top-2 ${
+                            msg.senderId === doctorId ? "-right-2" : "-left-2"
+                          } w-0 h-0 border-t-8 border-t-transparent ${
+                            msg.senderId === doctorId
+                              ? "border-l-8 border-l-green-500"
+                              : "border-r-8 border-r-white"
+                          } border-b-8 border-b-transparent`}
+                        />
+                        <p className="text-sm">{msg.content}</p>
+                        {msg.senderId === doctorId && (
+                          <span className="absolute bottom-1 right-2 text-xs flex items-center space-x-1">
+                            {msg.status === "read" ? (
+                              <FiCheckCircle className="text-blue-300" size={14} />
+                            ) : msg.status === "delivered" ? (
+                              <FiCheck className="text-gray-300" size={14} />
+                            ) : (
+                              <FiCheck className="text-gray-300" size={14} />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {/* Input Section */}
+            <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
+              <BsEmojiSmile className="text-xl text-gray-500 cursor-pointer hover:text-gray-700" />
               <input
                 type="text"
                 value={newMessage}
@@ -412,16 +470,19 @@ const DoctorChat = () => {
                   handleTyping();
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                placeholder="Type your message..."
-                className="flex-1 p-2 border rounded"
+                placeholder="Type a message..."
+                className="flex-1 p-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
               />
-              <button onClick={handleSendMessage} className="ml-2 text-xl text-green-500">
+              <button
+                onClick={handleSendMessage}
+                className="text-xl text-green-600 hover:text-green-700 transition-colors"
+              >
                 <FiSend />
               </button>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
             Select or start a conversation to begin chatting
           </div>
         )}
@@ -431,3 +492,31 @@ const DoctorChat = () => {
 };
 
 export default DoctorChat;
+
+
+
+{/* <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
+  <BsEmojiSmile className="text-xl text-gray-500 cursor-pointer hover:text-gray-700" />
+  <textarea
+    value={newMessage}
+    onChange={(e) => {
+      setNewMessage(e.target.value);
+      handleTyping();
+    }}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault(); // Prevent default Enter behavior (form submission or newline)
+        handleSendMessage();
+      }
+      // Shift+Enter will automatically add a newline in textarea, no additional logic needed
+    }}
+    placeholder="Type a message..."
+    className="flex-1 p-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none min-h-[40px] max-h-[100px] overflow-y-auto"
+  />
+  <button
+    onClick={handleSendMessage}
+    className="text-xl text-green-600 hover:text-green-700 transition-colors"
+  >
+    <FiSend />
+  </button>
+</div>; */}

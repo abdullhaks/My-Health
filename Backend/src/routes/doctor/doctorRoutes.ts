@@ -80,13 +80,20 @@ doctorRoutes.get(
   (req, res) => messageCtrl.getMessages(req, res)
 );
 
+
 doctorRoutes.post(
   "/message",
   verifyAccessTokenMidleware("doctor"),
-  // uploadMiddleware.single("file"),
-  // uploadToS3("chat-files", true),
   (req, res) => messageCtrl.sendMessage(req, res)
 );
+
+// doctorRoutes.post(
+//   "/message",
+//   verifyAccessTokenMidleware("doctor"),
+//   // uploadMiddleware.single("file"),
+//   // uploadToS3("chat-files", true),
+//   (req, res) => messageCtrl.sendMessage(req, res)
+// );
 
 export default doctorRoutes;
 

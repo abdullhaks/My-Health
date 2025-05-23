@@ -16,10 +16,8 @@ export default class MessageRepository
     super(_messageModel);
   }
 
-async createMessage(data: Partial<IMessageDocument>): Promise<IMessageDocument> {
-
-  // (!data.content && !data.fileUrl) if documents in chat.....
-    if (!data.conversationId || !data.senderId || !data.content  ) {
+ async createMessage(data: Partial<IMessageDocument>): Promise<IMessageDocument> {
+    if (!data.conversationId || !data.senderId || !data.content) {
       throw new Error("Conversation ID, sender ID, and content are required");
     }
     const message = await this._messageModel.create({
@@ -28,11 +26,12 @@ async createMessage(data: Partial<IMessageDocument>): Promise<IMessageDocument> 
       status: data.status || "sent",
     });
     await this._conversationModel.findByIdAndUpdate(data.conversationId, {
-      $set: { updatedAt: new Date() },
+      $set: { updatedAt: new Date(), lastMessage: data.content },
     });
     return message;
   }
 
+  
   async getMessagesByConversation(conversationId: string): Promise<IMessageDocument[]> {
     if (!conversationId) {
       throw new Error("Conversation ID is required");

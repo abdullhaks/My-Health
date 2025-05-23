@@ -52,15 +52,15 @@ export const setupSocket = (io: Server, container: Container) => {
 
     socket.on(
       "sendMessage",
-      async (msg: { senderId: string; conversationId: string; content: string; fileUrl?: string }) => {
+      async (msg: { senderId: string; conversationId: string; content: string }) => {
+        console.log("Socket sendMessage:", msg, "by userId:", userId);
         if (msg.senderId !== userId) {
           console.error("Sender ID does not match authenticated user");
           return socket.emit("error", { message: "Unauthorized action" });
         }
 
         try {
-          // -, msg.fileUrl - add for file uploading in chat......
-          const newMessage = await messageService.sendMessage(msg.conversationId, userId, msg.content);
+          const newMessage = await messageService.sendMessage(msg.conversationId, msg.senderId, msg.content);
           io.to(msg.conversationId).emit("message", newMessage);
         } catch (err) {
           console.error("Error sending message:", err);

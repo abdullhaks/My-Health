@@ -16,17 +16,16 @@ export default class MessageService implements IMessageService {
     async sendMessage(
     conversationId: string,
     senderId: string,
-    content: string,
-    fileUrl?: string
+    content: string
   ): Promise<IMessageDocument> {
-    if (!conversationId || !senderId || (!content && !fileUrl)) {
-      throw new Error("Conversation ID, sender ID, and content or file are required");
+    if (!conversationId || !senderId || !content) {
+      throw new Error("Conversation ID, sender ID, and content are required");
     }
+
     return await this._messageRepository.createMessage({
       conversationId,
       senderId,
       content,
-      // fileUrl, add it if file sharing in chat....
       readBy: [senderId],
       status: "sent",
     });

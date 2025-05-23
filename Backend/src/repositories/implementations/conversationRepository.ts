@@ -46,7 +46,7 @@ export default class ConversationRepository
     return Promise.all(
       conversations.map(async (conv: any) => ({
         _id: conv._id,
-        participants: await Promise.all(
+        members: await Promise.all(
           conv.members.map(async (member: any) => ({
             userId: member._id,
             name: member.fullName,

@@ -198,15 +198,14 @@ export const getDoctorMessages = async (conversationId: string) => {
 };
 
 
-export const sendDoctorMessage = async (messageData: any) => {
+export const sendDoctorMessage = async (messageData: { conversationId: string; senderId: string; content: string }) => {
   try {
-
-    console.log("massage data in api ...",messageData);
-    
-    const response = await doctorInstance.post('/doctor/message', messageData);
+    console.log("Message data:", messageData);
+    const response = await doctorInstance.post("/doctor/message", messageData);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending message:", error);
+    console.log("Error response:", error.response?.data);
     throw error;
   }
 };

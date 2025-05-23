@@ -15,21 +15,29 @@ private _messageService: IMessageService;
 
 async sendMessage(req: Request, res: Response): Promise<void> {
     try {
+      console.log("Request body:", req.body);
+      // console.log("Authenticated userId:", req.userId);
+
       const { conversationId, senderId, content } = req.body;
 
-      console.log(" conversationId, senderId, content ", conversationId, senderId, content );
-      
-      const fileUrl = req.file ? (req.file as any).location : undefined;
-      if (!conversationId || !senderId || (!content && !fileUrl)) {
-        res.status(400).json({ message: "Conversation ID, sender ID, and content or file are required" });
+      console.log("conversationId, senderId, content:", conversationId, senderId, content);
+
+      if (!conversationId || !senderId || !content) {
+        res.status(400).json({ message: "Conversation ID, sender ID, and content are required" });
         return;
       }
-      // if (senderId !== req.userId) { // Assuming req.userId from verifyAccessTokenMidleware
+      // if (senderId !== req.userId) {
       //   res.status(403).json({ message: "Unauthorized action" });
       //   return;
       // }
 
-      // fileUrl - add as argument if file sharing in chat........
+      // Validate conversation existence
+      // const conversation = await Conversation.findById(conversationId);
+      // if (!conversation) {
+      //   res.status(404).json({ message: "Conversation not found" });
+      //   return;
+      // }
+
       const message = await this._messageService.sendMessage(conversationId, senderId, content);
       res.status(201).json(message);
     } catch (error) {
