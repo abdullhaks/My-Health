@@ -26,11 +26,11 @@ export default class ConversationService implements IConversationService {
     return await this._conversationRepository.createConversation(userIds);
   }
 
-  async getUserConversations(userId: string): Promise<IConversationDocument[]> {
+  async getUserConversations(userId: string,from:string): Promise<IConversationDocument[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }
-    return await this._conversationRepository.getUserConversations(userId);
+    return await this._conversationRepository.getUserConversations(userId,from);
   }
 
 }

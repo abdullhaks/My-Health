@@ -176,9 +176,9 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
   
 };
 
-export const getDoctorConversations = async (doctorId: string) => {
+export const getDoctorConversations = async (doctorId: string,from:string) => {
   try {
-    const response = await doctorInstance.get(`/doctor/conversation/${doctorId}`);
+    const response = await doctorInstance.get(`/doctor/conversation/${doctorId}`, { params: { from } });
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);

@@ -38,15 +38,18 @@ async createConversation(req: Request, res: Response): Promise<void> {
   async getConversations(req: Request, res: Response): Promise<void> {
     try {
       const doctorId = req.params.doctorId;
-      if (!doctorId) {
-        res.status(400).json({ message: "Doctor ID is required" });
+      let from = req.query.from as string | undefined;
+      console.log("from doc... is ...", from);
+
+      if (!doctorId || !from) {
+        res.status(400).json({ message: "Doctor ID is required and doc location" });
         return;
       }
       // if (doctorId !== req.userId) { // Assuming req.userId from verifyAccessTokenMidleware
       //   res.status(403).json({ message: "Unauthorized access" });
       //   return;
       // }
-      const conversations = await this._conversationService.getUserConversations(doctorId);
+      const conversations = await this._conversationService.getUserConversations(doctorId, from as string);
       res.status(200).json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);

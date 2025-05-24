@@ -208,9 +208,9 @@ export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, 
 };
 
 
-export const getUserConversations = async (userId: string) => {
+export const getUserConversations = async (userId: string,from:string) => {
   try {
-    const response = await userInstance.get(`/user/conversation/${userId}`);
+    const response = await userInstance.get(`/user/conversation/${userId}`,{params:{from}});
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);

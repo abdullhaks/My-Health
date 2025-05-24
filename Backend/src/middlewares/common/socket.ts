@@ -52,7 +52,7 @@ export const setupSocket = (io: Server, container: Container) => {
 
     socket.on(
       "sendMessage",
-      async (msg: { senderId: string; conversationId: string; content: string }) => {
+      async (msg: { senderId: string; conversationId: string; content: string; _id?: string }) => {
         console.log("Socket sendMessage:", msg, "by userId:", userId);
         if (msg.senderId !== userId) {
           console.error("Sender ID does not match authenticated user");
@@ -61,7 +61,8 @@ export const setupSocket = (io: Server, container: Container) => {
 
         try {
           const newMessage = await messageService.sendMessage(msg.conversationId, msg.senderId, msg.content);
-          io.to(msg.conversationId).emit("message", newMessage);
+          io.to(msg.conversationId).emit("message", newMessage); // Broadcast to conversation room
+          io.to(msg.senderId).emit("message", newMessage); // Ensure sender also receives it
         } catch (err) {
           console.error("Error sending message:", err);
           socket.emit("error", { message: "Failed to send message" });
@@ -70,14 +71,14 @@ export const setupSocket = (io: Server, container: Container) => {
     );
 
     socket.on("markSeen", async ({ conversationId }: { conversationId: string }) => {
-      try {
-        await messageService.markMessagesAsSeen(conversationId, userId);
-        io.to(conversationId).emit("messageSeen", { conversationId, userId });
-      } catch (err) {
-        console.error("Error marking messages as seen:", err);
-        socket.emit("error", { message: "Failed to mark messages as seen" });
-      }
-    });
+        try {
+          await messageService.markMessagesAsSeen(conversationId, userId);
+          io.to(conversationId).emit("messageSeen", { conversationId, userId }); // Broadcast to all in room
+        } catch (err) {
+          console.error("Error marking messages as seen:", err);
+          socket.emit("error", { message: "Failed to mark messages as seen" });
+        }
+      });
 
     socket.on("typing", ({ conversationId }: { conversationId: string }) => {
       socket.to(conversationId).emit("typing", { userId, role, conversationId });

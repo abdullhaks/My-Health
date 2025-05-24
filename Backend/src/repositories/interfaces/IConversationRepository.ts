@@ -6,6 +6,6 @@ export default interface IConversationRepository extends BaseRepository<IConvers
 
     createConversation(members: string[]): Promise<IConversationDocument>
     findConversationByMembers(members: string[]): Promise<IConversationDocument | null>
-    getUserConversations(userId: string): Promise<IConversationDocument[]>
+    getUserConversations(userId: string,from:string): Promise<IConversationDocument[]>
     
 }

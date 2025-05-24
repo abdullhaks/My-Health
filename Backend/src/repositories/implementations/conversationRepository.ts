@@ -29,7 +29,7 @@ export default class ConversationRepository
     });
   }
 
-  async getUserConversations(userId: string): Promise<any[]> {
+  async getUserConversations(userId: string,from:string): Promise<any[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }
@@ -39,7 +39,7 @@ export default class ConversationRepository
       .populate({
         path: "members",
         select: "_id fullName profile",
-        model: "User",
+        model: from,
       });
 
     // Await all avatar URLs before returning

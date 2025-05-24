@@ -5,7 +5,7 @@ import { FiSend, FiCheck, FiCheckCircle } from "react-icons/fi";
 import { BsEmojiSmile } from "react-icons/bs";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getDoctorConversations, getDoctorMessages, sendDoctorMessage } from "../../api/doctor/doctorApi";
+import { getDoctorConversations, getDoctorMessages } from "../../api/doctor/doctorApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
@@ -125,7 +125,7 @@ const DoctorChat = () => {
       if (!doctorId) return;
       setLoading(true);
       try {
-        const res = await getDoctorConversations(doctorId);
+        const res = await getDoctorConversations(doctorId,"User");
         console.log("Fetched conversations:", res);
         setConversations(res);
       } catch (err) {
@@ -146,24 +146,33 @@ const DoctorChat = () => {
     }
   }, [doctorId]);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!currentChat) return;
-      setLoading(true);
-      try {
-        const res = await getDoctorMessages(currentChat._id);
-        setMessages(res);
-        socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
-        message.error("Failed to fetch messages. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  if (!currentChat || !socketRef.current) return;
 
-    if (currentChat) fetchMessages();
-  }, [currentChat]);
+  socketRef.current.emit("join", currentChat._id); // Join conversation room
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const res = await getDoctorMessages(currentChat._id);
+      setMessages(res);
+      socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+      message.error("Failed to fetch messages. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMessages();
+
+  return () => {
+    socketRef.current?.emit("leave", currentChat._id); // Leave conversation room on cleanup
+  };
+}, [currentChat]);
+
+
 
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
@@ -171,11 +180,15 @@ const DoctorChat = () => {
     const socket = socketRef.current;
 
     const handleMessage = (msg: Message) => {
-      if (msg.conversationId === currentChat._id) {
-        setMessages((prev) => [...prev, msg]);
-        socket.emit("markSeen", { conversationId: msg.conversationId });
-      }
-    };
+    if (msg.conversationId === currentChat._id) {
+      setMessages((prev) => {
+        // Avoid duplicates
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
+      socket.emit("markSeen", { conversationId: msg.conversationId });
+    }
+  };
 
     const handleSeen = ({ conversationId, userId }: { conversationId: string; userId: string }) => {
       setMessages((prev) =>
@@ -216,39 +229,42 @@ const DoctorChat = () => {
   }, [currentChat, users]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-    if (!currentChat) return;
+  if (!newMessage.trim() || !currentChat) return;
 
-    const messageData = {
-      senderId: doctorId,
-      conversationId: currentChat._id,
-      content: newMessage,
-    };
-
-    const tempMessage: Message = {
-      _id: uuidv4(),
-      conversationId: currentChat._id,
-      senderId: doctorId,
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      readBy: [doctorId],
-      status: "sent",
-    };
-
-    console.log("tempMessage is ", tempMessage);
-
-    setMessages((prev) => [...prev, tempMessage]);
-    setNewMessage("");
-
-    try {
-      socketRef.current?.emit("sendMessage", messageData);
-    } catch (error: any) {
-      console.error("Message send failed:", error);
-      console.log("Error response:", error.response?.data);
-      message.error(error.response?.data?.message || "Failed to send message. Please try again.");
-      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
-    }
+  const messageData = {
+    senderId: doctorId,
+    conversationId: currentChat._id,
+    content: newMessage,
   };
+
+  const tempMessage: Message = {
+    _id: uuidv4(),
+    conversationId: currentChat._id,
+    senderId: doctorId,
+    content: newMessage,
+    timestamp: new Date().toISOString(),
+    readBy: [doctorId],
+    status: "sent",
+  };
+
+  // setMessages((prev) => [...prev, tempMessage]);
+  setNewMessage("");
+
+  try {
+    // const response = await sendDoctorMessage(messageData);
+    // Update the temp message with server response
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg._id === tempMessage._id ? { ...tempMessage, readBy: [doctorId], status: "sent" } : msg
+      )
+    );
+    socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
+  } catch (error: any) {
+    console.error("Message send failed:", error);
+    message.error(error.response?.data?.message || "Failed to send message.");
+    setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+  }
+};
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -283,28 +299,28 @@ const DoctorChat = () => {
     }, 3000);
   };
 
-  const getUserDetails = (userId: string) => {
-    const user = users.find((u) => u._id === userId);
-    return {
-      name: user?.fullName || "Unknown User",
-      avatar: user?.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png",
-    };
-  };
+  // const getUserDetails = (userId: string) => {
+  //   const user = users.find((u) => u._id === userId);
+  //   return {
+  //     name: user?.fullName || "Unknown User",
+  //     avatar: user?.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png",
+  //   };
+  // };
 
-  const filteredConversations = conversations.filter((c) => {
-    console.log("Conversation:", c); // Debug log
-    if (!c.members || !Array.isArray(c.members)) {
-      console.warn("Invalid conversation, missing or invalid members:", c);
-      return false;
-    }
-    const otherUserId = c.members.find((id) => id !== doctorId);
-    if (!otherUserId) {
-      console.warn("No other user found in conversation:", c);
-      return false;
-    }
-    const { name } = getUserDetails(otherUserId);
-    return name.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  // const filteredConversations = conversations.filter((c) => {
+  //   console.log("Conversation:", c); // Debug log
+  //   if (!c.members || !Array.isArray(c.members)) {
+  //     console.warn("Invalid conversation, missing or invalid members:", c);
+  //     return false;
+  //   }
+  //   const otherUserId = c.members.find((id) => id !== doctorId);
+  //   if (!otherUserId) {
+  //     console.warn("No other user found in conversation:", c);
+  //     return false;
+  //   }
+  //   const { name } = getUserDetails(otherUserId);
+  //   return name.toLowerCase().includes(searchTerm.toLowerCase());
+  // });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
