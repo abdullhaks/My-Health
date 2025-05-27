@@ -134,6 +134,7 @@ function DoctorSignup() {
         .catch((error) => {
           console.error("Signup error", error);
           setErrors({ email: "Email already exists" });
+          toast.error("Email already exists");
         });
   
     } catch (error) {

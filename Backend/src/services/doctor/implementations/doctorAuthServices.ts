@@ -213,14 +213,12 @@ async sendMail(email: string, otp: string): Promise<void> {
 
     console.log("doctor response from service is ", response);
 
-    const otp = generateOtp();
-    console.log("Generated OTP: ", otp);
+    // const otp = generateOtp();
 
     if (!doctor.email) {
       throw new Error("Doctor email is required");
     }
-    await this.sendMail(doctor.email, otp);
-    console.log("OTP sent to email: ", doctor.email);
+    // await this.sendMail(doctor.email, otp);
 
     return {
       message: "Signup successful. OTP sent to email.",

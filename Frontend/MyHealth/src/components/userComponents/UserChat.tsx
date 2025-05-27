@@ -9,6 +9,7 @@ import { getUserConversations, getUserMessages } from "../../api/user/userApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface Message {
   _id: string;
@@ -47,6 +48,9 @@ const UserChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const hasInitializedConversation = useRef(false);
 
   const getAccessToken = async () => {
     try {
@@ -63,6 +67,52 @@ const UserChat = () => {
       throw error;
     }
   };
+
+
+  useEffect(() => {
+    const doctorId = location.state?.doctorId;
+    if (doctorId && userId && !hasInitializedConversation.current) {
+      const initializeConversation = async () => {
+        try {
+          setLoading(true);
+          // Fetch conversations to ensure we have the latest list
+          const res = await getUserConversations(userId, "Doctor");
+          setConversations(res);
+
+          // Check if a conversation with this doctor already exists
+          const existingConversation = res.find((c: Conversation) =>
+            c.members.some((m) => m._id === doctorId)
+          );
+
+          if (existingConversation) {
+            setCurrentChat(existingConversation);
+          } else {
+            // Create a new conversation
+            const response = await axios.post(
+              "http://localhost:3000/api/user/conversation",
+              { userIds: [userId, doctorId] },
+              { withCredentials: true }
+            );
+            const newConversation = response.data;
+            setConversations((prev) => [...prev, newConversation]);
+            setCurrentChat(newConversation);
+          }
+          hasInitializedConversation.current = true; // Mark as initialized
+          // Clear navigation state to prevent re-triggering
+          navigate("/chat", { replace: true, state: {} });
+        } catch (error) {
+          console.error("Failed to initialize conversation:", error);
+          message.error("Failed to start chat with doctor.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      initializeConversation();
+    }
+  }, [location.state?.doctorId, userId, navigate]);
+
+
 
   useEffect(() => {
     const setupSocket = async () => {
