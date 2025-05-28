@@ -68,7 +68,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: "Dashboard", path: "/doctor/dashboard", icon: <FaHome /> },
     { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
-    { name: "Appointments",path: "/doctor/manageAppointments",icon: <FaCalendarCheck />,premium: true},
+    { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
     {
       name: "Chat",
       path: "/doctor/chat",

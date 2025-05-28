@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { FaTrash, FaSave } from "react-icons/fa";
 import Calendar from "react-calendar";
-import 'react-calendar/dist/Calendar.css';
-import { RRule, RRuleSet, rrulestr } from 'rrule';
+import "react-calendar/dist/Calendar.css";
+import { RRule, rrulestr } from "rrule";
+import { setSessions as setSessionsApi} from "../../api/doctor/doctorApi";
+import { useSelector } from "react-redux";
 
 interface Session {
   id?: string;
@@ -20,8 +22,13 @@ interface AppointmentSlot {
   end: Date;
   duration: number;
   fee: number;
-  status: 'available' | 'booked';
+  status: "available" | "booked";
   sessionId: string;
+}
+
+interface ValidationError {
+  index: number;
+  message: string;
 }
 
 const weekdays = [
@@ -31,7 +38,7 @@ const weekdays = [
   { name: "Wednesday", value: 3 },
   { name: "Thursday", value: 4 },
   { name: "Friday", value: 5 },
-  { name: "Saturday", value: 6 }
+  { name: "Saturday", value: 6 },
 ];
 
 const defaultSession: Session = {
@@ -39,15 +46,18 @@ const defaultSession: Session = {
   endTime: "12:00",
   duration: 20,
   fee: 100,
-  dayOfWeek: 1 // Monday by default
+  dayOfWeek: 1, 
 };
 
-const DoctorAppointments = () => {
+const DoctorSlots = () => {
+
+  const doctor = useSelector((state:any)=> state.doctor.doctor);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointmentSlots, setAppointmentSlots] = useState<AppointmentSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
   // Load sessions from backend on component mount
   useEffect(() => {
@@ -57,87 +67,129 @@ const DoctorAppointments = () => {
         // const response = await fetch('/api/doctor/sessions');
         // const data = await response.json();
         // setSessions(data.sessions || []);
-        alert("fetching sessions.....");
       } catch (error) {
-        console.error('Error fetching sessions:', error);
+        console.error("Error fetching sessions:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchSessions();
   }, []);
 
-  // Generate appointment slots when sessions or selected date changes
+  // Validate sessions whenever they change
+  useEffect(() => {
+    const validateSessions = () => {
+      const errors: ValidationError[] = [];
+
+      sessions.forEach((session, index) => {
+        // Validate start time is before end time
+        const start = new Date(`2000-01-01T${session.startTime}:00`);
+        const end = new Date(`2000-01-01T${session.endTime}:00`);
+        if (start >= end) {
+          errors.push({
+            index,
+            message: "End time must be after start time.",
+          });
+          return;
+        }
+
+        // Check for overlapping sessions on the same day
+        const sameDaySessions = sessions.filter(
+          (s, i) => s.dayOfWeek === session.dayOfWeek && i !== index
+        );
+        sameDaySessions.forEach((otherSession) => {
+          const otherStart = new Date(`2000-01-01T${otherSession.startTime}:00`);
+          const otherEnd = new Date(`2000-01-01T${otherSession.endTime}:00`);
+
+          if (
+            (start >= otherStart && start < otherEnd) ||
+            (end > otherStart && end <= otherEnd) ||
+            (start <= otherStart && end >= otherEnd)
+          ) {
+            errors.push({
+              index,
+              message: `This session overlaps with another session on ${weekdays.find((day) => day.value === session.dayOfWeek)?.name}.`,
+            });
+          }
+        });
+      });
+
+      setValidationErrors(errors);
+    };
+
+    validateSessions();
+  }, [sessions]);
+
+  // Generate appointment slots (unchanged)
   useEffect(() => {
     if (sessions.length === 0) return;
-    
+
     const generateSlotsForDate = (date: Date) => {
       const daySlots: AppointmentSlot[] = [];
       const dayOfWeek = date.getDay();
-      
-      // Filter sessions for this day of week
-      const daySessions = sessions.filter(s => s.dayOfWeek === dayOfWeek);
-      
-      daySessions.forEach(session => {
+
+      const daySessions = sessions.filter((s) => s.dayOfWeek === dayOfWeek);
+
+      daySessions.forEach((session) => {
         const rrule = session.rRule ? rrulestr(session.rRule) : null;
-        
-        // Check if this date matches the recurrence rule
+
         if (rrule && !rrule.between(date, date, true).length) {
           return;
         }
-        
-        // Parse start and end times
-        const [startHours, startMinutes] = session.startTime.split(':').map(Number);
-        const [endHours, endMinutes] = session.endTime.split(':').map(Number);
-        
+
+        const [startHours, startMinutes] = session.startTime.split(":").map(Number);
+        const [endHours, endMinutes] = session.endTime.split(":").map(Number);
+
         const slotStart = new Date(date);
         slotStart.setHours(startHours, startMinutes, 0, 0);
-        
+
         const slotEnd = new Date(date);
         slotEnd.setHours(endHours, endMinutes, 0, 0);
-        
-        // Generate slots within this session
+
         let currentSlotStart = new Date(slotStart);
-        
+
         while (currentSlotStart < slotEnd) {
           const currentSlotEnd = new Date(currentSlotStart);
           currentSlotEnd.setMinutes(currentSlotEnd.getMinutes() + session.duration);
-          
+
           if (currentSlotEnd > slotEnd) break;
-          
+
           daySlots.push({
-            id: `${session.id}-${currentSlotStart.getTime()}`,
+            id: `${currentSlotStart.getTime()}`,
             start: new Date(currentSlotStart),
             end: new Date(currentSlotEnd),
             duration: session.duration,
             fee: session.fee,
-            status: 'available', // This would come from backend in real app
-            sessionId: session.id || ''
+            status: "available",
+            sessionId: session.id || "",
           });
-          
+
           currentSlotStart = new Date(currentSlotEnd);
         }
       });
-      
+
       return daySlots;
     };
-    
-    const slots = generateSlotsForDate(selectedDate);
 
-    console.log("slots are.....",slots);
+    const slots = generateSlotsForDate(selectedDate);
     setAppointmentSlots(slots);
+
+    console.log("created sessions:", sessions);
+    console.log("Selected date:", selectedDate);
+    console.log("Generated appointment slots:", slots);
+
   }, [sessions, selectedDate]);
 
   const handleEditSession = (index: number, field: keyof Session, value: string | number) => {
     const updated = [...sessions];
-    
-    if (field === 'startTime' || field === 'endTime') {
+
+    if (field === "startTime" || field === "endTime") {
       updated[index][field] = value as string;
-    } else if (field === 'duration' || field === 'fee' || field === 'dayOfWeek') {
+    } else if (field === "duration" || field === "fee" || field === "dayOfWeek") {
       updated[index][field] = Number(value);
     }
-    
+
     setSessions(updated);
   };
 
@@ -155,43 +207,40 @@ const DoctorAppointments = () => {
     const rule = new RRule({
       freq: RRule.WEEKLY,
       byweekday: [session.dayOfWeek],
-      dtstart: new Date(), // Starting today
-      until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // One year from now
+      dtstart: new Date(),
+      // until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     });
     return rule.toString();
   };
 
   const saveSessions = async () => {
-    try {
-      setSaveStatus('saving');
-      
-      // Generate RRule for each session
-      const sessionsWithRRule = sessions.map(session => ({
-        ...session,
-        rRule: generateRRule(session)
-      }));
-      
-      // const response = await fetch('/api/doctor/sessions', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({ sessions: sessionsWithRRule })
-      // });
-      
-      // if (!response.ok) throw new Error('Failed to save sessions');
-      
-      // const data = await response.json();
-      // setSessions(data.sessions);
+    if (validationErrors.length > 0) return; // Prevent saving if there are errors
 
-      console.log("session with rrule... is ",sessionsWithRRule);
-      setSaveStatus('success');
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => setSaveStatus('idle'), 3000);
+    try {
+      setSaveStatus("saving");
+
+      const sessionsWithRRule = sessions.map((session) => ({
+        ...session,
+        rRule: generateRRule(session),
+        doctorId:doctor._id
+      }));
+
+      console.log("Saving sessions:", sessionsWithRRule);
+
+      const response = await setSessionsApi(sessionsWithRRule);
+
+      console.log("response in frontend is .....",response);
+
+      if (!response) throw new Error('Failed to save sessions');
+
+    
+      setSessions(response);
+ 
+      setSaveStatus("success");
+      setTimeout(() => setSaveStatus("idle"), 3000);
     } catch (error) {
-      console.error('Error saving sessions:', error);
-      setSaveStatus('error');
+      console.error("Error saving sessions:", error);
+      setSaveStatus("error");
     }
   };
 
@@ -211,10 +260,16 @@ const DoctorAppointments = () => {
               </button>
               <button
                 onClick={saveSessions}
-                disabled={saveStatus === 'saving'}
-                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-1"
+                disabled={saveStatus === "saving" || validationErrors.length > 0}
+                className={`px-3 py-1 rounded flex items-center gap-1 ${
+                  saveStatus === "saving" || validationErrors.length > 0
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
+                }`}
               >
-                {saveStatus === 'saving' ? 'Saving...' : (
+                {saveStatus === "saving" ? (
+                  "Saving..."
+                ) : (
                   <>
                     <FaSave /> Save
                   </>
@@ -222,19 +277,19 @@ const DoctorAppointments = () => {
               </button>
             </div>
           </div>
-          
-          {saveStatus === 'success' && (
+
+          {saveStatus === "success" && (
             <div className="mb-4 p-2 bg-green-100 text-green-700 rounded">
               Sessions saved successfully!
             </div>
           )}
-          
-          {saveStatus === 'error' && (
+
+          {saveStatus === "error" && (
             <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
               Error saving sessions. Please try again.
             </div>
           )}
-          
+
           {isLoading ? (
             <div>Loading sessions...</div>
           ) : (
@@ -246,40 +301,42 @@ const DoctorAppointments = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
                       <select
                         value={session.dayOfWeek}
-                        onChange={(e) => handleEditSession(index, 'dayOfWeek', e.target.value)}
+                        onChange={(e) => handleEditSession(index, "dayOfWeek", e.target.value)}
                         className="border px-3 py-2 rounded w-full"
                       >
-                        {weekdays.map(day => (
-                          <option key={day.value} value={day.value}>{day.name}</option>
+                        {weekdays.map((day) => (
+                          <option key={day.value} value={day.value}>
+                            {day.name}
+                          </option>
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                       <input
                         type="time"
                         value={session.startTime}
-                        onChange={(e) => handleEditSession(index, 'startTime', e.target.value)}
+                        onChange={(e) => handleEditSession(index, "startTime", e.target.value)}
                         className="border px-3 py-2 rounded"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
                       <input
                         type="time"
                         value={session.endTime}
-                        onChange={(e) => handleEditSession(index, 'endTime', e.target.value)}
+                        onChange={(e) => handleEditSession(index, "endTime", e.target.value)}
                         className="border px-3 py-2 rounded"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Duration (mins)</label>
                       <select
                         value={session.duration}
-                        onChange={(e) => handleEditSession(index, 'duration', e.target.value)}
+                        onChange={(e) => handleEditSession(index, "duration", e.target.value)}
                         className="border px-3 py-2 rounded"
                       >
                         <option value={10}>10</option>
@@ -290,25 +347,31 @@ const DoctorAppointments = () => {
                         <option value={60}>60</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Fee (Rs)</label>
                       <input
                         type="number"
                         value={session.fee}
-                        onChange={(e) => handleEditSession(index, 'fee', e.target.value)}
+                        onChange={(e) => handleEditSession(index, "fee", e.target.value)}
                         className="border px-3 py-2 rounded w-20"
                       />
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={() => handleDeleteSession(index)}
                       className="text-red-500 hover:text-red-700 p-2"
                     >
                       <FaTrash />
                     </button>
                   </div>
-                  
+
+                  {validationErrors.some((err) => err.index === index) && (
+                    <div className="text-red-500 text-sm mt-2">
+                      {validationErrors.find((err) => err.index === index)?.message}
+                    </div>
+                  )}
+
                   {session.rRule && (
                     <div className="text-sm text-gray-500 mt-2">
                       Recurrence: {rrulestr(session.rRule).toText()}
@@ -316,7 +379,7 @@ const DoctorAppointments = () => {
                   )}
                 </div>
               ))}
-              
+
               {sessions.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   No consultation sessions configured. Click "Add Session" to create one.
@@ -326,55 +389,58 @@ const DoctorAppointments = () => {
           )}
         </div>
 
-        {/* Calendar + Slot Summary */}
+        {/* Calendar + Slot Summary (unchanged) */}
         <div className="bg-white rounded-lg p-6 shadow">
           <h2 className="text-lg font-semibold mb-4">Appointment Calendar</h2>
-          <Calendar 
-            onChange={(value) => value && setSelectedDate(value as Date)} 
-            value={selectedDate} 
+          <Calendar
+            onChange={(value) => value && setSelectedDate(value as Date)}
+            value={selectedDate}
             tileClassName={({ date }) => {
               const dayOfWeek = date.getDay();
-              return sessions.some(s => s.dayOfWeek === dayOfWeek) ? 'bg-blue-50' : '';
+              return sessions.some((s) => s.dayOfWeek === dayOfWeek) ? "bg-blue-50" : "";
             }}
           />
-          
+
           <div className="mt-6">
             <h3 className="text-md font-semibold mb-2">
-              Appointments on {selectedDate.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              Appointments on{" "}
+              {selectedDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </h3>
-            
+
             {appointmentSlots.length === 0 ? (
               <div className="text-gray-500 py-4 text-center">
                 No appointment slots available for this day.
               </div>
             ) : (
               <ul className="space-y-2">
-                {appointmentSlots.map(slot => (
-                  <li 
-                    key={slot.id} 
+                {appointmentSlots.map((slot) => (
+                  <li
+                    key={slot.id}
                     className={`border p-3 rounded shadow-sm text-sm ${
-                      slot.status === 'booked' ? 'bg-red-50' : 'bg-green-50'
+                      slot.status === "booked" ? "bg-red-50" : "bg-green-50"
                     }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
                         <span className="font-medium">
-                          {slot.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                          {slot.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {slot.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
+                          {slot.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                         <span className="text-gray-600 block text-xs">
                           Duration: {slot.duration} mins • Fee: ${slot.fee}
                         </span>
                       </div>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        slot.status === 'booked' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {slot.status === 'booked' ? 'Booked' : 'Available'}
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          slot.status === "booked" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {slot.status === "booked" ? "Booked" : "Available"}
                       </span>
                     </div>
                   </li>
@@ -388,4 +454,4 @@ const DoctorAppointments = () => {
   );
 };
 
-export default DoctorAppointments;
+export default DoctorSlots;

@@ -6,6 +6,7 @@ import doctorModel from "../models/doctorModel";
 import subscriptionModel from "../models/subscriptionModel";
 import conversationModel from "../models/conversationModel";
 import messageModel from "../models/messageModel";
+import sessionModel from "../models/sessionModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -28,6 +29,8 @@ import DoctorAuthController from "../controllers/doctor/implementations/authCtrl
 import IDoctorAuthCtrl from "../controllers/doctor/interfaces/IAuthCtrl";
 import DoctorProfileController from "../controllers/doctor/implementations/profileCtrl";
 import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
+import DoctorSessionController from "../controllers/doctor/implementations/sessionCtrl";
+import IDoctorSessionCtrl from "../controllers/doctor/interfaces/ISessionCtrl";
 
 
 
@@ -60,6 +63,8 @@ import DoctorAuthService from "../services/doctor/implementations/doctorAuthServ
 import IDoctorAuthService from "../services/doctor/interfaces/IDoctorAuthServices";
 import IDoctorProfileService from "../services/doctor/interfaces/IDoctorProfileSevices";
 import DoctorProfileService from "../services/doctor/implementations/doctorProfileService";
+import DoctorSessionService from "../services/doctor/implementations/doctorSessionService";
+import IDoctorSessionService from "../services/doctor/interfaces/IDoctorSessionService";
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -93,6 +98,10 @@ import IConversationRepository from "../repositories/interfaces/IConversationRep
 import MessageRepository from "../repositories/implementations/messageRepository";
 import IMessageRepository from "../repositories/interfaces/IMessageRepository";
 
+import SessionRepository from "../repositories/implementations/sessionRepository";
+import ISessionRepository from "../repositories/interfaces/ISessionRepository";
+
+
 //.................................................................................
 
 
@@ -105,6 +114,7 @@ container.bind("doctorModel").toConstantValue(doctorModel);
 container.bind("subscriptionModel").toConstantValue(subscriptionModel);
 container.bind("conversationModel").toConstantValue(conversationModel);
 container.bind("messageModel").toConstantValue(messageModel);
+container.bind("sessionModel").toConstantValue(sessionModel);
 
 //...................................................................
 
@@ -119,6 +129,7 @@ container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
 
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
+container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionController);
 
 
 container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
@@ -140,8 +151,9 @@ container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
 container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService);
 
-container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService)
-container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService)
+container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService);
+container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService);
+container.bind<IDoctorSessionService>("IDoctorSessionService").to(DoctorSessionService);
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
 container.bind<IConversationService>("IConversationService").to(ConversationService);
@@ -159,6 +171,7 @@ container.bind<IPaymentRepository>("IPaymentRepository").to(PaymentRepository);
 container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository);
 container.bind<IConversationRepository>("IConversationRepository").to(ConversationRepository);
 container.bind<IMessageRepository>("IMessageRepository").to(MessageRepository);
+container.bind<ISessionRepository>("ISessionRepository").to(SessionRepository);
 
 
 export default container;

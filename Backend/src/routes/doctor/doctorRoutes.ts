@@ -7,6 +7,7 @@ import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
+import ISessionCtrl from "../../controllers/doctor/interfaces/ISessionCtrl";
 
 const doctorRoutes = Router();
 
@@ -14,6 +15,7 @@ const authCtrl = container.get<IDoctorAuthCtrl>("IDoctorAuthCtrl");
 const profileCtrl = container.get<IDoctorProfileCtrl>("IDoctorProfileCtrl");
 const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl")
+const sessionCtrl = container.get<ISessionCtrl>("IDoctorSessionCtrl");
 
 doctorRoutes.post("/login", (req, res,next) => authCtrl.doctorLogin(req, res,next));
 
@@ -87,13 +89,10 @@ doctorRoutes.post(
   (req, res) => messageCtrl.sendMessage(req, res)
 );
 
-// doctorRoutes.post(
-//   "/message",
-//   verifyAccessTokenMidleware("doctor"),
-//   // uploadMiddleware.single("file"),
-//   // uploadToS3("chat-files", true),
-//   (req, res) => messageCtrl.sendMessage(req, res)
-// );
+
+doctorRoutes.post(
+  "/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSessions(req,res)
+)
 
 export default doctorRoutes;
 

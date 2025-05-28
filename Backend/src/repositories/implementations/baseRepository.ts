@@ -25,6 +25,15 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
     }
   }
 
+  async deleteAll(filter: FilterQuery<T> = {}): Promise<import("mongodb").DeleteResult> {
+    try {
+      return await this._model.deleteMany(filter).exec();
+    } catch (error) {
+      console.error("Error deleting documents:", error);
+      return { acknowledged: false, deletedCount: 0 };
+    }
+  }
+
   async create(data: Partial<T>): Promise<T> {
     console.log("data sis ==>",data);
     

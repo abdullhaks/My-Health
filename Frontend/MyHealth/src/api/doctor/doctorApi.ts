@@ -209,3 +209,16 @@ export const sendDoctorMessage = async (messageData: { conversationId: string; s
     throw error;
   }
 };
+
+export const setSessions = async (sessionData:any)=>{
+  try{
+    console.log("session data is ",sessionData);
+
+    const response = await doctorInstance.post("/doctor/sessions", {sessionData});
+    return response.data
+
+  }catch(error){
+    console.error("Error in set sessions", error);
+    throw error;
+  }
+}
