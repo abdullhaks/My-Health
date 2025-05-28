@@ -3,7 +3,7 @@ import { FaTrash, FaSave } from "react-icons/fa";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { RRule, rrulestr } from "rrule";
-import { setSessions as setSessionsApi} from "../../api/doctor/doctorApi";
+import { setSessions as setSessionsApi ,getSessions} from "../../api/doctor/doctorApi";
 import { useSelector } from "react-redux";
 
 interface Session {
@@ -64,9 +64,9 @@ const DoctorSlots = () => {
     const fetchSessions = async () => {
       try {
         setIsLoading(true);
-        // const response = await fetch('/api/doctor/sessions');
+        const response = await getSessions(doctor._id)
         // const data = await response.json();
-        // setSessions(data.sessions || []);
+        setSessions(response);
       } catch (error) {
         console.error("Error fetching sessions:", error);
       } finally {

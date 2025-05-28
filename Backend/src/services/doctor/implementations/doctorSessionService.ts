@@ -34,6 +34,16 @@ export default class DoctorSessionService implements IDoctorSessionService {
 };
 
 
+async getSessions (doctorId:string):Promise<any>{
 
+    try{
+        const response = await this._sessionRepository.findAll({doctorId:doctorId});
+        return response;
+
+    }catch(error){
+        console.error("Error in get sessions", error);
+        throw new Error("Failed to get consultation sessions");
+    }
+}
 
 };

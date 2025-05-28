@@ -215,10 +215,23 @@ export const setSessions = async (sessionData:any)=>{
     console.log("session data is ",sessionData);
 
     const response = await doctorInstance.post("/doctor/sessions", {sessionData});
-    return response.data
+    return response.data;
 
   }catch(error){
     console.error("Error in set sessions", error);
+    throw error;
+  }
+}
+
+export const getSessions = async (doctorId:string)=>{
+  try{
+    console.log("doctor id",doctorId);
+
+    const response = await doctorInstance.get("/doctor/sessions", { params: { doctorId } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
     throw error;
   }
 }

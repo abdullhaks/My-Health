@@ -90,9 +90,9 @@ doctorRoutes.post(
 );
 
 
-doctorRoutes.post(
-  "/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSessions(req,res)
-)
+doctorRoutes.post("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSessions(req,res));
+
+doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) )
 
 export default doctorRoutes;
 
