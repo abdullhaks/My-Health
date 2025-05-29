@@ -16,7 +16,6 @@ export const signupUser = async (userData: any) => {
 
 export const getMe = async ()=>{
   try{
-
     console.log("get me calling......")
     const response = await userInstance.get("/user/me");
     console.log("me me me...",response.data);
@@ -27,7 +26,18 @@ export const getMe = async ()=>{
     throw error;
   }
   
+}
 
+export const getDoctor = async (doctorId:string)=>{
+  try{
+    const response = await userInstance.get("/user/doctorDetails",{params:{doctorId}});
+    console.log("doctor details response is ",response.data);
+    return response.data
+  }catch(error){
+    console.error("Error signing up user:", error);
+    throw error;
+  }
+  
 }
 
 export const loginUser = async (userData: any) => {
@@ -228,3 +238,18 @@ export const getUserMessages = async (conversationId: string) => {
     throw error;
   }
 };
+
+
+
+export const getSessions = async (doctorId:string)=>{
+  try{
+    console.log("doctor id",doctorId);
+
+    const response = await userInstance.get("/user/sessions", { params: { doctorId } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+}

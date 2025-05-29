@@ -15,6 +15,8 @@ import UserRcoveryPassword from "../../pages/userPages/UserRcoveryPassword";
 import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
 import Doctors from "../../components/userComponents/UserDoctors";
 import UserChat from "../../components/userComponents/UserChat";
+import UserAppointmentSlots from "../../components/userComponents/UserAppointmentSlots";
+import UserAppointmentConfirmation from "../../components/userComponents/UserAppointmentConfirm";
 
 const UserRoutes = () => {
   return (
@@ -38,6 +40,9 @@ const UserRoutes = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="doctors" element={<Doctors/>} />
           <Route path="chat" element={<UserChat />} />
+          <Route path="doctor-appointment-slots" element={<UserAppointmentSlots />} />
+          <Route path="/appointment-confirmation" element={<UserAppointmentConfirmation />} />
+          
           
         </Route>
       </Route>

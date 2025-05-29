@@ -9,7 +9,7 @@ startTime: { type: String, required: true },
 endTime: { type: String, required: true },
 duration: { type: Number, required: true },
 fee: { type: Number, required: true },
-rRule: { type: String, required: true },
+// rRule: { type: String, required: true },
 createdAt: { type: Date, default: Date.now },
 updatedAt: { type: Date, default: Date.now },
 

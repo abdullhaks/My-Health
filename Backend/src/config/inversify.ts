@@ -15,6 +15,8 @@ import UserProfileController from "../controllers/user/implementations/profileCt
 import IUserProfileCtrl from "../controllers/user/interfaces/IProfileCtrl";
 import UserAppointmentController from "../controllers/user/implementations/appointmentCtrl";
 import IUserAppointmentController from "../controllers/user/interfaces/IAppointmentCtrl";
+import UserSessionController from "../controllers/user/implementations/sessionCtrl";
+import IUserSessionCtrl from "../controllers/user/interfaces/ISessionCtrl";
 
 
 import AdminAuthController from "../controllers/admin/implementations/authCtrl";
@@ -40,7 +42,8 @@ import ConversationController from "../controllers/common/implementations/conver
 import IConversationCtrl from "../controllers/common/interfaces/IConversationCtrl";
 import MessageController from "../controllers/common/implementations/messageCtrl";
 import IMessageCtrl from "../controllers/common/interfaces/IMessageCtrl";
-
+import DetailsController from "../controllers/common/implementations/detailsCtrl";
+import IDetailsCtrl from "../controllers/common/interfaces/IDetailsCtrl";
 //.................................................................................
 
 //services.....................................................................
@@ -50,6 +53,8 @@ import UserProfileService from "../services/user/implementations/userProfileServ
 import IUserProfileService from "../services/user/interfaces/IuserProfileServices";
 import UserAppointmentService from "../services/user/implementations/userAppointmentServices";
 import IUserAppointmentService from "../services/user/interfaces/IUserAppointmentServices";
+import UserSessionService from "../services/user/implementations/userSessionService";
+import IUserSessionService from "../services/user/interfaces/IUserSessionService";
 
 
 import AdminAuthService from "../services/admin/implementations/adminAuthService";
@@ -73,6 +78,8 @@ import ConversationService from "../services/common/implementations/conversation
 import IConversationService from "../services/common/interfaces/IConversationService";
 import MessageService from "../services/common/implementations/messageService";
 import IMessageService from "../services/common/interfaces/IMessageService";
+import DetailsService from "../services/common/implementations/detailsService";
+import IDetailsService from "../services/common/interfaces/IDetailsService";
 
 //.................................................................................
 
@@ -121,7 +128,8 @@ container.bind("sessionModel").toConstantValue(sessionModel);
 
 container.bind<IUserAuthCtrl>("IUserAuthCtrl").to(UserAuthController);
 container.bind<IUserProfileCtrl>("IUserProfileCtrl").to(UserProfileController);
-container.bind<IUserAppointmentController>("IUserAppointmentController").to(UserAppointmentController)
+container.bind<IUserAppointmentController>("IUserAppointmentController").to(UserAppointmentController);
+container.bind<IUserSessionCtrl>("IUserSessionCtrl").to(UserSessionController);
 
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
@@ -135,6 +143,7 @@ container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionControl
 container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
 container.bind<IConversationCtrl>("IConversationCtrl").to(ConversationController)
 container.bind<IMessageCtrl>("IMessageCtrl").to(MessageController)
+container.bind<IDetailsCtrl>("IDetailsCtrl").to(DetailsController);
 
 
 
@@ -146,6 +155,7 @@ container.bind<IMessageCtrl>("IMessageCtrl").to(MessageController)
 container.bind<IUserAuthService>("IUserAuthService").to(UserAuthService)
 container.bind<IUserProfileService>("IUserProfileService").to(UserProfileService);
 container.bind<IUserAppointmentService>("IUserAppointmentService").to(UserAppointmentService);
+container.bind<IUserSessionService>("IUserSessionService").to(UserSessionService);
 
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
@@ -158,6 +168,7 @@ container.bind<IDoctorSessionService>("IDoctorSessionService").to(DoctorSessionS
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
 container.bind<IConversationService>("IConversationService").to(ConversationService);
 container.bind<IMessageService>("IMessageService").to(MessageService);
+container.bind<IDetailsService>("IDetailsService").to(DetailsService);
 
 
 //..............................................................................

@@ -53,6 +53,10 @@ const Doctors = () => {
     navigate("/chat", { state: { doctorId } });
   };
 
+  const handleBookAppointment = (doctorId: string) => {
+    navigate("/user/doctor-appointment-slots", { state: { doctorId } });
+  };
+
   return (
     <div className="p-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
       <div className="lg:col-span-3 space-y-4">
@@ -184,7 +188,10 @@ const Doctors = () => {
             </div>
             {selectedDoctor && selectedDoctor.premiumMembership && (
               <div className="mt-6 flex gap-3">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                <button
+                  onClick={() => handleBookAppointment(selectedDoctor._id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
                   Book Appointment
                 </button>
                 <button
