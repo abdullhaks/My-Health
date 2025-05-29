@@ -75,7 +75,6 @@ const UserChat = () => {
       const initializeConversation = async () => {
         try {
           setLoading(true);
-          // Fetch conversations to ensure we have the latest list
           const res = await getUserConversations(userId, "Doctor");
           setConversations(res);
 
@@ -85,6 +84,8 @@ const UserChat = () => {
           );
 
           if (existingConversation) {
+
+            console.log("existing conversation is ",existingConversation)
             setCurrentChat(existingConversation);
           } else {
             // Create a new conversation
