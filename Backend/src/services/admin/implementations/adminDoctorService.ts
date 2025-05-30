@@ -2,6 +2,20 @@ import { inject, injectable } from "inversify";
 import IAdminDoctorService from "../interfaces/IAdminDoctorService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import { generateDeclineMail } from "../../../utils/generateSignupDeclineMail";
+
+
+
+dotenv.config();
+
+
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+});
+
 
 
 @injectable()
@@ -52,15 +66,27 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-  async declineDoctor(id: string,reason:string): Promise<any> {
-    const response = await this._adminRepository.declineDoctor(id,reason);
+   async declineDoctor(id: string, reason: string): Promise<any> {
+    const response = await this._adminRepository.declineDoctor(id, reason);
 
     if (!response) {
-      throw new Error("doctor verifying failed");
+      throw new Error("doctor declining failed");
     }
+
+    // Send decline email
+    try {
+      const doctor = await this._adminRepository.getDoctor(id);
+      if (doctor && doctor.email) {
+        const mailOptions = generateDeclineMail(doctor.email, reason);
+        await transporter.sendMail(mailOptions);
+      }
+    } catch (error) {
+      console.error("Error sending decline email:", error);
+      // Don't throw error to avoid failing the decline process
+    }
+
     return response;
   }
-
   async block(id: string): Promise<any> {
     console.log("id from block....", id);
     const response = await this._adminRepository.blockDoctor(id);

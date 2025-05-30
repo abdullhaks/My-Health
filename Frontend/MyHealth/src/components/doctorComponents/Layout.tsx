@@ -72,7 +72,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     {
       name: "Chat",
       path: "/doctor/chat",
-      icon: <FaComments />
+      icon: <FaComments />,premium: true
     },
     {
       name: "Report Analyses",
