@@ -153,6 +153,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between px-2 py-2 border-b border-gray-100">
           <div className={collapsed ? "mx-auto" : "flex items-center"}>
             <img src={applogoBlue} alt="Doctor Logo" className="h-10 w-auto object-contain" />
+            <h1 className="">Doctor</h1>
           </div>
         </div>
 

@@ -111,7 +111,7 @@ const UserChat = () => {
 
       initializeConversation();
     }
-  }, [location.state?.doctorId, userId, navigate]);
+  }, [location.state?.doctorId, navigate]);
 
 
 

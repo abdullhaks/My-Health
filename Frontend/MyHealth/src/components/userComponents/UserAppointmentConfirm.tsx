@@ -73,8 +73,9 @@ const UserAppointmentConfirmation = () => {
     try {
       setPaymentStatus("processing");
       setErrorMessage("");
-      // TODO: Implement Stripe payment logic here
-      // Example: const response = await initiateStripePayment(slot, doctorId);
+      // i want to add stripe normal payment logic here...........
+
+      
       console.log("Initiating payment for slot:", slot, "Doctor ID:", doctorId);
       // On success:
       // setPaymentStatus("success");
