@@ -17,6 +17,8 @@ import Doctors from "../../components/userComponents/UserDoctors";
 import UserChat from "../../components/userComponents/UserChat";
 import UserAppointmentSlots from "../../components/userComponents/UserAppointmentSlots";
 import UserAppointmentConfirmation from "../../components/userComponents/UserAppointmentConfirm";
+import UserPaymentSuccess from "../../components/userComponents/UserPaymentSuccess";
+import UserPaymentCancelled from "../../components/userComponents/UserPaymentCancelled";
 
 const UserRoutes = () => {
   return (
@@ -41,12 +43,13 @@ const UserRoutes = () => {
           <Route path="doctors" element={<Doctors/>} />
           <Route path="chat" element={<UserChat />} />
           <Route path="doctor-appointment-slots" element={<UserAppointmentSlots />} />
-          <Route path="/appointment-confirmation" element={<UserAppointmentConfirmation />} />
-          
+          <Route path="appointment-confirmation" element={<UserAppointmentConfirmation />} />
+          <Route path="payment-success" element={<UserPaymentSuccess />} />
+          <Route path="payment-cancelled" element={<UserPaymentCancelled />} />
           
         </Route>
       </Route>
-
+ 
       {/* Catch All */}
       <Route path="*" element={<Navigate to="/user/login" />} />
     </Routes>

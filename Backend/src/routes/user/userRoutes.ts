@@ -9,6 +9,7 @@ import IConversationCtrl from "../../controllers/common/interfaces/IConversation
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
 import IUserSessionCtrl from "../../controllers/user/interfaces/ISessionCtrl";
 import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
+import IPaymentCtrl from "../../controllers/common/interfaces/IPaymentCtrl";
 
 const userRoutes = Router();
 
@@ -19,6 +20,7 @@ const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl");
 const sessionCtrl = container.get<IUserSessionCtrl>("IUserSessionCtrl");
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
+const paymentCtrl =  container.get<IPaymentCtrl>("IPaymentCtrl");
 
 
 
@@ -87,6 +89,11 @@ userRoutes.get("/sessions",verifyAccessTokenMidleware("user"),(req,res)=> sessio
 
 userRoutes.get("/doctorDetails",verifyAccessTokenMidleware("user"),(req,res)=>detailsCtrl.getDoctor(req,res) )
 
+userRoutes.post(
+  "/stripe/create-one-time-payment",
+  verifyAccessTokenMidleware("user"),
+  paymentCtrl.createOneTimePaymentSession
+);
 
 
 export default userRoutes; 

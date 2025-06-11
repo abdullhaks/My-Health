@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getDoctor } from "../../api/user/userApi"; 
+import { getDoctor, createOneTimePayment } from "../../api/user/userApi";
+import { loadStripe } from "@stripe/stripe-js";
+import { useSelector } from "react-redux";
 
 interface AppointmentSlot {
   id: string;
@@ -18,13 +20,15 @@ interface Doctor {
   specialization: string;
   experience: number;
   profile?: string;
-  category?:string;
+  category?: string;
 }
 
 interface AppointmentConfirmationProps {
   doctorId: string;
   slot: AppointmentSlot;
 }
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const UserAppointmentConfirmation = () => {
   const location = useLocation();
@@ -34,6 +38,7 @@ const UserAppointmentConfirmation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
+  const user =  useSelector((state: any) => state.user.user);
 
   useEffect(() => {
     if (!doctorId || !slot) {
@@ -69,17 +74,35 @@ const UserAppointmentConfirmation = () => {
     });
 
   const handlePayment = async () => {
-    // Placeholder for Stripe payment integration
     try {
       setPaymentStatus("processing");
       setErrorMessage("");
-      // i want to add stripe normal payment logic here...........
 
-      
-      console.log("Initiating payment for slot:", slot, "Doctor ID:", doctorId);
-      // On success:
-      // setPaymentStatus("success");
-      // navigate to success page or update UI
+      // Convert fee to paise (Stripe expects amounts in the smallest currency unit)
+      const amountInPaise = slot.fee * 100;
+      const metadata = {
+        doctorId,
+        userId:user._id,
+        slotId: slot.id,
+        start:slot.start,
+        end:slot.end,
+        duration:slot.duration,
+        fee:slot.fee,
+        role: "user",
+        type: "appointment",
+      };
+
+      const data = await createOneTimePayment(amountInPaise, metadata);
+      const stripe = await stripePromise;
+
+      if (stripe) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("Stripe initialization failed.");
+      }
+
+      // On success, the webhook will handle updating the appointment status
+      // Optionally, redirect to a success page after webhook confirmation
     } catch (error) {
       console.error("Payment error:", error);
       setPaymentStatus("error");
@@ -114,19 +137,17 @@ const UserAppointmentConfirmation = () => {
           <div className="space-y-6">
             {/* Doctor Details */}
             <div className="flex items-center space-x-4 border-b border-gray-200 pb-4">
-             
-                <img
-                  src={doctor.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
-                  alt={doctor.fullName}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-            
+              <img
+                src={doctor.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
+                alt={doctor.fullName}
+                className="w-16 h-16 rounded-full object-cover"
+              />
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">Dr.{doctor.fullName}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">Dr. {doctor.fullName}</h3>
                 <p className="text-sm text-gray-600">{doctor.specialization}</p>
                 <span className="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                    {doctor.category || "General"}
-                  </span>
+                  {doctor.category || "General"}
+                </span>
                 <p className="text-sm text-gray-500">Experience: {doctor.experience} years</p>
               </div>
             </div>

@@ -252,4 +252,21 @@ export const getSessions = async (doctorId:string)=>{
     console.log("Error in get sessions",error);
     throw error;
   }
-}
+};
+
+
+export const createOneTimePayment = async (amount: number, metadata: any) => {
+  try {
+
+    console.log("metadata in api is :",metadata);
+    
+    const response = await userInstance.post("/user/stripe/create-one-time-payment", {
+      amount,
+      metadata,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error in creating one-time payment session:", error);
+    throw error;
+  }
+};

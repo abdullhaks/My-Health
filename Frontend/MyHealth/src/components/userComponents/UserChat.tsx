@@ -510,7 +510,7 @@ const UserChat = () => {
                         {msg.senderId === userId && (
                           <span className="absolute bottom-1 right-2 text-xs flex items-center space-x-1">
                             {msg.status === "read" ? (
-                              <FiCheckCircle className="text-blue-300" size={14} />
+                              <FiCheckCircle className="text-blue-500" size={14} />
                             ) : msg.status === "delivered" ? (
                               <FiCheck className="text-gray-300" size={14} />
                             ) : (

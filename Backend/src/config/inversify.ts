@@ -7,6 +7,7 @@ import subscriptionModel from "../models/subscriptionModel";
 import conversationModel from "../models/conversationModel";
 import messageModel from "../models/messageModel";
 import sessionModel from "../models/sessionModel";
+import appointmentModel from "../models/appointmentModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -108,7 +109,8 @@ import IMessageRepository from "../repositories/interfaces/IMessageRepository";
 import SessionRepository from "../repositories/implementations/sessionRepository";
 import ISessionRepository from "../repositories/interfaces/ISessionRepository";
 
-
+import AppointmentsRepository from "../repositories/implementations/appointmentsRepository";
+import IAppointmentsRepository from "../repositories/interfaces/IAppointmentsRepository";
 //.................................................................................
 
 
@@ -122,6 +124,7 @@ container.bind("subscriptionModel").toConstantValue(subscriptionModel);
 container.bind("conversationModel").toConstantValue(conversationModel);
 container.bind("messageModel").toConstantValue(messageModel);
 container.bind("sessionModel").toConstantValue(sessionModel);
+container.bind("appointmentModel").toConstantValue(appointmentModel)
 
 //...................................................................
 
@@ -183,6 +186,6 @@ container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentR
 container.bind<IConversationRepository>("IConversationRepository").to(ConversationRepository);
 container.bind<IMessageRepository>("IMessageRepository").to(MessageRepository);
 container.bind<ISessionRepository>("ISessionRepository").to(SessionRepository);
-
+container.bind<IAppointmentsRepository>("IAppointmentsRepository").to(AppointmentsRepository);
 
 export default container;

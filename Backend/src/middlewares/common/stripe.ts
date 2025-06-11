@@ -37,4 +37,45 @@ export const makePayment = async ({
 
 
 
+
+export const makeOneTimePayment = async ({
+  amount,
+  currency = "inr",
+  metadata = {},
+  successPath = "/payment-success",
+  cancelPath = "/payment-cancelled",
+}: {
+  amount: number; // Amount in smallest currency unit (e.g., paise for INR)
+  currency?: string;
+  metadata?: Record<string, any>;
+  successPath?: string;
+  cancelPath?: string;
+}) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency,
+          product_data: {
+            name: "Doctor Appointment",
+            description: `Appointment fee for doctor consultation`,
+          },
+          unit_amount: amount, // Amount in paise
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${process.env.CLIENT_URL}${successPath}?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.CLIENT_URL}${cancelPath}`,
+    metadata,
+  });
+
+  return session;
+};
+
+
+
+
   

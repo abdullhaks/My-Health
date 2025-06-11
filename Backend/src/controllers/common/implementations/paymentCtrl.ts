@@ -5,6 +5,7 @@ import stripe from "../../../middlewares/common/stripe";
 import IPaymentCtrl from "../interfaces/IPaymentCtrl";
 import { inject,injectable } from "inversify";
 import IPaymentService from "../../../services/common/interfaces/IPaymentService";
+import { makeOneTimePayment } from "../../../middlewares/common/stripe";
 
 
 @injectable()
@@ -38,7 +39,35 @@ private _paymentService: IPaymentService;
       console.error("Webhook signature verification failed.", error);
       return res.status(400).send(`Webhook Error: ${(error as Error).message}`);
     }
+  };
+
+  
+
+
+  async createOneTimePaymentSession(req: Request, res: Response): Promise<any> {
+    const { amount, metadata } = req.body;
+    const successPath = `/${metadata.role}/payment-success`;
+    const cancelPath = `/${metadata.role}/payment-cancelled`;
+
+    try {
+      const session = await makeOneTimePayment({
+        amount,
+        currency: "inr",
+        metadata, 
+        successPath,
+        cancelPath,
+      });
+
+      console.log("One-time payment session:", session);
+      return res.status(200).json({ url: session.url });
+    } catch (err) {
+      console.error("Stripe one-time payment error:", err);
+      return res.status(500).json({ message: "One-time payment session creation failed" });
+    }
   }
+
+
+
 }
 
 
