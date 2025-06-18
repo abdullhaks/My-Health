@@ -29,7 +29,7 @@ interface User {
 
 interface Conversation {
   _id: string;
-  members: [any]; 
+  members: [any];
   lastMessage?: string;
 }
 
@@ -68,7 +68,6 @@ const UserChat = () => {
     }
   };
 
-
   useEffect(() => {
     const doctorId = location.state?.doctorId;
     if (doctorId && userId && !hasInitializedConversation.current) {
@@ -84,8 +83,7 @@ const UserChat = () => {
           );
 
           if (existingConversation) {
-
-            console.log("existing conversation is ",existingConversation)
+            console.log("existing conversation is ", existingConversation);
             setCurrentChat(existingConversation);
           } else {
             // Create a new conversation
@@ -112,8 +110,6 @@ const UserChat = () => {
       initializeConversation();
     }
   }, [location.state?.doctorId, navigate]);
-
-
 
   useEffect(() => {
     const setupSocket = async () => {
@@ -176,7 +172,7 @@ const UserChat = () => {
       if (!userId) return;
       setLoading(true);
       try {
-        const res = await getUserConversations(userId,"Doctor");
+        const res = await getUserConversations(userId, "Doctor");
         console.log("Fetched conversations:", res);
         setConversations(res);
       } catch (err) {
@@ -188,9 +184,7 @@ const UserChat = () => {
     };
 
     // Temporarily hardcoded users until /api/user/all is implemented
-    setUsers([
-      { _id: "682d8d5e69828e1965f9b086", fullName: "FATHIMA KS" },
-    ]);
+    setUsers([{ _id: "682d8d5e69828e1965f9b086", fullName: "FATHIMA KS" }]);
 
     if (userId) {
       fetchConversations();
@@ -198,32 +192,30 @@ const UserChat = () => {
   }, [userId]);
 
   useEffect(() => {
-  if (!currentChat || !socketRef.current) return;
+    if (!currentChat || !socketRef.current) return;
 
-  socketRef.current.emit("join", currentChat._id); // Join conversation room
+    socketRef.current.emit("join", currentChat._id); // Join conversation session
 
-  const fetchMessages = async () => {
-    setLoading(true);
-    try {
-      const res = await getUserMessages(currentChat._id);
-      setMessages(res);
-      socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
-    } catch (err) {
-      console.error("Failed to fetch messages:", err);
-      message.error("Failed to fetch messages. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchMessages = async () => {
+      setLoading(true);
+      try {
+        const res = await getUserMessages(currentChat._id);
+        setMessages(res);
+        socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
+      } catch (err) {
+        console.error("Failed to fetch messages:", err);
+        message.error("Failed to fetch messages. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchMessages();
+    fetchMessages();
 
-  return () => {
-    socketRef.current?.emit("leave", currentChat._id); // Leave conversation room on cleanup
-  };
-}, [currentChat]);
-
-
+    return () => {
+      socketRef.current?.emit("leave", currentChat._id); // Leave conversation on cleanup
+    };
+  }, [currentChat]);
 
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
@@ -231,17 +223,23 @@ const UserChat = () => {
     const socket = socketRef.current;
 
     const handleMessage = (msg: Message) => {
-    if (msg.conversationId === currentChat._id) {
-      setMessages((prev) => {
-        // Avoid duplicates
-        if (prev.some((m) => m._id === msg._id)) return prev;
-        return [...prev, msg];
-      });
-      socket.emit("markSeen", { conversationId: msg.conversationId });
-    }
-  };
+      if (msg.conversationId === currentChat._id) {
+        setMessages((prev) => {
+          // Avoid duplicates
+          if (prev.some((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+        socket.emit("markSeen", { conversationId: msg.conversationId });
+      }
+    };
 
-    const handleSeen = ({ conversationId, userId }: { conversationId: string; userId: string }) => {
+    const handleSeen = ({
+      conversationId,
+      userId,
+    }: {
+      conversationId: string;
+      userId: string;
+    }) => {
       setMessages((prev) =>
         prev.map((msg) =>
           msg.conversationId === conversationId && !msg.readBy.includes(userId)
@@ -251,7 +249,15 @@ const UserChat = () => {
       );
     };
 
-    const handleTyping = ({ userId, role, conversationId }: { userId: string; role: string; conversationId: string }) => {
+    const handleTyping = ({
+      userId,
+      role,
+      conversationId,
+    }: {
+      userId: string;
+      role: string;
+      conversationId: string;
+    }) => {
       if (currentChat._id === conversationId) {
         const user = users.find((u) => u._id === userId);
         setTypingUser(`${user?.fullName || role} is typing...`);
@@ -279,43 +285,45 @@ const UserChat = () => {
     };
   }, [currentChat, users]);
 
- const handleSendMessage = async () => {
-  if (!newMessage.trim() || !currentChat) return;
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !currentChat) return;
 
-  const messageData = {
-    senderId: userId,
-    conversationId: currentChat._id,
-    content: newMessage,
+    const messageData = {
+      senderId: userId,
+      conversationId: currentChat._id,
+      content: newMessage,
+    };
+
+    const tempMessage: Message = {
+      _id: uuidv4(),
+      conversationId: currentChat._id,
+      senderId: userId,
+      content: newMessage,
+      timestamp: new Date().toISOString(),
+      readBy: [userId],
+      status: "sent",
+    };
+
+    // setMessages((prev) => [...prev, tempMessage]);
+    setNewMessage("");
+
+    try {
+      // const response = await sendDoctorMessage(messageData);
+      // Update the temp message with server response
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === tempMessage._id
+            ? { ...tempMessage, readBy: [userId], status: "sent" }
+            : msg
+        )
+      );
+      socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
+    } catch (error: any) {
+      console.error("Message send failed:", error);
+      message.error(error.response?.data?.message || "Failed to send message.");
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+    }
   };
-
-  const tempMessage: Message = {
-    _id: uuidv4(),
-    conversationId: currentChat._id,
-    senderId: userId,
-    content: newMessage,
-    timestamp: new Date().toISOString(),
-    readBy: [userId],
-    status: "sent",
-  };
-
-  // setMessages((prev) => [...prev, tempMessage]);
-  setNewMessage("");
-
-  try {
-    // const response = await sendDoctorMessage(messageData);
-    // Update the temp message with server response
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === tempMessage._id ? { ...tempMessage, readBy: [userId], status: "sent" } : msg
-      )
-    );
-    socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
-  } catch (error: any) {
-    console.error("Message send failed:", error);
-    message.error(error.response?.data?.message || "Failed to send message.");
-    setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
-  }
-};
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -350,32 +358,55 @@ const UserChat = () => {
     }, 3000);
   };
 
-  // const getUserDetails = (userId: string) => {
-  //   const user = users.find((u) => u._id === userId);
-  //   return {
-  //     name: user?.fullName || "Unknown User",
-  //     avatar: user?.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png",
-  //   };
-  // };
-
-  // const filteredConversations = conversations.filter((c) => {
-  //   console.log("Conversation:", c); // Debug log
-  //   if (!c.members || !Array.isArray(c.members)) {
-  //     console.warn("Invalid conversation, missing or invalid members:", c);
-  //     return false;
-  //   }
-  //   const otherUserId = c.members.find((id) => id !== userId);
-  //   if (!otherUserId) {
-  //     console.warn("No other user found in conversation:", c);
-  //     return false;
-  //   }
-  //   const { name } = getUserDetails(otherUserId);
-  //   return name.toLowerCase().includes(searchTerm.toLowerCase());
-  // });
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Helper function to format timestamp
+  const formatMessageTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Helper function to format date header
+  const formatDateHeader = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return "Today";
+    } else if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+  };
+
+  // Helper function to determine if a date header is needed
+  const needsDateHeader = (currentMsg: Message, prevMsg?: Message) => {
+    if (!prevMsg) return true;
+    const currentDate = new Date(currentMsg.timestamp).setHours(0, 0, 0, 0);
+    const prevDate = new Date(prevMsg.timestamp).setHours(0, 0, 0, 0);
+    return currentDate !== prevDate;
+  };
 
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
@@ -419,30 +450,30 @@ const UserChat = () => {
           ) : (
             <ul className="divide-y divide-gray-200">
               {conversations.map((c) => {
-                
-                return c.members.map((m)=>{
-                const { name, avatar } =m
-                return (
-                  <li
-                    key={c._id}
-                    className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
-                      currentChat?._id === c._id ? "bg-green-50" : ""
-                    }`}
-                    onClick={() => setCurrentChat(c)}
-                  >
-                    <img
-                      src={avatar}
-                      alt={name}
-                      className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-                      {/* <p className="text-xs text-gray-500 truncate">{c.lastMessage || "No messages yet"}</p> */}
-                    </div>
-                  </li>
-                );
-
-                })
+                return c.members.map((m) => {
+                  const { name, avatar } = m;
+                  return (
+                    <li
+                      key={c._id}
+                      className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
+                        currentChat?._id === c._id ? "bg-green-50" : ""
+                      }`}
+                      onClick={() => setCurrentChat(c)}
+                    >
+                      <img
+                        src={avatar}
+                        alt={name}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {name}
+                        </p>
+                        {/* <p className="text-xs text-gray-500 truncate">{c.lastMessage || "No messages yet"}</p> */}
+                      </div>
+                    </li>
+                  );
+                });
               })}
             </ul>
           )}
@@ -456,7 +487,7 @@ const UserChat = () => {
             {/* Chat Header */}
             <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3 sticky top-0 z-5 shadow-sm">
               <img
-                src={currentChat.members[0].avatar|| "Unknown User"}
+                src={currentChat.members[0].avatar || "Unknown User"}
                 alt={currentChat.members[0].name}
                 className="w-10 h-10 rounded-full object-cover border border-gray-200"
               />
@@ -479,45 +510,62 @@ const UserChat = () => {
               }}
             >
               {loading ? (
-                <div className="text-center text-gray-500 text-sm">Loading messages...</div>
+                <div className="text-center text-gray-500 text-sm">
+                  Loading messages...
+                </div>
               ) : (
                 <div className="space-y-2">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg._id}
-                      className={`flex ${
-                        msg.senderId === userId ? "justify-end" : "justify-start"
-                      }`}
-                    >
+                  {messages.map((msg, index) => (
+                    <div key={msg._id}>
+                      {/* Date Header */}
+                      {needsDateHeader(msg, messages[index - 1]) && (
+                        <div className="text-center my-4">
+                          <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
+                            {formatDateHeader(msg.timestamp)}
+                          </span>
+                        </div>
+                      )}
+                      {/* Message */}
                       <div
-                        className={`relative max-w-xs p-3 rounded-lg shadow-sm ${
-                          msg.senderId === userId
-                            ? "bg-green-500 text-white"
-                            : "bg-white text-gray-900"
+                        className={`flex ${
+                          msg.senderId === userId ? "justify-end" : "justify-start"
                         }`}
                       >
-                        {/* Message Tail */}
                         <div
-                          className={`absolute top-2 ${
-                            msg.senderId === userId ? "-right-2" : "-left-2"
-                          } w-0 h-0 border-t-8 border-t-transparent ${
+                          className={`relative max-w-xs p-3 rounded-lg shadow-sm ${
                             msg.senderId === userId
-                              ? "border-l-8 border-l-green-500"
-                              : "border-r-8 border-r-white"
-                          } border-b-8 border-b-transparent`}
-                        />
-                        <p className="text-sm">{msg.content}</p>
-                        {msg.senderId === userId && (
-                          <span className="absolute bottom-1 right-2 text-xs flex items-center space-x-1">
-                            {msg.status === "read" ? (
-                              <FiCheckCircle className="text-blue-500" size={14} />
-                            ) : msg.status === "delivered" ? (
-                              <FiCheck className="text-gray-300" size={14} />
-                            ) : (
-                              <FiCheck className="text-gray-300" size={14} />
+                              ? "bg-green-500 text-white"
+                              : "bg-white text-gray-900"
+                          }`}
+                        >
+                          {/* Message Tail */}
+                          <div
+                            className={`absolute top-2 ${
+                              msg.senderId === userId ? "-right-2" : "-left-2"
+                            } w-0 h-0 border-t-8 border-t-transparent ${
+                              msg.senderId === userId
+                                ? "border-l-8 border-l-green-500"
+                                : "border-r-8 border-r-white"
+                            } border-b-8 border-b-transparent`}
+                          />
+                          <p className="text-sm">{msg.content}</p>
+                          <div className="flex items-center justify-end mt-1 space-x-1">
+                            <span className="text-xs text-gray-300">
+                              {formatMessageTime(msg.timestamp)}
+                            </span>
+                            {msg.senderId === userId && (
+                              <span className="flex items-center">
+                                {msg.status === "read" ? (
+                                  <FiCheckCircle className="text-blue-500" size={14} />
+                                ) : msg.status === "delivered" ? (
+                                  <FiCheck className="text-gray-300" size={14} />
+                                ) : (
+                                  <FiCheck className="text-gray-300" size={14} />
+                                )}
+                              </span>
                             )}
-                          </span>
-                        )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -8,12 +8,13 @@ export interface IAppointment {
   end: Date;
   duration: number;
   fee: number;
-  status: "booked" | "cancelled" | "completed" | "pending";
+  appointmentStatus: "booked" | "cancelled" | "completed" | "pending";
   stripeSessionId?: string;
   userName: string;
   userEmail: string; 
   doctorName: string; 
   doctorSpecialization: string; 
+  paymentStatus: "pending" | "completed" | "failed";
   doctorCategory?: string; 
   createdAt: Date;
   updatedAt: Date;

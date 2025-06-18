@@ -28,12 +28,15 @@ import AdminDoctorController from "../controllers/admin/implementations/doctorCt
 import IAdminDoctorCtrl from "../controllers/admin/interfaces/IDoctorCtrl";
 
 
+
 import DoctorAuthController from "../controllers/doctor/implementations/authCtrl";
 import IDoctorAuthCtrl from "../controllers/doctor/interfaces/IAuthCtrl";
 import DoctorProfileController from "../controllers/doctor/implementations/profileCtrl";
 import IDoctorProfileCtrl from "../controllers/doctor/interfaces/IProfileCtrl";
 import DoctorSessionController from "../controllers/doctor/implementations/sessionCtrl";
 import IDoctorSessionCtrl from "../controllers/doctor/interfaces/ISessionCtrl";
+import DoctorAppointmentController from "../controllers/doctor/implementations/appointmentCtrl";
+import IDoctorAppointmentController from "../controllers/doctor/interfaces/IAppointmentCtrl";
 
 
 
@@ -71,6 +74,8 @@ import IDoctorProfileService from "../services/doctor/interfaces/IDoctorProfileS
 import DoctorProfileService from "../services/doctor/implementations/doctorProfileService";
 import DoctorSessionService from "../services/doctor/implementations/doctorSessionService";
 import IDoctorSessionService from "../services/doctor/interfaces/IDoctorSessionService";
+import DoctorAppointmentService from "../services/doctor/implementations/doctorAppointmentService";
+import IDoctorAppointmentService from "../services/doctor/interfaces/IDoctorAppointmentService";
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -141,6 +146,8 @@ container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionController);
+container.bind<IDoctorAppointmentController>("IDoctorAppointmentController").to(DoctorAppointmentController);
+
 
 
 container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
@@ -167,6 +174,8 @@ container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService);
 container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService);
 container.bind<IDoctorSessionService>("IDoctorSessionService").to(DoctorSessionService);
+container.bind<IDoctorAppointmentService>("IDoctorAppointmentService").to(DoctorAppointmentService);
+
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
 container.bind<IConversationService>("IConversationService").to(ConversationService);

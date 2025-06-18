@@ -234,4 +234,21 @@ export const getSessions = async (doctorId:string)=>{
     console.log("Error in get sessions",error);
     throw error;
   }
+};
+
+
+export const getDoctorAppointments = async(doctorId:string) => {
+  try{
+
+    const response = await doctorInstance.get("/doctor/getAppointments",{
+      params: { doctorId: doctorId }
+    });
+
+    console.log("response data is ....",response.data)
+    return response.data;
+
+  }catch(error){
+    console.error("Error in get doctor's appointments..:", error);
+    throw error;
+  }
 }

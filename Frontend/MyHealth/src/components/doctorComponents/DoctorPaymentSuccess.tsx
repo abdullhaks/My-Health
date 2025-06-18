@@ -57,7 +57,8 @@ const PaymentSuccess = () => {
             verifying ? 'opacity-60 cursor-not-allowed' : ''
           }`}
         >
-          {verifying ? 'Verifying...' : 'Verify Payment'}
+          Explore MyHealth
+          {/* {verifying ? 'Verifying...' : 'Verify Payment'} */}
         </button>
       </div>
     </div>

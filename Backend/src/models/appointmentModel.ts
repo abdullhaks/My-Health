@@ -31,10 +31,15 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       type: Number,
       required: true,
     },
-    status: {
+    appointmentStatus: {
       type: String,
       enum: ["booked", "cancelled", "completed", "pending"],
       default: "booked",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "completed", "failed"],
+      default: "pending",
     },
     stripeSessionId: {
       type: String,
@@ -54,13 +59,13 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
     },
     doctorSpecialization: {
       type: String,
-      required: true,
+      required: false,
     },
     doctorCategory: {
       type: String,
       required: false,
     }
-    
+
   },
   {
     timestamps: true,

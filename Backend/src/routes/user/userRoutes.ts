@@ -95,5 +95,7 @@ userRoutes.post(
   paymentCtrl.createOneTimePaymentSession
 );
 
+userRoutes.get("/getAppointments",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.getAppointments(req,res))
+
 
 export default userRoutes; 

@@ -270,3 +270,19 @@ export const createOneTimePayment = async (amount: number, metadata: any) => {
     throw error;
   }
 };
+
+export const getUserAppointments = async(userId:string) => {
+  try{
+
+    const response = await userInstance.get("/user/getAppointments",{
+      params: { userId: userId }
+    });
+
+    console.log("response data is ....",response.data)
+    return response.data;
+
+  }catch(error){
+    console.error("Error in get user's appointments..:", error);
+    throw error;
+  }
+}

@@ -59,6 +59,10 @@ export default class DoctorProfileService implements IDoctorProfileService {
         if (!doctor) {
             throw new Error("Doctor not found in subcription verification");
         }
+
+        if(doctor){
+          doctor.profile = await getSignedImageURL(doctor.profile)
+        }
         const { password, ...doctorWithoutPassword } = doctor;
 
         return {

@@ -5,13 +5,20 @@ import Stripe from "stripe";
 import stripe from "../../../middlewares/common/stripe";
 import { ISubscriptionDocument } from "../../../entities/subscriptionEntities";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
+import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import { IAppointmentDocument } from "../../../entities/appointmentEntities";
+import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 
 @injectable()
 export default class PaymentService implements IPaymentService {
   constructor(
     @inject("IPaymentRepository")
     private _paymentRepository: IPaymentRepository,
-    @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
+    @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository,
+    @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
+    @inject("IUserRepository") private _userRepository:IUserRepository,
+
   ) {}
 
   async handleWebhookEvent(event: any): Promise<any> {
@@ -22,8 +29,8 @@ export default class PaymentService implements IPaymentService {
       const session = event.data.object as Stripe.Checkout.Session;
       
 
-      console.log("event is..................", event);
-      console.log("session is..................", session);
+      // console.log("event is..................", event);
+      // console.log("session is..................", session);
 
       const metadata = session.metadata;
 
@@ -34,13 +41,59 @@ export default class PaymentService implements IPaymentService {
 
       switch (metadata.role) {
         case "user":
-          console.log("User payment session completed:", session);
+          
         if (metadata.type === "appointment") {
-          // Handle one-time appointment payment
-          // Example: Update appointment status in the database
           console.log("Processing one-time appointment payment for user:", metadata);
-          // Call a service to update the appointment status
-          // await this._paymentService.handleUserAppointmentPayment(session);
+
+          const user = await this._userRepository.findOne({_id:metadata.userId});
+
+          console.log("user is ",user);
+
+            if (!user) {
+              console.error("User not found:", metadata.userId);
+              throw new Error("User not found.");
+            };
+
+
+            const doctor = await this._doctorRepository.findOne({_id:metadata.doctorId});
+          console.log("doctor is ",doctor);
+
+            if (!doctor) {
+              console.error("Doctor not found:", metadata.doctorId);
+              throw new Error("Doctor not found.");
+            };
+
+            const appointmentsWithSameDoc = this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorName});
+
+            // if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
+
+              
+            // }
+
+
+            const appointmentData: Partial<IAppointmentDocument> = {
+              userId: metadata.userId,
+              doctorId: metadata.doctorId,
+              userName: user.fullName,
+              userEmail:user.email,
+              doctorName: doctor.fullName,
+              doctorCategory: doctor.category,
+              start: new Date(metadata.start),
+              end: new Date(metadata.end),
+              duration: parseInt(metadata.duration),
+              fee: parseInt(metadata.fee),
+              slotId: metadata.slotId,
+              stripeSessionId: session.id,
+              paymentStatus: "completed",
+              appointmentStatus: "booked",
+            };
+
+
+
+          const appointment = await this._appointmentsRepository.create(
+              appointmentData
+            );
+            console.log("Appointment created:", appointment);
         }
         break;
         case "doctor":

@@ -3,8 +3,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUserFriends, FaCalendarCheck, FaComments, FaChartBar,
   FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight,
-  FaSearch, FaBell, FaEnvelope,
-  FaUser
+  FaSearch, FaBell, FaEnvelope,FaCalendarAlt,FaUser
 } from "react-icons/fa";
 import { GiRoyalLove } from "react-icons/gi"; 
 import applogoBlue from "../../assets/applogoblue.png";
@@ -67,6 +66,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
   const menuItems = [
     { name: "Dashboard", path: "/doctor/dashboard", icon: <FaHome /> },
+    { name: "Appointments", path: "/doctor/appointments", icon: <FaCalendarAlt /> },
     { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
     { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
     {

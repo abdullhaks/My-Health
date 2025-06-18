@@ -9,6 +9,7 @@ injectable();
 export default class UserAppointmentController implements IUserAppointmentController {
 
     private _appointmentService: IUserAppointmentService;
+    
 
     constructor(
         @inject("IUserAppointmentService") UserAppointmentService: IUserAppointmentService
@@ -35,6 +36,28 @@ export default class UserAppointmentController implements IUserAppointmentContro
     console.error("Error in controller fetchingDoctors:", err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+
+
+async getAppointments (req: Request, res: Response): Promise<any> {
+
+try{
+
+  const userId = req.query.userId;
+
+  console.log("user id is///",userId);
+
+  const appointments = await this._appointmentService.getUserAppointments(String(userId));
+
+    res.status(200).json(appointments);
+
+
+}catch(err){
+  console.error("Error in fetchin user appointments:", err);
+  res.status(500).json({ message: "Server error" });
+}
+
 }
 
 

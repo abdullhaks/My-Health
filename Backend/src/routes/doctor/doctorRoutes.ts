@@ -2,7 +2,7 @@ import { Router } from "express";
 import container from "../../config/inversify";
 import IDoctorAuthCtrl from "../../controllers/doctor/interfaces/IAuthCtrl";
 import IDoctorProfileCtrl from "../../controllers/doctor/interfaces/IProfileCtrl";
-import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
+import IDoctorAppointmentController from "../../controllers/doctor/interfaces/IAppointmentCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
@@ -16,6 +16,8 @@ const profileCtrl = container.get<IDoctorProfileCtrl>("IDoctorProfileCtrl");
 const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl")
 const sessionCtrl = container.get<ISessionCtrl>("IDoctorSessionCtrl");
+const appointmentCtrl = container.get<IDoctorAppointmentController>("IDoctorAppointmentController");
+
 
 doctorRoutes.post("/login", (req, res,next) => authCtrl.doctorLogin(req, res,next));
 
@@ -93,6 +95,15 @@ doctorRoutes.post(
 doctorRoutes.post("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSessions(req,res));
 
 doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) );
+
+doctorRoutes.get("/getAppointments",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.getAppointments(req,res))
+
+
+
+
+
+
+
 
 export default doctorRoutes;
 

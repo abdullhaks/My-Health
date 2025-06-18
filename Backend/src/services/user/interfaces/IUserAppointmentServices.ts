@@ -9,5 +9,7 @@ export default interface IUserAppointmentService {
   sort: string,
   page: number,
   limit: number
-): Promise<any> 
+): Promise<any> ,
+
+getUserAppointments(userId:string):Promise<any>
 }

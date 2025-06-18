@@ -59,7 +59,7 @@ const handleTokenErrors = async (error: AxiosError<ErrorResponse>) => {
   try {
     await logout();
     
-    toast.error(error.message);
+    toast.error(error.message);  
     localStorage.removeItem("userEmail");
   } catch (logoutError) {
     console.error("Logout failed:", logoutError);

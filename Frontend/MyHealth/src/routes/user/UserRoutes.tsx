@@ -19,6 +19,7 @@ import UserAppointmentSlots from "../../components/userComponents/UserAppointmen
 import UserAppointmentConfirmation from "../../components/userComponents/UserAppointmentConfirm";
 import UserPaymentSuccess from "../../components/userComponents/UserPaymentSuccess";
 import UserPaymentCancelled from "../../components/userComponents/UserPaymentCancelled";
+import UserAppointments from "../../components/userComponents/UserAppointments";
 
 const UserRoutes = () => {
   return (
@@ -46,8 +47,11 @@ const UserRoutes = () => {
           <Route path="appointment-confirmation" element={<UserAppointmentConfirmation />} />
           <Route path="payment-success" element={<UserPaymentSuccess />} />
           <Route path="payment-cancelled" element={<UserPaymentCancelled />} />
+          <Route path="appointments" element={<UserAppointments />} />
+           
           
         </Route>
+        
       </Route>
  
       {/* Catch All */}
