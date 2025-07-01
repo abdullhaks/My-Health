@@ -36,6 +36,7 @@ export interface IDoctorDocument extends Document{
     registerNo:string;
     registrationCertificate:string;
     experience:number;
+    reportAnalysisFees:number;
     specializations:ISpecializations[];
     verificationId:string;
     walletBalance:number;

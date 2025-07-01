@@ -24,6 +24,7 @@ const doctorSchema : Schema<IDoctorDocument> = new Schema ({
     isBlocked: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
     adminVerified:{ type: Number, default: 0 },
+    reportAnalysisFees:{type:Number,default:50},
     rejectionReason:{ type: String },
     graduation:{ type: String },
     graduationCertificate:{ type: String },

@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import userRoutes from './src/routes/user/userRoutes';
 import logger from './src/utils/logs/logger';
 import connectDB from './src/config/connectDB';
-import cors from 'cors';
+import cors from 'cors'; 
 import adminRoutes from './src/routes/admin/adminRoutes';
 import doctorRoutes from './src/routes/doctor/doctorRoutes';
 // import { stripeWebhookController } from './src/controllers/common/implementations/paymentCtrl';

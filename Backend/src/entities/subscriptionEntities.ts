@@ -13,4 +13,6 @@ export interface ISubscriptionDocument extends Document {
     amount: number;
     subscribedAt: Date;
     doctor: Types.ObjectId | string |undefined
+    userId: Types.ObjectId | string |undefined
+
   }

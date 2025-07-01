@@ -20,6 +20,10 @@ import UserAppointmentConfirmation from "../../components/userComponents/UserApp
 import UserPaymentSuccess from "../../components/userComponents/UserPaymentSuccess";
 import UserPaymentCancelled from "../../components/userComponents/UserPaymentCancelled";
 import UserAppointments from "../../components/userComponents/UserAppointments";
+import UserVideoCall from "../../components/userComponents/UserVideoCall";
+import AiHealthStatusGenerator from "../../components/userComponents/AiHealthStatus";
+import UserHealthReportAnalysis from "../../components/userComponents/UserHealthReportAnalysis";
+import VideoCall from "../../sharedComponents/VideoCall";
 
 const UserRoutes = () => {
   return (
@@ -48,7 +52,10 @@ const UserRoutes = () => {
           <Route path="payment-success" element={<UserPaymentSuccess />} />
           <Route path="payment-cancelled" element={<UserPaymentCancelled />} />
           <Route path="appointments" element={<UserAppointments />} />
-           
+          <Route path="video-call/:appointmentId" element={<VideoCall role="user" />} />
+          <Route path="ai" element={< AiHealthStatusGenerator/>} />
+          <Route path="health-report-analysis" element={< UserHealthReportAnalysis/>} />
+          
           
         </Route>
         

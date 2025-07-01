@@ -33,12 +33,12 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
     },
     appointmentStatus: {
       type: String,
-      enum: ["booked", "cancelled", "completed", "pending"],
+      enum: ["booked", "cancelled", "completed", "pending",],
       default: "booked",
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "completed", "failed"],
+      enum: ["pending", "completed", "failed", "refunded"],
       default: "pending",
     },
     stripeSessionId: {
@@ -64,9 +64,18 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
     doctorCategory: {
       type: String,
       required: false,
-    }
+    },
+    callStartTime:{
+    type:Date,
+    reuired:false
+    },
+    callEndTime:{
+      type:Date,
+      required:false
+    },
 
   },
+  
   {
     timestamps: true,
   }

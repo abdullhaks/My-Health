@@ -1,7 +1,7 @@
-const apiUrl = import.meta.env.VITE_API_URL;
+
 // import {message} from "antd";
 import { adminInstance } from "../../services/adminInstance";
-console.log(`API URL: ${apiUrl}`);
+import { ROUTES } from "../../constants/routes";
 
 
 

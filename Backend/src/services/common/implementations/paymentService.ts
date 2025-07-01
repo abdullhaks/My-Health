@@ -63,12 +63,12 @@ export default class PaymentService implements IPaymentService {
               throw new Error("Doctor not found.");
             };
 
-            const appointmentsWithSameDoc = this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorName});
+            const appointmentsWithSameDoc =await this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorName});
 
-            // if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
+            if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
 
               
-            // }
+            }
 
 
             const appointmentData: Partial<IAppointmentDocument> = {
@@ -94,7 +94,31 @@ export default class PaymentService implements IPaymentService {
               appointmentData
             );
             console.log("Appointment created:", appointment);
-        }
+        }else if (metadata.type === "report_analysis") {
+            console.log("Processing report analysis payment for user:", metadata);
+
+            const user = await this._userRepository.findOne({ _id: metadata.userId });
+            if (!user) {
+              console.error("User not found:", metadata.userId);
+              throw new Error("User not found.");
+            }
+
+            const doctor = await this._doctorRepository.findOne({ _id: metadata.userId });
+            if (!doctor) {
+              console.error("Doctor not found:", metadata.doctorId);
+              throw new Error("Doctor not found.");
+            }
+
+            
+            // await this._paymentRepository.create({
+            //   sessionId: session.id,
+            //   userId: metadata.userId,
+            //   doctor: metadata.doctorId,
+            //   amount: session.amount_total / 100, // Convert paise to INR
+            //   paymentStatus: "completed",
+            //   type: "report_analysis",
+            // });
+          }
         break;
         case "doctor":
 

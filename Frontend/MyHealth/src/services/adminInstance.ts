@@ -17,18 +17,6 @@ export const adminInstance: AxiosInstance = axios.create({
 });
 
 
-// adminInstance.interceptors.request.use(
-//     (config) => {
-//       const accessToken = store.getState().admin.accessToken;
-//       if (accessToken) {
-//         config.headers.Authorization = `Bearer ${accessToken}`;
-//       }
-//       return config;
-//     },
-//     (error) => Promise.reject(error)
-//   );
-
-
 
 const handleTokenRefresh = async (originalRequest: InternalAxiosRequestConfig) => {
     try{

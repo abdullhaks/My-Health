@@ -14,8 +14,10 @@ export interface IAppointment {
   userEmail: string; 
   doctorName: string; 
   doctorSpecialization: string; 
-  paymentStatus: "pending" | "completed" | "failed";
+  paymentStatus: "pending" | "completed" | "failed" | "refunded";
   doctorCategory?: string; 
+  callStartTime?: Date;
+  callEndTime?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

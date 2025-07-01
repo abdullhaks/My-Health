@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@geoapify/geocoder-autocomplete": "^2.1.0",
+    "@google/generative-ai": "^0.24.1",
     "@reduxjs/toolkit": "^2.6.1",
     "@stripe/react-stripe-js": "^3.7.0",
     "@tailwindcss/vite": "^4.1.1",
@@ -29,6 +30,7 @@
     "recharts": "^2.15.3",
     "redux-persist": "^6.0.0",
     "rrule": "^2.8.1",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
@@ -37,6 +39,7 @@
     "@eslint/js": "^9.21.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@types/simple-peer": "^9.11.8",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "@vitejs/plugin-react": "^4.3.4",

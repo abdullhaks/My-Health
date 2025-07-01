@@ -1,5 +1,6 @@
 import { message } from "antd";
 import { doctorInstance } from "../../services/doctorInstance";
+import { ROUTES } from "../../constants/routes";
 
 
 
@@ -11,7 +12,7 @@ export const signupDoctor = async (doctorData: any) => {
       }
 
     
-    const response = await doctorInstance.post("/doctor/signup", doctorData);
+    const response = await doctorInstance.post(ROUTES.doctor.signup, doctorData);
     message.success("Signup successful!");
     return response.data;
   } catch (error) {
@@ -24,7 +25,7 @@ export const getMe = async ()=>{
   try{
 
     console.log("get me calling......")
-    const response = await doctorInstance.get("/doctor/me");
+    const response = await doctorInstance.get(ROUTES.doctor.me);
     console.log("me me me...",response.data);
 
     return response.data

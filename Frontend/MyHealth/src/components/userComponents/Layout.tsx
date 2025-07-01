@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import {FaHome,FaUserMd, FaCalendarAlt, FaFileMedical, FaClipboardList, FaUserFriends,FaChartLine, FaBell,
-  FaCog, FaSignOutAlt, FaBars, FaTimes,FaChevronLeft,FaChevronRight, FaSearch, FaEnvelope,FaComments
+  FaCog, FaSignOutAlt, FaBars, FaTimes,FaChevronLeft,FaChevronRight, FaSearch, FaEnvelope,FaComments,FaPodcast
 } from "react-icons/fa";
 import applogoBlue from "../../assets/applogoblue.png";
 // import defaultAvatar from "../../assets/avatar.png";
@@ -83,6 +83,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Doctors", path: "/user/doctors", icon: <FaUserMd /> },
     { name: "Appointments", path: "/user/appointments", icon: <FaCalendarAlt /> },
     {name: "Chat",path: "/user/chat",icon: <FaComments />},
+    {name: "MyHealth-Ai",path: "/user/ai",icon: <FaPodcast/>},
     { name: "Medical Records", path: "/user/records", icon: <FaFileMedical /> },
     { name: "Prescriptions", path: "/user/prescriptions", icon: <FaClipboardList /> },
     { name: "My Profile", path: "/user/profile", icon: <FaUserFriends /> },

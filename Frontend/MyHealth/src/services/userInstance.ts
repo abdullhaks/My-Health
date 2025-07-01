@@ -26,17 +26,6 @@ export const userInstance: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor (uncomment if using Authorization header)
-// userInstance.interceptors.request.use(
-//   (config) => {
-//     const accessToken = store.getState().user.accessToken;
-//     if (accessToken) {
-//       config.headers.Authorization = `Bearer ${accessToken}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
 
 const handleTokenRefresh = async (originalRequest: InternalAxiosRequestConfig) => {
   try {

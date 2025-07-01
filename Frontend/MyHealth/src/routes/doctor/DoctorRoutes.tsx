@@ -16,6 +16,9 @@ import DoctorProfile from "../../components/doctorComponents/DoctorProfile";
 import DoctorChat from "../../components/doctorComponents/DoctorChat";
 import DoctorSlots from "../../components/doctorComponents/DoctorSlots";
 import DoctorAppointments from "../../components/doctorComponents/DoctorAppointments";
+import DoctorVideoCall from "../../components/doctorComponents/DoctorVideoCall";
+import VideoCall from "../../sharedComponents/VideoCall";
+
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
 // import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
@@ -42,7 +45,9 @@ const DoctorRoutes = () => {
           <Route path="payment-success" element={<PaymentSuccess />} />
           <Route path="slots" element={<DoctorSlots />} />
           <Route path="chat" element={<DoctorChat />} />
-          <Route path="appointments" element={<DoctorAppointments />} />
+          <Route path="appointments" element={<DoctorAppointments />} />  
+          <Route path="video-call/:appointmentId" element={<VideoCall role="doctor" />} />
+          
 
         </Route>
       </Route>

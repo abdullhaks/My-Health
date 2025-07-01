@@ -18,17 +18,6 @@ export const doctorInstance: AxiosInstance = axios.create({
 });
 
 
-// doctorInstance.interceptors.request.use(
-//     (config) => {
-//       const accessToken = store.getState().doctor.accessToken;
-//       if (accessToken) {
-//         config.headers.Authorization = `Bearer ${accessToken}`;
-//       }
-//       return config;
-//     },
-//     (error) => Promise.reject(error)
-//   );
-
 
 
 const handleTokenRefresh = async (originalRequest: InternalAxiosRequestConfig) => {

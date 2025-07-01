@@ -3,13 +3,15 @@ import IUserAppointmentService from "../interfaces/IUserAppointmentServices";
 import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 
 @injectable()
 export default class UserAppointmentService implements IUserAppointmentService {
 
     constructor(
       @inject("IAppointmentRepository") private _appointmentRepository:IAppointmentRepository ,
-      @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository
+      @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
+      @inject("IUserRepository") private _userRepository:IUserRepository,
     ){
 
 
@@ -46,15 +48,34 @@ return {doctors:[]}
 }
 
 
-async getUserAppointments(userId:string):Promise<any>{
+async getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<any>{
   console.log("userid from service...",userId);
 
-  const appointments = await this._appointmentsRepository.findAll({userId:userId});
+  const appointments = await this._appointmentsRepository.getUserAppointments(userId,pageNumber,limitNumber);
   console.log("appointments from service...",appointments);
 
 
   return appointments;
 
+};
+async cancelAppointment(appointmentId:string):Promise<any>{
+  console.log("appointment id is ",appointmentId);
+  const response = await this._appointmentsRepository.update(appointmentId,{appointmentStatus:"cancelled",paymentStatus:"refunded"});
+  if(response){
+    const updateWalet = await this._userRepository.update(response.userId, {$inc:{walletBalance: response.fee}});
+
+            if(updateWalet){
+                  const { password, ...userWithoutPassword } = updateWalet.toObject();
+                  if(userWithoutPassword.profile){
+                    userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+                  };
+                  return {status:true,message:`${updateWalet.fullName} your appointment has been cancelled and ${response.fee} has been refunded to your wallet`,updatedUser:userWithoutPassword};
+            }else{
+                 return {message:"Your appointment cancletation failed, please try again later",status:false};
+                };
+
+  }
+ 
 }
 
 

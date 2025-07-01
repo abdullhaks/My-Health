@@ -44,11 +44,14 @@ async getAppointments (req: Request, res: Response): Promise<any> {
 
 try{
 
-  const userId = req.query.userId;
+  const {userId,page,limit} = req.query
 
   console.log("user id is///",userId);
 
-  const appointments = await this._appointmentService.getUserAppointments(String(userId));
+  const pageNumber = page ? parseInt(page as string, 10) : 1;
+  const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+
+  const appointments = await this._appointmentService.getUserAppointments(String(userId), pageNumber, limitNumber);
 
     res.status(200).json(appointments);
 
@@ -58,6 +61,25 @@ try{
   res.status(500).json({ message: "Server error" });
 }
 
+};
+
+
+async cancelAppointment(req:Request, res: Response) : Promise <any> {
+
+  try{
+
+    console.log("appointment id is ctrl...",req.query.appointmentId);
+
+    const appoinmentId = req.query.appointmentId;
+
+    const response = await this._appointmentService.cancelAppointment(String(appoinmentId));
+
+    res.status(200).json(response);
+
+  }catch(err){
+      console.error("Error in cancel appointments:", err);
+      res.status(500).json({ message: "Server error" });
+  }
 }
 
 

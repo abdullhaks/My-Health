@@ -1,11 +1,12 @@
 import { message } from "antd";
 import { userInstance } from "../../services/userInstance";
+import { ROUTES } from "../../constants/routes";
 
 
 
 export const signupUser = async (userData: any) => {
   try {
-    const response = await userInstance.post("/user/signup", userData);
+    const response = await userInstance.post(ROUTES.user.signup, userData);
     message.success("Signup successful!");
     return response.data;
   } catch (error) {
@@ -17,7 +18,7 @@ export const signupUser = async (userData: any) => {
 export const getMe = async ()=>{
   try{
     console.log("get me calling......")
-    const response = await userInstance.get("/user/me");
+    const response = await userInstance.get(ROUTES.user.me);
     console.log("me me me...",response.data);
 
     return response.data
@@ -271,11 +272,11 @@ export const createOneTimePayment = async (amount: number, metadata: any) => {
   }
 };
 
-export const getUserAppointments = async(userId:string) => {
+export const getUserAppointments = async(userId:string,page:number,limit:number) => {
   try{
 
     const response = await userInstance.get("/user/getAppointments",{
-      params: { userId: userId }
+      params: { userId,page,limit}
     });
 
     console.log("response data is ....",response.data)
@@ -283,6 +284,23 @@ export const getUserAppointments = async(userId:string) => {
 
   }catch(error){
     console.error("Error in get user's appointments..:", error);
+    throw error;
+  }
+}
+
+export const cancelAppointment = async (appointmentId:string) => {
+  try{
+
+    console.log("appointment id is ",appointmentId);
+    const response = await userInstance.patch("/user/cancelAppointments", null, {
+      params: { appointmentId }
+    });
+
+    console.log("response data is ....",response.data)
+    return response.data;
+
+  }catch(error){
+    console.error("Error in cancel appointments..:", error);
     throw error;
   }
 }

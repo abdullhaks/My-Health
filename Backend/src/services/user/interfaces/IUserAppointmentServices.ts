@@ -11,5 +11,10 @@ export default interface IUserAppointmentService {
   limit: number
 ): Promise<any> ,
 
-getUserAppointments(userId:string):Promise<any>
-}
+getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<any>,
+cancelAppointment(appointmentId:string):Promise<any>,
+};
+
+
+
+

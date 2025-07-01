@@ -45,7 +45,7 @@ export const makeOneTimePayment = async ({
   successPath = "/payment-success",
   cancelPath = "/payment-cancelled",
 }: {
-  amount: number; // Amount in smallest currency unit (e.g., paise for INR)
+  amount: number;
   currency?: string;
   metadata?: Record<string, any>;
   successPath?: string;
@@ -58,10 +58,13 @@ export const makeOneTimePayment = async ({
         price_data: {
           currency,
           product_data: {
-            name: "Doctor Appointment",
-            description: `Appointment fee for doctor consultation`,
+            name: metadata.type === "report_analysis" ? "Report Analysis" : "Doctor Appointment",
+            description:
+              metadata.type === "report_analysis"
+                ? `Health report analysis fee`
+                : `Appointment fee for doctor consultation`,
           },
-          unit_amount: amount, // Amount in paise
+          unit_amount: amount,
         },
         quantity: 1,
       },

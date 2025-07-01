@@ -20,7 +20,7 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const limit = 3;
+  const limit = 5;
 
   const fetchUsers = async () => {
     try {

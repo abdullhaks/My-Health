@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getDoctorAppointments } from "../../api/doctor/doctorApi";
+import { useNavigate } from "react-router-dom";
+import { Popconfirm, message } from "antd";
 
 interface IAppointment {
   _id: string;
@@ -24,49 +26,75 @@ interface IAppointment {
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState<IAppointment[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state:any) => state.doctor.doctor);
+  const navigate = useNavigate();
+ 
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        setIsLoading(true);
+        setIsFetching(true);
         setErrorMessage("");
         const response = await getDoctorAppointments(doctor._id);
-        setAppointments(response);
+        setAppointments(response || []);
       } catch (error) {
         console.error("Error fetching appointments:", error);
-        setErrorMessage("Failed to load appointments. Please try again.");
+        setErrorMessage(
+          (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) ||
+            "Failed to load appointments. Please try again."
+        );
       } finally {
-        setIsLoading(false);
+        setIsFetching(false);
       }
     };
-    fetchAppointments();
-  }, []);
+    if (doctor._id) fetchAppointments();
+  }, [doctor._id]);
 
-  const handleCancel = async (appointmentId: string) => {
-
+  const handleCancel = async (appointmentId: any) => {
     try {
-      setIsLoading(true);
-      setErrorMessage("");
-    //   await cancelAppointment(appointmentId);
-      setAppointments((prev) =>
-        prev.map((appt) =>
-          appt._id === appointmentId
-            ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "failed" }
-            : appt
-        )
-      );
+      // setIsCanceling(true);
+      // setErrorMessage("");
+      // const response = await cancelAppointment(appointmentId);
+      // if (response.status) {
+      //   message.success(response.message);
+      //   setAppointments((prev) =>
+      //     prev.map((appt) =>
+      //       appt._id === appointmentId
+      //         ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "failed" }
+      //         : appt
+      //     )
+      //   );
+      // } else {
+      //   message.error(response.message);
+      // }
     } catch (error) {
       console.error("Error cancelling appointment:", error);
-      setErrorMessage("Failed to cancel appointment. Please try again.");
+      setErrorMessage(
+          (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) ||
+            "Failed to load appointments. Please try again."
+        );
     } finally {
-      setIsLoading(false);
+      setIsCanceling(false);
     }
   };
 
-  const formatDateTime = (date: string) =>
+  const handleJoin = (appointmentId:string) => {
+    navigate(`/doctor/video-call/${appointmentId}`);
+  };
+
+  const isJoinable = (start:any, end:any) => {
+    // const now = new Date().getTime();
+    // const startTime = new Date(start).getTime();
+    // const endTime = new Date(end).getTime();
+    // const buffer = 5 * 60 * 1000; // 5-minute buffer
+    // return now >= startTime - buffer && now <= endTime + buffer;
+    return true;
+  };
+
+  const formatDateTime = (date:any) =>
     new Date(date).toLocaleString("en-US", {
       weekday: "short",
       year: "numeric",
@@ -84,8 +112,8 @@ const DoctorAppointments = () => {
         {errorMessage && (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">{errorMessage}</div>
         )}
-        {isLoading ? (
-          <div className="text-center text-gray-500 py-4">Loading...</div>
+        {isFetching ? (
+          <div className="text-center text-gray-500 py-4">Loading appointments...</div>
         ) : appointments.length === 0 ? (
           <div className="text-center text-gray-500 py-4">No appointments found.</div>
         ) : (
@@ -97,7 +125,7 @@ const DoctorAppointments = () => {
               >
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {appt.userName}-({appt.userEmail})
+                    {appt.userName} ({appt.userEmail})
                   </h3>
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Date & Time:</span>{" "}
@@ -113,20 +141,38 @@ const DoctorAppointments = () => {
                     <span className="font-medium">Status:</span> {appt.appointmentStatus}
                   </p>
                 </div>
-                <div>
+                <div className="flex gap-2">
                   {appt.appointmentStatus === "booked" && (
                     <button
-                      onClick={() => handleCancel(appt._id)}
-                      disabled={isLoading}
+                      onClick={() => handleJoin(appt._id)}
+                      disabled={!isJoinable(appt.start, appt.end)}
                       className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-                        isLoading
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-red-600 hover:bg-red-700"
+                        isJoinable(appt.start, appt.end)
+                          ? "bg-green-600 hover:bg-green-700"
+                          : "bg-gray-400 cursor-not-allowed"
                       }`}
                     >
-                      Cancel
+                      Join
                     </button>
                   )}
+                  <Popconfirm
+                    title="Cancel Appointment"
+                    description="Are you sure to cancel this appointment?"
+                    onConfirm={() => handleCancel(appt._id)}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    {appt.appointmentStatus === "booked" && (
+                      <button
+                        disabled={isCanceling || appt.appointmentStatus !== "booked"}
+                        className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
+                          isCanceling ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+                        }`}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </Popconfirm>
                 </div>
               </div>
             ))}

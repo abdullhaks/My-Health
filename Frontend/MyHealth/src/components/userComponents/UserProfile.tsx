@@ -284,9 +284,9 @@ const UserProfile = () => {
                 <p className="text-base">My Wallet</p>
                 <p className="text-sm text-gray-500">balance: {profileData.walletBalance} rs</p>
               </div>
-              <button className="text-blue-500 hover:text-blue-700 border border-blue-500 hover:border-blue-700 px-4 py-1 rounded text-sm transition cursor-pointer">
+              {/* <button className="text-blue-500 hover:text-blue-700 border border-blue-500 hover:border-blue-700 px-4 py-1 rounded text-sm transition cursor-pointer">
                 withdraw
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
