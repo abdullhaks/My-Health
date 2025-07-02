@@ -3,6 +3,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import {FaHome,FaUserMd, FaCalendarAlt, FaFileMedical, FaClipboardList, FaUserFriends,FaChartLine, FaBell,
   FaCog, FaSignOutAlt, FaBars, FaTimes,FaChevronLeft,FaChevronRight, FaSearch, FaEnvelope,FaComments,FaPodcast
 } from "react-icons/fa";
+import { BiSolidAnalyse } from "react-icons/bi";
 import applogoBlue from "../../assets/applogoblue.png";
 // import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
@@ -82,6 +83,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Dashboard", path: "/user/dashboard", icon: <FaHome /> },
     { name: "Doctors", path: "/user/doctors", icon: <FaUserMd /> },
     { name: "Appointments", path: "/user/appointments", icon: <FaCalendarAlt /> },
+    { name: "Report Analysis", path: "/user/report-analysis", icon: <BiSolidAnalyse /> },
     {name: "Chat",path: "/user/chat",icon: <FaComments />},
     {name: "MyHealth-Ai",path: "/user/ai",icon: <FaPodcast/>},
     { name: "Medical Records", path: "/user/records", icon: <FaFileMedical /> },

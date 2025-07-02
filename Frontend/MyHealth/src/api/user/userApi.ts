@@ -325,3 +325,18 @@ export const directFileUpload = async (formData:any) => {
     throw error;
   }
 };
+
+
+
+export const getAnalysisReports = async (userId:string)=>{
+  try{
+    console.log("userId id",userId);
+
+    const response = await userInstance.get("/user/getAnalysisReports", { params: { userId } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};

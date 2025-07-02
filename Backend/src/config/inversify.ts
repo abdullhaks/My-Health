@@ -19,6 +19,8 @@ import UserAppointmentController from "../controllers/user/implementations/appoi
 import IUserAppointmentController from "../controllers/user/interfaces/IAppointmentCtrl";
 import UserSessionController from "../controllers/user/implementations/sessionCtrl";
 import IUserSessionCtrl from "../controllers/user/interfaces/ISessionCtrl";
+import UserReportAnalyisController from "../controllers/user/implementations/reportAnalysisCtrl";
+import IUserReportAnalysisCtrl from "../controllers/user/interfaces/IReportAnalysisCtrl";
 
 
 import AdminAuthController from "../controllers/admin/implementations/authCtrl";
@@ -62,6 +64,8 @@ import UserAppointmentService from "../services/user/implementations/userAppoint
 import IUserAppointmentService from "../services/user/interfaces/IUserAppointmentServices";
 import UserSessionService from "../services/user/implementations/userSessionService";
 import IUserSessionService from "../services/user/interfaces/IUserSessionService";
+import UserReportAnalysisService from "../services/user/implementations/userReportAnalysis";
+import IUserReportAnalysisService from "../services/user/interfaces/IUserReportAnalysis";
 
 
 import AdminAuthService from "../services/admin/implementations/adminAuthService";
@@ -148,6 +152,7 @@ container.bind<IUserAuthCtrl>("IUserAuthCtrl").to(UserAuthController);
 container.bind<IUserProfileCtrl>("IUserProfileCtrl").to(UserProfileController);
 container.bind<IUserAppointmentController>("IUserAppointmentController").to(UserAppointmentController);
 container.bind<IUserSessionCtrl>("IUserSessionCtrl").to(UserSessionController);
+container.bind<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl").to(UserReportAnalyisController);
 
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
@@ -177,6 +182,7 @@ container.bind<IUserAuthService>("IUserAuthService").to(UserAuthService)
 container.bind<IUserProfileService>("IUserProfileService").to(UserProfileService);
 container.bind<IUserAppointmentService>("IUserAppointmentService").to(UserAppointmentService);
 container.bind<IUserSessionService>("IUserSessionService").to(UserSessionService);
+container.bind<IUserReportAnalysisService>("IUserReportAnalysisService").to(UserReportAnalysisService);
 
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);

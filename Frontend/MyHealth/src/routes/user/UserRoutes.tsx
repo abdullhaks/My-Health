@@ -24,6 +24,7 @@ import UserVideoCall from "../../components/userComponents/UserVideoCall";
 import AiHealthStatusGenerator from "../../components/userComponents/AiHealthStatus";
 import UserHealthReportAnalysis from "../../components/userComponents/UserHealthReportAnalysis";
 import VideoCall from "../../sharedComponents/VideoCall";
+import { UserReportAnalysis } from "../../components/userComponents/UserReportAnalysis";
 
 const UserRoutes = () => {
   return (
@@ -55,6 +56,7 @@ const UserRoutes = () => {
           <Route path="video-call/:appointmentId" element={<VideoCall role="user" />} />
           <Route path="ai" element={< AiHealthStatusGenerator/>} />
           <Route path="health-report-analysis" element={< UserHealthReportAnalysis/>} />
+          <Route path="report-analysis" element={< UserReportAnalysis/>} />
           
           
         </Route>

@@ -5,6 +5,7 @@ import {
   FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight,
   FaSearch, FaBell, FaEnvelope,FaCalendarAlt,FaUser
 } from "react-icons/fa";
+import { BiSolidAnalyse } from "react-icons/bi";
 import { GiRoyalLove } from "react-icons/gi"; 
 import applogoBlue from "../../assets/applogoblue.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
@@ -67,6 +68,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: "Dashboard", path: "/doctor/dashboard", icon: <FaHome /> },
     { name: "Appointments", path: "/doctor/appointments", icon: <FaCalendarAlt /> },
+    { name: "Report Analysis", path: "/doctor/report-analysis", icon: <BiSolidAnalyse /> },
     { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
     { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
     {
