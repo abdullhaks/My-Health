@@ -48,6 +48,8 @@ import MessageController from "../controllers/common/implementations/messageCtrl
 import IMessageCtrl from "../controllers/common/interfaces/IMessageCtrl";
 import DetailsController from "../controllers/common/implementations/detailsCtrl";
 import IDetailsCtrl from "../controllers/common/interfaces/IDetailsCtrl";
+import DirectDocUploadS3Controller from "../controllers/common/implementations/directDocUploadS3";
+import IDirectDocUploadS3Ctrl from "../controllers/common/interfaces/IDirectDocUploadS3";
 //.................................................................................
 
 //services.....................................................................
@@ -86,6 +88,8 @@ import MessageService from "../services/common/implementations/messageService";
 import IMessageService from "../services/common/interfaces/IMessageService";
 import DetailsService from "../services/common/implementations/detailsService";
 import IDetailsService from "../services/common/interfaces/IDetailsService";
+import DirectDocUploadS3Service from "../services/common/implementations/directDocUploadS3Service";
+import IDirectDocUploadS3Service from "../services/common/interfaces/IDirectDocUploadS3Service";
 
 //.................................................................................
 
@@ -154,6 +158,7 @@ container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
 container.bind<IConversationCtrl>("IConversationCtrl").to(ConversationController)
 container.bind<IMessageCtrl>("IMessageCtrl").to(MessageController)
 container.bind<IDetailsCtrl>("IDetailsCtrl").to(DetailsController);
+container.bind<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl").to(DirectDocUploadS3Controller);
 
 
 
@@ -181,6 +186,7 @@ container.bind<IPaymentService>("IPaymentService").to(PaymentService);
 container.bind<IConversationService>("IConversationService").to(ConversationService);
 container.bind<IMessageService>("IMessageService").to(MessageService);
 container.bind<IDetailsService>("IDetailsService").to(DetailsService);
+container.bind<IDirectDocUploadS3Service>("IDirectDocUploadS3Service").to(DirectDocUploadS3Service);
 
 
 //..............................................................................

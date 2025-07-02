@@ -303,4 +303,25 @@ export const cancelAppointment = async (appointmentId:string) => {
     console.error("Error in cancel appointments..:", error);
     throw error;
   }
-}
+};
+
+
+export const directFileUpload = async (formData:any) => {
+  try {
+
+     for (const [key, value] of formData.entries()) {
+    console.log(`api side...${key}:`, value);
+  }
+
+    const response = await userInstance.post("/user/directFileUpload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in directFileUpload:", error);
+    throw error;
+  }
+};

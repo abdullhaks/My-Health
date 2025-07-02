@@ -58,14 +58,14 @@ export const setupSocket = (io: Server, container: Container) => {
       console.log(`${role} ${userId} joined conversation: ${conversationId}`);
     });
 
-    socket.on("sendMessage", async (msg: { conversationId: string; senderId: string; content: string }) => {
+    socket.on("sendMessage", async (msg: { conversationId: string; senderId: string; content: string ; type:string}) => {
       if (msg.senderId !== userId) {
         console.warn(`Unauthorized message attempt by ${userId} for senderId ${msg.senderId}`);
         return socket.emit("error", { message: "Unauthorized action." });
       }
 
       try {
-        const newMessage = await messageService.sendMessage(msg.conversationId, msg.senderId, msg.content);
+        const newMessage = await messageService.sendMessage(msg.conversationId, msg.senderId, msg.content,msg.type);
         io.to(msg.conversationId).emit("message", newMessage);
         io.to(msg.senderId).emit("message", newMessage);
       } catch (err) {

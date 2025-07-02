@@ -10,6 +10,7 @@ import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
 import IUserSessionCtrl from "../../controllers/user/interfaces/ISessionCtrl";
 import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
 import IPaymentCtrl from "../../controllers/common/interfaces/IPaymentCtrl";
+import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
 
 const userRoutes = Router();
 
@@ -21,6 +22,7 @@ const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl");
 const sessionCtrl = container.get<IUserSessionCtrl>("IUserSessionCtrl");
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
 const paymentCtrl =  container.get<IPaymentCtrl>("IPaymentCtrl");
+const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
 
 
 
@@ -50,6 +52,13 @@ userRoutes.patch("/updateProfile/:id",verifyAccessTokenMidleware("user"),( req,r
 
 userRoutes.patch("/updateDp/:id" ,verifyAccessTokenMidleware("user"), upload.single("profile"),
 uploadToS3("users/profile-images",true), (req,res)=>profileCtrl.updateDp(req,res));
+
+userRoutes.post(
+  "/directFileUpload",
+  verifyAccessTokenMidleware("user"),
+  upload.single("doc"),
+  (req, res) => directUploadCtrl.directUpload(req, res)
+);
 
 
 userRoutes.get("/google", authCtrl.googleLoginRedirect); 

@@ -18,7 +18,7 @@ async sendMessage(req: Request, res: Response): Promise<void> {
       console.log("Request body:", req.body);
       // console.log("Authenticated userId:", req.userId);
 
-      const { conversationId, senderId, content } = req.body;
+      const { conversationId, senderId, content,type } = req.body;
 
       console.log("conversationId, senderId, content:", conversationId, senderId, content);
 
@@ -38,7 +38,7 @@ async sendMessage(req: Request, res: Response): Promise<void> {
       //   return;
       // }
 
-      const message = await this._messageService.sendMessage(conversationId, senderId, content);
+      const message = await this._messageService.sendMessage(conversationId, senderId, content ,type);
       res.status(201).json(message);
     } catch (error) {
       console.error("Error sending message:", error);

@@ -1,11 +1,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { FiSend, FiCheck, FiCheckCircle } from "react-icons/fi";
-import { BsEmojiSmile } from "react-icons/bs";
+import { FiSend, FiCheck, FiCheckCircle, FiX } from "react-icons/fi";
+import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getUserConversations, getUserMessages } from "../../api/user/userApi";
+import { getUserConversations, getUserMessages ,directFileUpload} from "../../api/user/userApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
@@ -16,21 +16,21 @@ interface Message {
   conversationId: string;
   senderId: string;
   content: string;
+  type: "text" | "file";
+  fileName?: string; // Added for file display
   timestamp: string;
   readBy: string[];
   status: "sent" | "delivered" | "read";
 }
 
+interface Conversation {
+  _id: string;
+  members: { _id: string; name: string; avatar: string }[];
+}
+
 interface User {
   _id: string;
   fullName: string;
-  profile?: string;
-}
-
-interface Conversation {
-  _id: string;
-  members: [any];
-  lastMessage?: string;
 }
 
 const UserChat = () => {
@@ -40,6 +40,7 @@ const UserChat = () => {
   const [currentChat, setCurrentChat] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [docMessage, setDocMessage] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [typingUser, setTypingUser] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -48,6 +49,7 @@ const UserChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Added ref for file input
   const location = useLocation();
   const navigate = useNavigate();
   const hasInitializedConversation = useRef(false);
@@ -59,7 +61,6 @@ const UserChat = () => {
         {},
         { withCredentials: true }
       );
-      console.log("Token response:", response.data);
       return response.data.accessToken;
     } catch (error) {
       console.error("Failed to fetch access token:", error);
@@ -77,16 +78,13 @@ const UserChat = () => {
           const res = await getUserConversations(userId, "Doctor");
           setConversations(res);
 
-          // Check if a conversation with this doctor already exists
           const existingConversation = res.find((c: Conversation) =>
             c.members.some((m) => m._id === doctorId)
           );
 
           if (existingConversation) {
-            console.log("existing conversation is ", existingConversation);
             setCurrentChat(existingConversation);
           } else {
-            // Create a new conversation
             const response = await axios.post(
               "http://localhost:3000/api/user/conversation",
               { userIds: [userId, doctorId] },
@@ -96,8 +94,7 @@ const UserChat = () => {
             setConversations((prev) => [...prev, newConversation]);
             setCurrentChat(newConversation);
           }
-          hasInitializedConversation.current = true; // Mark as initialized
-          // Clear navigation state to prevent re-triggering
+          hasInitializedConversation.current = true;
           navigate("/chat", { replace: true, state: {} });
         } catch (error) {
           console.error("Failed to initialize conversation:", error);
@@ -109,7 +106,7 @@ const UserChat = () => {
 
       initializeConversation();
     }
-  }, [location.state?.doctorId, navigate]);
+  }, [location.state?.doctorId, navigate, userId]);
 
   useEffect(() => {
     const setupSocket = async () => {
@@ -123,8 +120,6 @@ const UserChat = () => {
       if (!token) {
         token = await getAccessToken();
       }
-
-      console.log("Token in frontend:", token);
 
       const socket = io("http://localhost:3000", {
         transports: ["websocket"],
@@ -173,7 +168,6 @@ const UserChat = () => {
       setLoading(true);
       try {
         const res = await getUserConversations(userId, "Doctor");
-        console.log("Fetched conversations:", res);
         setConversations(res);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);
@@ -183,7 +177,6 @@ const UserChat = () => {
       }
     };
 
-    // Temporarily hardcoded users until /api/user/all is implemented
     setUsers([{ _id: "682d8d5e69828e1965f9b086", fullName: "FATHIMA KS" }]);
 
     if (userId) {
@@ -194,7 +187,7 @@ const UserChat = () => {
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
 
-    socketRef.current.emit("join", currentChat._id); // Join conversation session
+    socketRef.current.emit("join", currentChat._id);
 
     const fetchMessages = async () => {
       setLoading(true);
@@ -213,7 +206,7 @@ const UserChat = () => {
     fetchMessages();
 
     return () => {
-      socketRef.current?.emit("leave", currentChat._id); // Leave conversation on cleanup
+      socketRef.current?.emit("leave", currentChat._id);
     };
   }, [currentChat]);
 
@@ -225,7 +218,6 @@ const UserChat = () => {
     const handleMessage = (msg: Message) => {
       if (msg.conversationId === currentChat._id) {
         setMessages((prev) => {
-          // Avoid duplicates
           if (prev.some((m) => m._id === msg._id)) return prev;
           return [...prev, msg];
         });
@@ -285,43 +277,106 @@ const UserChat = () => {
     };
   }, [currentChat, users]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        message.error("File size must be less than 10MB");
+        return;
+      }
+      setDocMessage(file);
+      setNewMessage("");
+    }
+  };
+
+  const handleCancelFile = () => {
+    setDocMessage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !currentChat) return;
+    if (!currentChat || (!newMessage.trim() && !docMessage)) return;
 
-    const messageData = {
-      senderId: userId,
-      conversationId: currentChat._id,
-      content: newMessage,
-    };
+    let messageData: any;
+    let tempMessage: Message;
 
-    const tempMessage: Message = {
-      _id: uuidv4(),
-      conversationId: currentChat._id,
-      senderId: userId,
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      readBy: [userId],
-      status: "sent",
-    };
-
-    // setMessages((prev) => [...prev, tempMessage]);
-    setNewMessage("");
+    // setLoading(true);
 
     try {
+      if (docMessage) {
+
+        const formData = new FormData();
+        formData.append("doc", docMessage);
+        const uploadResult = await directFileUpload(formData);
+        if (!uploadResult?.url) {
+          throw new Error("Failed to upload file");
+        }
+
+        messageData = {
+          senderId: userId,
+          conversationId: currentChat._id,
+          type: "file",
+          content: uploadResult.url,
+          fileName: docMessage.name,
+        };
+
+        tempMessage = {
+          _id: uuidv4(),
+          conversationId: currentChat._id,
+          senderId: userId,
+          content: uploadResult.url,
+          type: "file",
+          fileName: docMessage.name, // Include fileName in tempMessage
+          timestamp: new Date().toISOString(),
+          readBy: [userId],
+          status: "sent",
+        };
+      } else {
+        messageData = {
+          senderId: userId,
+          conversationId: currentChat._id,
+          type: "text",
+          content: newMessage,
+        };
+
+        tempMessage = {
+          _id: uuidv4(),
+          conversationId: currentChat._id,
+          senderId: userId,
+          content: newMessage,
+          type: "text",
+          timestamp: new Date().toISOString(),
+          readBy: [userId],
+          status: "sent",
+        };
+      }
+
+      // setMessages((prev) => [...prev, tempMessage]);
+      setNewMessage("");
+      setDocMessage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset file input after sending
+      }
+
+      // Send message to server
       // const response = await sendDoctorMessage(messageData);
-      // Update the temp message with server response
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === tempMessage._id
-            ? { ...tempMessage, readBy: [userId], status: "sent" }
-            : msg
-        )
-      );
+      // setMessages((prev) =>
+      //   prev.map((msg) =>
+      //     msg._id === tempMessage._id
+      //       ? { ...tempMessage, ...response.data, status: "sent" }
+      //       : msg
+      //   )
+      // );
+
       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
     } catch (error: any) {
       console.error("Message send failed:", error);
-      message.error(error.response?.data?.message || "Failed to send message.");
+      message.error(error.response?.data?.message || "Failed to send message");
       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+    } finally {
+      // setLoading(false);
     }
   };
 
@@ -332,14 +387,12 @@ const UserChat = () => {
     }
 
     try {
-      console.log("userId and selected user:", userId, selectedUser);
       const response = await axios.post(
         "http://localhost:3000/api/user/conversation",
         { userIds: [userId, selectedUser] },
         { withCredentials: true }
       );
       const newConversation = response.data;
-      console.log("New conversation:", newConversation);
       setConversations((prev) => [...prev, newConversation]);
       setCurrentChat(newConversation);
       setSelectedUser("");
@@ -362,7 +415,6 @@ const UserChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Helper function to format timestamp
   const formatMessageTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString("en-US", {
       hour: "numeric",
@@ -371,7 +423,6 @@ const UserChat = () => {
     });
   };
 
-  // Helper function to format date header
   const formatDateHeader = (timestamp: string) => {
     const date = new Date(timestamp);
     const today = new Date();
@@ -400,7 +451,6 @@ const UserChat = () => {
     }
   };
 
-  // Helper function to determine if a date header is needed
   const needsDateHeader = (currentMsg: Message, prevMsg?: Message) => {
     if (!prevMsg) return true;
     const currentDate = new Date(currentMsg.timestamp).setHours(0, 0, 0, 0);
@@ -410,9 +460,7 @@ const UserChat = () => {
 
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
-      {/* Conversation Sidebar */}
       <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col">
-        {/* Search and New Chat Section */}
         <div className="p-4 border-b border-gray-200">
           <input
             type="text"
@@ -443,7 +491,6 @@ const UserChat = () => {
             </button>
           </div>
         </div>
-        {/* Conversation List */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-gray-500 text-sm">Loading conversations...</div>
@@ -469,7 +516,6 @@ const UserChat = () => {
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {name}
                         </p>
-                        {/* <p className="text-xs text-gray-500 truncate">{c.lastMessage || "No messages yet"}</p> */}
                       </div>
                     </li>
                   );
@@ -480,11 +526,9 @@ const UserChat = () => {
         </div>
       </div>
 
-      {/* Chat Window */}
       <div className="flex-1 flex flex-col bg-gray-50">
         {currentChat ? (
           <>
-            {/* Chat Header */}
             <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3 sticky top-0 z-5 shadow-sm">
               <img
                 src={currentChat.members[0].avatar || "Unknown User"}
@@ -499,7 +543,6 @@ const UserChat = () => {
               </div>
             </div>
 
-            {/* Message Container */}
             <div
               className="flex-1 overflow-y-auto p-4"
               style={{
@@ -517,7 +560,6 @@ const UserChat = () => {
                 <div className="space-y-2">
                   {messages.map((msg, index) => (
                     <div key={msg._id}>
-                      {/* Date Header */}
                       {needsDateHeader(msg, messages[index - 1]) && (
                         <div className="text-center my-4">
                           <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
@@ -525,7 +567,6 @@ const UserChat = () => {
                           </span>
                         </div>
                       )}
-                      {/* Message */}
                       <div
                         className={`flex ${
                           msg.senderId === userId ? "justify-end" : "justify-start"
@@ -538,7 +579,6 @@ const UserChat = () => {
                               : "bg-white text-gray-900"
                           }`}
                         >
-                          {/* Message Tail */}
                           <div
                             className={`absolute top-2 ${
                               msg.senderId === userId ? "-right-2" : "-left-2"
@@ -548,7 +588,21 @@ const UserChat = () => {
                                 : "border-r-8 border-r-white"
                             } border-b-8 border-b-transparent`}
                           />
-                          <p className="text-sm">{msg.content}</p>
+                          {msg.type === "file" ? (
+                            <div className="flex items-center space-x-2">
+                              <IoDocumentAttachOutline className="text-lg" />
+                              <a
+                                href={msg.content}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm underline"
+                              >
+                                {msg.fileName || "Document"}
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.content}</p>
+                          )}
                           <div className="flex items-center justify-end mt-1 space-x-1">
                             <span className="text-xs text-gray-300">
                               {formatMessageTime(msg.timestamp)}
@@ -574,9 +628,37 @@ const UserChat = () => {
               )}
             </div>
 
-            {/* Input Section */}
             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
-              <BsEmojiSmile className="text-xl text-gray-500 cursor-pointer hover:text-gray-700" />
+              <label className="cursor-pointer">
+                <IoDocumentAttachOutline
+                  className="text-xl text-gray-500 hover:text-gray-700"
+                  onClick={() => fileInputRef.current?.click()}
+                />
+                <input
+                  id="docMessageInput"
+                  type="file"
+                  name="docMessage"
+                  className="hidden"
+                  ref={fileInputRef} // Attach ref to input
+                  onChange={handleFileChange}
+                />
+              </label>
+
+              {docMessage && (
+                <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
+                  <IoDocumentAttachOutline className="text-gray-500" />
+                  <span className="text-sm text-gray-700 ml-1">
+                    {docMessage.name}
+                  </span>
+                  <button
+                    onClick={handleCancelFile}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    <FiX size={16} />
+                  </button>
+                </div>
+              )}
+
               <input
                 type="text"
                 value={newMessage}
@@ -587,10 +669,15 @@ const UserChat = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                 placeholder="Type a message..."
                 className="flex-1 p-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                disabled={!!docMessage}
               />
+
               <button
                 onClick={handleSendMessage}
-                className="text-xl text-green-600 hover:text-green-700 transition-colors"
+                className={`text-xl ${
+                  loading ? "text-gray-400" : "text-green-600 hover:text-green-700"
+                } transition-colors`}
+                disabled={loading}
               >
                 <FiSend />
               </button>

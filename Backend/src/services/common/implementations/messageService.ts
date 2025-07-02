@@ -16,9 +16,10 @@ export default class MessageService implements IMessageService {
     async sendMessage(
     conversationId: string,
     senderId: string,
-    content: string
+    content: string,
+    type: string = "text" 
   ): Promise<IMessageDocument> {
-    if (!conversationId || !senderId || !content) {
+    if (!conversationId || !senderId || !content || !type) {
       throw new Error("Conversation ID, sender ID, and content are required");
     }
 
@@ -26,6 +27,7 @@ export default class MessageService implements IMessageService {
       conversationId,
       senderId,
       content,
+      type,
       readBy: [senderId],
       status: "sent",
     });
