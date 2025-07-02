@@ -46,6 +46,8 @@ private _paymentService: IPaymentService;
 
   async createOneTimePaymentSession(req: Request, res: Response): Promise<any> {
     const { amount, metadata } = req.body;
+    console.log("Creating one-time payment session with amount:", amount, "and metadata:", metadata);
+    
     const successPath = `/${metadata.role}/payment-success`;
     const cancelPath = `/${metadata.role}/payment-cancelled`;
 

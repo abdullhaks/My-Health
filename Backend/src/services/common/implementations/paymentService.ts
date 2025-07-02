@@ -9,6 +9,7 @@ import IAppointmentRepository from "../../../repositories/interfaces/IAppointmen
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IAppointmentDocument } from "../../../entities/appointmentEntities";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import IReportAnalysisRepository from "../../../repositories/interfaces/IReportAnalysisRepository";
 
 @injectable()
 export default class PaymentService implements IPaymentService {
@@ -18,6 +19,7 @@ export default class PaymentService implements IPaymentService {
     @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository,
     @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
     @inject("IUserRepository") private _userRepository:IUserRepository,
+    @inject("IReportAnalysisRepository") private _reportAnalysisRepository: IReportAnalysisRepository
 
   ) {}
 
@@ -103,21 +105,30 @@ export default class PaymentService implements IPaymentService {
               throw new Error("User not found.");
             }
 
-            const doctor = await this._doctorRepository.findOne({ _id: metadata.userId });
+            const doctor = await this._doctorRepository.findOne({ _id: metadata.doctorId });
             if (!doctor) {
               console.error("Doctor not found:", metadata.doctorId);
               throw new Error("Doctor not found.");
             }
 
+            const uploadedFiles = [];
+            if(metadata.file1) uploadedFiles.push(metadata.file1);
+            if(metadata.file2) uploadedFiles.push(metadata.file2);
+            if(metadata.file3) uploadedFiles.push(metadata.file3);
+            if(metadata.file4) uploadedFiles.push(metadata.file4);
+            if(metadata.file5) uploadedFiles.push(metadata.file5);
+
             
-            // await this._paymentRepository.create({
-            //   sessionId: session.id,
-            //   userId: metadata.userId,
-            //   doctor: metadata.doctorId,
-            //   amount: session.amount_total / 100, // Convert paise to INR
-            //   paymentStatus: "completed",
-            //   type: "report_analysis",
-            // });
+            await this._reportAnalysisRepository.create({
+              
+              userId: metadata.userId,
+              doctorId: metadata.doctorId,
+              concerns: metadata.concerns,
+              files: uploadedFiles.length ? uploadedFiles: [],
+              doctorName: metadata.doctorName,
+              doctorCategory: metadata.doctorCategory,
+              fee: metadata.fee ? parseInt(metadata.fee) : 0, 
+            });
           }
         break;
         case "doctor":

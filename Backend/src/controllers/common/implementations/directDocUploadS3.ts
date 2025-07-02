@@ -35,9 +35,14 @@ private _uploadService: IDirectDocUploadS3Service;
       ];
       if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({ message: `Unsupported file type: ${file.mimetype}` });
-      }
+      };
 
-      const uploadResult = await this._uploadService.directUpload(file);
+      const location = req.body.location ;
+       if (!location) {
+        return res.status(400).json({ message: `files upload failed` });
+      };
+
+      const uploadResult = await this._uploadService.directUpload(file,location);
       res.status(200).json({
         message: uploadResult.message,
         url: uploadResult.url,

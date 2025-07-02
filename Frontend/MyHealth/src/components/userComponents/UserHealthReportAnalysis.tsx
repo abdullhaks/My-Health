@@ -4,7 +4,9 @@ import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { createOneTimePayment } from "../../api/user/userApi";
+import { createOneTimePayment, directFileUpload } from "../../api/user/userApi";
+import { message } from "antd";
+import { useSelector } from "react-redux";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -12,6 +14,7 @@ const UserHealthReportAnalysis = () => {
   const { state, search } = useLocation();
   const navigate = useNavigate();
   const doctor = state?.doctor || null;
+  const user = useSelector((state: any) => state.user.user);
   const [concerns, setConcerns] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -105,17 +108,44 @@ const UserHealthReportAnalysis = () => {
 
     try {
       setUploading(true);
+      const urls = files.map(async(file,indx) =>{
+
+        message.loading({ content: `Uploading file ${indx + 1} of ${files.length}`, key: "upload" });
+        const formData = new FormData();
+        formData.append("doc", file);
+        formData.append("location", "healthReports");
+        const uploadResult = await directFileUpload(formData);
+        if (!uploadResult?.url) {
+          throw new Error("Failed to upload file");
+        };
+
+        return uploadResult.url;
+      });
+
+      const uploadedFiles = await Promise.all(urls);
+      console.log("uploadedFiles",uploadedFiles);
+
       setPaymentStatus("processing");
       const amountInPaise = doctor.reportAnalysisFees * 100; // Convert to paise
       const metadata = {
         doctorId: doctor._id,
-        userId: localStorage.getItem("userId"), // Assuming userId is stored
+        doctorName: doctor.fullName,
+        doctorCategory: doctor.category,
+        userId: user._id, 
+        concerns,
+        file1: uploadedFiles[0] || "",
+        file2: uploadedFiles[1] || "",
+        file3: uploadedFiles[2] || "",
+        file4: uploadedFiles[3] || "",
+        file5: uploadedFiles[4] || "",
+        fee: doctor.reportAnalysisFees,
         role: "user",
         type: "report_analysis",
       };
 
 
       const data = await createOneTimePayment(amountInPaise, metadata);
+      console.log("Payment data:", data);
             const stripe = await stripePromise;
       
             if (stripe) {
@@ -228,7 +258,8 @@ const UserHealthReportAnalysis = () => {
         </div>
 
         {/* Payment Status */}
-        {paymentStatus === "success" && (
+
+        {/* {paymentStatus === "success" && (
           <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
             Payment successful! Report submitted.
           </div>
@@ -237,7 +268,7 @@ const UserHealthReportAnalysis = () => {
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
             Error processing payment. Please try again.
           </div>
-        )}
+        )} */}
 
         {/* Payment Button */}
         <button

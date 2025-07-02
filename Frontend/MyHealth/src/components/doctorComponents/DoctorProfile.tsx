@@ -119,8 +119,8 @@ const DoctorProfile = () => {
           <div className="flex-1">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <h2 className="text-2xl font-bold text-gray-800">Dr. {profileData.fullName}</h2>
-              {profileData.isPremium && (
-                <span className="bg-yellow-400 text-white text-sm px-3 py-1 rounded-full font-medium mt-2 md:mt-0">
+              {profileData.premiumMembership && (
+                <span className="rounded-full bg-yellow-100 text-yellow-700 text-sm px-3 py-1  font-medium mt-2 md:mt-0">
                   Premium Doctor ⭐
                 </span>
               )}

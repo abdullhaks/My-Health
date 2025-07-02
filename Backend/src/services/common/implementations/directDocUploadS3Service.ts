@@ -7,7 +7,7 @@ export default class DirectDocUploadS3Service implements IDirectDocUploadS3Servi
 
     constructor(
     ){};
-    async directUpload(file: any): Promise<any> {
+    async directUpload(file: any,location:string): Promise<any> {
     if (!file) {
       throw new Error("Document is required for upload");
     }
@@ -15,7 +15,7 @@ export default class DirectDocUploadS3Service implements IDirectDocUploadS3Servi
     const fileUrl = await uploadFileToS3(
       file.buffer,
       file.originalname,
-      "chatDoc",
+      location,
       file.mimetype
     );
 

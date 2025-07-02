@@ -101,7 +101,7 @@ userRoutes.get("/doctorDetails",verifyAccessTokenMidleware("user"),(req,res)=>de
 userRoutes.post(
   "/stripe/create-one-time-payment",
   verifyAccessTokenMidleware("user"),
-  paymentCtrl.createOneTimePaymentSession
+  (req,res)=>paymentCtrl.createOneTimePaymentSession(req,res)
 );
 
 userRoutes.get("/getAppointments",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.getAppointments(req,res))

@@ -309,6 +309,7 @@ const UserChat = () => {
 
         const formData = new FormData();
         formData.append("doc", docMessage);
+        formData.append("location","chatDoc")
         const uploadResult = await directFileUpload(formData);
         if (!uploadResult?.url) {
           throw new Error("Failed to upload file");

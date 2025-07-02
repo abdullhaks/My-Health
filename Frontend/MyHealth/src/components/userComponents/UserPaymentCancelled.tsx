@@ -9,10 +9,10 @@ const UserPaymentCancelled = () => {
         <h2 className="text-2xl font-bold text-red-600 mb-6">Payment Cancelled</h2>
         <p className="text-gray-600 mb-4">Your payment was not completed. Please try again.</p>
         <button
-          onClick={() => navigate("/user/book-appointment")}
+          onClick={() => navigate("/user/dashboard")}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          Try Again
+          Try Again After Some Time Later
         </button>
       </div>
     </div>
