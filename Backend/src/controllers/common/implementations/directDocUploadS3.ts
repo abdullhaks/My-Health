@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import IDirectDocUploadS3Ctrl from "../interfaces/IDirectDocUploadS3";
 import { inject,injectable } from "inversify";
 import IDirectDocUploadS3Service from "../../../services/common/interfaces/IDirectDocUploadS3Service";
+import { HttpStatusCode } from "../../../utils/enum";
 
 
 @injectable()
@@ -23,7 +24,7 @@ private _uploadService: IDirectDocUploadS3Service;
       console.log("Request file:", req.file);
 
       if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "No file uploaded" });
       };
 
       const allowedTypes = [
@@ -34,22 +35,22 @@ private _uploadService: IDirectDocUploadS3Service;
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ];
       if (!allowedTypes.includes(file.mimetype)) {
-        return res.status(400).json({ message: `Unsupported file type: ${file.mimetype}` });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: `Unsupported file type: ${file.mimetype}` });
       };
 
       const location = req.body.location ;
        if (!location) {
-        return res.status(400).json({ message: `files upload failed` });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: `files upload failed` });
       };
 
       const uploadResult = await this._uploadService.directUpload(file,location);
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         message: uploadResult.message,
         url: uploadResult.url,
       });
     } catch (error) {
       console.error("Error in direct file upload:", error);
-      res.status(500).json({ message: "Failed to upload file" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to upload file" });
     }
   }
 

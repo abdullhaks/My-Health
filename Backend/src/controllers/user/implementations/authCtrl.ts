@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import IUserAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject, injectable } from "inversify";
 import IUserAuthService from "../../../services/user/interfaces/IUserAuthServices";
-
+import { HttpStatusCode } from "../../../utils/enum";
 
 //..................temp
 import axios from "axios";
@@ -28,12 +28,12 @@ export default class UserAuthController implements IUserAuthCtrl {
       console.log("result is ", result);
 
       if (!result) {
-        return res.status(401).json({ msg: "Envalid credentials" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
       }
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "Envalid credentials" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
     }
   };
 
@@ -45,14 +45,14 @@ export default class UserAuthController implements IUserAuthCtrl {
   
       console.log("user email from auth ctrl....",userEmail);
       if (!userEmail) {
-        return res.status(401).json({ msg: "Unauthorized" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Unauthorized" });
       }
   
       const result = await this._userService.getMe(userEmail);
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -72,7 +72,7 @@ export default class UserAuthController implements IUserAuthCtrl {
         secure: false, 
       });
 
-       res.status(200)
+       res.status(HttpStatusCode.OK)
 
     } catch (error) {
       console.log(error);
@@ -95,10 +95,10 @@ export default class UserAuthController implements IUserAuthCtrl {
 
       console.log("user  is ", user);
 
-      return res.status(200).json(user);
+      return res.status(HttpStatusCode.CREATED).json(user);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -109,10 +109,10 @@ export default class UserAuthController implements IUserAuthCtrl {
       console.log(`otp is ${otp} & email is ${email}`);
 
       const otpRecord = await this._userService.verifyOtp(email, otp);
-      return res.status(200).json({ otp, email });
+      return res.status(HttpStatusCode.OK).json({ otp, email });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -120,15 +120,15 @@ export default class UserAuthController implements IUserAuthCtrl {
     try {
       const { email } = req.query;
       if (!email || typeof email !== "string") {
-        return res.status(400).json({ msg: "Email is required" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
       }
 
       const result = await this._userService.resentOtp(email);
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error: any) {
       console.error(error);
       return res
-        .status(500)
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
         .json({ msg: error.message || "Internal server error" });
     }
   }
@@ -138,13 +138,13 @@ export default class UserAuthController implements IUserAuthCtrl {
       const email = req.query.email;
 
       if (typeof email !== "string") {
-        return res.status(400).json({ msg: "Email must be provided in query" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email must be provided " });
       }
       const result = await this._userService.forgotPassword(email);
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -153,10 +153,10 @@ export default class UserAuthController implements IUserAuthCtrl {
       const { email } = req.body;
       const resp = this._userService.forgotPassword(email);
 
-      return res.status(200).json(resp);
+      return res.status(HttpStatusCode.OK).json(resp);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -166,7 +166,7 @@ export default class UserAuthController implements IUserAuthCtrl {
 
       if (!email || !recoveryCode) {
         return res
-          .status(400)
+          .status(HttpStatusCode.BAD_REQUEST)
           .json({ msg: "Email and recovery code are required" });
       }
 
@@ -176,15 +176,15 @@ export default class UserAuthController implements IUserAuthCtrl {
       );
 
       if (!isValid) {
-        return res.status(400).json({ msg: "Invalid recovery code" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Invalid recovery code" });
       }
 
       return res
-        .status(200)
+        .status(HttpStatusCode.OK)
         .json({ msg: "Recovery code verified successfully" });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "Internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Internal server error" });
     }
   }
 
@@ -197,19 +197,19 @@ export default class UserAuthController implements IUserAuthCtrl {
       const { newPassword, confirmPassword } = req.body.formData;
 
       if(newPassword != confirmPassword){
-        return res.status(403).json({ msg: "invalid inputs" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "invalid inputs" });
       }
       const response = this._userService.resetPassword(email, newPassword);
 
       if(!response){
-        return res.status(403).json({ msg: "user not found" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "user not found" });
       };
       
-      return res.status(200).json({ msg:"password updated" });
+      return res.status(HttpStatusCode.OK).json({ msg:"password updated" });
 
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
@@ -218,7 +218,7 @@ export default class UserAuthController implements IUserAuthCtrl {
       const { userRefreshToken } = req.cookies;
 
       if (!userRefreshToken) {
-        return res.status(403).json({ msg: "refresh token not found" });
+        return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
       }
 
       const result = await this._userService.refreshToken(userRefreshToken);
@@ -226,7 +226,7 @@ export default class UserAuthController implements IUserAuthCtrl {
       console.log("result from ctrl is ...", result);
 
       if (!result) {
-        return res.status(401).json({ msg: "Refresh token expired" });
+        return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
       }
 
       const {accessToken} = result
@@ -240,10 +240,10 @@ export default class UserAuthController implements IUserAuthCtrl {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   };
 
@@ -297,7 +297,7 @@ export default class UserAuthController implements IUserAuthCtrl {
         // });
 
         console.log("no account with this email")
-        return res.status(401).send("user not found..");
+        return res.status(HttpStatusCode.BAD_REQUEST).send("user not found..");
       };
 
 
@@ -337,7 +337,7 @@ export default class UserAuthController implements IUserAuthCtrl {
   
     } catch (err) {
       console.error("Google login error:", err);
-      res.status(500).send("Google login failed");
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send("Google login failed");
     }
   };
 

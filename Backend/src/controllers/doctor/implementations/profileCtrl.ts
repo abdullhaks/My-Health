@@ -3,7 +3,7 @@ import IDoctorProfileCtrl from "../interfaces/IProfileCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorProfileService from "../../../services/doctor/interfaces/IDoctorProfileSevices";
 import stripe, { makePayment } from "../../../middlewares/common/stripe"
-
+import { HttpStatusCode } from "../../../utils/enum"
 
 
 
@@ -45,13 +45,17 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
             successPath,
             cancelPath,
           });
+
+          if(!session){
+            return res.status(HttpStatusCode.BAD_REQUEST).json({meg:"make payment failed"})
+          }
       
           console.log("Session details:", session);
           console.log("i am here");
-          return res.status(200).json({ url: session.url });
+          return res.status(HttpStatusCode.OK).json({ url: session.url });
         } catch (err) {
           console.error("Stripe error:", err);
-          return res.status(500).json({ message: "Payment session creation failed" });
+          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Payment session creation failed" });
         }
       };
 
@@ -65,11 +69,11 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
           const response = await this._doctorService.verifySubscription(sessionId)
 
-          return res.status(200).json(response);
+          return res.status(HttpStatusCode.OK).json(response);
 
         }catch(error){
           console.error("Stripe error:", error);
-          return res.status(500).json({ message: "Subscription verification failed" });
+          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Subscription verification failed" });
         }
 
       };
@@ -89,12 +93,12 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
             const updatedDoctor = await this._doctorService.updateDoctorDp(id, updatedFields, uploadedImageKey);
 
-            res.status(200).json({updatedDoctor});
+            res.status(HttpStatusCode.OK).json({updatedDoctor});
 
     
         }catch(error){
             console.log(error);
-            res.status(500).json({ msg: "internal server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
     
 
@@ -119,10 +123,10 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
             const userId = req.params.id;
             const result = await this._doctorService.updateProfile(userId,userData);
 
-            return res.status(200).json(result);
+            return res.status(HttpStatusCode.OK).json(result);
         }catch (error) {
             console.log(error);
-            res.status(500).json({ msg: "internal server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
 
     };

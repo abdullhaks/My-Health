@@ -25,6 +25,8 @@ export const ROUTES = {
     me: "/user/me",
     doctorDetails: "/user/doctorDetails",
   },
+
+
   doctor: {
     signup: "/doctor/signup",
     login: "/doctor/login",

@@ -49,7 +49,7 @@ const UserChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Added ref for file input
+  const fileInputRef = useRef<HTMLInputElement>(null); 
   const location = useLocation();
   const navigate = useNavigate();
   const hasInitializedConversation = useRef(false);

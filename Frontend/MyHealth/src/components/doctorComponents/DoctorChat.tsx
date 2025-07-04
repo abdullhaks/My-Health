@@ -1,11 +1,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { FiSend, FiCheck, FiCheckCircle } from "react-icons/fi";
-import { BsEmojiSmile } from "react-icons/bs";
+import { FiSend, FiCheck, FiCheckCircle,FiX } from "react-icons/fi";
+import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getDoctorConversations, getDoctorMessages } from "../../api/doctor/doctorApi";
+import { directFileUpload, getDoctorConversations, getDoctorMessages } from "../../api/doctor/doctorApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
@@ -15,6 +15,8 @@ interface Message {
   conversationId: string;
   senderId: string;
   content: string;
+  type: "text" | "file";
+  fileName?: string;
   timestamp: string;
   readBy: string[];
   status: "sent" | "delivered" | "read";
@@ -47,6 +49,10 @@ const DoctorChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const [docMessage, setDocMessage] = useState<File | null>(null);
+  
+  
 
   const getAccessToken = async () => {
     try {
@@ -174,6 +180,25 @@ const DoctorChat = () => {
 
 
 
+     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          if (file.size > 10 * 1024 * 1024) {
+            message.error("File size must be less than 10MB");
+            return;
+          }
+          setDocMessage(file);
+          setNewMessage("");
+        }
+      };
+    
+      const handleCancelFile = () => {
+        setDocMessage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Reset file input
+        }
+      };
+
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
 
@@ -199,6 +224,7 @@ const DoctorChat = () => {
         )
       );
     };
+
 
     const handleTyping = ({ userId, role, conversationId }: { userId: string; role: string; conversationId: string }) => {
       if (currentChat._id === conversationId) {
@@ -228,43 +254,90 @@ const DoctorChat = () => {
     };
   }, [currentChat, users]);
 
-  const handleSendMessage = async () => {
-  if (!newMessage.trim() || !currentChat) return;
-
-  const messageData = {
-    senderId: doctorId,
-    conversationId: currentChat._id,
-    content: newMessage,
-  };
-
-  const tempMessage: Message = {
-    _id: uuidv4(),
-    conversationId: currentChat._id,
-    senderId: doctorId,
-    content: newMessage,
-    timestamp: new Date().toISOString(),
-    readBy: [doctorId],
-    status: "sent",
-  };
-
-  // setMessages((prev) => [...prev, tempMessage]);
-  setNewMessage("");
-
-  try {
-    // const response = await sendDoctorMessage(messageData);
-    // Update the temp message with server response
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === tempMessage._id ? { ...tempMessage, readBy: [doctorId], status: "sent" } : msg
-      )
-    );
-    socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
-  } catch (error: any) {
-    console.error("Message send failed:", error);
-    message.error(error.response?.data?.message || "Failed to send message.");
-    setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
-  }
-};
+   const handleSendMessage = async () => {
+     if (!currentChat || (!newMessage.trim() && !docMessage)) return;
+ 
+     let messageData: any;
+     let tempMessage: Message;
+ 
+     // setLoading(true);
+ 
+     try {
+       if (docMessage) {
+ 
+         const formData = new FormData();
+         formData.append("doc", docMessage);
+         formData.append("location","chatDoc")
+         const uploadResult = await directFileUpload(formData);
+         if (!uploadResult?.url) {
+           throw new Error("Failed to upload file");
+         }
+ 
+         messageData = {
+           senderId: doctorId,
+           conversationId: currentChat._id,
+           type: "file",
+           content: uploadResult.url,
+           fileName: docMessage.name,
+         };
+ 
+         tempMessage = {
+           _id: uuidv4(),
+           conversationId: currentChat._id,
+           senderId: doctorId,
+           content: uploadResult.url,
+           type: "file",
+           fileName: docMessage.name, // Include fileName in tempMessage
+           timestamp: new Date().toISOString(),
+           readBy: [doctorId],
+           status: "sent",
+         };
+       } else {
+         messageData = {
+           senderId: doctorId,
+           conversationId: currentChat._id,
+           type: "text",
+           content: newMessage,
+         };
+ 
+         tempMessage = {
+           _id: uuidv4(),
+           conversationId: currentChat._id,
+           senderId: doctorId,
+           content: newMessage,
+           type: "text",
+           timestamp: new Date().toISOString(),
+           readBy: [doctorId],
+           status: "sent",
+         };
+       }
+ 
+       // setMessages((prev) => [...prev, tempMessage]);
+       setNewMessage("");
+       setDocMessage(null);
+       if (fileInputRef.current) {
+         fileInputRef.current.value = ""; // Reset file input after sending
+       }
+ 
+       // Send message to server
+       // const response = await sendDoctorMessage(messageData);
+       // setMessages((prev) =>
+       //   prev.map((msg) =>
+       //     msg._id === tempMessage._id
+       //       ? { ...tempMessage, ...response.data, status: "sent" }
+       //       : msg
+       //   )
+       // );
+ 
+       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
+     } catch (error: any) {
+       console.error("Message send failed:", error);
+       message.error(error.response?.data?.message || "Failed to send message");
+       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+     } finally {
+       // setLoading(false);
+     }
+   };
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -325,6 +398,47 @@ const DoctorChat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+ const formatMessageTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const formatDateHeader = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return "Today";
+    } else if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+  };
+  const needsDateHeader = (currentMsg: Message, prevMsg?: Message) => {
+    if (!prevMsg) return true;
+    const currentDate = new Date(currentMsg.timestamp).setHours(0, 0, 0, 0);
+    const prevDate = new Date(prevMsg.timestamp).setHours(0, 0, 0, 0);
+    return currentDate !== prevDate;
+  };
 
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
@@ -431,9 +545,16 @@ const DoctorChat = () => {
                 <div className="text-center text-gray-500 text-sm">Loading messages...</div>
               ) : (
                 <div className="space-y-2">
-                  {messages.map((msg) => (
+                  {messages.map((msg, index) => (
+                  <div key={msg._id}>
+                    {needsDateHeader(msg, messages[index - 1]) && (
+                      <div className="text-center my-4">
+                        <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
+                          {formatDateHeader(msg.timestamp)}
+                        </span>
+                      </div>
+                    )}
                     <div
-                      key={msg._id}
                       className={`flex ${
                         msg.senderId === doctorId ? "justify-end" : "justify-start"
                       }`}
@@ -445,7 +566,6 @@ const DoctorChat = () => {
                             : "bg-white text-gray-900"
                         }`}
                       >
-                        {/* Message Tail */}
                         <div
                           className={`absolute top-2 ${
                             msg.senderId === doctorId ? "-right-2" : "-left-2"
@@ -455,21 +575,41 @@ const DoctorChat = () => {
                               : "border-r-8 border-r-white"
                           } border-b-8 border-b-transparent`}
                         />
-                        <p className="text-sm">{msg.content}</p>
-                        {msg.senderId === doctorId && (
-                          <span className="absolute bottom-1 right-2 text-xs flex items-center space-x-1">
-                            {msg.status === "read" ? (
-                              <FiCheckCircle className="text-blue-500" size={14} />
-                            ) : msg.status === "delivered" ? (
-                              <FiCheck className="text-gray-300" size={14} />
-                            ) : (
-                              <FiCheck className="text-gray-300" size={14} />
-                            )}
-                          </span>
+                        {msg.type === "file" ? (
+                          <div className="flex items-center space-x-2">
+                            <IoDocumentAttachOutline className="text-lg" />
+                            <a
+                              href={msg.content}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm underline"
+                            >
+                              {msg.fileName || "Document"}
+                            </a>
+                          </div>
+                        ) : (
+                          <p className="text-sm">{msg.content}</p>
                         )}
+                        <div className="flex items-center justify-end mt-1 space-x-1">
+                          <span className="text-xs text-gray-300">
+                            {formatMessageTime(msg.timestamp)}
+                          </span>
+                          {msg.senderId === doctorId && (
+                            <span className="flex items-center">
+                              {msg.status === "read" ? (
+                                <FiCheckCircle className="text-blue-500" size={14} />
+                              ) : msg.status === "delivered" ? (
+                                <FiCheck className="text-gray-300" size={14} />
+                              ) : (
+                                <FiCheck className="text-gray-300" size={14} />
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
                   <div ref={messagesEndRef} />
                 </div>
               )}
@@ -477,7 +617,35 @@ const DoctorChat = () => {
 
             {/* Input Section */}
             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
-              <BsEmojiSmile className="text-xl text-gray-500 cursor-pointer hover:text-gray-700" />
+              <label className="cursor-pointer">
+              <IoDocumentAttachOutline
+                className="text-xl text-gray-500 hover:text-gray-700"
+                onClick={() => fileInputRef.current?.click()}
+              />
+              <input
+                id="docMessageInput"
+                type="file"
+                name="docMessage"
+                className="hidden"
+                ref={fileInputRef} // Attach ref to input
+                onChange={handleFileChange}
+              />
+            </label>
+
+            {docMessage && (
+              <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
+                <IoDocumentAttachOutline className="text-gray-500" />
+                <span className="text-sm text-gray-700 ml-1">
+                  {docMessage.name}
+                </span>
+                <button
+                  onClick={handleCancelFile}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  <FiX size={16} />
+                </button>
+              </div>
+            )}
               <input
                 type="text"
                 value={newMessage}

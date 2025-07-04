@@ -252,4 +252,65 @@ export const getDoctorAppointments = async(doctorId:string) => {
     console.error("Error in get doctor's appointments..:", error);
     throw error;
   }
-}
+};
+
+export const getAnalysisReports = async (doctorId:string)=>{
+  try{
+    console.log("doctorId id",doctorId);
+
+    const response = await doctorInstance.get("/doctor/getAnalysisReports", { params: { doctorId } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};
+
+
+export const submitAnalysisReports = async (analysisId:string,result:string)=>{
+  try{
+    console.log("analysisId id",analysisId);
+
+    const response = await doctorInstance.post("/doctor/submitAnalysisReports", {analysisId, result});
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};
+
+export const directFileUpload = async (formData:any) => {
+  try {
+
+     for (const [key, value] of formData.entries()) {
+    console.log(`api side...${key}:`, value);
+  }
+
+    const response = await doctorInstance.post("/doctor/directFileUpload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in directFileUpload:", error);
+    throw error;
+  }
+};
+
+
+export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:number)=>{
+  try{
+    console.log("analysisId id",analysisId);
+
+    const response = await doctorInstance.post("/doctor/cancelAnalysisReports",{ analysisId,userId,fee });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};

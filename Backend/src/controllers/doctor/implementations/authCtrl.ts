@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import IDoctorAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorAuthService from "../../../services/doctor/interfaces/IDoctorAuthServices";
+import {HttpStatusCode} from "../../../utils/enum"
 
 
 
@@ -23,12 +24,12 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       console.log("result is ", result);
 
       if (!result) {
-        return res.status(401).json({ msg: "Envalid credentials" });
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
       }
-      return res.status(200).json(result);
+      return res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "Envalid credentials" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
     }
   };
 
@@ -73,12 +74,12 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       // Save to DB or upload to S3 as needed
       const response = await this._doctorService.signup(doctor,certificates,parsedSpecializations)
   
-      return res.status(201).json({ message: "Doctor signed up successfully!" });
+      return res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
 
       
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ msg: "internal server error" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   };
 
@@ -90,10 +91,10 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
         console.log(`otp is ${otp} & email is ${email}`);
   
         const otpRecord = await this._doctorService.verifyOtp(email, otp);
-        return res.status(200).json({ otp, email });
+        return res.status(HttpStatusCode.OK).json({ otp, email });
       } catch (error) {
         console.log(error);
-        return res.status(500).json({ msg: "internal server error" });
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
       }
     }
   
@@ -101,15 +102,15 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       try {
         const { email } = req.query;
         if (!email || typeof email !== "string") {
-          return res.status(400).json({ msg: "Email is required" });
+          return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
         }
   
         const result = await this._doctorService.resentOtp(email);
-        return res.status(200).json(result);
+        return res.status(HttpStatusCode.OK).json(result);
       } catch (error: any) {
         console.error(error);
         return res
-          .status(500)
+          .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
           .json({ msg: error.message || "Internal server error" });
       }
     };
@@ -120,7 +121,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           const { doctorRefreshToken } = req.cookies;
     
           if (!doctorRefreshToken) {
-            return res.status(403).json({ msg: "refresh token not found" });
+            return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
           }
     
           const result = await this._doctorService.refreshToken(doctorRefreshToken);
@@ -128,7 +129,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           console.log("result from ctrl is ...", result);
     
           if (!result) {
-            return res.status(401).json({ msg: "Refresh token expired" });
+            return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
           }
     
           const {accessToken} = result
@@ -142,10 +143,10 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
             maxAge: 7 * 24 * 60 * 60 * 1000,
           });
     
-          return res.status(200).json(result);
+          return res.status(HttpStatusCode.OK).json(result);
         } catch (error) {
           console.log(error);
-          return res.status(500).json({ msg: "internal server error" });
+          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
       };
 
@@ -154,11 +155,11 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
 
         try{
         const doctorRefreshToken = req.cookies.doctorRefreshToken
-        return res.status(200).json(doctorRefreshToken);
+        return res.status(HttpStatusCode.OK).json(doctorRefreshToken);
 
         }catch(error){
           console.log(error);
-          return res.status(500).json({ msg: "internal server error" });
+          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
 
       }

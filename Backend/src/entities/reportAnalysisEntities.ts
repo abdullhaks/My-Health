@@ -11,4 +11,5 @@ doctorCategory: String,
 createdAt: Date;
 fee: Number 
 analysisStatus: "pending" | "cancelled" | "submited";
+result: String
 }

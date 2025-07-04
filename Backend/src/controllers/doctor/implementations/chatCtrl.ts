@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import IDoctorChatCtrl from "../interfaces/IChatCtrl";
 import { inject,injectable } from "inversify";
 import IDoctorChatService from "../../../services/doctor/interfaces/IDoctorChatService";
+import { HttpStatusCode } from "../../../utils/enum"
 
 
 @injectable()
@@ -20,7 +21,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
       console.log("usearids from contorller ....",userIds);
       
       if (!Array.isArray(userIds) || userIds.length !== 2) {
-        res.status(400).json({ message: "Exactly two user IDs (doctor and user) are required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Exactly two user IDs (doctor and user) are required" });
         return;
       }
       // if (!userIds.includes(req.userId)) { // Assuming req.userId from verifyAccessTokenMidleware
@@ -28,10 +29,10 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   return;
       // }
       const conversation = await this._chatService.createOrGetConversation(userIds);
-      res.status(201).json(conversation);
+      res.status(HttpStatusCode.CREATED).json(conversation);
     } catch (error) {
       console.error("Error creating conversation:", error);
-      res.status(500).json({ message: "Failed to create conversation" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to create conversation" });
     }
   }
 
@@ -39,7 +40,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
     try {
       const doctorId = req.params.doctorId;
       if (!doctorId) {
-        res.status(400).json({ message: "Doctor ID is required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Doctor ID is required" });
         return;
       }
       // if (doctorId !== req.userId) { // Assuming req.userId from verifyAccessTokenMidleware
@@ -47,10 +48,10 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   return;
       // }
       const conversations = await this._chatService.getUserConversations(doctorId);
-      res.status(200).json(conversations);
+      res.status(HttpStatusCode.OK).json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: "Failed to fetch conversations" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch conversations" });
     }
   }
 
@@ -65,7 +66,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
         console.log("conversationId, senderId, content:", conversationId, senderId, content);
   
         if (!conversationId || !senderId || !content) {
-          res.status(400).json({ message: "Conversation ID, sender ID, and content are required" });
+          res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Conversation ID, sender ID, and content are required" });
           return;
         }
         // if (senderId !== req.userId) {
@@ -81,10 +82,10 @@ async createConversation(req: Request, res: Response): Promise<void> {
         // }
   
         const message = await this._chatService.sendMessage(conversationId, senderId, content);
-        res.status(201).json(message);
+        res.status(HttpStatusCode.CREATED).json(message);
       } catch (error) {
         console.error("Error sending message:", error);
-        res.status(500).json({ message: "Failed to send message" });
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to send message" });
       }
     }
   
@@ -92,14 +93,14 @@ async createConversation(req: Request, res: Response): Promise<void> {
       try {
         const { conversationId } = req.params;
         if (!conversationId) {
-          res.status(400).json({ message: "Conversation ID is required" });
+          res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Conversation ID is required" });
           return;
         }
         const messages = await this._chatService.getMessages(conversationId);
-        res.status(200).json(messages);
+        res.status(HttpStatusCode.OK).json(messages);
       } catch (error) {
         console.error("Error fetching messages:", error);
-        res.status(500).json({ message: "Failed to fetch messages" });
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch messages" });
       }
     }
 

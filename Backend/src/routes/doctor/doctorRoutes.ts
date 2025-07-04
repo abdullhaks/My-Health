@@ -8,6 +8,8 @@ import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccess
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
 import ISessionCtrl from "../../controllers/doctor/interfaces/ISessionCtrl";
+import IDoctorReportAnalysisCtrl from "../../controllers/doctor/interfaces/IReportAnalysisCtrl";
+import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
 
 const doctorRoutes = Router();
 
@@ -17,6 +19,9 @@ const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl")
 const sessionCtrl = container.get<ISessionCtrl>("IDoctorSessionCtrl");
 const appointmentCtrl = container.get<IDoctorAppointmentController>("IDoctorAppointmentController");
+const ReportAnalysisCtrl = container.get<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl");
+const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
+
 
 
 doctorRoutes.post("/login", (req, res,next) => authCtrl.doctorLogin(req, res,next));
@@ -50,6 +55,13 @@ doctorRoutes.patch(
   verifyAccessTokenMidleware("doctor"),
   uploadToS3("doctors/profile-images", true),
   (req, res) => profileCtrl.updateDp(req, res)
+);
+
+doctorRoutes.post(
+  "/directFileUpload",
+  verifyAccessTokenMidleware("doctor"),
+  upload.single("doc"),
+  (req, res) => directUploadCtrl.directUpload(req, res)
 );
 
 
@@ -98,9 +110,14 @@ doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> se
 
 doctorRoutes.get("/getAppointments",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.getAppointments(req,res))
 
+doctorRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
+  ReportAnalysisCtrl.getReports(req, res)) 
 
+doctorRoutes.post("/submitAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
+  ReportAnalysisCtrl.submitAnalysisReports(req, res));
 
-
+doctorRoutes.post("/cancelAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
+  ReportAnalysisCtrl.cancelAnalysisReports(req, res));
 
 
 

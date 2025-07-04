@@ -40,4 +40,7 @@ adminRoutes.patch("/doctor/:id/decline",(req,res)=>doctorCtrl.declineDoctor(req,
 adminRoutes.patch("/doctors/:id/block",(req,res)=>doctorCtrl.block(req,res))
 adminRoutes.patch("/doctors/:id/unblock",(req,res)=>doctorCtrl.unblock(req,res))
 
+
+
+
 export default adminRoutes; 

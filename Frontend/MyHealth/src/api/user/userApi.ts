@@ -4,6 +4,7 @@ import { ROUTES } from "../../constants/routes";
 
 
 
+
 export const signupUser = async (userData: any) => {
   try {
     const response = await userInstance.post(ROUTES.user.signup, userData);
@@ -12,7 +13,7 @@ export const signupUser = async (userData: any) => {
   } catch (error) {
     console.error("Error signing up user:", error);
     throw error;
-  }
+  } 
 };
 
 export const getMe = async ()=>{
@@ -31,7 +32,7 @@ export const getMe = async ()=>{
 
 export const getDoctor = async (doctorId:string)=>{
   try{
-    const response = await userInstance.get("/user/doctorDetails",{params:{doctorId}});
+    const response = await userInstance.get(ROUTES.user.doctorDetails,{params:{doctorId}});
     console.log("doctor details response is ",response.data);
     return response.data
   }catch(error){
@@ -43,7 +44,7 @@ export const getDoctor = async (doctorId:string)=>{
 
 export const loginUser = async (userData: any) => {
   try {
-    const response = await userInstance.post("/user/login", userData);
+    const response = await userInstance.post(ROUTES.user.login, userData);
     console.log("Login response:", response.data);
     return response.data;
   } catch (error) {
@@ -55,7 +56,7 @@ export const loginUser = async (userData: any) => {
 export const verifyOtp = async (otpData: any) => {
   try {
     console.log("OTP data:", otpData);
-    const response = await userInstance.post("/user/verifyOtp", otpData);
+    const response = await userInstance.post(ROUTES.user.verifyOtp, otpData);
     return response.data;
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -65,7 +66,7 @@ export const verifyOtp = async (otpData: any) => {
 
 export const resentOtp = async (email: string) => {
   try {
-    const response = await userInstance.get("/user/resentOtp", {
+    const response = await userInstance.get(ROUTES.user.resentOtp, {
       params: { email },
     });
     return response.data;
@@ -77,7 +78,7 @@ export const resentOtp = async (email: string) => {
 
 export const forgetPassword = async (email: string) => {
   try {
-    const response = await userInstance.get("/user/forgotPassword", {
+    const response = await userInstance.get(ROUTES.user.forgotPassword, {
       params: { email },
     });
     return response.data;
@@ -89,7 +90,7 @@ export const forgetPassword = async (email: string) => {
 
 export const recoveryPassword = async (email: string) => {
   try {
-    const response = await userInstance.get("/user/recoveryPassword", {
+    const response = await userInstance.get(ROUTES.user.recoveryPassword, {
       params: { email },
     });
     return response.data;
@@ -333,6 +334,20 @@ export const getAnalysisReports = async (userId:string)=>{
     console.log("userId id",userId);
 
     const response = await userInstance.get("/user/getAnalysisReports", { params: { userId } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};
+
+
+export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:number)=>{
+  try{
+    console.log("analysisId id",analysisId);
+
+    const response = await userInstance.post("/user/cancelAnalysisReports",{ analysisId,userId,fee });
     return response.data;
 
   }catch(error){

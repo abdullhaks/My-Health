@@ -110,6 +110,20 @@ export const setupSocket = (io: Server, container: Container) => {
           return socket.emit("error", { message: "Not authorized for this appointment." });
         }
 
+        // const now = new Date();
+        // const startTime = new Date(appointment.start);
+        // const endTime = new Date(appointment.end);
+        // const fiveMinutesBeforeStart = new Date(startTime.getTime() - 5 * 60 * 1000);
+
+        // if (now < fiveMinutesBeforeStart) {
+        //   socket.emit("error", { message: "You can only join the meeting within 5 minutes before the start time." });
+        //   return;
+        // }
+        // if (now > endTime) {
+        //   socket.emit("error", { message: "The meeting has already ended." });
+        //   return;
+        // }
+
         socket.join(appointmentId);
         await appointmentsRepository.update(appointmentId, { callStartTime: new Date() });
         socket.emit("joinedVideoCall", { appointmentId });

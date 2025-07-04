@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import IConversationCtrl from "../interfaces/IConversationCtrl";
 import { inject,injectable } from "inversify";
 import IConversationService from "../../../services/common/interfaces/IConversationService";
+import { HttpStatusCode } from "../../../utils/enum";
+
 
 
 @injectable()
@@ -20,7 +22,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
       console.log("usearids from contorller ....",userIds);
       
       if (!Array.isArray(userIds) || userIds.length !== 2) {
-        res.status(400).json({ message: "Exactly two user IDs (doctor and user) are required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Exactly two user IDs (doctor and user) are required" });
         return;
       }
       // if (!userIds.includes(req.userId)) { // Assuming req.userId from verifyAccessTokenMidleware
@@ -28,10 +30,10 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   return;
       // }
       const conversation = await this._conversationService.createOrGetConversation(userIds);
-      res.status(201).json(conversation);
+      res.status(HttpStatusCode.CREATED).json(conversation);
     } catch (error) {
       console.error("Error creating conversation:", error);
-      res.status(500).json({ message: "Failed to create conversation" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to create conversation" });
     }
   }
 
@@ -42,7 +44,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
       console.log("from doc... is ...", from);
 
       if (!doctorId || !from) {
-        res.status(400).json({ message: "Doctor ID is required and doc location" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Doctor ID is required and doc location" });
         return;
       }
       // if (doctorId !== req.userId) { // Assuming req.userId from verifyAccessTokenMidleware
@@ -50,10 +52,10 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   return;
       // }
       const conversations = await this._conversationService.getUserConversations(doctorId, from as string);
-      res.status(200).json(conversations);
+      res.status(HttpStatusCode.OK).json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: "Failed to fetch conversations" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch conversations" });
     }
   }
 

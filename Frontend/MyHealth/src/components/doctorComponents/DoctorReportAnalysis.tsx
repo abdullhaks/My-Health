@@ -1,42 +1,14 @@
-import { useState } from "react";
-
-const dummyReports = [
-  {
-    _id: "1",
-    doctorName: "Ravi K",
-    doctorCategory: "Ayurvedha",
-    fee: 50,
-    concerns: "Headache",
-    result: "Patient shows improvement...",
-    files: ["https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/healthReports/393482cb-5592-4336-9484-eb31a38020e8.jpg"],
-    analysisStatus: "submited",
-  },
-  {
-    _id: "2",
-    doctorName: "Ravi K",
-    doctorCategory: "Ayurvedha",
-    fee: 50,
-    concerns: "Back pain",
-    result: "",
-    files:  ["https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/healthReports/393482cb-5592-4336-9484-eb31a38020e8.jpg"],
-    analysisStatus: "pending",
-  },
-  {
-    _id: "3",
-    doctorName: "Ravi K",
-    doctorCategory: "Ayurvedha",
-    fee: 50,
-    concerns: "Fever",
-    result: "",
-    files: [],
-    analysisStatus: "cancelled",
-  },
-];
+import { useEffect, useState } from "react";
+import { getAnalysisReports,submitAnalysisReports,cancelAnalysisReports } from "../../api/doctor/doctorApi";
+import { useSelector } from "react-redux";
+import { message } from "antd";
 
 
 type Report = {
   _id: string;
   doctorName: string;
+  userId: string;
+  doctorId: string;
   doctorCategory: string;
   fee: number;
   concerns: string;
@@ -46,25 +18,109 @@ type Report = {
 };
 
 export function DoctorReportAnalysis() {
+  const [reports,setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [resultText, setResultText] = useState("");
+  const doctor = useSelector((state: any) => state.doctor.doctor);
+
+
+
+  const handleCancel = async (report: Report) => {
+    const analysisId = report._id;
+    const userId = report.userId; 
+    const fee = report.fee; 
+    if (!analysisId) {
+      message.error("Invalid report ID.");
+      return;
+    }
+    try {
+      const response = await cancelAnalysisReports(analysisId,userId,fee);
+      if (response && response._id) {
+        message.success("Report cancelled successfully");
+        setReports((prevReports) =>
+          prevReports.map((r) =>
+            r._id === response._id ? { ...r, analysisStatus: "cancelled" } : r
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling report:", error);
+      message.error("Failed to cancel report. Please try again later.");
+    }
+  };
+
+
 
   const handleSubmitResult = () => {
     console.log("Submit result:", resultText);
+
+    if (!resultText.trim()) {
+      message.error("Result cannot be empty");
+      return;
+    };
+    const analysisId = selectedReport?._id;
+
+    const submitResult = async () => {
+      if (!analysisId) {
+        message.error("Invalid report ID.");
+        return;
+      }
+      try {
+        const response = await submitAnalysisReports(analysisId, resultText);
+        setSelectedReport(null);
+        setResultText("");
+        // Update only the submitted report in the state
+        if (response && response._id) {
+        message.success("Result submitted successfully");
+          setReports((prevReports) =>
+            prevReports.map((report) =>
+              report._id === response._id ? { ...report, ...response } : report
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Error submitting result:", error);
+        message.error("Failed to submit result. Please try again later.");
+      }
+    }
+
+    submitResult();
     setSelectedReport(null);
     setResultText("");
   };
 
+   useEffect(() => {
+      const fetchReports = async () => {
+        try {
+          const response = await getAnalysisReports(doctor._id);
+          setReports(response);
+        } catch (error) {
+          console.error("Error fetching reports:", error);
+          message.error("Failed to fetch reports. Please try again later.");
+        }
+      };
+  
+      fetchReports();
+    }
+    , [doctor._id]);
+
   return (
     <div className="p-4 space-y-4">
-      {dummyReports.map((report) => (
+
+      {reports.length === 0 && (
+        <div className="text-center text-gray-500">
+          <p>No reports available</p>
+        </div>
+      )}
+
+      {reports.map((report) => (
         <div key={report._id} className="border rounded-xl shadow p-4 bg-white">
           <h2 className="text-lg font-semibold">User Report</h2>
           <p className="text-sm">Concern: {report.concerns}</p>
           <p className="text-sm">Status: {report.analysisStatus}</p>
           {report.analysisStatus === "pending" && (
             <div className="flex gap-2 mt-2">
-              <button className="px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
+              <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleCancel(report)}>Cancel</button>
               <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => setSelectedReport(report)}>Add Result</button>
             </div>
           )}

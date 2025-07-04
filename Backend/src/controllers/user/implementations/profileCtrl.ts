@@ -2,7 +2,7 @@ import { Response,Request } from "express";
 import IUserProfileCtrl from "../interfaces/IProfileCtrl";
 import { inject, injectable } from "inversify";
 import IUserProfileService from "../../../services/user/interfaces/IuserProfileServices";
-
+import { HttpStatusCode } from "../../../utils/enum";
 
 injectable();
 
@@ -31,10 +31,10 @@ export default class UserProfileController implements IUserProfileCtrl {
             const userId = req.params.id;
             const result = await this._profileService.updateProfile(userId,userData);
 
-            return res.status(200).json(result);
+            return res.status(HttpStatusCode.OK).json(result);
         }catch (error) {
             console.log(error);
-            res.status(500).json({ msg: "internal server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
 
     };
@@ -53,12 +53,12 @@ export default class UserProfileController implements IUserProfileCtrl {
 
             const updatedUser = await this._profileService.updateUserDp(id, updatedFields, uploadedImageKey);
 
-            res.status(200).json({updatedUser});
+            res.status(HttpStatusCode.OK).json({updatedUser});
 
     
         }catch(error){
             console.log(error);
-            res.status(500).json({ msg: "internal server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
     
 
@@ -75,14 +75,14 @@ export default class UserProfileController implements IUserProfileCtrl {
             const response = await this._profileService.changePassword(id,data);
 
             if(!response){
-            return res.status(403).json({ msg: "password changing has been failed" });
+            return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "password changing has been failed" });
             };
 
-            return res.status(200).json({msg:"password changed"})
+            return res.status(HttpStatusCode.OK).json({msg:"password changed"})
 
         }catch(error){
             console.log(error);
-            res.status(500).json({ msg: "internal server error" });
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
 
     }

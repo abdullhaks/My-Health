@@ -1,26 +1,24 @@
 
 import { inject,injectable } from "inversify";
-import IUserReportAnalysisService from "../interfaces/IUserReportAnalysis";
+import IDoctorReportAnalysisService from "../interfaces/IDoctorReportAnalysis";
 import IReportAnalysisRepository from "../../../repositories/interfaces/IReportAnalysisRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
-import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
 @injectable()
-export default class UserReportAnalysisService implements IUserReportAnalysisService {
+export default class DoctorReportAnalysisService implements IDoctorReportAnalysisService {
 
     constructor(
         @inject("IReportAnalysisRepository") private _ReportAnalysisRepository : IReportAnalysisRepository,
         @inject("IUserRepository") private _UserRepository: IUserRepository
-        
     ){
 
     };
 
 
-async getReports (userId:string):Promise<any>{
+async getReports (doctorId:string):Promise<any>{
 
     try{
-        const response = await this._ReportAnalysisRepository.findAll({userId:userId});
+        const response = await this._ReportAnalysisRepository.findAll({doctorId:doctorId});
         return response;
 
     }catch(error){
@@ -31,6 +29,18 @@ async getReports (userId:string):Promise<any>{
 
 
 
+async submitAnalysisReports (analysisId:string, result:string):Promise<any>{
+    try{
+        const response = await this._ReportAnalysisRepository.update(analysisId, { result: result, analysisStatus: "submited" });
+        return response;
+
+    }catch(error){
+        console.error("Error in submitting analysis reports", error);
+        throw new Error("Failed to submit analysis report");
+    }
+
+};
+
 async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Promise<any>{
     try{
         
@@ -39,15 +49,11 @@ async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Pr
         }
 
         console.log("Cancelling analysis report with ID:", analysisId, "for user ID:", userId, "with fee:", fee);
-        var walletUpdate = await this._UserRepository.update(userId, { $inc: { walletBalance: fee } });
+        const walletUpdate = await this._UserRepository.update(userId, { $inc: { walletBalance: fee } });
         
         if(walletUpdate){
-            const { password, ...userWithoutPassword } = walletUpdate.toObject();
-                    if(userWithoutPassword.profile){
-                    userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
-                    };
             const response = await this._ReportAnalysisRepository.update(analysisId, { analysisStatus: "cancelled" });
-             return {userWithoutPassword ,response};
+             return response;
         }else{
                 console.error("Failed to update wallet balance");
                 throw new Error("Failed to update wallet balance");
@@ -62,4 +68,4 @@ async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Pr
 
 };
 
-};
+}

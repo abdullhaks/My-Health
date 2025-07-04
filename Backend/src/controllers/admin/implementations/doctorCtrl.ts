@@ -1,112 +1,155 @@
-import { NextFunction,Request,Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IAdminDoctorCtrl from "../interfaces/IDoctorCtrl";
-import { inject,injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import IAdminDoctorService from "../../../services/admin/interfaces/IAdminDoctorService";
+import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
-
 export default class AdminDoctorController implements IAdminDoctorCtrl {
+  private _adminService: IAdminDoctorService;
 
-    private _adminService: IAdminDoctorService;
+  constructor(
+    @inject("IAdminDoctorService") AdminDoctorService: IAdminDoctorService
+  ) {
+    this._adminService = AdminDoctorService;
+  }
 
-    constructor( 
-        @inject("IAdminDoctorService") AdminDoctorService:IAdminDoctorService
+  async getDoctors(req: Request, res: Response): Promise<any> {
+    try {
+      const { page, search, limit, onlyPremium } = req.query;
+      console.log("reqest.params from get users...", search, page, limit);
 
-    ){ this._adminService= AdminDoctorService}
+      const pageNumber = page ? parseInt(page as string, 10) : 1;
+      const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+      const onlyPremiumBool = onlyPremium === "true" ? true : false;
 
-    async getDoctors(req:Request,res:Response):Promise<any>{
+      const result = await this._adminService.getDoctors(
+        pageNumber,
+        search as string | undefined,
+        limitNumber,
+        onlyPremiumBool
+      );
 
-        const { page, search, limit ,onlyPremium} = req.query;
-        console.log("reqest.params from get users...", search, page, limit);
-
-        const pageNumber = page ? parseInt(page as string, 10) : 1;
-        const limitNumber = limit ? parseInt(limit as string, 10) : 10;
-        const onlyPremiumBool = onlyPremium === 'true' ? true : false;
-
-        const result = await this._adminService.getDoctors(pageNumber, search as string | undefined, limitNumber, onlyPremiumBool);
-
-        if(!result){
-            return res.status(401).json({msg:"fetching doctors has been fialed "});
-        }
-        return res.status(200).json(result);
+      if (!result) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "fetching doctors has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
     }
+  }
 
-    async getDoctor(req:Request,res:Response):Promise<any>{
+  async getDoctor(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
+      const response = await this._adminService.getDoctor(id);
 
-        const {id} = req.params;
-        const response = await this._adminService.getDoctor(id);
+      if (!response) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "fetching doctor has been fialed " });
+      }
 
-        if(!response){
-            return res.status(401).json({msg:"fetching doctor has been fialed "});
-        };
+      return res.status(HttpStatusCode.OK).json(response);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
-        return res.status(200).json(response);
-    };
+  async verifyDoctor(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
+      const response = await this._adminService.verifyDoctor(id);
+      if (!response) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "verifying doctor has been failed " });
+      }
 
-    async verifyDoctor(req:Request , res:Response):Promise<any>{
+      return res.status(HttpStatusCode.OK).json(response);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
-        const {id} = req.params;
-        const response = await this._adminService.verifyDoctor(id);
-        if(!response){
-            return res.status(401).json({msg:"verifying doctor has been failed "});
-        };
+  async declineDoctor(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
 
-        return res.status(200).json(response);
+      console.log("reson is..........", reason);
+      const response = await this._adminService.declineDoctor(id, reason);
+      if (!response) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "declining doctor has been failed " });
+      }
 
-    };
+      return res.status(HttpStatusCode.OK).json(response);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
+  async block(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
 
-    async declineDoctor(req:Request , res:Response):Promise<any>{
+      console.log("user id for block...", id);
 
-        const {id} = req.params;
-        const {reason} = req.body;
+      const result = this._adminService.block(id);
 
-        console.log("reson is..........",reason);
-        const response = await this._adminService.declineDoctor(id,reason);
-        if(!response){
-            return res.status(401).json({msg:"declining doctor has been failed "});
-        };
+      console.log("resposne form doctor blocking ctrl..", result);
 
-        return res.status(200).json(response);
-    };
+      if (!result) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "blocking doctors has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
+  async unblock(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
 
+      console.log("doctor id for block...", id);
 
-    async block(req:Request,res:Response):Promise<any>{
+      const result = this._adminService.unblock(id);
 
-        const {id} = req.params;
+      console.log("resposne form doctor blocking ctrl..", result);
 
-        console.log("user id for block...",id);
-
-        const result = this._adminService.block(id);
-
-        console.log("resposne form doctor blocking ctrl..",result);
-
-        if(!result){
-            return res.status(401).json({msg:"blocking doctors has been fialed "});
-        }
-        return res.status(200).json(result);
-
-    };
-
-
-    
-
-    async unblock(req:Request,res:Response):Promise<any>{
-
-        const {id} = req.params;
-
-        console.log("doctor id for block...",id);
-
-        const result = this._adminService.unblock(id);
-
-        console.log("resposne form doctor blocking ctrl..",result);
-
-        if(!result){
-            return res.status(401).json({msg:"blocking doctors has been fialed "});
-        }
-        return res.status(200).json(result);
-
-    };
-
+      if (!result) {
+        return res
+          .status(HttpStatusCode.BAD_REQUEST)
+          .json({ msg: "blocking doctors has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 }

@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import IDetailsCtrl from "../interfaces/IDetailsCtrl";
 import { inject,injectable } from "inversify";
 import IDetailsService from "../../../services/common/interfaces/IDetailsService";
+import { HttpStatusCode } from "../../../utils/enum";
+
 
 
 @injectable()
@@ -21,15 +23,15 @@ private _detailsService: IDetailsService;
         console.log("doctor id is ",doctorId);
       if (doctorId) {
       const response = await this._detailsService.getDoctor(doctorId.toString());
-        return  res.status(200).json(response);
+        return  res.status(HttpStatusCode.OK).json(response);
 
     };
 
-      res.status(400).json({ message: "doctor ID is required" });
-        return;
+      res.status(HttpStatusCode.BAD_REQUEST).json({ message: "doctor ID is required" });
+        return 
     }catch(error){
       console.error("Error fetching dector details:", error);
-      res.status(500).json({ message: "Failed to fetch dector details" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch dector details" });
     }
   }
 

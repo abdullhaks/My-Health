@@ -6,6 +6,7 @@ import IPaymentCtrl from "../interfaces/IPaymentCtrl";
 import { inject,injectable } from "inversify";
 import IPaymentService from "../../../services/common/interfaces/IPaymentService";
 import { makeOneTimePayment } from "../../../middlewares/common/stripe";
+import { HttpStatusCode } from "../../../utils/enum";
 
 
 @injectable()
@@ -32,12 +33,12 @@ private _paymentService: IPaymentService;
 
       const response =await this._paymentService.handleWebhookEvent(event)
 
-      if (response) return  res.status(200).json({ received: true })
-      else return res.status(401).json({ msg: "Webhook signature verification failed..." });
+      if (response) return  res.status(HttpStatusCode.OK).json({ received: true })
+      else return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Webhook signature verification failed..." });
 
     }catch(error){
       console.error("Webhook signature verification failed.", error);
-      return res.status(400).send(`Webhook Error: ${(error as Error).message}`);
+      return res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(error as Error).message}`);
     }
   };
 
@@ -61,10 +62,10 @@ private _paymentService: IPaymentService;
       });
 
       console.log("One-time payment session:", session);
-      return res.status(200).json({ url: session.url });
+      return res.status(HttpStatusCode.OK).json({ url: session.url });
     } catch (err) {
       console.error("Stripe one-time payment error:", err);
-      return res.status(500).json({ message: "One-time payment session creation failed" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "One-time payment session creation failed" });
     }
   }
 
@@ -94,7 +95,7 @@ export const stripeWebhookController = async (req: Request, res: Response):Promi
       );
     } catch (err) {
       console.error("Webhook signature verification failed.", err);
-      return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
+      return res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(err as Error).message}`);
     }
   
     if (event.type === "checkout.session.completed") {
@@ -103,7 +104,7 @@ export const stripeWebhookController = async (req: Request, res: Response):Promi
 
       if (!metadata) {
         console.error("Metadata is null or undefined.");
-        return res.status(400).send("Invalid session metadata.");
+        return res.status(HttpStatusCode.BAD_REQUEST).send("Invalid session metadata.");
       }
 
       switch (metadata.role) {
@@ -123,6 +124,6 @@ export const stripeWebhookController = async (req: Request, res: Response):Promi
       }
     }
   
-    res.status(200).json({ received: true });
+    res.status(HttpStatusCode.OK).json({ received: true });
   };
   

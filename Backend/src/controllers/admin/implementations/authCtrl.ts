@@ -3,6 +3,7 @@ import { NextFunction,Request,Response } from "express";
 import IAuthCtrl from "../interfaces/IAuthCtrl";
 import { inject,injectable } from "inversify";
 import IAdminAuthService from "../../../services/admin/interfaces/IAdminAuthService";
+import { HttpStatusCode } from "../../../utils/enum";
 
 
 @injectable()
@@ -29,13 +30,13 @@ export default class AdminAuthController implements IAuthCtrl {
             console.log("result is ",result);
 
             if(!result){
-                return res.status(401).json({msg:"Envalid credentials"});
+                return res.status(HttpStatusCode.UNAUTHORIZED).json({msg:"Envalid credentials"});
             }
-            return res.status(200).json(result);
+            return res.status(HttpStatusCode.OK).json(result);
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"Envalid credentials"});
+            return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({msg:"Envalid credentials"});
         }
         
     };
@@ -49,14 +50,14 @@ export default class AdminAuthController implements IAuthCtrl {
             const email = req.query.email;
 
             if (typeof email !== "string") {
-              return res.status(400).json({ msg: "Email must be provided in query" });
+              return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email must be provided in query" });
             }
             const result = await this._adminService.forgotPassword(email);
-            return res.status(200).json(result);
+            return res.status(HttpStatusCode.OK).json(result);
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"internal server error"});
+            return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({msg:"internal server error"});
 
         }
     };
@@ -68,11 +69,11 @@ export default class AdminAuthController implements IAuthCtrl {
             const {email} = req.body;
             const resp = this._adminService.forgotPassword(email)
     
-            return res.status(200).json(resp)
+            return res.status(HttpStatusCode.OK).json(resp)
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"internal server error"});
+            return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({msg:"internal server error"});
 
         }
        
@@ -83,19 +84,19 @@ export default class AdminAuthController implements IAuthCtrl {
           const { email, recoveryCode } = req.body;
       
           if (!email || !recoveryCode) {
-            return res.status(400).json({ msg: "Email and recovery code are required" });
+            return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email and recovery code are required" });
           }
       
           const isValid = await this._adminService.verifyRecoveryPassword(email, recoveryCode);
       
           if (!isValid) {
-            return res.status(400).json({ msg: "Invalid recovery code" });
+            return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Invalid recovery code" });
           }
       
-          return res.status(200).json({ msg: "Recovery code verified successfully" });
+          return res.status(HttpStatusCode.OK).json({ msg: "Recovery code verified successfully" });
         } catch (error) {
           console.log(error);
-          return res.status(500).json({ msg: "Internal server error" });
+          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Internal server error" });
         }
       }
       
@@ -109,11 +110,11 @@ export default class AdminAuthController implements IAuthCtrl {
             const {email} =req.params;
             const {password,confirmPassword} = req.body;
 
-            return res.status(200).json({email,password,confirmPassword});
+            return res.status(HttpStatusCode.OK).json({email,password,confirmPassword});
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"internal server error"});
+            return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({msg:"internal server error"});
 
         }
     };
@@ -125,17 +126,21 @@ export default class AdminAuthController implements IAuthCtrl {
             const {adminRefreshToken} = req.cookies;
 
             if(!adminRefreshToken){
-                return res.status(401).json({msg:"refresh token not found"});
+                return res.status(HttpStatusCode.UNAUTHORIZED).json({msg:"refresh token not found"});
             }
 
             const result = await this._adminService.refreshToken(adminRefreshToken);
 
-            return res.status(200).json(result);
+            if (!result) {
+            return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
+          }
+
+            return res.status(HttpStatusCode.OK).json(result);
 
 
         }catch(error){
             console.log(error);
-            return res.status(500).json({msg:"internal server error"});
+            return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({msg:"internal server error"});
 
         }
     }

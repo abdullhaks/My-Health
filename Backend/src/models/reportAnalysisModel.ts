@@ -32,6 +32,10 @@ const reportAnalysisSchema = new Schema<IReportAnalysisDocument>(
       type: Number,
       required: true,
     },
+    result:{
+      type: String,
+      default: "",
+    },
     analysisStatus: {
       type: String,
       enum: ["pending", "cancelled", "submited",],

@@ -168,7 +168,7 @@ class PeerService {
         }
 
       await this.peer.setRemoteDescription(new RTCSessionDescription(desc));
-      console.log("Set remote description:", desc.type); // Added log
+      console.log("Set remote description:", desc.type); 
     } catch (err) {
       console.error("Error setting remote description:", err);
     }
@@ -176,7 +176,7 @@ class PeerService {
 
   async addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
     try {
-        // Only add if the peer connection is not closed and the candidate exists
+        
         if (this.peer.signalingState !== 'closed' && candidate) {
             await this.peer.addIceCandidate(new RTCIceCandidate(candidate));
         } else {
@@ -200,11 +200,7 @@ class PeerService {
       }
     });
 
-    // Also stop tracks from the original localStream if it was stored (not storing it now)
-    // If you were storing it on PeerService:
-    // if (this.stream) {
-    //   this.stream.getTracks().forEach((track) => track.stop());
-    // }
+   
 
     this.peer.close();
     console.log("Peer connection closed."); // Added log

@@ -114,6 +114,10 @@ userRoutes.patch("/cancelAppointments",verifyAccessTokenMidleware("user"),(req,r
 userRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
   ReportAnalysisCtrl.getReports(req, res)) 
 
+userRoutes.post("/cancelAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
+  ReportAnalysisCtrl.cancelAnalysisReports(req, res));
+
+
 
 
 export default userRoutes; 

@@ -1,70 +1,86 @@
-import { NextFunction,Request,Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import IAdminUserCtrl from "../interfaces/IUserCtrl";
-import { inject,injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import IAdminUserService from "../../../services/admin/interfaces/IAdminUserService";
+import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
-
 export default class AdminUserController implements IAdminUserCtrl {
+  private _adminService: IAdminUserService;
 
-    private _adminService: IAdminUserService;
+  constructor(
+    @inject("IAdminUserService") AdminUserService: IAdminUserService
+  ) {
+    this._adminService = AdminUserService;
+  }
 
-    constructor( 
-        @inject("IAdminUserService") AdminUserService:IAdminUserService
+  async getUsers(req: Request, res: Response): Promise<any> {
+    try {
+      const { page, search, limit } = req.query;
+      console.log("reqest.params from get users...", search, page, limit);
 
-    ){ this._adminService= AdminUserService}
+      const pageNumber = page ? parseInt(page as string, 10) : 1;
+      const limitNumber = limit ? parseInt(limit as string, 10) : 10;
 
-    async getUsers(req:Request,res:Response):Promise<any>{
+      const result = await this._adminService.getUsers(
+        pageNumber,
+        search as string | undefined,
+        limitNumber
+      );
 
-        const { page, search, limit } = req.query;
-        console.log("reqest.params from get users...", search, page, limit);
+      if (!result) {
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "fetching users has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
-        const pageNumber = page ? parseInt(page as string, 10) : 1;
-        const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+  async block(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
 
-        const result = await this._adminService.getUsers(pageNumber, search as string | undefined, limitNumber);
+      console.log("user id for block...", id);
 
-        if(!result){
-            return res.status(401).json({msg:"fetching users has been fialed "});
-        }
-        return res.status(200).json(result);
-    };
+      const result = this._adminService.block(id);
 
-    async block(req:Request,res:Response):Promise<any>{
+      console.log("resposne form user blocking ctrl..", result);
 
-        const {id} = req.params;
+      if (!result) {
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 
-        console.log("user id for block...",id);
+  async unblock(req: Request, res: Response): Promise<any> {
+    try {
+      const { id } = req.params;
 
-        const result = this._adminService.block(id);
+      console.log("user id for block...", id);
 
-        console.log("resposne form user blocking ctrl..",result);
+      const result = this._adminService.unblock(id);
 
-        if(!result){
-            return res.status(401).json({msg:"blocking users has been fialed "});
-        }
-        return res.status(200).json(result);
+      console.log("resposne form user blocking ctrl..", result);
 
-    };
-
-
-    
-
-    async unblock(req:Request,res:Response):Promise<any>{
-
-        const {id} = req.params;
-
-        console.log("user id for block...",id);
-
-        const result = this._adminService.unblock(id);
-
-        console.log("resposne form user blocking ctrl..",result);
-
-        if(!result){
-            return res.status(401).json({msg:"blocking users has been fialed "});
-        }
-        return res.status(200).json(result);
-
-    };
-
+      if (!result) {
+        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
+      }
+      return res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "Envalid credentials" });
+    }
+  }
 }

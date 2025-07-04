@@ -178,5 +178,23 @@ export const declineDoctor = async (id: string, reason: string ) => {
 
 
 
+export const getAppointments = async(page:number,limit:number) => {
+  try{
+
+    const response = await adminInstance.get("/admin/getAppointments",{
+      params: { page,limit}
+    });
+
+    console.log("response data is ....",response.data)
+    return response.data;
+
+  }catch(error){
+    console.error("Error in get doctor's appointments..:", error);
+    throw error;
+  }
+};
+
+
+
 
 

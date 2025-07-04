@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { getAnalysisReports } from "../../api/user/userApi";
-import { useSelector } from "react-redux";
+import { getAnalysisReports,cancelAnalysisReports } from "../../api/user/userApi";
+import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
+import { updateUser } from "../../redux/slices/userSlices";
+
 
 
 type Report = {
   _id: string;
   doctorName: string;
+  userId:string;
+  doctorId: string;
   doctorCategory: string;
   fee: number;
   concerns: string;
@@ -19,6 +23,34 @@ export function UserReportAnalysis() {
   const [reports,setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const user = useSelector((state: any) => state.user.user);
+  const dispatch = useDispatch();
+
+
+
+   const handleCancel = async (report: Report) => {
+      const analysisId = report._id;
+      const userId = report.userId; 
+      const fee = report.fee; 
+      if (!analysisId) {
+        message.error("Invalid report ID.");
+        return;
+      }
+      try {
+        const response = await cancelAnalysisReports(analysisId,userId,fee);
+        if (response.userWithoutPassword && response.response._id) {
+          message.success("Report cancelled successfully");
+          dispatch(updateUser(response.userWithoutPassword));
+          setReports((prevReports) =>
+            prevReports.map((r) =>
+              r._id === response.response._id ? { ...r, analysisStatus: "cancelled" } : r
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Error cancelling report:", error);
+        message.error("Failed to cancel report. Please try again later.");
+      }
+    };
 
 
   useEffect(() => {
@@ -53,7 +85,7 @@ export function UserReportAnalysis() {
           <p className="text-sm">Concern: {report.concerns}</p>
           <p className="text-sm">Status: {report.analysisStatus}</p>
           {report.analysisStatus === "pending" && (
-            <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
+            <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded" onClick={() => handleCancel(report)}>Cancel</button>
           )}
           {report.analysisStatus === "submited" && (
             <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded" onClick={() => setSelectedReport(report)}>View Result</button>

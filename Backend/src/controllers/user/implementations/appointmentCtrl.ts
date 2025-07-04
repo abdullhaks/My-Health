@@ -2,6 +2,7 @@ import { Response,Request } from "express";
 import IUserAppointmentController from "../interfaces/IAppointmentCtrl";
 import { inject, injectable } from "inversify";
 import IUserAppointmentService from "../../../services/user/interfaces/IUserAppointmentServices";
+import { HttpStatusCode } from "../../../utils/enum";
 
 
 injectable();
@@ -10,7 +11,7 @@ export default class UserAppointmentController implements IUserAppointmentContro
 
     private _appointmentService: IUserAppointmentService;
     
-
+    
     constructor(
         @inject("IUserAppointmentService") UserAppointmentService: IUserAppointmentService
     ) {
@@ -31,10 +32,10 @@ export default class UserAppointmentController implements IUserAppointmentContro
       parseInt(limit as string)
     );
 
-    res.status(200).json(doctors);
+    res.status(HttpStatusCode.OK).json(doctors);
   } catch (err) {
     console.error("Error in controller fetchingDoctors:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -53,12 +54,12 @@ try{
 
   const appointments = await this._appointmentService.getUserAppointments(String(userId), pageNumber, limitNumber);
 
-    res.status(200).json(appointments);
+    res.status(HttpStatusCode.OK).json(appointments);
 
 
 }catch(err){
   console.error("Error in fetchin user appointments:", err);
-  res.status(500).json({ message: "Server error" });
+  res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
 }
 
 };
@@ -74,11 +75,11 @@ async cancelAppointment(req:Request, res: Response) : Promise <any> {
 
     const response = await this._appointmentService.cancelAppointment(String(appoinmentId));
 
-    res.status(200).json(response);
+    res.status(HttpStatusCode.OK).json(response);
 
   }catch(err){
       console.error("Error in cancel appointments:", err);
-      res.status(500).json({ message: "Server error" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
 }
 

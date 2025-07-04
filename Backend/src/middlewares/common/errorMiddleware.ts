@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { HttpStatusCode } from '../../utils/enum';
 
 
 interface CustomError extends Error {
@@ -39,7 +40,7 @@ export const errorHandler = (
 
   
   if (err.name === 'ValidationError') {
-    return res.status(400).json({
+    return res.status(HttpStatusCode.BAD_REQUEST).json({
       ...errorResponse,
       error: {
         ...errorResponse.error,
@@ -50,7 +51,7 @@ export const errorHandler = (
   }
 
   if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({
+    return res.status(HttpStatusCode.UNAUTHORIZED).json({
       ...errorResponse,
       error: {
         ...errorResponse.error,

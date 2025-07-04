@@ -40,6 +40,8 @@ import DoctorSessionController from "../controllers/doctor/implementations/sessi
 import IDoctorSessionCtrl from "../controllers/doctor/interfaces/ISessionCtrl";
 import DoctorAppointmentController from "../controllers/doctor/implementations/appointmentCtrl";
 import IDoctorAppointmentController from "../controllers/doctor/interfaces/IAppointmentCtrl";
+import DoctorReportAnalysisController from "../controllers/doctor/implementations/reportAnalysisCtrl";
+import IDoctorReportAnalysisCtrl from "../controllers/doctor/interfaces/IReportAnalysisCtrl";
 
 
 
@@ -83,6 +85,8 @@ import DoctorSessionService from "../services/doctor/implementations/doctorSessi
 import IDoctorSessionService from "../services/doctor/interfaces/IDoctorSessionService";
 import DoctorAppointmentService from "../services/doctor/implementations/doctorAppointmentService";
 import IDoctorAppointmentService from "../services/doctor/interfaces/IDoctorAppointmentService";
+import DoctorReportAnalysisService from "../services/doctor/implementations/doctorReportAnalysis";
+import IDoctorReportAnalysisService from "../services/doctor/interfaces/IDoctorReportAnalysis";
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -162,6 +166,7 @@ container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionController);
 container.bind<IDoctorAppointmentController>("IDoctorAppointmentController").to(DoctorAppointmentController);
+container.bind<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl").to(DoctorReportAnalysisController);
 
 
 
@@ -188,10 +193,12 @@ container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
 container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService);
 
+
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService);
 container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileService);
 container.bind<IDoctorSessionService>("IDoctorSessionService").to(DoctorSessionService);
 container.bind<IDoctorAppointmentService>("IDoctorAppointmentService").to(DoctorAppointmentService);
+container.bind<IDoctorReportAnalysisService>("IDoctorReportAnalysisService").to(DoctorReportAnalysisService);
 
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);

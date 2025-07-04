@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import IDoctorSessionCtrl from "../interfaces/ISessionCtrl";
 import { inject, injectable } from "inversify";
 import IDoctorSessionService from "../../../services/doctor/interfaces/IDoctorSessionService";
+import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class DoctorSessionController implements IDoctorSessionCtrl {
@@ -17,10 +18,10 @@ export default class DoctorSessionController implements IDoctorSessionCtrl {
 
       const response = await this._sessionService.addSessions(sessionData);
 
-      return res.status(201).json(response);
+      return res.status(HttpStatusCode.CREATED).json(response);
     } catch (error) {
       console.error("error in add sessions :", error);
-      return res.status(500).json({ message: "add sessions failed" });
+      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "add sessions failed" });
     }
   }
 
@@ -29,14 +30,14 @@ async getSessions (req:Request,res:Response):Promise<any>{
         const doctorId =  req.query.doctorId;
         if(doctorId){
         const response = await this._sessionService.getSessions(doctorId.toString());
-        return res.status(200).json(response);
+        return res.status(HttpStatusCode.OK).json(response);
         }
-        return res.status(401).json({message:"bad request"});
+        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
 
 
     }catch(error){
         console.log("error in get sessions",error);
-        return res.status(500).json({message:"get sessions failed"});
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
     }
 }
 

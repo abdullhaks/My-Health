@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import IMessageCtrl from "../interfaces/IMessageCtrl";
 import { inject,injectable } from "inversify";
 import IMessageService from "../../../services/common/interfaces/IMessageService";
+import { HttpStatusCode } from "../../../utils/enum";
+
 
 
 @injectable()
@@ -23,7 +25,7 @@ async sendMessage(req: Request, res: Response): Promise<void> {
       console.log("conversationId, senderId, content:", conversationId, senderId, content);
 
       if (!conversationId || !senderId || !content) {
-        res.status(400).json({ message: "Conversation ID, sender ID, and content are required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Conversation ID, sender ID, and content are required" });
         return;
       }
       // if (senderId !== req.userId) {
@@ -39,10 +41,10 @@ async sendMessage(req: Request, res: Response): Promise<void> {
       // }
 
       const message = await this._messageService.sendMessage(conversationId, senderId, content ,type);
-      res.status(201).json(message);
+      res.status(HttpStatusCode.CREATED).json(message);
     } catch (error) {
       console.error("Error sending message:", error);
-      res.status(500).json({ message: "Failed to send message" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to send message" });
     }
   }
 
@@ -50,14 +52,14 @@ async sendMessage(req: Request, res: Response): Promise<void> {
     try {
       const { conversationId } = req.params;
       if (!conversationId) {
-        res.status(400).json({ message: "Conversation ID is required" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Conversation ID is required" });
         return;
       }
       const messages = await this._messageService.getMessages(conversationId);
-      res.status(200).json(messages);
+      res.status(HttpStatusCode.OK).json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
-      res.status(500).json({ message: "Failed to fetch messages" });
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch messages" });
     }
   }
 
