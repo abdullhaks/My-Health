@@ -135,6 +135,17 @@ export default class AdminAuthController implements IAuthCtrl {
             return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
           }
 
+          const {accessToken} = result
+
+            console.log("result from ctrl is afrt destructr...", accessToken);
+
+            res.cookie("adminAccessToken", accessToken, {
+                httpOnly: true,
+                sameSite: "strict",
+                secure: false, 
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+
             return res.status(HttpStatusCode.OK).json(result);
 
 

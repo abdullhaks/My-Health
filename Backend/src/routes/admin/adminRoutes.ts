@@ -3,8 +3,9 @@ import container from "../../config/inversify";
 import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAuthCtrl";
 import IAdminUserCtrl from "../../controllers/admin/interfaces/IUserCtrl";
 import IAdminDoctorCtrl from "../../controllers/admin/interfaces/IDoctorCtrl";
-import { verifyAccessToken } from "../../middlewares/common/checkAccessToken";
 import { resolve } from "path/win32";
+import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
+
 
 const adminRoutes = Router();
 
@@ -24,21 +25,21 @@ adminRoutes.patch("/resetPassword/:email",(req,res)=>authCtrl.resetPassword(req,
 
 adminRoutes.post("/refreshToken",(req,res)=>authCtrl.refreshToken(req,res));
 
-adminRoutes.get("/users",(req,res)=>userCtrl.getUsers(req,res));
+adminRoutes.get("/users",verifyAccessTokenMidleware("admin"),(req,res)=>userCtrl.getUsers(req,res));
 
-adminRoutes.patch("/users/:id/block",(req,res)=>userCtrl.block(req,res))
-adminRoutes.patch("/users/:id/unblock",(req,res)=>userCtrl.unblock(req,res))
-
-
-adminRoutes.get("/doctors",(req,res)=>doctorCtrl.getDoctors(req,res)) 
-adminRoutes.get("/doctor/:id",(req,res)=>doctorCtrl.getDoctor(req,res)) 
+adminRoutes.patch("/users/:id/block",verifyAccessTokenMidleware("admin"),(req,res)=>userCtrl.block(req,res))
+adminRoutes.patch("/users/:id/unblock",verifyAccessTokenMidleware("admin"),(req,res)=>userCtrl.unblock(req,res))
 
 
-adminRoutes.patch("/doctor/:id/verify",(req,res)=>doctorCtrl.verifyDoctor(req,res))
-adminRoutes.patch("/doctor/:id/decline",(req,res)=>doctorCtrl.declineDoctor(req,res))
+adminRoutes.get("/doctors",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.getDoctors(req,res)) 
+adminRoutes.get("/doctor/:id",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.getDoctor(req,res)) 
 
-adminRoutes.patch("/doctors/:id/block",(req,res)=>doctorCtrl.block(req,res))
-adminRoutes.patch("/doctors/:id/unblock",(req,res)=>doctorCtrl.unblock(req,res))
+
+adminRoutes.patch("/doctor/:id/verify",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.verifyDoctor(req,res))
+adminRoutes.patch("/doctor/:id/decline",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.declineDoctor(req,res))
+
+adminRoutes.patch("/doctors/:id/block",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.block(req,res))
+adminRoutes.patch("/doctors/:id/unblock",verifyAccessTokenMidleware("admin"),(req,res)=>doctorCtrl.unblock(req,res))
 
 
 

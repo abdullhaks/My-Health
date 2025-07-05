@@ -1,13 +1,11 @@
 
 // import {message} from "antd";
-import { adminInstance } from "../../services/adminInstance";
 import { ROUTES } from "../../constants/routes";
-
-
+import { adminInstance } from "../../services/axiosFactory";
 
 export const loginAdmin = async (adminData: any) => {
     try {
-        const response = await adminInstance.post("/admin/login", adminData);
+        const response = await adminInstance.post(ROUTES.admin.login, adminData);
         return response.data;
     } catch (error) {
         console.error("Error logging in admin:", error);
@@ -17,7 +15,7 @@ export const loginAdmin = async (adminData: any) => {
 
 export const forgetPassword = async (email: string) => {
     try {
-        const response = await adminInstance.get("/admin/forgotPassword", {
+        const response = await adminInstance.get(ROUTES.admin.forgotPassword, {
             params: { email },
         });
         return response.data;
@@ -29,7 +27,7 @@ export const forgetPassword = async (email: string) => {
 
 export const recoveryPassword = async (email: string) => {
     try {
-        const response = await adminInstance.get("/admin/recoveryPassword", {
+        const response = await adminInstance.get(ROUTES.admin.recoveryPassword, {
             params: { email },
         });
         return response.data;

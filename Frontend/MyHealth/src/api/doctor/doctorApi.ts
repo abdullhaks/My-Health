@@ -1,8 +1,6 @@
 import { message } from "antd";
-import { doctorInstance } from "../../services/doctorInstance";
 import { ROUTES } from "../../constants/routes";
-
-
+import { doctorInstance } from "../../services/axiosFactory";
 
 export const signupDoctor = async (doctorData: any) => {
   try {
@@ -39,7 +37,7 @@ export const getMe = async ()=>{
 
 export const loginDoctor = async (doctorData: any) => {
   try {
-    const response = await doctorInstance.post("/doctor/login", doctorData);
+    const response = await doctorInstance.post(ROUTES.doctor.login, doctorData);
     console.log("Login response:", response.data);
     return response.data;
   } catch (error) {
@@ -52,7 +50,7 @@ export const loginDoctor = async (doctorData: any) => {
 export const verifyDoctorOtp = async (otpData: any) => {
   try {
     console.log("OTP data:", otpData);
-    const response = await doctorInstance.post("/doctor/verifyOtp", otpData);
+    const response = await doctorInstance.post(ROUTES.doctor.verifyOtp, otpData);
     return response.data;
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -62,7 +60,7 @@ export const verifyDoctorOtp = async (otpData: any) => {
 
 export const resendDoctorOtp = async (email: string) => {
   try {
-    const response = await doctorInstance.get("/doctor/resentOtp", {
+    const response = await doctorInstance.get(ROUTES.doctor.resentOtp, {
       params: { email },
     });
     return response.data;
@@ -75,7 +73,7 @@ export const resendDoctorOtp = async (email: string) => {
 
 export const refreshToken = async () => {
   try {
-    const response = await doctorInstance.post("/doctor/refreshToken");
+    const response = await doctorInstance.post(ROUTES.doctor.refreshToken);
 
     console.log("user api response is ",response);
 
@@ -88,7 +86,7 @@ export const refreshToken = async () => {
 
 export const logoutDoctor = async () => {
   try {
-    await doctorInstance.post("/doctor/logout");
+    await doctorInstance.post(ROUTES.doctor.logout);
     // return response.data;
   } catch (error) {
     console.error("Error logging out user:", error);
@@ -99,7 +97,7 @@ export const logoutDoctor = async () => {
 export const handlePayment = async (priceId:any,metadata:any) =>{
   try{
 
-    const response = await doctorInstance.post("/doctor/stripe/create-checkout-session",{priceId,metadata});
+    const response = await doctorInstance.post(ROUTES.doctor.stripe.createCheckoutSession,{priceId,metadata});
 
     return response.data;
 
@@ -113,7 +111,7 @@ export const handlePayment = async (priceId:any,metadata:any) =>{
 export const verifySubscription = async (sessionId:string) =>{
 try{
 
-  const response = await doctorInstance.post("/doctor/verifySubscription",{sessionId});
+  const response = await doctorInstance.post(ROUTES.doctor.verifySubscription,{sessionId});
 
   return response.data;
 
@@ -128,7 +126,7 @@ export const changePassword = async (data:any ,userId:string)=>{
   console.log("new password....",data,userId);
 
   try{
-    const response = await doctorInstance.patch(`/doctor/changePassword/${userId}`,{
+    const response = await doctorInstance.patch(ROUTES.doctor.changePassword(userId),{
       data
     });
 
@@ -147,7 +145,7 @@ export const updateDoctorProfile = async (userData: any,userId:string) => {
 
     console.log("User data for update:", userData);
     
-    const response = await doctorInstance.patch(`/doctor/updateProfile/${userId}`, userData, {
+    const response = await doctorInstance.patch(ROUTES.doctor.updateProfile(userId), userData, {
     
     });
     return response.data;
@@ -162,7 +160,7 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
 
   try{
   console.log("doctor dp changin api is working......")
-    const response = await doctorInstance.patch(`/doctor/updateDp/${userId}`,formData,{
+    const response = await doctorInstance.patch(ROUTES.doctor.updateDp(userId),formData,{
       headers: {
         "Content-Type": "multipart/form-data"
       }
@@ -179,7 +177,7 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
 
 export const getDoctorConversations = async (doctorId: string,from:string) => {
   try {
-    const response = await doctorInstance.get(`/doctor/conversation/${doctorId}`, { params: { from } });
+    const response = await doctorInstance.get(ROUTES.doctor.conversation(doctorId), { params: { from } });
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);
@@ -190,7 +188,7 @@ export const getDoctorConversations = async (doctorId: string,from:string) => {
 
 export const getDoctorMessages = async (conversationId: string) => {
   try {
-    const response = await doctorInstance.get(`/doctor/message/${conversationId}`);
+    const response = await doctorInstance.get(ROUTES.doctor.getMessage(conversationId));
     return response.data;
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -202,7 +200,7 @@ export const getDoctorMessages = async (conversationId: string) => {
 export const sendDoctorMessage = async (messageData: { conversationId: string; senderId: string; content: string }) => {
   try {
     console.log("Message data:", messageData);
-    const response = await doctorInstance.post("/doctor/message", messageData);
+    const response = await doctorInstance.post(ROUTES.doctor.message, messageData);
     return response.data;
   } catch (error: any) {
     console.error("Error sending message:", error);
@@ -215,7 +213,7 @@ export const setSessions = async (sessionData:any)=>{
   try{
     console.log("session data is ",sessionData);
 
-    const response = await doctorInstance.post("/doctor/sessions", {sessionData});
+    const response = await doctorInstance.post(ROUTES.doctor.sessions, {sessionData});
     return response.data;
 
   }catch(error){
@@ -228,7 +226,7 @@ export const getSessions = async (doctorId:string)=>{
   try{
     console.log("doctor id",doctorId);
 
-    const response = await doctorInstance.get("/doctor/sessions", { params: { doctorId } });
+    const response = await doctorInstance.get(ROUTES.doctor.sessions, { params: { doctorId } });
     return response.data;
 
   }catch(error){
@@ -241,7 +239,7 @@ export const getSessions = async (doctorId:string)=>{
 export const getDoctorAppointments = async(doctorId:string) => {
   try{
 
-    const response = await doctorInstance.get("/doctor/getAppointments",{
+    const response = await doctorInstance.get(ROUTES.doctor.getAppointments,{
       params: { doctorId: doctorId }
     });
 
@@ -258,7 +256,7 @@ export const getAnalysisReports = async (doctorId:string)=>{
   try{
     console.log("doctorId id",doctorId);
 
-    const response = await doctorInstance.get("/doctor/getAnalysisReports", { params: { doctorId } });
+    const response = await doctorInstance.get(ROUTES.doctor.getAnalysisReport, { params: { doctorId } });
     return response.data;
 
   }catch(error){
@@ -272,7 +270,7 @@ export const submitAnalysisReports = async (analysisId:string,result:string)=>{
   try{
     console.log("analysisId id",analysisId);
 
-    const response = await doctorInstance.post("/doctor/submitAnalysisReports", {analysisId, result});
+    const response = await doctorInstance.post(ROUTES.doctor.submitAnalysisReport, {analysisId, result});
     return response.data;
 
   }catch(error){
@@ -288,7 +286,7 @@ export const directFileUpload = async (formData:any) => {
     console.log(`api side...${key}:`, value);
   }
 
-    const response = await doctorInstance.post("/doctor/directFileUpload", formData, {
+    const response = await doctorInstance.post(ROUTES.doctor.directFileUpload, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -306,7 +304,7 @@ export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:
   try{
     console.log("analysisId id",analysisId);
 
-    const response = await doctorInstance.post("/doctor/cancelAnalysisReports",{ analysisId,userId,fee });
+    const response = await doctorInstance.post(ROUTES.doctor.cancelAnalysisReports,{ analysisId,userId,fee });
     return response.data;
 
   }catch(error){

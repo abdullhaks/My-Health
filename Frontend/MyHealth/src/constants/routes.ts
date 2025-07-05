@@ -5,6 +5,8 @@ export const ROUTES = {
     login: "/user/login",
     verifyOtp: "/user/verifyOtp",
     resentOtp: "/user/resentOtp",
+    me: "/user/me",
+    doctorDetails: "/user/doctorDetails",
     forgotPassword: "/user/forgotPassword",
     recoveryPassword: "/user/recoveryPassword",
     verifyRecoveryPassword: "/user/verifyRecoveryPassword",
@@ -22,13 +24,18 @@ export const ROUTES = {
       createOneTimePayment: "/user/stripe/create-one-time-payment",
     },
     getAppointments: "/user/getAppointments",
-    me: "/user/me",
-    doctorDetails: "/user/doctorDetails",
+    cancelAppointment: "/user/cancelAppointments",
+    directFileUpload: "/user/directFileUpload",
+    getAnalysisReport : "/user/getAnalysisReports",
+    cancelAnalysisReport : "/user/cancelAnalysisReports",
+
+    
   },
 
 
   doctor: {
     signup: "/doctor/signup",
+    me: "/doctor/me",
     login: "/doctor/login",
     verifyOtp: "/doctor/verifyOtp",
     resentOtp: "/doctor/resentOtp",
@@ -42,11 +49,19 @@ export const ROUTES = {
     updateProfile: (userId: string) => `/doctor/updateProfile/${userId}`,
     updateDp: (userId: string) => `/doctor/updateDp/${userId}`,
     conversation: (doctorId: string) => `/doctor/conversation/${doctorId}`,
-    message: (conversationId: string) => `/doctor/message/${conversationId}`,
+    getMessage: (conversationId: string) => `/doctor/message/${conversationId}`,
+    message: "/doctor/message",
     sessions: "/doctor/sessions",
     getAppointments: "/doctor/getAppointments",
-    me: "/doctor/me",
+    getAnalysisReport: "/doctor/getAnalysisReports",
+    submitAnalysisReport: "/doctor/submitAnalysisReports",
+    directFileUpload: "/doctor/directFileUpload",
+    cancelAnalysisReports: "/doctor/cancelAnalysisReports",
+    
+
   },
+
+
   admin: {
     login: "/admin/login",
     forgotPassword: "/admin/forgotPassword",

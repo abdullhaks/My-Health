@@ -1,7 +1,6 @@
 import { message } from "antd";
-import { userInstance } from "../../services/userInstance";
 import { ROUTES } from "../../constants/routes";
-
+import { userInstance } from "../../services/axiosFactory";
 
 
 
@@ -14,7 +13,8 @@ export const signupUser = async (userData: any) => {
     console.error("Error signing up user:", error);
     throw error;
   } 
-};
+}; 
+
 
 export const getMe = async ()=>{
   try{
@@ -103,7 +103,7 @@ export const recoveryPassword = async (email: string) => {
 export const verifyRecoveryPassword = async (userData: any) => {
   try {
     console.log("User data:", userData);
-    const response = await userInstance.post("/user/verifyRecoveryPassword", userData);
+    const response = await userInstance.post(ROUTES.user.verifyRecoveryPassword, userData);
     console.log("Login response:", response.data);
     return response.data;
   } catch (error) {
@@ -114,7 +114,7 @@ export const verifyRecoveryPassword = async (userData: any) => {
 
 export const resetPassword = async (email: string, formData: any) => {
   try {
-    const response = await userInstance.patch(`/user/resetPassword/${email}`, {
+    const response = await userInstance.patch(ROUTES.user.resetPassword(email), {
       formData,
     });
 
@@ -132,7 +132,7 @@ export const changePassword = async (data:any ,userId:string)=>{
   console.log("new password....",data,userId);
 
   try{
-    const response = await userInstance.patch(`/user/changePassword/${userId}`,{
+    const response = await userInstance.patch(ROUTES.user.changePassword(userId),{
       data
     });
 
@@ -147,7 +147,7 @@ export const changePassword = async (data:any ,userId:string)=>{
 
 export const refreshToken = async () => {
   try {
-    const response = await userInstance.post("/user/refreshToken");
+    const response = await userInstance.post(ROUTES.user.refreshToken);
 
     console.log("user api response is ",response);
 
@@ -163,7 +163,7 @@ export const updateProfile = async (userData: any,userId:string) => {
 
     console.log("User data for update:", userData);
     
-    const response = await userInstance.patch(`/user/updateProfile/${userId}`, userData, {
+    const response = await userInstance.patch(ROUTES.user.updateProfile(userId), userData, {
     
     });
     return response.data;
@@ -180,7 +180,7 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
   //   console.log(`api side...${key}:`, value,userId);
   // }
 
-  const response = await userInstance.patch(`user/updateDp/${userId}`,formData,{
+  const response = await userInstance.patch(ROUTES.user.updateDp(userId),formData,{
     headers: {
       "Content-Type": "multipart/form-data"
     }
@@ -191,7 +191,7 @@ export const updateProfileImage = async(formData:any, userId:string) =>{
 
 export const logoutUser = async () => {
   try {
-    await userInstance.post("/user/logout");
+    await userInstance.post(ROUTES.user.logout);
     // return response.data;
   } catch (error) {
     console.error("Error logging out user:", error);
@@ -202,7 +202,7 @@ export const logoutUser = async () => {
 
 export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, page, limit }: any) => {
   try {
-    const response = await userInstance.get("/user/doctors", {
+    const response = await userInstance.get(ROUTES.user.doctors, {
       params: {
         search: searchTerm,
         location,
@@ -222,7 +222,7 @@ export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, 
 
 export const getUserConversations = async (userId: string,from:string) => {
   try {
-    const response = await userInstance.get(`/user/conversation/${userId}`,{params:{from}});
+    const response = await userInstance.get(ROUTES.user.conversation(userId),{params:{from}});
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);
@@ -233,7 +233,7 @@ export const getUserConversations = async (userId: string,from:string) => {
 
 export const getUserMessages = async (conversationId: string) => {
   try {
-    const response = await userInstance.get(`/user/message/${conversationId}`);
+    const response = await userInstance.get(ROUTES.user.message(conversationId));
     return response.data;
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -247,7 +247,7 @@ export const getSessions = async (doctorId:string)=>{
   try{
     console.log("doctor id",doctorId);
 
-    const response = await userInstance.get("/user/sessions", { params: { doctorId } });
+    const response = await userInstance.get(ROUTES.user.sessions, { params: { doctorId } });
     return response.data;
 
   }catch(error){
@@ -262,7 +262,7 @@ export const createOneTimePayment = async (amount: number, metadata: any) => {
 
     console.log("metadata in api is :",metadata);
     
-    const response = await userInstance.post("/user/stripe/create-one-time-payment", {
+    const response = await userInstance.post(ROUTES.user.stripe.createOneTimePayment, {
       amount,
       metadata,
     });
@@ -276,7 +276,7 @@ export const createOneTimePayment = async (amount: number, metadata: any) => {
 export const getUserAppointments = async(userId:string,page:number,limit:number) => {
   try{
 
-    const response = await userInstance.get("/user/getAppointments",{
+    const response = await userInstance.get(ROUTES.user.getAppointments,{
       params: { userId,page,limit}
     });
 
@@ -293,7 +293,7 @@ export const cancelAppointment = async (appointmentId:string) => {
   try{
 
     console.log("appointment id is ",appointmentId);
-    const response = await userInstance.patch("/user/cancelAppointments", null, {
+    const response = await userInstance.patch(ROUTES.user.cancelAppointment, null, {
       params: { appointmentId }
     });
 
@@ -314,7 +314,7 @@ export const directFileUpload = async (formData:any) => {
     console.log(`api side...${key}:`, value);
   }
 
-    const response = await userInstance.post("/user/directFileUpload", formData, {
+    const response = await userInstance.post(ROUTES.user.directFileUpload, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -333,7 +333,7 @@ export const getAnalysisReports = async (userId:string)=>{
   try{
     console.log("userId id",userId);
 
-    const response = await userInstance.get("/user/getAnalysisReports", { params: { userId } });
+    const response = await userInstance.get(ROUTES.user.getAnalysisReport, { params: { userId } });
     return response.data;
 
   }catch(error){
@@ -347,7 +347,7 @@ export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:
   try{
     console.log("analysisId id",analysisId);
 
-    const response = await userInstance.post("/user/cancelAnalysisReports",{ analysisId,userId,fee });
+    const response = await userInstance.post(ROUTES.user.cancelAnalysisReport,{ analysisId,userId,fee });
     return response.data;
 
   }catch(error){
