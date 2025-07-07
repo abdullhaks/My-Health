@@ -25,6 +25,24 @@ async getSessions (req:Request,res:Response):Promise<any>{
         console.log("error in get sessions",error);
         return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
     }
+};
+
+
+
+async getBookedSlots (req:Request,res:Response):Promise<any>{
+    try{
+        const {doctorId, formattedDate} =  req.query;
+        if(doctorId && formattedDate){
+        const response = await this._sessionService.getBookedSlots(doctorId.toString(),formattedDate.toString());
+        return res.status(HttpStatusCode.OK).json(response);
+        }
+        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+
+
+    }catch(error){
+        console.log("error in get sessions",error);
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
+    }
 }
 
 

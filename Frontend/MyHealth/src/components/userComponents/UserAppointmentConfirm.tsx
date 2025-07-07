@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getDoctor, createOneTimePayment } from "../../api/user/userApi";
+import { getDoctor, createOneTimePayment ,walletPayment } from "../../api/user/userApi";
 import { loadStripe } from "@stripe/stripe-js";
 import { useSelector } from "react-redux";
 
@@ -39,6 +39,7 @@ const UserAppointmentConfirmation = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const user =  useSelector((state: any) => state.user.user);
+ 
 
   useEffect(() => {
     if (!doctorId || !slot) {
@@ -110,6 +111,44 @@ const UserAppointmentConfirmation = () => {
     }
   };
 
+
+  const handleWalletPayment = async ()=>{
+
+    try{
+      setPaymentStatus("processing");
+      setErrorMessage("");
+
+      var tempDate = new Date(slot.start).toISOString().split("T")[0];
+      const data = {
+        doctorId,
+        userId:user._id,
+        userName: user.fullName,
+        userEmail:user.email,
+        date:tempDate,
+        slotId: slot.id,
+        start:slot.start,
+        end:slot.end,
+        paymentType: "wallet",
+        duration:slot.duration,
+        fee:slot.fee,
+        paymentStatus: "completed",
+        appointmentStatus: "booked",
+
+      };
+
+      const response = await walletPayment(data);
+
+      if(response.appointment){
+        navigate("/user/payment-success")
+      }
+
+    }catch(error){
+      console.error("Payment error:", error);
+      setPaymentStatus("error");
+      setErrorMessage("Wallet Payment failed. Please try again.");
+    }
+  }
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6">
@@ -177,6 +216,21 @@ const UserAppointmentConfirmation = () => {
               >
                 Back to Slots
               </button>
+
+              <button
+                onClick={handleWalletPayment}
+                disabled={paymentStatus === "processing" || user. walletBalance < slot.fee}
+                className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
+
+                  user. walletBalance < slot.fee?"bg-gray-300 cursor-not-allowed":
+                  paymentStatus === "processing"
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-yellow-500 hover:bg-yellow-600"
+                }`}
+              >
+                {paymentStatus === "processing" ? "Processing..." : "Pay with Wallet"}
+              </button>
+
               <button
                 onClick={handlePayment}
                 disabled={paymentStatus === "processing"}

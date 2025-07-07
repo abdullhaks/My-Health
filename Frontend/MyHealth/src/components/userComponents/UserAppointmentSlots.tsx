@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { RRule, rrulestr } from "rrule";
-import { getSessions } from "../../api/user/userApi";
+import { getSessions, getBookedSlots } from "../../api/user/userApi"; // Import getBookedSlots
 
 interface Session {
   _id?: string;
@@ -36,11 +35,13 @@ const UserAppointmentSlots = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "booking" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]); // Store booked slot IDs
 
   const minDate = new Date();
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 14);
 
+  // Fetch sessions for the doctor
   useEffect(() => {
     if (!doctorId) {
       setErrorMessage("No doctor selected. Please go back and select a doctor.");
@@ -64,7 +65,35 @@ const UserAppointmentSlots = () => {
     fetchSessions();
   }, [doctorId]);
 
+  // Fetch booked slots for the selected date
   useEffect(() => {
+    if (!doctorId || !selectedDate) return;
+
+    const fetchBookedSlots = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+        // Format the date to YYYY-MM-DD for the API
+        const formattedDate = selectedDate.toISOString().split("T")[0];
+        const response = await getBookedSlots(doctorId, formattedDate);
+        // // Assuming response is an array of booked slot IDs
+        // setBookedSlots(response.map((slot: any) => slot.slotId) || []);
+        // console.log("Fetched booked slots:", response);
+      } catch (error) {
+        console.error("Error fetching booked slots:", error);
+        setErrorMessage("Failed to load booked slots. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookedSlots();
+  }, [doctorId, selectedDate]);
+
+  // Generate slots and filter based on booked slots
+  useEffect(() => {
+    console.log("Selected date is:", selectedDate);
+
     if (sessions.length === 0) {
       setAppointmentSlots([]);
       return;
@@ -81,19 +110,22 @@ const UserAppointmentSlots = () => {
       daySessions.forEach((session) => {
         let shouldGenerateSlots = true;
 
-        // if (session.rRule) {
-        //   try {
-        //     const rrule = rrulestr(session.rRule);
-        //     const utcDate = new Date(
-        //       Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-        //     );
-        //     shouldGenerateSlots = rrule.between(utcDate, utcDate, true).length > 0;
-        //     console.log(`rRule check for session ${session._id}:`, shouldGenerateSlots);
-        //   } catch (error) {
-        //     console.error(`Invalid rRule for session ${session._id}:`, error);
-        //     shouldGenerateSlots = true; // Fallback to dayOfWeek
-        //   }
-        // }
+        // Uncomment if rRule logic is needed
+        /*
+        if (session.rRule) {
+          try {
+            const rrule = rrulestr(session.rRule);
+            const utcDate = new Date(
+              Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+            );
+            shouldGenerateSlots = rrule.between(utcDate, utcDate, true).length > 0;
+            console.log(`rRule check for session ${session._id}:`, shouldGenerateSlots);
+          } catch (error) {
+            console.error(`Invalid rRule for session ${session._id}:`, error);
+            shouldGenerateSlots = true; // Fallback to dayOfWeek
+          }
+        }
+        */
 
         if (!shouldGenerateSlots) return;
 
@@ -114,13 +146,16 @@ const UserAppointmentSlots = () => {
 
           if (currentSlotEnd > slotEnd) break;
 
+          const slotId = `${currentSlotStart.getTime()}`;
+          const isBooked = bookedSlots.includes(slotId);
+
           daySlots.push({
-            id: `${currentSlotStart.getTime()}`,
+            id: slotId,
             start: new Date(currentSlotStart),
             end: new Date(currentSlotEnd),
             duration: session.duration,
             fee: session.fee,
-            status: "available",
+            status: isBooked ? "booked" : "available",
             sessionId: session._id || "",
           });
 
@@ -134,10 +169,10 @@ const UserAppointmentSlots = () => {
 
     const slots = generateSlotsForDate(selectedDate);
     setAppointmentSlots(slots);
-  }, [sessions, selectedDate]);
+  }, [sessions, selectedDate, bookedSlots]); // Add bookedSlots as dependency
 
   const handleBookSlot = (slot: AppointmentSlot) => {
-  navigate("/user/appointment-confirmation", { state: { doctorId, slot } });
+    navigate("/user/appointment-confirmation", { state: { doctorId, slot } });
   };
 
   const formatTime = (date: Date) =>
@@ -197,32 +232,32 @@ const UserAppointmentSlots = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
-                  {appointmentSlots.map((slot) => (
-                    <div
-                      key={slot.id}
-                      onClick={() => slot.status !== "booked" && bookingStatus !== "booking" && handleBookSlot(slot)}
-                      className={`p-3 rounded-xl shadow-lg border border-gray-300 transition-all duration-300 cursor-pointer
-                        ${slot.status === "booked" ? "bg-gray-100 opacity-70 cursor-not-allowed" : "bg-white hover:bg-blue-200 hover:shadow-md"}
-                        ${bookingStatus === "booking" && slot.status !== "booked" ? "animate-pulse" : ""}`}
-                    >
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-base font-semibold text-gray-900">
-                          {formatTime(slot.start)} - {formatTime(slot.end)}
-                        </p>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Duration: {slot.duration} mins</span>
-                          <span>₹{slot.fee}</span>
-                        </div>
-                        {slot.status === "booked" && (
-                          <p className="text-xs text-red-500 font-medium">Booked</p>
-                        )}
-                        {bookingStatus === "booking" && slot.status !== "booked" && (
-                          <p className="text-xs text-blue-500 font-medium">Booking...</p>
-                        )}
+                {appointmentSlots.map((slot) => (
+                  <div
+                    key={slot.id}
+                    onClick={() => slot.status !== "booked" && bookingStatus !== "booking" && handleBookSlot(slot)}
+                    className={`p-3 rounded-xl shadow-lg border border-gray-300 transition-all duration-300 cursor-pointer
+                      ${slot.status === "booked" ? "bg-gray-100 opacity-70 cursor-not-allowed" : "bg-white hover:bg-blue-200 hover:shadow-md"}
+                      ${bookingStatus === "booking" && slot.status !== "booked" ? "animate-pulse" : ""}`}
+                  >
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-base font-semibold text-gray-900">
+                        {formatTime(slot.start)} - {formatTime(slot.end)}
+                      </p>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Duration: {slot.duration} mins</span>
+                        <span>₹{slot.fee}</span>
                       </div>
+                      {slot.status === "booked" && (
+                        <p className="text-xs text-red-500 font-medium">Booked</p>
+                      )}
+                      {bookingStatus === "booking" && slot.status !== "booked" && (
+                        <p className="text-xs text-blue-500 font-medium">Booking...</p>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>

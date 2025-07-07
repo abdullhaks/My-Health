@@ -4,6 +4,7 @@ import IAppointmentRepository from "../../../repositories/interfaces/IAppointmen
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 
 @injectable()
 export default class UserAppointmentService implements IUserAppointmentService {
@@ -12,6 +13,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
       @inject("IAppointmentRepository") private _appointmentRepository:IAppointmentRepository ,
       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
       @inject("IUserRepository") private _userRepository:IUserRepository,
+      @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
     ){
 
 
@@ -76,7 +78,31 @@ async cancelAppointment(appointmentId:string):Promise<any>{
 
   }
  
-}
+};
 
 
+async walletPayment(data:any):Promise<any> {
+
+console.log("data is ",data);
+const doctor = await this._doctorRepository.findOne({_id:data.doctorId});
+
+if(!doctor){
+  throw new Error("Wallet payment failed")
+};
+
+
+const userUpdate =await this._userRepository.update(data.userId,{$inc:{walletBalance: -data.fee}});
+
+if(userUpdate){
+    data.doctorName= doctor?.fullName;
+    data.doctorCategory= doctor?.category;
+    const appointment = await this._appointmentsRepository.create(data);
+    console.log("Appointment created:", appointment);
+
+
+    return appointment;
+
 }
+    
+};
+};

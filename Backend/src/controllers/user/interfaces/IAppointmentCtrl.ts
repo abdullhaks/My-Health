@@ -6,6 +6,7 @@ export default interface IUserAppointmentController {
 fetchingDoctors(req: Request, res: Response): Promise<any>,
 getAppointments (req: Request, res: Response): Promise<any> ,
 cancelAppointment(req:Request, res: Response) : Promise<any>,
+walletPayment(req:Request, res: Response) : Promise<any>,
 
 }
 

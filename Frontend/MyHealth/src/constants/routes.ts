@@ -20,6 +20,7 @@ export const ROUTES = {
     conversation: (userId: string) => `/user/conversation/${userId}`,
     message: (conversationId: string) => `/user/message/${conversationId}`,
     sessions: "/user/sessions",
+    bookedSlots: "/user/bookedSlots",
     stripe: {
       createOneTimePayment: "/user/stripe/create-one-time-payment",
     },
@@ -28,7 +29,8 @@ export const ROUTES = {
     directFileUpload: "/user/directFileUpload",
     getAnalysisReport : "/user/getAnalysisReports",
     cancelAnalysisReport : "/user/cancelAnalysisReports",
-
+    walletPayment : "/user/walletPayment",
+    
     
   },
 

@@ -44,11 +44,8 @@ export default class UserAppointmentController implements IUserAppointmentContro
 async getAppointments (req: Request, res: Response): Promise<any> {
 
 try{
-
   const {userId,page,limit} = req.query
-
   console.log("user id is///",userId);
-
   const pageNumber = page ? parseInt(page as string, 10) : 1;
   const limitNumber = limit ? parseInt(limit as string, 10) : 10;
 
@@ -83,5 +80,22 @@ async cancelAppointment(req:Request, res: Response) : Promise <any> {
   }
 }
 
+async walletPayment(req:Request, res: Response) : Promise<any>{
 
-}
+  try{
+    const data  = req.body;
+    console.log("data in backend is :.....",data);
+    const response = await this._appointmentService.walletPayment(data);
+
+    return res.status(HttpStatusCode.CREATED).json({appointment:response});
+
+  }catch(err){
+    console.error("Error in wallet payment:", err);
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+  };
+
+};
+
+};
+
+

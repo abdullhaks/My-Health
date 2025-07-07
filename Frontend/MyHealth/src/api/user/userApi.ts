@@ -355,3 +355,31 @@ export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:
     throw error;
   }
 };
+
+
+export const walletPayment = async (data:any)=>{
+  try{
+    console.log("data is,................",data);
+
+    const response = await userInstance.post(ROUTES.user.walletPayment,data );
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};
+
+
+export const getBookedSlots = async (doctorId:string, formattedDate:string)=>{
+  try{
+    console.log("data id",doctorId, formattedDate);
+
+    const response = await userInstance.get(ROUTES.user.bookedSlots, { params: { doctorId, formattedDate } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get sessions",error);
+    throw error;
+  }
+};

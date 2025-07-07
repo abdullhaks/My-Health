@@ -4,6 +4,7 @@ export interface IAppointment {
   userId: string;
   doctorId: string;
   slotId: string;
+  date:string;
   start: Date;
   end: Date;
   duration: number;
@@ -14,6 +15,7 @@ export interface IAppointment {
   userEmail: string; 
   doctorName: string; 
   doctorSpecialization: string; 
+  paymentType: "stripe" | "wallet";
   paymentStatus: "pending" | "completed" | "failed" | "refunded";
   doctorCategory?: string; 
   callStartTime?: Date;

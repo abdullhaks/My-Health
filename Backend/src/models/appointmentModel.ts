@@ -15,6 +15,10 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       type: String,
       required: true,
     },
+    date: {
+      type: String,
+      required: true,
+    },
     start: {
       type: Date,
       required: true,
@@ -35,6 +39,10 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       type: String,
       enum: ["booked", "cancelled", "completed", "pending",],
       default: "booked",
+    },
+    paymentType:{
+      type:String,
+      enum:["stripe","wallet"],
     },
     paymentStatus: {
       type: String,

@@ -117,7 +117,9 @@ userRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("user"), (req, 
 userRoutes.post("/cancelAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
   ReportAnalysisCtrl.cancelAnalysisReports(req, res));
 
+userRoutes.get("/bookedSlots",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getBookedSlots(req,res))
 
+userRoutes.post("/walletPayment",verifyAccessTokenMidleware("user"),(req,res)=> appointmentCtrl.walletPayment(req,res))
 
 
 export default userRoutes; 

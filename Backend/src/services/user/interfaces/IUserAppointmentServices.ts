@@ -13,6 +13,7 @@ export default interface IUserAppointmentService {
 
 getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<any>,
 cancelAppointment(appointmentId:string):Promise<any>,
+walletPayment(data:any):Promise<any>,
 };
 
 

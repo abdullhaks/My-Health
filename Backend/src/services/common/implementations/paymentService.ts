@@ -65,13 +65,14 @@ export default class PaymentService implements IPaymentService {
               throw new Error("Doctor not found.");
             };
 
-            const appointmentsWithSameDoc =await this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorName});
+            // const appointmentsWithSameDoc =await this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorName});
 
-            if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
+            // if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
 
               
-            }
+            // }
 
+            var tempDate = new Date(metadata.start).toISOString().split("T")[0];
 
             const appointmentData: Partial<IAppointmentDocument> = {
               userId: metadata.userId,
@@ -80,12 +81,14 @@ export default class PaymentService implements IPaymentService {
               userEmail:user.email,
               doctorName: doctor.fullName,
               doctorCategory: doctor.category,
+              date:tempDate,
               start: new Date(metadata.start),
               end: new Date(metadata.end),
               duration: parseInt(metadata.duration),
               fee: parseInt(metadata.fee),
               slotId: metadata.slotId,
               stripeSessionId: session.id,
+              paymentType: "stripe",
               paymentStatus: "completed",
               appointmentStatus: "booked",
             };
