@@ -31,9 +31,9 @@ async getSessions (req:Request,res:Response):Promise<any>{
 
 async getBookedSlots (req:Request,res:Response):Promise<any>{
     try{
-        const {doctorId, formattedDate} =  req.query;
-        if(doctorId && formattedDate){
-        const response = await this._sessionService.getBookedSlots(doctorId.toString(),formattedDate.toString());
+        const {doctorId, selectedDate} =  req.query;
+        if(doctorId && selectedDate){
+        const response = await this._sessionService.getBookedSlots(doctorId.toString(),selectedDate.toString());
         return res.status(HttpStatusCode.OK).json(response);
         }
         return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});

@@ -71,13 +71,23 @@ const UserAppointmentSlots = () => {
 
     const fetchBookedSlots = async () => {
       try {
+
+
+        console.log("selected date is >>>>>>>",selectedDate);
         setIsLoading(true);
         setErrorMessage("");
-        // Format the date to YYYY-MM-DD for the API
-        const formattedDate = selectedDate.toISOString().split("T")[0];
-        const response = await getBookedSlots(doctorId, formattedDate);
-        // // Assuming response is an array of booked slot IDs
-        // setBookedSlots(response.map((slot: any) => slot.slotId) || []);
+       
+        const formattedDate = selectedDate.toISOString();
+        console.log("formattedDate date is >>>>>>>",formattedDate);
+
+        const yyyy = selectedDate.getFullYear();
+        const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+        const dd = String(selectedDate.getDate()).padStart(2, "0");
+        const localDate = `${yyyy}-${mm}-${dd}`;
+        
+        const response = await getBookedSlots(doctorId, localDate);
+        // Assuming response is an array of booked slot IDs
+        setBookedSlots(response.map((slot: any) => slot.slotId) || []);
         // console.log("Fetched booked slots:", response);
       } catch (error) {
         console.error("Error fetching booked slots:", error);
@@ -169,7 +179,7 @@ const UserAppointmentSlots = () => {
 
     const slots = generateSlotsForDate(selectedDate);
     setAppointmentSlots(slots);
-  }, [sessions, selectedDate, bookedSlots]); // Add bookedSlots as dependency
+  }, [sessions, selectedDate, bookedSlots]); 
 
   const handleBookSlot = (slot: AppointmentSlot) => {
     navigate("/user/appointment-confirmation", { state: { doctorId, slot } });

@@ -60,6 +60,8 @@ async getUserAppointments(userId:string,pageNumber:number, limitNumber:number):P
   return appointments;
 
 };
+
+
 async cancelAppointment(appointmentId:string):Promise<any>{
   console.log("appointment id is ",appointmentId);
   const response = await this._appointmentsRepository.update(appointmentId,{appointmentStatus:"cancelled",paymentStatus:"refunded"});

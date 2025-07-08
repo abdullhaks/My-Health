@@ -371,11 +371,11 @@ export const walletPayment = async (data:any)=>{
 };
 
 
-export const getBookedSlots = async (doctorId:string, formattedDate:string)=>{
+export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
   try{
-    console.log("data id",doctorId, formattedDate);
+    console.log("data id",doctorId, selectedDate);
 
-    const response = await userInstance.get(ROUTES.user.bookedSlots, { params: { doctorId, formattedDate } });
+    const response = await userInstance.get(ROUTES.user.bookedSlots, { params: { doctorId, selectedDate } });
     return response.data;
 
   }catch(error){
