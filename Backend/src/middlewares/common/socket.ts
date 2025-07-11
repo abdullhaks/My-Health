@@ -146,6 +146,31 @@ export const setupSocket = (io: Server, container: Container) => {
       }
     });
 
+
+    socket.on("videoCall:sendMessage", async (msg: { 
+          appointmentId: string;
+          senderId: string;
+          content: string;
+          senderRole:string;
+        }) => {
+          try {
+            const newMessage = {
+              id: Date.now().toString(),
+              senderId: msg.senderId,
+              content: msg.content,
+              timestamp: new Date(),
+              senderRole: msg.senderRole
+            };
+
+            // Broadcast to all in the video call room
+            io.to(msg.appointmentId).emit("videoCall:newMessage", newMessage);
+            
+          } catch (err) {
+            console.error("Error handling video call message:", err);
+            socket.emit("videoCall:error", { message: "Failed to send message." });
+          }
+        });
+
     socket.on("user:call", ({ to, offer }) => {
       console.log(`Received user:call from ${userId} to ${to}`);
       io.to(to).emit("incomming:call", { from: userId, offer });
