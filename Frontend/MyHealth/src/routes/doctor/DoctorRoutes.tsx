@@ -19,6 +19,7 @@ import DoctorAppointments from "../../components/doctorComponents/DoctorAppointm
 import DoctorVideoCall from "../../components/doctorComponents/DoctorVideoCall";
 import VideoCall from "../../sharedComponents/VideoCall";
 import { DoctorReportAnalysis } from "../../components/doctorComponents/DoctorReportAnalysis";
+import DoctorSubscriptionPlans from "../../components/doctorComponents/DoctorSubscription";
 
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
@@ -49,6 +50,7 @@ const DoctorRoutes = () => {
           <Route path="appointments" element={<DoctorAppointments />} />  
           <Route path="video-call/:appointmentId" element={<VideoCall role="doctor" />} />
           <Route path="report-analysis" element={< DoctorReportAnalysis/>} />
+          <Route path="plans" element={< DoctorSubscriptionPlans/>} />
           
 
         </Route>

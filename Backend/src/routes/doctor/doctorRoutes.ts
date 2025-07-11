@@ -3,6 +3,7 @@ import container from "../../config/inversify";
 import IDoctorAuthCtrl from "../../controllers/doctor/interfaces/IAuthCtrl";
 import IDoctorProfileCtrl from "../../controllers/doctor/interfaces/IProfileCtrl";
 import IDoctorAppointmentController from "../../controllers/doctor/interfaces/IAppointmentCtrl";
+import IDoctorPlanCtrl from "../../controllers/doctor/interfaces/IPlanCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
@@ -21,6 +22,7 @@ const sessionCtrl = container.get<ISessionCtrl>("IDoctorSessionCtrl");
 const appointmentCtrl = container.get<IDoctorAppointmentController>("IDoctorAppointmentController");
 const ReportAnalysisCtrl = container.get<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl");
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
+const planCtrl = container.get<IDoctorPlanCtrl>("IDoctorPlanCtrl");
 
 
 
@@ -119,7 +121,7 @@ doctorRoutes.post("/submitAnalysisReports", verifyAccessTokenMidleware("doctor")
 doctorRoutes.post("/cancelAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
   ReportAnalysisCtrl.cancelAnalysisReports(req, res));
 
-
+doctorRoutes.get("/getSubscriptions",verifyAccessTokenMidleware("doctor"),(req,res)=>planCtrl.getProducts(req,res))
 
 
 export default doctorRoutes;

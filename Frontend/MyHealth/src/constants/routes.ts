@@ -59,6 +59,8 @@ export const ROUTES = {
     submitAnalysisReport: "/doctor/submitAnalysisReports",
     directFileUpload: "/doctor/directFileUpload",
     cancelAnalysisReports: "/doctor/cancelAnalysisReports",
+    getSubscriptions: "/doctor/getSubscriptions",
+
     
 
   },
@@ -84,5 +86,10 @@ export const ROUTES = {
       block: (id: string) => `/admin/doctors/${id}/block`,
       unblock: (id: string) => `/admin/doctors/${id}/unblock`,
     },
+    getSubscriptions: "/admin/getSubscriptions",
+    createSubscription: "/admin/createSubscription",
+    deleteSubscription: "/admin/deleteSubscription",
+    updateSubscription: "/admin/updateSubscription",
+    
   },
 };

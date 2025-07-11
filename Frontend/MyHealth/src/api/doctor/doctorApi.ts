@@ -312,3 +312,15 @@ export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:
     throw error;
   }
 };
+
+
+export const getSubscriptions = async() => {
+  try{
+    const response = await doctorInstance.get(ROUTES.doctor.getSubscriptions);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in get subscriptions..:", error);
+    throw error;
+  }
+};

@@ -68,19 +68,13 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
   const menuItems = [
     { name: "Dashboard", path: "/doctor/dashboard", icon: <FaHome /> },
     { name: "Appointments", path: "/doctor/appointments", icon: <FaCalendarAlt /> },
-    { name: "Report Analysis", path: "/doctor/report-analysis", icon: <BiSolidAnalyse /> },
+    { name: "Report Analysis", path: "/doctor/report-analysis", icon: <BiSolidAnalyse />,premium: true },
     { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
     { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
     {
       name: "Chat",
       path: "/doctor/chat",
       icon: <FaComments />,premium: true
-    },
-    {
-      name: "Report Analyses",
-      path: "/doctor/reports",
-      icon: <FaChartBar />,
-      premium: true
     },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
 
@@ -92,13 +86,15 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
       const isPremiumOnly = item.premium && !isPremium;
       return (
         <Link
-            to={isPremiumOnly ? "#" : item.path}
+            to={isPremiumOnly ? "/doctor/plans" : item.path}
             key={index}
             onClick={(e) => {
-                handleMobileLinkClick();
+                // handleMobileLinkClick();
                 if (isPremiumOnly) {
-                e.preventDefault();
-                setShowSubscription(true);
+                // e.preventDefault();
+                // setShowSubscription(true);
+                // navigate("/doctor/plans");
+
                 }
             }}
             className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all duration-200 relative ${
@@ -253,9 +249,9 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
 
 
-    {showSubscription && (
+    {/* {showSubscription && (
     <SubscriptionModal onClose={() => setShowSubscription(false)} />
-    )}
+    )} */}
 
     </div>
   );

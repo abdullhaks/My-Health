@@ -12,6 +12,7 @@ import AdminDashboard from "../../components/adminComponents/AdminDashboard";
 import AdminUsers from "../../components/adminComponents/AdminUsers";
 import AdminDoctors from "../../components/adminComponents/AdminDoctors";
 import AdminDoctorDetails from "../../components/adminComponents/AdminDoctorDetails";
+import AdminSubscriptions from "../../components/adminComponents/AdminSubscriptions";
 
 const UserRoutes = () => {
   return (
@@ -22,6 +23,7 @@ const UserRoutes = () => {
         <Route path="/forgetPassword" element={<AdminForgetPassword />} />
         <Route path="/recoverPassword" element={<AdminRcoveryPassword/> } />
         {/* <Route path="/resetPassword" element={<UserResetPassword />} /> */}
+
       </Route>
 
       {/* Protected Routes */}
@@ -31,6 +33,8 @@ const UserRoutes = () => {
           <Route path="users" element={<AdminUsers />} />
           <Route path="doctors" element={<AdminDoctors />} />
           <Route path="doctor/:id" element={<AdminDoctorDetails/>} />
+          <Route path="/subscriptionPlans" element={<AdminSubscriptions/> } />
+
         </Route>
       </Route>
 

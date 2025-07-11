@@ -175,22 +175,67 @@ export const declineDoctor = async (id: string, reason: string ) => {
 };
 
 
-
 export const getAppointments = async(page:number,limit:number) => {
   try{
-
     const response = await adminInstance.get("/admin/getAppointments",{
       params: { page,limit}
     });
-
     console.log("response data is ....",response.data)
     return response.data;
-
   }catch(error){
     console.error("Error in get doctor's appointments..:", error);
     throw error;
   }
 };
+
+
+export const getSubscriptions = async() => {
+  try{
+    const response = await adminInstance.get(ROUTES.admin.getSubscriptions);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in get subscriptions..:", error);
+    throw error;
+  }
+};
+
+
+export const createSubscription = async(payload:any) => {
+  try{
+    const response = await adminInstance.post(ROUTES.admin.createSubscription,payload);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in create subscription..:", error);
+    throw error;
+  }
+};
+
+
+export const updateSubscription = async(payload:any) => {
+  try{
+    const response = await adminInstance.put(ROUTES.admin.updateSubscription,payload);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in update subscription..:", error);
+    throw error;
+  }
+};
+
+
+export const deleteSubscription = async(productId:string) => {
+  try{
+    const response = await adminInstance.delete(`${ROUTES.admin.deleteSubscription}/${productId}`);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in delete subscription..:", error);
+    throw error;
+  }
+};
+
 
 
 

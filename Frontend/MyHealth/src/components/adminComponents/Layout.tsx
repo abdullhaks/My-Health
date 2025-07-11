@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUserMd, FaUsers, FaSignOutAlt, FaBars, FaTimes, FaChevronLeft,
-  FaChevronRight, FaSearch, FaBell, FaEnvelope
+  FaChevronRight, FaSearch, FaBell, FaEnvelope,
+  FaStar
 } from "react-icons/fa";
 import applogoBlue from "../../assets/applogoblue.png";
 import defaultAvatar from "../../assets/avatar.png";
@@ -73,6 +74,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Dashboard", path: "/admin/dashboard", icon: <FaHome /> },
     { name: "Users", path: "/admin/users", icon: <FaUsers /> },
     { name: "Doctors", path: "/admin/doctors", icon: <FaUserMd /> },
+    { name: "Plans", path: "/admin/subscriptionPlans", icon: <FaStar /> },
   ];
 
   const renderMenuItems = (items: any) => {

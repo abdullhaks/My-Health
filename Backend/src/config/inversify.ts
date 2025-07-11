@@ -29,6 +29,8 @@ import AdminUserController from "../controllers/admin/implementations/userCtrl";
 import IAdminUserCtrl from "../controllers/admin/interfaces/IUserCtrl";
 import AdminDoctorController from "../controllers/admin/implementations/doctorCtrl";
 import IAdminDoctorCtrl from "../controllers/admin/interfaces/IDoctorCtrl";
+import AdminProductController from "../controllers/admin/implementations/productCtrl";
+import IAdminProductCtrl from "../controllers/admin/interfaces/IProductCtrl";
 
 
 
@@ -42,6 +44,8 @@ import DoctorAppointmentController from "../controllers/doctor/implementations/a
 import IDoctorAppointmentController from "../controllers/doctor/interfaces/IAppointmentCtrl";
 import DoctorReportAnalysisController from "../controllers/doctor/implementations/reportAnalysisCtrl";
 import IDoctorReportAnalysisCtrl from "../controllers/doctor/interfaces/IReportAnalysisCtrl";
+import DoctorPlansController from "../controllers/doctor/implementations/planCtrl";
+import IDoctorPlanCtrl from "../controllers/doctor/interfaces/IPlanCtrl";
 
 
 
@@ -161,12 +165,14 @@ container.bind<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl").to(UserReport
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
 container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
+container.bind<IAdminProductCtrl>("IAdminProductCtrl").to(AdminProductController);
 
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
 container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionController);
 container.bind<IDoctorAppointmentController>("IDoctorAppointmentController").to(DoctorAppointmentController);
 container.bind<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl").to(DoctorReportAnalysisController);
+container.bind<IDoctorPlanCtrl>("IDoctorPlanCtrl").to(DoctorPlansController);
 
 
 

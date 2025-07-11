@@ -1,91 +1,141 @@
-import { loadStripe } from "@stripe/stripe-js";
-import { handlePayment } from "../../api/doctor/doctorApi";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { FaCheckCircle } from 'react-icons/fa';
+import { loadStripe } from '@stripe/stripe-js';
+import { handlePayment , getSubscriptions} from '../../api/doctor/doctorApi';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store/store';
 
-interface Props {
-  onClose: () => void;
-}
 
-const SubscriptionModal: React.FC<Props> = ({ onClose }) => {
+type Plan = {
+  id: string;
+  name?: string;
+  description?: string;
+  default_price?: {
+    id: string;
+    unit_amount: number;
+    currency: string;
+    recurring?: {
+      interval: string;
+    };
+  };
+};
 
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+const DoctorSubscriptionPlans = () => {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const doctor = useSelector((state: RootState) => state.doctor.doctor);
+  const isPremium = doctor?.premiumMembership;
 
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-  const handleCheckout = async (priceId: string) => {
-    const data = await handlePayment(priceId,{doctorId:doctor._id,type:"subscription",role:"doctor"});
-  
-    console.log("payment data is ",data);
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
-    const stripe = await stripePromise;
-    // stripe?.redirectToCheckout({ sessionId: data.sessionId });
-    if(stripe){
-      window.location.href = data.url; 
+  const fetchPlans = async () => {
+    try {
+      const response = await getSubscriptions();
+      setPlans(response.data);
+      setLoading(false);
+    } catch (error) {
+      toast.error('Failed to fetch subscription plans');
+      setLoading(false);
     }
+  };
 
-    
+  const handleCheckout = async (priceId: string) => {
+    if (isPremium) {
+      toast.info('You are already a premium member');
+      return;
+    }
+    try {
+      const data = await handlePayment(priceId, {
+        doctorId: doctor._id,
+        type: 'subscription',
+        role: 'doctor',
+      });
+      const stripe = await stripePromise;
+      if (stripe && data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      toast.error('Failed to initiate payment');
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 bg-opacity-40 px-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-xl">
-        <div className="text-center py-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Choose your plan</h2>
-        </div>
-        <div className="flex flex-col md:flex-row justify-around items-center gap-6 p-6">
-          {[
-            { title: "Free", price: "Rs 0", term: "/10 dy", btn: "Already using" },
-            { title: "POPULAR", price: "Rs1499", term: "/1 yr", btn: "Buy Now" },
-            { title: "", price: "Rs149", term: "/1mo", btn: "Buy Now" }
-          ].map((plan, idx) => (
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+      <h3 className="text-lg font-semibold mb-3">Subscription Plans</h3>
+      {loading ? (
+        <p className="text-gray-600">Loading plans...</p>
+      ) : plans.length === 0 ? (
+        <p className="text-gray-600">No plans available</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {plans.map((plan, idx) => (
             <div
-              key={idx}
-              className={`bg-black text-white p-6 rounded-xl w-72 text-center shadow-lg ${
-                plan.title === "POPULAR" ? "relative" : ""
+              key={plan.id}
+              className={`bg-white p-6 rounded-xl shadow-lg text-center relative ${
+                idx === 1 ? 'border-2 border-purple-500' : ''
               }`}
             >
-              {plan.title === "POPULAR" && (
-                <span className="absolute top-0 left-0 right-0 bg-gray-700 py-1 text-sm font-bold tracking-wider rounded-t-xl">
+              {idx === 1 && (
+                <span className="absolute top-0 left-0 right-0 bg-purple-700 text-white py-1 text-sm font-bold tracking-wider rounded-t-xl">
                   POPULAR
                 </span>
               )}
-              <h3 className="text-2xl font-semibold mt-2">{plan.title === "POPULAR" ? "" : plan.title}</h3>
+              <h3 className="text-xl font-semibold mt-4">
+                {plan.name || 'Unnamed Plan'}
+              </h3>
               <p className="text-3xl font-bold mt-2">
-                {plan.price}
-                <span className="text-sm font-normal">{plan.term}</span>
+                {plan.default_price
+                  ? `${(plan.default_price.unit_amount / 100).toFixed(2)} ${plan.default_price.currency.toUpperCase()}`
+                  : 'N/A'}
+                <span className="text-sm font-normal">
+                  {plan.default_price?.recurring?.interval
+                    ? `/${plan.default_price.recurring.interval}`
+                    : '/one-time'}
+                </span>
+              </p>
+              <p className="text-sm text-gray-600 mt-2">
+                {plan.description || 'No description available'}
               </p>
               <ul className="text-sm text-left mt-4 space-y-2">
-                <li>✔ online consultations with secure video calls</li>
-                <li>✔ report analysis service</li>
-                <li>✔ advertisement service</li>
+                <li className="flex items-center">
+                  <FaCheckCircle className="text-green-500 mr-2" />
+                  Online consultations with secure video calls
+                </li>
+                <li className="flex items-center">
+                  <FaCheckCircle className="text-green-500 mr-2" />
+                  Report analysis service
+                </li>
+                <li className="flex items-center">
+                  <FaCheckCircle className="text-green-500 mr-2" />
+                  Advertisement service
+                </li>
               </ul>
               <button
+                onClick={() =>
+                  handleCheckout(
+                    plan.default_price?.id || ""
+                  )
+                }
                 className={`mt-5 px-4 py-2 rounded-md w-full ${
-                  idx === 0
-                    ? "bg-gray-700 text-white cursor-default"
-                    : "bg-white text-black hover:bg-gray-100 transition cursor-pointer"
+                  isPremium || !plan.default_price
+                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                    : 'bg-purple-600 text-white hover:bg-purple-700 transition'
                 }`}
-
-                onClick={()=>handleCheckout(idx===1?"price_1RM4jDCsbZ91FBD8CubcmsMs":"price_1RM4z8CsbZ91FBD8stOSw1Lu")}
+                disabled={isPremium || !plan.default_price}
               >
-                {plan.btn}
-
-                
+                {isPremium ? 'Already Subscribed' : 'Buy Now'}
               </button>
             </div>
           ))}
         </div>
-        <div className="text-center pb-4">
-          <button
-            onClick={onClose}
-            className="mt-2 text-sm text-gray-600 hover:text-black transition"
-          >
-            Close
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default SubscriptionModal;
+export default DoctorSubscriptionPlans;

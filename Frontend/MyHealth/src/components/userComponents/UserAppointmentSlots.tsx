@@ -35,7 +35,7 @@ const UserAppointmentSlots = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<"idle" | "booking" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]); // Store booked slot IDs
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
 
   const minDate = new Date();
   const maxDate = new Date();
@@ -64,6 +64,7 @@ const UserAppointmentSlots = () => {
     };
     fetchSessions();
   }, [doctorId]);
+
 
   // Fetch booked slots for the selected date
   useEffect(() => {
