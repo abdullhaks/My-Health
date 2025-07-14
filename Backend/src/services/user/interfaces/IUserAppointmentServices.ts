@@ -1,4 +1,6 @@
-
+import { IAppointment } from "../../../dto/appointmentDTO";
+import { IUser } from "../../../dto/userDTO";
+import {IDoctor} from "../../../dto/doctorDTO";
 
 
 export default interface IUserAppointmentService {
@@ -9,11 +11,11 @@ export default interface IUserAppointmentService {
   sort: string,
   page: number,
   limit: number
-): Promise<any> ,
+): Promise<{doctors: IDoctor[] }> ,
 
-getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<any>,
-cancelAppointment(appointmentId:string):Promise<any>,
-walletPayment(data:any):Promise<any>,
+getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<IAppointment[]>,
+cancelAppointment(appointmentId:string):Promise<{status:boolean;message:string;updatedUser:Partial<IUser>}>,
+walletPayment(data:any):Promise<IAppointment>,
 };
 
 
