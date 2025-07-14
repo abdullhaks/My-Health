@@ -1,6 +1,7 @@
 import IUserAuthService from "../interfaces/IUserAuthServices";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IUser } from "../../../dto/userDTO";
+import { IUserResponse } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
 import generateOtp from "../../../utils/helpers";
@@ -12,7 +13,6 @@ import { generateOtpMail } from "../../../utils/generateOtpMail";
 import dotenv from 'dotenv';
 dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";
-import { Request, Response, NextFunction } from "express";
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
@@ -38,7 +38,7 @@ export default class UserAuthService implements IUserAuthService {
     }
 
 
-    async login(res: Response, userData: IUser): Promise<any> {
+    async login(userData: IUser): Promise<Partial<IUserResponse>> {
         console.log("user data from service....", userData);
       
         if (!userData.email || !userData.password) {
@@ -78,20 +78,20 @@ export default class UserAuthService implements IUserAuthService {
         const accessToken = generateAccessToken({ id: existingUser._id.toString(), role: "user" });
         const refreshToken = generateRefreshToken({ id: existingUser._id.toString(), role: "user" });
       
-        res.cookie("userRefreshToken", refreshToken, {
-          httpOnly: true,
-          sameSite: "strict",
-          secure: false, 
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        // res.cookie("userRefreshToken", refreshToken, {
+        //   httpOnly: true,
+        //   sameSite: "strict",
+        //   secure: false, 
+        //   maxAge: 7 * 24 * 60 * 60 * 1000,
+        // });
 
         
-        res.cookie("userAccessToken", accessToken, {
-          httpOnly: true,
-          sameSite: "strict",
-          secure: false, 
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        }); 
+        // res.cookie("userAccessToken", accessToken, {
+        //   httpOnly: true,
+        //   sameSite: "strict",
+        //   secure: false, 
+        //   maxAge: 7 * 24 * 60 * 60 * 1000,
+        // }); 
       
         const { password, ...userWithoutPassword } = existingUser.toObject();
       
@@ -102,11 +102,13 @@ export default class UserAuthService implements IUserAuthService {
         return {
           message: "Login successful",
           user: userWithoutPassword,
+          accessToken,
+          refreshToken,
         };
       }
       
 
-    async signup(userData:IUser): Promise<any> {
+    async signup(userData: IUser): Promise<Partial<IUserResponse>> {
         console.log("user data from service....",userData);
 
         if(!userData.email || !userData.password || !userData.fullName){
@@ -142,7 +144,7 @@ export default class UserAuthService implements IUserAuthService {
 
 
 
-    async sendMail(email:string,otp:string):Promise<any>{
+    async sendMail(email:string,otp:string):Promise<void>{
         const otpRecord = new OtpModel({
             email: email,
             otp: otp,
@@ -176,7 +178,7 @@ export default class UserAuthService implements IUserAuthService {
 
     };
 
-    async verifyOtp(email:string, otp:string):Promise<any>{
+    async verifyOtp(email:string, otp:string):Promise<Partial<IUserResponse>>{
         const otpRecord = await this._userRepository.findLatestOtpByEmail(email);
         console.log("OTP record: ", otpRecord);
 
@@ -198,7 +200,7 @@ export default class UserAuthService implements IUserAuthService {
 
 
 
-    async resentOtp(email: string): Promise<any> {
+    async resentOtp(email: string): Promise<Partial<IUserResponse>> {
       if (!email) {
         throw new Error("Email is required");
       }
@@ -237,7 +239,7 @@ export default class UserAuthService implements IUserAuthService {
       }
     }
     
-    async forgotPassword(email: string): Promise<any> {
+    async forgotPassword(email: string): Promise<Partial<IUserResponse>> {
       if (!email) {
         throw new Error("Email is required");
       }
@@ -288,11 +290,10 @@ export default class UserAuthService implements IUserAuthService {
       return isMatch;
     }
 
-    async resetPassword(email:string , newPassword:string):Promise<any>{
+    async resetPassword(email:string , newPassword:string):Promise<IUser> {
 
       console.log("email is from rest passwered",email);
       console.log("new pasword is from rest passwered",newPassword);
-
 
       const user = await this._userRepository.findByEmail(email);
 
@@ -306,7 +307,11 @@ export default class UserAuthService implements IUserAuthService {
 
       console.log("after hashing newPassword is from rest passwered",newPassword);
 
-      return  await this._userRepository.update(user._id.toString(),{password:newPassword})
+      const updatedUser = await this._userRepository.update(user._id.toString(),{password:newPassword});
+      if (!updatedUser) {
+        throw new Error("Failed to update password");
+      }
+      return updatedUser as IUser;
 
     }
 
@@ -334,7 +339,7 @@ export default class UserAuthService implements IUserAuthService {
         };
 
 
-        async getMe(email: string):Promise<any>{
+        async getMe(email: string):Promise<Partial<IUserResponse>>{
          
           console.log("get me email....",email);
 

@@ -31,6 +31,8 @@ import AdminDoctorController from "../controllers/admin/implementations/doctorCt
 import IAdminDoctorCtrl from "../controllers/admin/interfaces/IDoctorCtrl";
 import AdminProductController from "../controllers/admin/implementations/productCtrl";
 import IAdminProductCtrl from "../controllers/admin/interfaces/IProductCtrl";
+import AdminAppointmentController from "../controllers/admin/implementations/appointmentCtrl";
+import IAdminAppointmentController from "../controllers/admin/interfaces/IAppointmentCtrl";
 
 
 
@@ -80,6 +82,8 @@ import AdminUserService from "../services/admin/implementations/adminUserService
 import IAdminUserService from "../services/admin/interfaces/IAdminUserService";
 import AdminDoctorService from "../services/admin/implementations/adminDoctorService";
 import IAdminDoctorService from "../services/admin/interfaces/IAdminDoctorService";
+import AdminAppointmentService from "../services/admin/implementations/adminAppointmentServices";
+import IAdminAppointmentsService from "../services/admin/interfaces/IAdminAppointmentServices";
 
 import DoctorAuthService from "../services/doctor/implementations/doctorAuthServices";
 import IDoctorAuthService from "../services/doctor/interfaces/IDoctorAuthServices";
@@ -166,6 +170,7 @@ container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
 container.bind<IAdminUserCtrl>("IAdminUserCtrl").to(AdminUserController);
 container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
 container.bind<IAdminProductCtrl>("IAdminProductCtrl").to(AdminProductController);
+container.bind<IAdminAppointmentController>("IAdminAppointmentController").to(AdminAppointmentController);
 
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
@@ -198,6 +203,7 @@ container.bind<IUserReportAnalysisService>("IUserReportAnalysisService").to(User
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
 container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
 container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService);
+container.bind<IAdminAppointmentsService>("IAdminAppointmentsService").to(AdminAppointmentService);
 
 
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService);
@@ -217,7 +223,6 @@ container.bind<IDirectDocUploadS3Service>("IDirectDocUploadS3Service").to(Direct
 //..............................................................................
 
 
-
 container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);
 container.bind<IDoctorRepository>("IDoctorRepository").to(DoctorRepository)
@@ -228,5 +233,6 @@ container.bind<IMessageRepository>("IMessageRepository").to(MessageRepository);
 container.bind<ISessionRepository>("ISessionRepository").to(SessionRepository);
 container.bind<IAppointmentsRepository>("IAppointmentsRepository").to(AppointmentsRepository);
 container.bind<IReportAnalysisRepository>("IReportAnalysisRepository").to(ReportAnalysisRepository);
+
 
 export default container;

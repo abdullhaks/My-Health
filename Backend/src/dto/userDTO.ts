@@ -1,4 +1,4 @@
-import { Document,Types } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
 
@@ -17,7 +17,7 @@ export interface IUserDocument extends Document{
     phone:string;
     location:ILocation;
     gender:string;
-    dob:String;
+    dob: string;
     isBlocked:boolean;
     isVerified:boolean;
     bmi:string;
@@ -30,3 +30,10 @@ export interface IUserDocument extends Document{
 }
 
 export interface IUser extends IUserDocument{}; 
+export interface IUserResponse {
+    message: string;
+    user: Partial<IUser>;
+    accessToken:string;
+    refreshToken:string;
+    email:string;
+}

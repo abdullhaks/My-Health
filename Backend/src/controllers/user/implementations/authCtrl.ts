@@ -23,14 +23,31 @@ export default class UserAuthController implements IUserAuthCtrl {
     try {
       const { email, password } = req.body;
 
-      const result = await this._userService.login(res, { email, password });
+      const result = await this._userService.login({email, password });
 
       console.log("result is ", result);
 
       if (!result) {
         return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
-      }
-      return res.status(HttpStatusCode.OK).json(result);
+      };
+
+
+      res.cookie("userRefreshToken", result.refreshToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false, 
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        
+        res.cookie("userAccessToken", result.accessToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false, 
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        }); 
+
+      return res.status(HttpStatusCode.OK).json({message:result.message,user:result.user});
     } catch (error) {
       console.log(error);
       return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });

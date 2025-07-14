@@ -3,7 +3,8 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUserMd, FaUsers, FaSignOutAlt, FaBars, FaTimes, FaChevronLeft,
   FaChevronRight, FaSearch, FaBell, FaEnvelope,
-  FaStar
+  FaStar,
+  FaCalendarAlt
 } from "react-icons/fa";
 import applogoBlue from "../../assets/applogoblue.png";
 import defaultAvatar from "../../assets/avatar.png";
@@ -75,6 +76,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Users", path: "/admin/users", icon: <FaUsers /> },
     { name: "Doctors", path: "/admin/doctors", icon: <FaUserMd /> },
     { name: "Plans", path: "/admin/subscriptionPlans", icon: <FaStar /> },
+    { name: "Appointments", path: "/admin/appointments", icon: <FaCalendarAlt /> },
   ];
 
   const renderMenuItems = (items: any) => {

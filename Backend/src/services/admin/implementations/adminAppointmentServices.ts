@@ -1,32 +1,40 @@
-// import { inject , injectable } from "inversify";
-// import IAdminAppointmentsService from "../interfaces/IAdminAppointmentServices";
-// import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import { inject , injectable } from "inversify";
+import IAdminAppointmentsService from "../interfaces/IAdminAppointmentServices";
+import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 
 
-// @injectable()
-// export default class UserAppointmentService implements IAdminAppointmentsService {
+@injectable()
+export default class AdminAppointmentService implements IAdminAppointmentsService {
 
-//     constructor(
+    constructor(
      
-//       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
+      @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
       
-//     ){
+    ){
 
 
-//     }
+    }
 
+ async getAppointments(pageNumber: number, limitNumber: number, filters: any = {}): Promise<any> {
+    const query: any = {};
 
+    if (filters.status) {
+      query.appointmentStatus = filters.status;
+    }
+    if (filters.doctorCategory) {
+      query.doctorCategory = filters.doctorCategory;
+    }
+    if (filters.startDate && filters.endDate) {
+      query.date = {
+        $gte: new Date(filters.startDate),
+        $lte: new Date(filters.endDate),
+      };
+    }
 
+    const appointments = await this._appointmentsRepository.getAllAppointments(pageNumber, limitNumber, query);
+    console.log("appointments from service...", appointments);
 
-// async getAppointments(pageNumber:number, limitNumber:number):Promise<any>{
+    return appointments;
+  }
 
-
-//   const appointments = await this._appointmentsRepository.getAppointments(pageNumber,limitNumber);
-//   console.log("appointments from service...",appointments);
-
-
-//   return appointments;
-
-// };
-
-// }
+}

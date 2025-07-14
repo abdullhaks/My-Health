@@ -15,8 +15,6 @@ export default class AppointmentsRepository extends BaseRepository<IAppointmentD
         super(_appointmentModel);
     };
 
-    
-
     async getUserAppointments(userId:string,page: number,limit: number): Promise<any> {
         try {
             const query: any = {userId: userId };
@@ -61,6 +59,50 @@ export default class AppointmentsRepository extends BaseRepository<IAppointmentD
             throw new Error("Failed to fetch users");
         }
     };
+
+
+    async getAllAppointments(page: number, limit: number, query: any = {}): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      const appointments = await await this._appointmentModel.find(query)
+        .skip(skip)
+        .limit(limit)
+        .populate("userId", "name email") // Assuming userId references a User model with name and email
+        .populate("doctorId", "name category") // Assuming doctorId references a Doctor model with name and category
+        .lean();
+
+      const total = await  this._appointmentModel.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        appointments: appointments.map((appointment:any) => ({
+          _id: appointment._id.toString(),
+          userId: appointment.userId.toString(),
+          userName: appointment.userId.name,
+          userEmail: appointment.userId.email,
+          doctorId: appointment.doctorId.toString(),
+          doctorName: appointment.doctorId.name,
+          doctorCategory: appointment.doctorId.category,
+          date: appointment.date,
+          start: appointment.start,
+          end: appointment.end,
+          duration: appointment.duration,
+          fee: appointment.fee,
+          paymentStatus: appointment.paymentStatus,
+          paymentType: appointment.paymentType,
+          appointmentStatus: appointment.appointmentStatus,
+          callStartTime: appointment.callStartTime,
+          createdAt: appointment.createdAt,
+          updatedAt: appointment.updatedAt,
+          slotId: appointment.slotId,
+        })),
+        totalPages,
+      };
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+      throw new Error("Failed to fetch appointments");
+    }
+  }
 
 
 }

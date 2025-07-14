@@ -122,15 +122,11 @@ export default class AdminAuthController implements IAuthCtrl {
 
     async refreshToken(req:Request,res:Response):Promise<any>{
         try{
-
             const {adminRefreshToken} = req.cookies;
-
             if(!adminRefreshToken){
                 return res.status(HttpStatusCode.UNAUTHORIZED).json({msg:"refresh token not found"});
             }
-
             const result = await this._adminService.refreshToken(adminRefreshToken);
-
             if (!result) {
             return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
           }

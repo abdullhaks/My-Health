@@ -39,7 +39,7 @@ export const recoveryPassword = async (email: string) => {
 
 export const verifyRecoveryPassword = async (adminData: any) => {
     try {
-        const response = await adminInstance.post("/admin/login", adminData);
+        const response = await adminInstance.post(ROUTES.admin.login, adminData);
         return response.data;
     } catch (error) {
         console.error("Error verifying recovery password:", error);
@@ -49,7 +49,7 @@ export const verifyRecoveryPassword = async (adminData: any) => {
 
 export const resetPassword = async (email: string, newPassword: string) => {
     try {
-        const response = await adminInstance.patch(`/admin/resetPassword/${email}`, { newPassword });
+        const response = await adminInstance.patch(ROUTES.admin.resetPassword(email), { newPassword });
         return response.data;
     } catch (error) {
         console.error("Error resetting password:", error);
@@ -59,7 +59,7 @@ export const resetPassword = async (email: string, newPassword: string) => {
 
 export const refreshToken = async () => {
     try {
-        const response = await adminInstance.post("/admin/refreshToken");
+        const response = await adminInstance.post(ROUTES.admin.refreshToken);
         return response.data;
     } catch (error) {
         console.error("Error refreshing token:", error);
@@ -69,7 +69,7 @@ export const refreshToken = async () => {
 
 export const logoutAdmin = async () => {
     try {
-        const response = await adminInstance.post("/admin/logout");
+        const response = await adminInstance.post(ROUTES.admin.logout);
         return response.data;
     } catch (error) {
         console.error("Error logging out admin:", error);
@@ -83,7 +83,7 @@ export const getUsers = async (search: string, page: number, limit: number) => {
     console.log("serach,page,and limit from api",search,page,limit);
     try {
 
-        const response = await adminInstance.get("/admin/users", {
+        const response = await adminInstance.get(ROUTES.admin.users, {
             params: { search, page, limit }
         });
 
@@ -98,7 +98,7 @@ export const getUsers = async (search: string, page: number, limit: number) => {
 export const getDoctors= async(search:string,page:number , limit:number ,onlyPremium:boolean)=>{
     try{
 
-        const response = await adminInstance.get("/admin/doctors" ,{
+        const response = await adminInstance.get(ROUTES.admin.doctors,{
             params:{search,page,limit,onlyPremium} 
         })
 
@@ -114,8 +114,8 @@ export const getDoctors= async(search:string,page:number , limit:number ,onlyPre
 export const manageUsers = async (id: string, isBlocked: boolean) => {
     try {
         const url = isBlocked
-            ? `/admin/users/${id}/unblock`
-            : `/admin/users/${id}/block`;
+            ? ROUTES.admin.manageUsers.unblock(id)
+            : ROUTES.admin.manageUsers.block(id)
 
         const response = await adminInstance.patch(url);
 
@@ -131,8 +131,8 @@ export const manageUsers = async (id: string, isBlocked: boolean) => {
 export const manageDoctors = async (id: string, isBlocked: boolean) => {
     try {
         const url = isBlocked
-            ? `/admin/doctors/${id}/unblock`
-            : `/admin/doctors/${id}/block`;
+            ? ROUTES.admin.manageDoctors.unblock(id)
+            : ROUTES.admin.manageDoctors.block(id)
 
         const response = await adminInstance.patch(url);
 
@@ -146,7 +146,7 @@ export const manageDoctors = async (id: string, isBlocked: boolean) => {
 
 export const doctorDetails = async (id: string) => {
     try {
-        const response = await adminInstance.get(`/admin/doctor/${id}`);
+        const response = await adminInstance.get(ROUTES.admin.doctor(id));
         return response.data;
     } catch (error) {
         console.log("error in get doctor details");
@@ -156,7 +156,7 @@ export const doctorDetails = async (id: string) => {
 
 export const verifyDoctor = async (id: string) => {
     try {
-        const response = await adminInstance.patch(`/admin/doctor/${id}/verify`);
+        const response = await adminInstance.patch(ROUTES.admin.verifyDoctor(id));
         return response.data;
     } catch (error) {
         console.log("error in verify doctor");
@@ -166,7 +166,7 @@ export const verifyDoctor = async (id: string) => {
 
 export const declineDoctor = async (id: string, reason: string ) => {
     try {
-        const response = await adminInstance.patch(`/admin/doctor/${id}/decline`,{reason});
+        const response = await adminInstance.patch(ROUTES.admin.declineDoctor(id),{reason});
         return response.data;
     } catch (error) {
         console.log("error in verify doctor");
@@ -174,11 +174,21 @@ export const declineDoctor = async (id: string, reason: string ) => {
     }
 };
 
+interface FilterParams {
+  status?: string;
+  doctorCategory?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
-export const getAppointments = async(page:number,limit:number) => {
+export const getAppointments = async(page:number,limit:number,filters: FilterParams = {}) => {
   try{
-    const response = await adminInstance.get("/admin/getAppointments",{
-      params: { page,limit}
+    const response = await adminInstance.get(ROUTES.admin.getAppointments,{
+      params: {
+        page,
+        limit,
+        ...filters,
+      }
     });
     console.log("response data is ....",response.data)
     return response.data;

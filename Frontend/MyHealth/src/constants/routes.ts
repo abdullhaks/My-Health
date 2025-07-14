@@ -86,6 +86,7 @@ export const ROUTES = {
       block: (id: string) => `/admin/doctors/${id}/block`,
       unblock: (id: string) => `/admin/doctors/${id}/unblock`,
     },
+    getAppointments : "/admin/getAppointments",
     getSubscriptions: "/admin/getSubscriptions",
     createSubscription: "/admin/createSubscription",
     deleteSubscription: "/admin/deleteSubscription",

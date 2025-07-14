@@ -4,7 +4,7 @@ import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAuthCtrl";
 import IAdminUserCtrl from "../../controllers/admin/interfaces/IUserCtrl";
 import IAdminDoctorCtrl from "../../controllers/admin/interfaces/IDoctorCtrl";
 import IAdminProductCtrl from "../../controllers/admin/interfaces/IProductCtrl";
-import { resolve } from "path/win32";
+import IAdminAppointmentController from "../../controllers/admin/interfaces/IAppointmentCtrl";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 
 
@@ -14,6 +14,8 @@ const authCtrl = container.get<IAdminAuthCtrl>("IAdminAuthCtrl");
 const userCtrl = container.get<IAdminUserCtrl>("IAdminUserCtrl");
 const doctorCtrl = container.get<IAdminDoctorCtrl>("IAdminDoctorCtrl");
 const productCtrl = container.get<IAdminProductCtrl>("IAdminProductCtrl");
+const appointmentCtrl = container.get<IAdminAppointmentController>("IAdminAppointmentController");
+
 
 adminRoutes.post("/login",(req,res)=>authCtrl.adminLogin(req,res));
 
@@ -47,6 +49,9 @@ adminRoutes.get("/getSubscriptions",verifyAccessTokenMidleware("admin"),(req,res
 adminRoutes.put("/updateSubscription",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.updateProduct(req,res));
 adminRoutes.delete("/deleteSubscription/:id",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.deleteProduct(req,res))
 adminRoutes.post("/createSubscription",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.createProduct(req,res));
+
+adminRoutes.get("/getAppointments",verifyAccessTokenMidleware("admin"),(req,res)=>appointmentCtrl.getAppointments(req,res));
+
 
 
 export default adminRoutes; 
