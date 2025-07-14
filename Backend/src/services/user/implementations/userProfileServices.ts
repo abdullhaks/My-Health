@@ -9,6 +9,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import bcrypt from "bcryptjs"
 import UserRepository from "../../../repositories/implementations/userRepository";
+import { IUserResponse } from "../../../dto/userDTO";
 
 
 @injectable()
@@ -17,7 +18,7 @@ export default class UserProfileService implements IUserProfileService {
     
         }
 
-    async updateProfile(userId:string,userData: Partial<IUser> ): Promise<any> {
+    async updateProfile(userId:string,userData: Partial<IUser> ): Promise<Partial<IUserResponse>> {
         
         console.log("user data is ",userData);
         console.log("user id from service ",userId);
@@ -39,6 +40,7 @@ export default class UserProfileService implements IUserProfileService {
            
             }
 
+            return {}
             
         } catch (error) {
             console.error("Error updating user profile:", error);
@@ -50,7 +52,7 @@ export default class UserProfileService implements IUserProfileService {
 
    
 
-    async updateUserDp(userId: string, updatedFields: any, fileKey: string | undefined): Promise<any> {
+    async updateUserDp(userId: string, updatedFields: Partial<IUser>, fileKey: string | undefined): Promise<IUser> {
       try {
         const updatePayload = {
           ...updatedFields,
@@ -59,18 +61,25 @@ export default class UserProfileService implements IUserProfileService {
     
         const updatedUser = await this._userRepository.update(userId, updatePayload);
 
-        if(updatedUser){
-          updatedUser.profile = await getSignedImageURL(updatedUser.profile)
+        if(!updatedUser){
+          throw new Error("failed to update DP");
         }
+
+        updatedUser.profile = await getSignedImageURL(updatedUser.profile);
+       
+        return updatedUser as IUser;
         
-        return updatedUser;
-      } catch (error: any) {
+      } catch (error) {
         console.error("Service error:", error);
         throw new Error("Failed to update profile");
       }
     };
 
-    async changePassword(id: string, data: any): Promise<any> {
+
+    async changePassword(id: string, data: {
+      currentPassword: string;
+      newPassword: string;
+      confirmPassword: string;}): Promise<IUser> {
       try {
         const existingUser = await this._userRepository.findOne({ _id: id });
         console.log("Existing user: ", existingUser);
@@ -102,7 +111,11 @@ export default class UserProfileService implements IUserProfileService {
     
         console.log("after hashing newPassword is", hashedNewPassword);
     
-        return await this._userRepository.update(existingUser._id.toString(), { password: hashedNewPassword });
+        const updatedUser = await this._userRepository.update(existingUser._id.toString(), { password: hashedNewPassword });
+        if (!updatedUser) {
+          throw new Error("Failed to update password");
+        }
+        return updatedUser as IUser;
     
       } catch (error) {
         console.error("profile service error:", error);

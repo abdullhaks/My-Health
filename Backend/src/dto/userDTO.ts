@@ -33,6 +33,7 @@ export interface IUser extends IUserDocument{};
 export interface IUserResponse {
     message: string;
     user: Partial<IUser>;
+    updatedUser: Partial<IUser>;
     accessToken:string;
     refreshToken:string;
     email:string;
