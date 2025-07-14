@@ -5,7 +5,7 @@ import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { generateDeclineMail } from "../../../utils/generateSignupDeclineMail";
-
+import {IDoctor} from "../../../dto/doctorDTO"
 
 
 dotenv.config();
@@ -29,7 +29,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     search: string | undefined,
     limit: number
     ,onlyPremium:boolean
-  ): Promise<any> {
+  ): Promise<IDoctor[]> {
     const response = await this._adminRepository.getDoctors(
       page,
       search,
@@ -44,7 +44,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-  async getDoctor(id: string): Promise<any> {
+  async getDoctor(id: string): Promise<IDoctor> {
     const response = await this._adminRepository.getDoctor(id);
     if (!response) {
       throw new Error("doctor not found..!");
@@ -57,7 +57,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return userWithoutPassword;
   }
 
-  async verifyDoctor(id: string): Promise<any> {
+  async verifyDoctor(id: string): Promise<IDoctor> {
     const response = await this._adminRepository.verifyDoctor(id);
 
     if (!response) {
@@ -66,7 +66,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-   async declineDoctor(id: string, reason: string): Promise<any> {
+   async declineDoctor(id: string, reason: string): Promise<IDoctor> {
     const response = await this._adminRepository.declineDoctor(id, reason);
 
     if (!response) {
@@ -86,8 +86,11 @@ export default class AdminDoctorService implements IAdminDoctorService {
     }
 
     return response;
-  }
-  async block(id: string): Promise<any> {
+  };
+
+
+
+  async block(id: string): Promise<IDoctor> {
     console.log("id from block....", id);
     const response = await this._adminRepository.blockDoctor(id);
 
@@ -96,7 +99,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-  async unblock(id: string): Promise<any> {
+  async unblock(id: string): Promise<IDoctor> {
     console.log("id from block....", id);
     const response = await this._adminRepository.unblockDoctor(id);
 

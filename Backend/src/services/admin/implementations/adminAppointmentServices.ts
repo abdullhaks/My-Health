@@ -1,9 +1,18 @@
 import { inject , injectable } from "inversify";
 import IAdminAppointmentsService from "../interfaces/IAdminAppointmentServices";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import { IAppointment } from "../../../dto/appointmentDTO";
 
+
+ interface filter {
+    status?:string;
+    doctorCategory?:string;
+    startDate?:string;
+    endDate?:string;
+  }
 
 @injectable()
+
 export default class AdminAppointmentService implements IAdminAppointmentsService {
 
     constructor(
@@ -15,7 +24,9 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
 
     }
 
- async getAppointments(pageNumber: number, limitNumber: number, filters: any = {}): Promise<any> {
+ 
+
+ async getAppointments(pageNumber: number, limitNumber: number, filters: filter = {}): Promise<IAppointment[]> {
     const query: any = {};
 
     if (filters.status) {

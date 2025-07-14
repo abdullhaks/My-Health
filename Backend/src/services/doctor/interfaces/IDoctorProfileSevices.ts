@@ -1,10 +1,9 @@
 import {IDoctor} from "../../../dto/doctorDTO"
-import { Response } from "express"
 
 export default interface IDoctorProfileService {
 
-verifySubscription (sessionId:string): Promise<any>
-updateDoctorDp(userId: string, updatedFields: any, fileKey: string | undefined): Promise<any> 
-updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<any> 
+verifySubscription (sessionId:string): Promise<{message:string,doctor:Partial<IDoctor>}>
+updateDoctorDp(userId: string, updatedFields: Partial<IDoctor>, fileKey: string | undefined): Promise<IDoctor> 
+updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<{message:string,updatedDoctor:Partial<IDoctor>}> 
 
 }

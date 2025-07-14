@@ -25,14 +25,30 @@ export default class AdminAuthController implements IAuthCtrl {
 
             console.log("email and password are ",email,password);
             
-            const result =await this._adminService.login(res,{email,password})
+            const result =await this._adminService.login({email,password})
 
             console.log("result is ",result);
 
             if(!result){
                 return res.status(HttpStatusCode.UNAUTHORIZED).json({msg:"Envalid credentials"});
-            }
-            return res.status(HttpStatusCode.OK).json(result);
+            };
+
+
+             res.cookie("adminRefreshToken", result.refreshToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.cookie("adminAccessToken", result.accessToken, {
+          httpOnly: true,
+          sameSite: "strict",
+          secure: false, 
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        }); 
+
+            return res.status(HttpStatusCode.OK).json({message:result.message,admin:result.admin});
 
         }catch(error){
             console.log(error);

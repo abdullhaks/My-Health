@@ -3,6 +3,7 @@ import { inject,injectable } from "inversify";
 import IDoctorReportAnalysisService from "../interfaces/IDoctorReportAnalysis";
 import IReportAnalysisRepository from "../../../repositories/interfaces/IReportAnalysisRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import { IReportAnalysis } from "../../../dto/reportAnalysisDTO";
 
 @injectable()
 export default class DoctorReportAnalysisService implements IDoctorReportAnalysisService {
@@ -15,7 +16,7 @@ export default class DoctorReportAnalysisService implements IDoctorReportAnalysi
     };
 
 
-async getReports (doctorId:string):Promise<any>{
+async getReports (doctorId:string):Promise<IReportAnalysis[]>{
 
     try{
         const response = await this._ReportAnalysisRepository.findAll({doctorId:doctorId});
@@ -29,9 +30,13 @@ async getReports (doctorId:string):Promise<any>{
 
 
 
-async submitAnalysisReports (analysisId:string, result:string):Promise<any>{
+async submitAnalysisReports (analysisId:string, result:string):Promise<IReportAnalysis>{
     try{
         const response = await this._ReportAnalysisRepository.update(analysisId, { result: result, analysisStatus: "submited" });
+
+        if(!response){
+            throw new Error("submiting report analysis failed")
+        }
         return response;
 
     }catch(error){
@@ -41,7 +46,7 @@ async submitAnalysisReports (analysisId:string, result:string):Promise<any>{
 
 };
 
-async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Promise<any>{
+async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Promise<IReportAnalysis>{
     try{
         
         if(!analysisId || !userId || fee <= 0){
@@ -53,6 +58,10 @@ async cancelAnalysisReports (analysisId:string , userId:string , fee: number):Pr
         
         if(walletUpdate){
             const response = await this._ReportAnalysisRepository.update(analysisId, { analysisStatus: "cancelled" });
+
+            if(!response){
+                throw new Error("wallet updation failed")
+            }
              return response;
         }else{
                 console.error("Failed to update wallet balance");

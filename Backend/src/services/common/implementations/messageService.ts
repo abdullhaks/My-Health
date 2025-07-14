@@ -1,7 +1,7 @@
 import {inject,injectable} from "inversify"
 import IMessageService from "../interfaces/IMessageService";
 import IMessageRepository from "../../../repositories/interfaces/IMessageRepository";
-import { IMessageDocument } from "../../../entities/messageEntities";
+import {IMessage} from "../../../dto/messageDTO";
 
 @injectable()
 export default class MessageService implements IMessageService {
@@ -18,7 +18,7 @@ export default class MessageService implements IMessageService {
     senderId: string,
     content: string,
     type: string = "text" 
-  ): Promise<IMessageDocument> {
+  ): Promise<IMessage> {
     if (!conversationId || !senderId || !content || !type) {
       throw new Error("Conversation ID, sender ID, and content are required");
     }
@@ -33,7 +33,7 @@ export default class MessageService implements IMessageService {
     });
   }
 
-  async getMessages(conversationId: string): Promise<IMessageDocument[]> {
+  async getMessages(conversationId: string): Promise<IMessage[]> {
     if (!conversationId) {
       throw new Error("Conversation ID is required");
     }

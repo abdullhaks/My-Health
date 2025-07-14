@@ -3,6 +3,7 @@ import IDetailsService from "../interfaces/IDetailsService";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { IMessageDocument } from "../../../entities/messageEntities";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
+import {IDoctor} from "../../../dto/doctorDTO";
 
 @injectable()
 export default class DetailsService implements IDetailsService {
@@ -14,14 +15,15 @@ export default class DetailsService implements IDetailsService {
 
     }
 
-async getDoctor(doctorId: string): Promise<any> {
+async getDoctor(doctorId: string): Promise<IDoctor> {
   try {
     console.log("doctor id from service... ", doctorId);
 
     const response = await this._doctorRepository.findOne({ _id: doctorId });
     if (!response) {
       console.log("No doctor found for ID:", doctorId);
-      return null;
+      throw new Error("failed to fetch doctor");
+
     }
 
     console.log("response from service... ", response);

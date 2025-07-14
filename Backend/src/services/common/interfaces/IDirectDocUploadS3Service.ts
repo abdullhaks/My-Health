@@ -2,7 +2,8 @@
 
 export default interface IDirectDocUploadS3Service {
     
-    directUpload(doc:any,location:string):Promise<any>
+    directUpload(file: { buffer: Buffer; originalname: string; mimetype: string },
+      location: string):Promise<{ message: string; url: string }>
  
     
 }

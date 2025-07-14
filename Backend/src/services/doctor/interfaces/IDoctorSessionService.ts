@@ -1,5 +1,6 @@
+import {ISession} from "../../../dto/sessionDTO"
 
 export default interface IDoctorSessionService {
-    addSessions (sessionData:any):Promise<any>
-    getSessions (doctorId:string):Promise<any>
+    addSessions (sessionData:any):Promise<ISession[]>
+    getSessions (doctorId:string):Promise<ISession[]>
 }

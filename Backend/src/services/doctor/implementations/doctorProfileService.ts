@@ -1,5 +1,4 @@
 import IDoctorProfileService from "../interfaces/IDoctorProfileSevices";
-import { Response } from "express";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { IUser } from "../../../dto/userDTO";
@@ -44,8 +43,7 @@ export default class DoctorProfileService implements IDoctorProfileService {
 
     }
 
-
-    async verifySubscription (sessionId:string): Promise<any>{
+    async verifySubscription (sessionId:string): Promise<{message:string,doctor:Partial<IDoctor>}>{
 
         console.log("session id from verifySubscription",sessionId);
 
@@ -74,7 +72,7 @@ export default class DoctorProfileService implements IDoctorProfileService {
     
 
 
-    async updateDoctorDp(userId: string, updatedFields: any, fileKey: string | undefined): Promise<any> {
+    async updateDoctorDp(userId: string, updatedFields: Partial<IDoctor>, fileKey: string | undefined): Promise<IDoctor> {
       try {
         const updatePayload = {
           ...updatedFields,
@@ -83,19 +81,20 @@ export default class DoctorProfileService implements IDoctorProfileService {
     
         const updatedUser = await this._doctorRepository.update(userId, updatePayload);
 
-        if(updatedUser){
-          updatedUser.profile = await getSignedImageURL(updatedUser.profile)
+        if (!updatedUser) {
+          throw new Error("Doctor not found or update failed");
         }
+        updatedUser.profile = await getSignedImageURL(updatedUser.profile);
         
         return updatedUser;
-      } catch (error: any) {
+      } catch (error) {
         console.error("Service error:", error);
         throw new Error("Failed to update profile");
       }
     };
 
 
- async updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<any> {
+ async updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<{message:string,updatedDoctor:Partial<IDoctor>}> {
         
         console.log("user data is ",userData);
         console.log("user id from service ",userId);
@@ -104,7 +103,9 @@ export default class DoctorProfileService implements IDoctorProfileService {
             const updatedUser = await this._doctorRepository.update(userId.toString(), userData);
             console.log("Updated user: ", updatedUser);
 
-            if(updatedUser){
+            if(!updatedUser){
+              throw new Error ("profile update failed")
+            }
                 const { password, ...userWithoutPassword } = updatedUser.toObject();
       
                 if(userWithoutPassword.profile){
@@ -115,7 +116,7 @@ export default class DoctorProfileService implements IDoctorProfileService {
             updatedDoctor: userWithoutPassword,
             };
            
-            }
+            
 
             
         } catch (error) {

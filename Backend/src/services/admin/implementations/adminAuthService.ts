@@ -34,7 +34,7 @@ export default class AdminAuthService implements IAdminAuthService {
     }
 
 
-    async login(res: Response, adminData: IAdmin): Promise<any> {
+    async login(adminData: IAdmin): Promise<{message:string;admin:IAdmin;accessToken:string;refreshToken:string}> {
         console.log("admin data from service....", adminData);
       
         if (!adminData.email || !adminData.password) {
@@ -59,31 +59,33 @@ export default class AdminAuthService implements IAdminAuthService {
         const accessToken = generateAccessToken({ id: admin._id.toString(), role: "admin" });
         const refreshToken = generateRefreshToken({ id: admin._id.toString(), role: "admin" });
       
-        res.cookie("adminRefreshToken", refreshToken, {
-          httpOnly: true,
-          sameSite: "strict",
-          secure: false,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        // res.cookie("adminRefreshToken", refreshToken, {
+        //   httpOnly: true,
+        //   sameSite: "strict",
+        //   secure: false,
+        //   maxAge: 7 * 24 * 60 * 60 * 1000,
+        // });
 
-        res.cookie("adminAccessToken", accessToken, {
-          httpOnly: true,
-          sameSite: "strict",
-          secure: false, 
-          maxAge: 7 * 24 * 60 * 60 * 1000,
-        }); 
+        // res.cookie("adminAccessToken", accessToken, {
+        //   httpOnly: true,
+        //   sameSite: "strict",
+        //   secure: false, 
+        //   maxAge: 7 * 24 * 60 * 60 * 1000,
+        // }); 
       
         const { password, ...userWithoutPassword } = admin.toObject();
       
         return {
           message: "Login successful",
           admin: userWithoutPassword,
+          accessToken,
+          refreshToken,
         };
       }
       
 
     
-    async forgotPassword(email: string): Promise<any> {
+    async forgotPassword(email: string): Promise<{message:string,email:string}> {
       if (!email) {
         throw new Error("Email is required");
       }

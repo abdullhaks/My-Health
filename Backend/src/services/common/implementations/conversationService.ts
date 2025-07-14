@@ -1,7 +1,7 @@
 import {inject,injectable} from "inversify"
 import IConversationService from "../interfaces/IConversationService";
 import IConversationRepository from "../../../repositories/interfaces/IConversationRepository";
-import { IConversationDocument } from "../../../entities/conversationEntities";
+import {IConversation} from "../../../dto/conversationDTO"
 
 @injectable()
 export default class ConversationService implements IConversationService {
@@ -13,7 +13,7 @@ export default class ConversationService implements IConversationService {
 
     }
 
- async createOrGetConversation(userIds: string[]): Promise<IConversationDocument> {
+ async createOrGetConversation(userIds: string[]): Promise<IConversation> {
     if (!userIds || userIds.length !== 2) {
       throw new Error("Exactly two user IDs are required");
     };
@@ -26,7 +26,7 @@ export default class ConversationService implements IConversationService {
     return await this._conversationRepository.createConversation(userIds);
   }
 
-  async getUserConversations(userId: string,from:string): Promise<IConversationDocument[]> {
+  async getUserConversations(userId: string,from:string): Promise<IConversation[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }

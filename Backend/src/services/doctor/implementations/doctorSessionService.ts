@@ -2,6 +2,7 @@
 import { inject,injectable } from "inversify";
 import IDoctorSessionService from "../interfaces/IDoctorSessionService";
 import ISessionRepository from "../../../repositories/interfaces/ISessionRepository";
+import {ISession} from "../../../dto/sessionDTO"
 
 @injectable()
 export default class DoctorSessionService implements IDoctorSessionService {
@@ -13,7 +14,7 @@ export default class DoctorSessionService implements IDoctorSessionService {
     };
 
 
-   async addSessions(sessionData: any): Promise<any> {
+   async addSessions(sessionData: ISession[]): Promise<ISession[]> {
     console.log("session data from service ", sessionData);
     try {
 
@@ -34,7 +35,7 @@ export default class DoctorSessionService implements IDoctorSessionService {
 };
 
 
-async getSessions (doctorId:string):Promise<any>{
+async getSessions (doctorId:string):Promise<ISession[]>{
 
     try{
         const response = await this._sessionRepository.findAll({doctorId:doctorId});

@@ -25,8 +25,23 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
 
       if (!result) {
         return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
-      }
-      return res.status(HttpStatusCode.OK).json(result);
+      };
+
+      res.cookie("doctorRefreshToken", result.refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie("doctorAccessToken", result.accessToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+      return res.status(HttpStatusCode.OK).json({message:result.message,doctor:result.doctor});
     } catch (error) {
       console.log(error);
       return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
@@ -48,7 +63,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       while (req.body[`specializations[${i}][title]`]) {
         parsedSpecializations.push({
           title: req.body[`specializations[${i}][title]`],
-          certificate:(req.files as unknown as { [key: string]: File[] })?.[`specializations[${i}][certificate]`]?.[0],
+          certificate:(req.files as unknown as { [key: string]: any[] })?.[`specializations[${i}][certificate]`]?.[0],
         });
         i++;
       }
@@ -59,21 +74,39 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       }
 
       
-      const registrationCertificate = (req.files as unknown as { [key: string]: File[] })?.registrationCertificate?.[0];
-      const graduationCertificate = (req.files as unknown as { [key: string]: File[] })?.graduationCertificate?.[0];
-      const verificationId = (req.files as unknown as { [key: string]: File[] })?.verificationId?.[0];
-  
-      const certificates = {
-        registrationCertificate,
-        graduationCertificate,
-        verificationId
-      }
+      const registrationCertificateFile = (req.files as unknown as { [key: string]: any[] })?.registrationCertificate?.[0];
+      const graduationCertificateFile = (req.files as unknown as { [key: string]: any[] })?.graduationCertificate?.[0];
+      const verificationIdFile = (req.files as unknown as { [key: string]: any[] })?.verificationId?.[0];
 
-      console.log("file are",registrationCertificate,graduationCertificate,verificationId)
+      const certificates:any = {
+        registrationCertificate: registrationCertificateFile
+          ? {
+              buffer: registrationCertificateFile.buffer,
+              originalname: registrationCertificateFile.originalname,
+              mimetype: registrationCertificateFile.mimetype,
+            }
+          : undefined,
+        graduationCertificate: graduationCertificateFile
+          ? {
+              buffer: graduationCertificateFile.buffer,
+              originalname: graduationCertificateFile.originalname,
+              mimetype: graduationCertificateFile.mimetype,
+            }
+          : undefined,
+        verificationId: verificationIdFile
+          ? {
+              buffer: verificationIdFile.buffer,
+              originalname: verificationIdFile.originalname,
+              mimetype: verificationIdFile.mimetype,
+            }
+          : undefined,
+      };
+
+      console.log("file are", certificates.registrationCertificate, certificates.graduationCertificate, certificates.verificationId);
       // Now you have everything properly parsed.
       // Save to DB or upload to S3 as needed
-      const response = await this._doctorService.signup(doctor,certificates,parsedSpecializations)
-  
+      const response = await this._doctorService.signup(doctor, certificates, parsedSpecializations);
+
       return res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
 
       

@@ -3,6 +3,6 @@ import {IDoctor} from "../../../dto/doctorDTO"
 
 export default interface IPaymentService {
 
-handleWebhookEvent(event:any):Promise<any>
+handleWebhookEvent(event:any):Promise<{received:boolean}>
 
 }

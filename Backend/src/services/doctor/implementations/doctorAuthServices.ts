@@ -3,7 +3,6 @@ import { Response } from "express";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { IUser } from "../../../dto/userDTO";
-import { IDoctor } from "../../../dto/doctorDTO";
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
 import generateOtp from "../../../utils/helpers";
@@ -17,6 +16,7 @@ import {generateAccessToken,generateRefreshToken,verifyRefreshToken,} from "../.
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
 import {getSignedImageURL,uploadFileToS3,} from "../../../middlewares/common/uploadS3";
+import { IDoctor } from "../../../dto/doctorDTO";
 
 dotenv.config();
 
@@ -27,13 +27,41 @@ const transporter = nodemailer.createTransport({
 });
 
 
+
+interface IParsed {
+  title?:string;
+  certificate?:{
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    };
+}
+
+  interface ICertificates {
+    graduationCertificate: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    };
+    registrationCertificate: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    };
+    verificationId: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype: string;
+    };
+  }
+
 @injectable()
 export default class DoctorAuthService implements IDoctorAuthService {
   constructor(
     @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
   ) {}
 
-  async login(res: Response, doctorData: Partial<IDoctor>): Promise<any> {
+  async login(res: Response, doctorData: Partial<IDoctor>): Promise<{message:string,doctor:IDoctor,accessToken?:string,refreshToken?:string}> {
     console.log("doctor data from service....", doctorData);
 
     if (!doctorData.email || !doctorData.password) {
@@ -103,19 +131,19 @@ export default class DoctorAuthService implements IDoctorAuthService {
       role: "doctor",
     });
 
-    res.cookie("doctorRefreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // res.cookie("doctorRefreshToken", refreshToken, {
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: false,
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
 
-    res.cookie("doctorAccessToken", accessToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // res.cookie("doctorAccessToken", accessToken, {
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: false,
+    //   maxAge: 7 * 24 * 60 * 60 * 1000,
+    // });
 
     const { password, ...doctorWithoutPassword } = existingDoctor.toObject();
 
@@ -128,6 +156,8 @@ export default class DoctorAuthService implements IDoctorAuthService {
     return {
       message: "Login successful",
       doctor: doctorWithoutPassword,
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -152,13 +182,11 @@ async sendMail(email: string, otp: string): Promise<void> {
 
 
 
-
-
   async signup(
     doctor: Partial<IDoctor>,
-    certificates: any,
-    parsedSpecializations: any
-  ): Promise<any> {
+    certificates: ICertificates,
+    parsedSpecializations: IParsed[]
+  ): Promise<{message:string,email:string}> {
     console.log("user data from service....", doctor);
 
     const existingUser = await this._doctorRepository.findOne({
@@ -228,10 +256,7 @@ async sendMail(email: string, otp: string): Promise<void> {
 
 
 
-
-
-
-  async verifyOtp(email: string, otp: string): Promise<any> {
+  async verifyOtp(email: string, otp: string): Promise<{message:string}> {
     const otpRecord = await this._doctorRepository.findLatestOtpByEmail(email);
     console.log("OTP record: ", otpRecord);
 
@@ -256,7 +281,7 @@ async sendMail(email: string, otp: string): Promise<void> {
 
 
 
-  async resentOtp(email: string): Promise<any> {
+  async resentOtp(email: string): Promise<{message:string}> {
     if (!email) {
       throw new Error("Email is required");
     }
@@ -318,8 +343,5 @@ async sendMail(email: string, otp: string): Promise<void> {
           
               return {accessToken} ;
           };
-
-
-
 
 }

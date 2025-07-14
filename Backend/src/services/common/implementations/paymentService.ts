@@ -23,7 +23,7 @@ export default class PaymentService implements IPaymentService {
 
   ) {}
 
-  async handleWebhookEvent(event: any): Promise<any> {
+  async handleWebhookEvent(event: any): Promise<{received:boolean}> {
 
 
 

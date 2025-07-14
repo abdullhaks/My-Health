@@ -1,9 +1,9 @@
 import {inject,injectable} from "inversify"
 import IDoctorChatService from "../interfaces/IDoctorChatService";
 import IConversationRepository from "../../../repositories/interfaces/IConversationRepository";
-import { IConversationDocument } from "../../../entities/conversationEntities";
+import { IConversation } from "../../../dto/conversationDTO";
 import IMessageRepository from "../../../repositories/interfaces/IMessageRepository";
-import { IMessageDocument } from "../../../entities/messageEntities";
+import {IMessage} from "../../../dto/messageDTO"
 
 @injectable()
 export default class DoctorChatService implements IDoctorChatService {
@@ -17,7 +17,7 @@ export default class DoctorChatService implements IDoctorChatService {
 
     }
 
- async createOrGetConversation(userIds: string[]): Promise<IConversationDocument> {
+ async createOrGetConversation(userIds: string[]): Promise<IConversation> {
     if (!userIds || userIds.length !== 2) {
       throw new Error("Exactly two user IDs are required");
     };
@@ -30,7 +30,7 @@ export default class DoctorChatService implements IDoctorChatService {
     return await this._conversationRepository.createConversation(userIds);
   }
 
-  async getUserConversations(userId: string): Promise<IConversationDocument[]> {
+  async getUserConversations(userId: string): Promise<IConversation[]> {
     if (!userId) {
       throw new Error("User ID is required");
     }
@@ -41,7 +41,7 @@ export default class DoctorChatService implements IDoctorChatService {
       conversationId: string,
       senderId: string,
       content: string
-    ): Promise<IMessageDocument> {
+    ): Promise<IMessage> {
       if (!conversationId || !senderId || !content) {
         throw new Error("Conversation ID, sender ID, and content are required");
       }
@@ -55,7 +55,7 @@ export default class DoctorChatService implements IDoctorChatService {
       });
     }
   
-    async getMessages(conversationId: string): Promise<IMessageDocument[]> {
+    async getMessages(conversationId: string): Promise<IMessage[]> {
       if (!conversationId) {
         throw new Error("Conversation ID is required");
       }
