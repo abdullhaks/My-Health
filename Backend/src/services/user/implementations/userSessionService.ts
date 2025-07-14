@@ -4,6 +4,8 @@ import IUserSessionService from "../interfaces/IUserSessionService";
 import ISessionRepository from "../../../repositories/interfaces/ISessionRepository";
 import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import {ISession} from "../../../dto/sessionDTO";
+import { IAppointment } from "../../../dto/appointmentDTO";
 
 @injectable()
 export default class UserSessionService implements IUserSessionService {
@@ -17,7 +19,7 @@ export default class UserSessionService implements IUserSessionService {
     };
 
 
-async getSessions (doctorId:string):Promise<any>{
+async getSessions (doctorId:string):Promise<ISession[]>{
 
     try{
         const response = await this._sessionRepository.findAll({doctorId:doctorId});
@@ -30,7 +32,7 @@ async getSessions (doctorId:string):Promise<any>{
 }
 
 
-async getBookedSlots (doctorId:string,formattedDate:string):Promise<any>{
+async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment[]>{
 
     try{
 
