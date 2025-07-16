@@ -6,7 +6,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 
 
-injectable();
+injectable()
 
 export default class AdminAppointmentController implements IAdminAppointmentController {
 

@@ -247,6 +247,44 @@ export const deleteSubscription = async(productId:string) => {
 };
 
 
+export const getUserAnalytics = async(filter:string) =>{
+try{
+
+    const response = await adminInstance.get(ROUTES.admin.getUserAnalytics(filter));
+    return response.data;
+    
+}catch(error){
+    console.error("error in getUserAnalytics");
+    throw error;
+}
+};
+
+export const getDoctorAnalytics = async(filter:string) =>{
+try{
+
+    const response = await adminInstance.get(ROUTES.admin.getDoctorAnalytics(filter));
+    return response.data;
+    
+}catch(error){
+    console.error("error in getUserAnalytics");
+    throw error;
+}
+};
+
+export const getTotalAnalytics = async ()=>{
+    try{
+
+        const response = await adminInstance.get(ROUTES.admin.getTotalAnalytics);
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+}
+
+
 
 
 

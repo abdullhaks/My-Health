@@ -91,6 +91,10 @@ export const ROUTES = {
     createSubscription: "/admin/createSubscription",
     deleteSubscription: "/admin/deleteSubscription",
     updateSubscription: "/admin/updateSubscription",
+    getUserAnalytics:(filter:string) => `/admin/getUserAnalytics/${filter}`,
+    getDoctorAnalytics:(filter:string) => `/admin/getDoctorAnalytics/${filter}`,
+    getTotalAnalytics : "/admin/getTotalAnalytics"
     
   },
+  
 };

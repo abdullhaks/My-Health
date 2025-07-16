@@ -80,6 +80,17 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
         }
     }
     
+    async aggregate(pipeline: any[]): Promise<any> {
+    try {
+        const resp = await this._userModel.aggregate(pipeline);
+        console.log("pipe line is .....",pipeline)
+        console.log("resp is .....",resp)
+      return resp;
 
+    } catch (error) {
+      console.error("Error in aggregate:", error);
+      throw new Error("Failed to perform aggregation");
+    }
+  }
 
 }

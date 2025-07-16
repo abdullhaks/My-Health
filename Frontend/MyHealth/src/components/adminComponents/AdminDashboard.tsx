@@ -1,216 +1,220 @@
-
-// import doctorImg from '../../assets/doctorLogin.png'; 
-// import {Video,FileText,DollarSign,Calendar,} from 'lucide-react';
-// import {LineChart,Line,XAxis,YAxis,Tooltip,ResponsiveContainer,CartesianGrid,} from 'recharts';
-
-// // Dummy chart data
-// const consultationData = [
-//   { day: 'Mon', count: 8 },
-//   { day: 'Tue', count: 12 },
-//   { day: 'Wed', count: 10 },
-//   { day: 'Thu', count: 14 },
-//   { day: 'Fri', count: 7 },
-//   { day: 'Sat', count: 15 },
-//   { day: 'Sun', count: 9 },
-// ];
-
-// const statCards = [
-//   {
-//     title: 'Today Consultations',
-//     value: 12,
-//     icon: <Video className="text-white" size={20} />,
-//     bgColor: 'bg-green-500',
-//     growth: '+8.5%',
-//   },
-//   {
-//     title: 'Report Analysis',
-//     value: 3,
-//     icon: <FileText className="text-white" size={20} />,
-//     bgColor: 'bg-orange-400',
-//     growth: '+3.2%',
-//   },
-//   {
-//     title: 'Earnings',
-//     value: '$1,250',
-//     icon: <DollarSign className="text-white" size={20} />,
-//     bgColor: 'bg-emerald-500',
-//     growth: '+5.1%',
-//   },
-//   {
-//     title: 'Upcoming Appointments',
-//     value: 9,
-//     icon: <Calendar className="text-white" size={20} />,
-//     bgColor: 'bg-pink-500',
-//     growth: '+2.4%',
-//   },
-// ];
-
-// const DoctorDashboard = () => {
-//   return (
-//     <div className="p-6 w-full bg-gray-50 min-h-screen">
-//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
-
-//       {/* Stat Cards */}
-//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-//         {statCards.map((card, index) => (
-//           <div
-//             key={index}
-//             className={`flex items-center justify-between p-5 rounded-xl shadow ${card.bgColor} text-white`}
-//           >
-//             <div>
-//               <h2 className="text-lg font-semibold">{card.title}</h2>
-//               <p className="text-2xl font-bold mt-1">{card.value}</p>
-//               <p className="text-sm mt-1">{card.growth} from last check-in</p>
-//             </div>
-//             <div className="ml-4">{card.icon}</div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* Consultation Trends Graph */}
-//       <div className="bg-white rounded-xl p-6 shadow mb-10">
-//         <div className="flex justify-between items-center mb-4">
-//           <h2 className="text-lg font-semibold text-gray-800">Consultation Trends</h2>
-//           <select className="border rounded p-1 text-sm">
-//             <option>This Week</option>
-//             <option>This Month</option>
-//           </select>
-//         </div>
-//         <ResponsiveContainer width="100%" height={300}>
-//           <LineChart data={consultationData}>
-//             <CartesianGrid strokeDasharray="3 3" />
-//             <XAxis dataKey="day" />
-//             <YAxis />
-//             <Tooltip />
-//             <Line
-//               type="monotone"
-//               dataKey="count"
-//               stroke="#3b82f6"
-//               strokeWidth={3}
-//               activeDot={{ r: 8 }}
-//             />
-//           </LineChart>
-//         </ResponsiveContainer>
-//       </div>
-
-//       {/* Advertisement / Promo Section */}
-//       <div className="relative bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl p-6 overflow-hidden shadow-md">
-//         <div className="text-white z-10 relative max-w-lg">
-//           <h2 className="text-3xl font-bold tracking-wide animate-pulse drop-shadow-md">
-//             “We’ll Treat You Well” – Book Your Slot Today!
-//           </h2>
-//           <p className="mt-2 text-sm font-light">Aster MIMS Hospital</p>
-//         </div>
-//         <img
-//           src={doctorImg}
-//           alt="Doctor Promo"
-//           className="absolute bottom-0 right-0 w-48 h-auto object-contain opacity-90"
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default DoctorDashboard;
-
-
-
-//............................second ui.........................
-
-
-import adminimg from "../../assets/doctorLogin.png"; // Replace with your actual image path
+import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { getDoctorAnalytics, getUserAnalytics ,getTotalAnalytics} from "../../api/admin/adminApi";
+import adminimg from "../../assets/doctorLogin.png";
+import { FaCalendarCheck, FaUsers } from "react-icons/fa";
+import { FaMoneyBillTransfer, FaMoneyBillTrendUp, FaUserDoctor } from "react-icons/fa6";
 
-const data = [
-  { name: "5k", value: 20 },
-  { name: "10k", value: 40 },
-  { name: "15k", value: 38 },
-  { name: "20k", value: 64 },
-  { name: "25k", value: 35 },
-  { name: "30k", value: 42 },
-  { name: "35k", value: 51 },
-  { name: "40k", value: 25 },
-  { name: "45k", value: 54 },
-  { name: "50k", value: 48 },
-  { name: "55k", value: 46 },
-  { name: "60k", value: 50 },
-];
 
 interface SummaryCardProps {
   title: string;
   value: string;
   trend: string;
   trendColor: string;
-  icon?: React.ReactNode;
-}
+  icon?: any;
+};
 
-const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendColor }) => (
-  <div className="bg-white rounded-xl p-4 shadow flex flex-col gap-2">
+
+
+const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendColor, icon }) => (
+  <div className="bg-white rounded-2xl p-6 shadow-lg flex flex-col gap-3 transition-transform transform hover:scale-105">
     <div className="flex justify-between items-center">
-      <h4 className="text-sm text-gray-500 font-medium">{title}</h4>
-      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-        {/* Replace with icon logic if needed */}
-        <span className="text-lg">📊</span>
+      <h4 className="text-sm text-gray-600 font-semibold">{title}</h4>
+      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+        {icon || <span className="text-xl">📊</span>}
       </div>
     </div>
-    <div className="text-2xl font-semibold">{value}</div>
-    <div className={`text-xs ${trendColor}`}>{trend}</div>
+    <div className="text-3xl font-bold text-gray-800">{value}</div>
+    <div className={`text-sm font-medium ${trendColor}`}>{trend}</div>
   </div>
 );
 
 const AdminDashboard = () => {
+  const [userData, setUserData] = useState([]);
+  const [userFilter, setUserFilter] = useState("day");
+  const [doctorData,setDoctorData] = useState([]);
+  const [doctorFilter, setDoctorFilter] = useState("day");
+  const [totaldata,setTotalData] = useState({totalConsultations:0,
+                                             totalDoctors:0,
+                                             totalPaid:0,
+                                             totalRevenue:0,
+                                             totalUsers:0 })
+
+  useEffect(() => {
+    const fetchTotalAnalytics = async () => {
+      try {
+        const response = await getTotalAnalytics();
+
+        console.log("total analytics response is ...",response);
+        setTotalData(response); 
+      } catch (error) {
+        console.error("Failed to fetch user analytics:", error);
+      }
+    };
+    fetchTotalAnalytics();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserAnalytics = async () => {
+      try {
+        const response = await getUserAnalytics(userFilter);
+        setUserData(response); 
+      } catch (error) {
+        console.error("Failed to fetch user analytics:", error);
+      }
+    };
+    fetchUserAnalytics();
+  }, [userFilter]);
+
+  useEffect(() => {
+    const fetchDoctorAnalytics = async () => {
+      try {
+        const response = await getDoctorAnalytics(doctorFilter);
+        setDoctorData(response); 
+      } catch (error) {
+        console.error("Failed to fetch user analytics:", error);
+      }
+    };
+    fetchDoctorAnalytics();
+  }, [doctorFilter]);
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-8 bg-gray-100 min-h-screen">
       {/* Top Banner */}
-      <div className="relative flex items-center justify-between bg-gradient-to-r from-blue-500 to-cyan-400 rounded-xl h-44 px-6 shadow-lg overflow-hidden">
-        <div className="z-4 text-white max-w-md">
-          <h2 className="text-3xl font-bold ">
-            Aster MIMS HOSPITALS
+      <div className="relative flex items-center justify-between bg-gradient-to-r from-blue-500 to-cyan-300 rounded-2xl h-48 px-8 shadow-xl overflow-hidden">
+        <div className="z-10 text-white max-w-lg">
+          <h2 className="text-4xl font-extrabold tracking-tight">
+            Aster MIMS Hospitals
           </h2>
-          <p className="text-lg font-semibold mt-1">We’ll Treat You Well</p>
+          <p className="text-lg font-semibold mt-2">We’ll Treat You Well</p>
           <p className="text-sm mt-1">www.asterhospitals.in</p>
           <p className="text-sm">+91 3434 5656 999</p>
         </div>
         <img
           src={adminimg}
           alt="Doctors"
-          className="absolute bottom-0 right-4 h-full max-h-44 object-contain z-0"
+          className="absolute bottom-0 right-8 h-full max-h-48 object-contain opacity-90 z-0"
         />
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-6">
-        <SummaryCard title="Total User" value="40,689" trend="8.5% Up from yesterday" trendColor="text-green-500" />
-        <SummaryCard title="Total Doctors" value="10,293" trend="1.3% Up from past week" trendColor="text-green-500" />
-        <SummaryCard title="Total Revenue" value="Rs89,000" trend="4.3% Down from yesterday" trendColor="text-red-500" />
-        <SummaryCard title="Total Paid" value="Rs75,000" trend="1.8% Up from yesterday" trendColor="text-green-500" />
-        <SummaryCard title="Total Consultation" value="5,343" trend="8.5% Up from yesterday" trendColor="text-green-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-8">
+        <SummaryCard
+          title="Total Users"
+          value={totaldata.totalUsers.toString()}
+          trend="8.5% Up from yesterday"
+          trendColor="text-green-600"
+          icon={<FaUsers />}
+        />
+        <SummaryCard
+          title="Total Doctors"
+          value={totaldata.totalDoctors.toString()}
+          trend="1.3% Up from past week"
+          trendColor="text-green-600"
+          icon={<FaUserDoctor />}
+        />
+        <SummaryCard
+          title="Total Revenue"
+          value={totaldata.totalRevenue.toString()}
+          trend="4.3% Down from yesterday"
+          trendColor="text-red-600"
+          icon={<FaMoneyBillTrendUp />}
+        />
+        <SummaryCard
+          title="Total Paid"
+          value={totaldata.totalPaid.toString()}
+          trend="1.8% Up from yesterday"
+          trendColor="text-green-600"
+          icon={<FaMoneyBillTransfer />}
+        />
+        <SummaryCard
+          title="Total Consultations"
+          value={totaldata.totalConsultations.toString()}
+          trend="8.5% Up from yesterday"
+          trendColor="text-green-600"
+          icon={<FaCalendarCheck />}
+        />
       </div>
 
-      {/* Sales Details Chart */}
-      <div className="mt-6 p-6 bg-white rounded-xl shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Sales Details</h3>
-          <select className="border px-3 py-1 rounded-md text-sm">
-            <option>October</option>
-            <option>September</option>
+      {/* User Analytics Chart */}
+      <div className="mt-8 p-6 bg-white rounded-2xl shadow-lg">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-semibold text-gray-800">User Analytics</h3>
+          <select
+            className="border border-gray-300 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+          >
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
           </select>
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2} dot={{ r: 4 }} />
-          </LineChart>
-        </ResponsiveContainer>
+       <ResponsiveContainer width="100%" height={350}>
+        <LineChart data={userData.length > 0 ? userData : [{ name: "", value: 0 }]}>
+          <XAxis dataKey="name" stroke="#6b7280" />
+          <YAxis stroke="#6b7280" />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="#3b82f6"
+            strokeWidth={3}
+            dot={{ r: 5, fill: "#3b82f6" }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
       </div>
+
+
+
+      {/* Doctor Analytics Chart */}
+      <div className="mt-8 p-6 bg-white rounded-2xl shadow-lg">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-semibold text-gray-800">Doctor Analytics</h3>
+          <select
+            className="border border-gray-300 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            value={doctorFilter}
+            onChange={(e) => setDoctorFilter(e.target.value)}
+          >
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+       <ResponsiveContainer width="100%" height={350}>
+        <LineChart data={doctorData.length > 0 ? doctorData : [{ name: "", value: 0 }]}>
+          <XAxis dataKey="name" stroke="#6b7280" />
+          <YAxis stroke="#6b7280" />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="#3b82f6"
+            strokeWidth={3}
+            dot={{ r: 5, fill: "#3b82f6" }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      </div>
+
+
     </div>
   );
 };
 
 export default AdminDashboard;
-
-
-
- 

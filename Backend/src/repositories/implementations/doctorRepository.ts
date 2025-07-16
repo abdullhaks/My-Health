@@ -66,6 +66,20 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
                 console.error("Error verifying doctor:", error);
                 throw new Error("Failed to verify doctor with this email.");
             }
+        };
+
+
+         async aggregate(pipeline: any[]): Promise<any> {
+            try {
+                const resp = await this._doctorModel.aggregate(pipeline);
+                console.log("pipe line is .....",pipeline)
+                console.log("resp is .....",resp)
+            return resp;
+
+            } catch (error) {
+            console.error("Error in aggregate:", error);
+            throw new Error("Failed to perform aggregation");
+            }
         }
         
 

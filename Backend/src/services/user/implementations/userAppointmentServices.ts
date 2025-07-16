@@ -91,7 +91,7 @@ async walletPayment(data:Partial<IAppointment>):Promise<IAppointment> {
 
 console.log("data is ",data);
 const doctor = await this._doctorRepository.findOne({_id:data.doctorId});
-
+console.log("doctor is ....",doctor);
 if(!doctor){
   throw new Error("Wallet payment failed")
 };
@@ -104,6 +104,8 @@ if (typeof data.fee !== "number") {
   throw new Error("Fee is required for wallet payment");
 }
 const userUpdate = await this._userRepository.update(data.userId, { $inc: { walletBalance: -data.fee } });
+
+console.log("updated user is ......",userUpdate);
 
     data.doctorName= doctor?.fullName;
     data.doctorCategory= doctor?.category;

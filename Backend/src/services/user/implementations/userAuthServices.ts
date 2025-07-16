@@ -1,5 +1,6 @@
 import IUserAuthService from "../interfaces/IUserAuthServices";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
 import { IUser } from "../../../dto/userDTO";
 import { IUserResponse } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
@@ -33,7 +34,11 @@ const transporter = nodemailer.createTransport({
 @injectable()
 export default class UserAuthService implements IUserAuthService {
 
-    constructor(@inject("IUserRepository") private _userRepository:IUserRepository){
+    constructor(
+      @inject("IUserRepository") private _userRepository:IUserRepository,
+      @inject("IAnalyticsRepository") private _analyticsRepository:IAnalyticsRepository,
+  
+  ){
 
     }
 
@@ -192,6 +197,12 @@ export default class UserAuthService implements IUserAuthService {
         }
 
         const validateUser = await this._userRepository.verifyUser(email);
+        if(!validateUser){
+          throw new Error ("otp verification failed")
+        };
+
+        const reslt = await this._analyticsRepository.uptadeOneWithUpsert({dataSet:"1"},{ $inc: { totalUsers:1} });
+        console.log("udpate result is ...",reslt)
 
         console.log("User verified: ", validateUser);
 

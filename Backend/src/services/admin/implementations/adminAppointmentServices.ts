@@ -20,8 +20,7 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
       
     ){
-
-
+    
     }
 
  

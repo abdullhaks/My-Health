@@ -5,6 +5,7 @@ import IAdminUserCtrl from "../../controllers/admin/interfaces/IUserCtrl";
 import IAdminDoctorCtrl from "../../controllers/admin/interfaces/IDoctorCtrl";
 import IAdminProductCtrl from "../../controllers/admin/interfaces/IProductCtrl";
 import IAdminAppointmentController from "../../controllers/admin/interfaces/IAppointmentCtrl";
+import IAdminAnalyticsController from "../../controllers/admin/interfaces/IAnalyticsCtrl";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 
 
@@ -15,6 +16,7 @@ const userCtrl = container.get<IAdminUserCtrl>("IAdminUserCtrl");
 const doctorCtrl = container.get<IAdminDoctorCtrl>("IAdminDoctorCtrl");
 const productCtrl = container.get<IAdminProductCtrl>("IAdminProductCtrl");
 const appointmentCtrl = container.get<IAdminAppointmentController>("IAdminAppointmentController");
+const analyticsCtrl = container.get<IAdminAnalyticsController>("IAdminAnalyticsController");
 
 
 adminRoutes.post("/login",(req,res)=>authCtrl.adminLogin(req,res));
@@ -52,6 +54,9 @@ adminRoutes.post("/createSubscription",verifyAccessTokenMidleware("admin"),(req,
 
 adminRoutes.get("/getAppointments",verifyAccessTokenMidleware("admin"),(req,res)=>appointmentCtrl.getAppointments(req,res));
 
+adminRoutes.get("/getUserAnalytics/:filter",verifyAccessTokenMidleware("admin"),(req,res)=>analyticsCtrl.getUserAnalytics(req,res));
+adminRoutes.get("/getDoctorAnalytics/:filter",verifyAccessTokenMidleware("admin"),(req,res)=>analyticsCtrl.getDoctorAnalytics(req,res));
+adminRoutes.get("/getTotalAnalytics",verifyAccessTokenMidleware("admin"),(req,res)=>analyticsCtrl.getTotalAnalytics(req,res));
 
 
 export default adminRoutes; 

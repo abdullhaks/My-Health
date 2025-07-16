@@ -33,7 +33,7 @@ const AdminAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(5);
+  const [limit] = useState(2);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     status: "",
@@ -73,14 +73,15 @@ const AdminAppointments = () => {
       title: "Patient",
       dataIndex: "userName",
       key: "userName",
-      render: (text: string, record: Appointment) => `${text} (${record.userEmail})`,
+      render: (text: string, record: Appointment) => `${record.userName}`,
     },
     {
       title: "Doctor",
       dataIndex: "doctorName",
       key: "doctorName",
-      render: (text: string, record: Appointment) => `${text} (${record.doctorCategory})`,
+      render: (text: string, record: Appointment) => `Dr.${record.doctorName}`,
     },
+
     {
       title: "Date & Time",
       dataIndex: "date",
@@ -88,18 +89,21 @@ const AdminAppointments = () => {
       render: (text: string, record: Appointment) =>
         `${moment(record.date).format("MMM DD, YYYY")} ${moment(record.start).format("h:mm A")}`,
     },
+
     {
       title: "Duration",
       dataIndex: "duration",
       key: "duration",
       render: (duration: number) => `${duration} mins`,
     },
+
     {
       title: "Fee",
       dataIndex: "fee",
       key: "fee",
-      render: (fee: number) => `$${fee}`,
+      render: (fee: number) => `Rs ${fee}`,
     },
+
     {
       title: "Payment Status",
       dataIndex: "paymentStatus",
