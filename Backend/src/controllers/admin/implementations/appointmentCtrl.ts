@@ -6,6 +6,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 
 
+
 injectable()
 
 export default class AdminAppointmentController implements IAdminAppointmentController {
@@ -18,7 +19,7 @@ export default class AdminAppointmentController implements IAdminAppointmentCont
         this._appointmentService = AdminAppointmentService;
     };
 
- async getAppointments(req: Request, res: Response): Promise<any> {
+ async getAppointments(req: Request, res: Response): Promise<void> {
     try {
       const { page, limit, status, doctorCategory, startDate, endDate } = req.query;
 

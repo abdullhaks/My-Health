@@ -17,7 +17,7 @@ export default class UserProfileController implements IUserProfileCtrl {
     };
 
 
-    async updateProfile(req: Request, res: Response): Promise<any> {
+    async updateProfile(req: Request, res: Response): Promise<void> {
         try {
            console.log("user data is ",req.body);
            console.log("user id is ",req.params.id);
@@ -31,7 +31,7 @@ export default class UserProfileController implements IUserProfileCtrl {
             const userId = req.params.id;
             const result = await this._profileService.updateProfile(userId,userData);
 
-            return res.status(HttpStatusCode.OK).json(result);
+             res.status(HttpStatusCode.OK).json(result);
         }catch (error) {
             console.log(error);
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
@@ -40,7 +40,7 @@ export default class UserProfileController implements IUserProfileCtrl {
     };
 
 
-    async updateDp (req:Request,res:Response):Promise<any> {
+    async updateDp (req:Request,res:Response):Promise<void> {
 
         try{
             const { id } = req.params;
@@ -65,7 +65,7 @@ export default class UserProfileController implements IUserProfileCtrl {
     };
 
 
-    async changePassword(req:Request,res:Response):Promise<any>{
+    async changePassword(req:Request,res:Response):Promise<void>{
 
         try{
             const {id} = req.params;
@@ -75,10 +75,11 @@ export default class UserProfileController implements IUserProfileCtrl {
             const response = await this._profileService.changePassword(id,data);
 
             if(!response){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "password changing has been failed" });
+             res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "password changing has been failed" });
+             return
             };
 
-            return res.status(HttpStatusCode.OK).json({msg:"password changed"})
+             res.status(HttpStatusCode.OK).json({msg:"password changed"})
 
         }catch(error){
             console.log(error);

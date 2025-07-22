@@ -1,11 +1,10 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { FiSend, FiCheck, FiCheckCircle, FiX } from "react-icons/fi";
 import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getUserConversations, getUserMessages ,directFileUpload} from "../../api/user/userApi";
+import { getUserConversations, getUserMessages, directFileUpload } from "../../api/user/userApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
@@ -17,7 +16,7 @@ interface Message {
   senderId: string;
   content: string;
   type: "text" | "file";
-  fileName?: string; // Added for file display
+  fileName?: string;
   timestamp: string;
   readBy: string[];
   status: "sent" | "delivered" | "read";
@@ -49,7 +48,7 @@ const UserChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const hasInitializedConversation = useRef(false);
@@ -292,7 +291,7 @@ const UserChat = () => {
   const handleCancelFile = () => {
     setDocMessage(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset file input
+      fileInputRef.current.value = "";
     }
   };
 
@@ -302,14 +301,11 @@ const UserChat = () => {
     let messageData: any;
     let tempMessage: Message;
 
-    // setLoading(true);
-
     try {
       if (docMessage) {
-
         const formData = new FormData();
         formData.append("doc", docMessage);
-        formData.append("location","chatDoc")
+        formData.append("location", "chatDoc");
         const uploadResult = await directFileUpload(formData);
         if (!uploadResult?.url) {
           throw new Error("Failed to upload file");
@@ -329,7 +325,7 @@ const UserChat = () => {
           senderId: userId,
           content: uploadResult.url,
           type: "file",
-          fileName: docMessage.name, // Include fileName in tempMessage
+          fileName: docMessage.name,
           timestamp: new Date().toISOString(),
           readBy: [userId],
           status: "sent",
@@ -358,26 +354,14 @@ const UserChat = () => {
       setNewMessage("");
       setDocMessage(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = ""; // Reset file input after sending
+        fileInputRef.current.value = "";
       }
-
-      // Send message to server
-      // const response = await sendDoctorMessage(messageData);
-      // setMessages((prev) =>
-      //   prev.map((msg) =>
-      //     msg._id === tempMessage._id
-      //       ? { ...tempMessage, ...response.data, status: "sent" }
-      //       : msg
-      //   )
-      // );
 
       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
     } catch (error: any) {
       console.error("Message send failed:", error);
       message.error(error.response?.data?.message || "Failed to send message");
       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
-    } finally {
-      // setLoading(false);
     }
   };
 
@@ -630,19 +614,16 @@ const UserChat = () => {
             </div>
 
             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
-              <label className="cursor-pointer">
-                <IoDocumentAttachOutline
-                  className="text-xl text-gray-500 hover:text-gray-700"
-                  onClick={() => fileInputRef.current?.click()}
-                />
-                <input
-                  id="docMessageInput"
-                  type="file"
-                  name="docMessage"
-                  className="hidden"
-                  ref={fileInputRef} // Attach ref to input
-                  onChange={handleFileChange}
-                />
+              <input
+                id="docMessageInput"
+                type="file"
+                name="docMessage"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+              <label htmlFor="docMessageInput" className="cursor-pointer">
+                <IoDocumentAttachOutline className="text-xl text-gray-500 hover:text-gray-700" />
               </label>
 
               {docMessage && (
@@ -695,7 +676,6 @@ const UserChat = () => {
 };
 
 export default UserChat;
-
 
 
 {/* <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">

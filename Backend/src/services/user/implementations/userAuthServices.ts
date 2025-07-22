@@ -19,8 +19,6 @@ import { IResponseDTO } from "../../../dto/commonDTO";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
 console.log("User auth service is running....");
-console.log("NODE_ENV: ", process.env.EMAIL_USER);
-console.log("NODE_ENV: ", process.env.EMAIL_PASS);
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",

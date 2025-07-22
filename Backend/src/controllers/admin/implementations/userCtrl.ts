@@ -14,7 +14,7 @@ export default class AdminUserController implements IAdminUserCtrl {
     this._adminService = AdminUserService;
   }
 
-  async getUsers(req: Request, res: Response): Promise<any> {
+  async getUsers(req: Request, res: Response): Promise<void> {
     try {
       const { page, search, limit } = req.query;
       console.log("reqest.params from get users...", search, page, limit);
@@ -29,18 +29,18 @@ export default class AdminUserController implements IAdminUserCtrl {
       );
 
       if (!result) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "fetching users has been fialed " });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "fetching users has been fialed " });
       }
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res
+       res
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
         .json({ msg: "Envalid credentials" });
     }
   }
 
-  async block(req: Request, res: Response): Promise<any> {
+  async block(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -51,18 +51,18 @@ export default class AdminUserController implements IAdminUserCtrl {
       console.log("resposne form user blocking ctrl..", result);
 
       if (!result) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
       }
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res
+       res
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
         .json({ msg: "Envalid credentials" });
     }
   }
 
-  async unblock(req: Request, res: Response): Promise<any> {
+  async unblock(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -73,12 +73,12 @@ export default class AdminUserController implements IAdminUserCtrl {
       console.log("resposne form user blocking ctrl..", result);
 
       if (!result) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "blocking users has been fialed " });
       }
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res
+       res
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
         .json({ msg: "Envalid credentials" });
     }

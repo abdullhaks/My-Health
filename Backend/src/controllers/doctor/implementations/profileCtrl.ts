@@ -16,7 +16,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
   }
 
 
-      async createCheckoutSession(req: Request, res: Response): Promise<any> {
+      async createCheckoutSession(req: Request, res: Response): Promise<void> {
         const { priceId, metadata } = req.body;
       
         // Determine redirect paths based on role
@@ -34,7 +34,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
       //   mode: "subscription", // or 'payment' for one-time
       //   success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       //   cancel_url: `${process.env.CLIENT_URL}/payment-cancelled`,
-      //   metadata, // pass any related data
+      //   metadata, // pass void related data
       // });
 
         try {
@@ -47,20 +47,21 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
           });
 
           if(!session){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({meg:"make payment failed"})
+             res.status(HttpStatusCode.BAD_REQUEST).json({meg:"make payment failed"})
+             return;
           }
       
           console.log("Session details:", session);
           console.log("i am here");
-          return res.status(HttpStatusCode.OK).json({ url: session.url });
+           res.status(HttpStatusCode.OK).json({ url: session.url });
         } catch (err) {
           console.error("Stripe error:", err);
-          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Payment session creation failed" });
+           res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Payment session creation failed" });
         }
       };
 
 
-      async verifyingSubscription(req: Request, res: Response): Promise<any>{
+      async verifyingSubscription(req: Request, res: Response): Promise<void>{
 
         const {sessionId} = req.body;
         console.log("sessoin id is ...",sessionId);
@@ -69,18 +70,18 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
           const response = await this._doctorService.verifySubscription(sessionId)
 
-          return res.status(HttpStatusCode.OK).json(response);
+           res.status(HttpStatusCode.OK).json(response);
 
         }catch(error){
           console.error("Stripe error:", error);
-          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Subscription verification failed" });
+           res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Subscription verification failed" });
         }
 
       };
 
 
 
-      async updateDp (req:Request,res:Response):Promise<any> {
+      async updateDp (req:Request,res:Response):Promise<void> {
 
         try{
             const { id } = req.params;
@@ -105,7 +106,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
     };
 
 
-       async updateProfile(req: Request, res: Response): Promise<any> {
+       async updateProfile(req: Request, res: Response): Promise<void> {
         try {
            console.log("user data is ",req.body);
            console.log("user id is ",req.params.id);
@@ -123,7 +124,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
             const userId = req.params.id;
             const result = await this._doctorService.updateProfile(userId,userData);
 
-            return res.status(HttpStatusCode.OK).json(result);
+             res.status(HttpStatusCode.OK).json(result);
         }catch (error) {
             console.log(error);
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });

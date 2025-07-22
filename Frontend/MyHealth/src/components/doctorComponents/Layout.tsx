@@ -3,7 +3,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUserFriends, FaCalendarCheck, FaComments, FaChartBar,
   FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight,
-  FaSearch, FaBell, FaEnvelope,FaCalendarAlt,FaUser
+  FaSearch, FaBell, FaEnvelope,FaCalendarAlt,FaUser,FaBlog
 } from "react-icons/fa";
 import { BiSolidAnalyse } from "react-icons/bi";
 import { GiRoyalLove } from "react-icons/gi"; 
@@ -71,11 +71,8 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "Report Analysis", path: "/doctor/report-analysis", icon: <BiSolidAnalyse />,premium: true },
     { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
     { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
-    {
-      name: "Chat",
-      path: "/doctor/chat",
-      icon: <FaComments />,premium: true
-    },
+    { name: "Chat", path: "/doctor/chat",icon: <FaComments />,premium: true},
+    { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
 
   ];

@@ -11,48 +11,53 @@ export default class DoctorReportAnalyisController implements IDoctorReportAnaly
     private _ReportAnalyisService: IDoctorReportAnalysisService
   ) {}
 
-async getReports (req:Request,res:Response):Promise<any>{
+async getReports (req:Request,res:Response):Promise<void>{
     try{
         const doctorId =  req.query.doctorId;
         if(doctorId){
         const response = await this._ReportAnalyisService.getReports(doctorId.toString());
-        return res.status(HttpStatusCode.OK).json(response);
+        res.status(HttpStatusCode.OK).json(response);
+        return 
         }
-        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+        res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+        return 
 
 
     }catch(error){
         console.log("error in get analysis Reports",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get analysis report failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get analysis report failed"});
+         return
     }
 };
 
-async submitAnalysisReports (req:Request,res:Response):Promise<any>{
+async submitAnalysisReports (req:Request,res:Response):Promise<void>{
     try{
         const { analysisId, result } = req.body;
         if(!analysisId || !result){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             return
         }
         const response = await this._ReportAnalyisService.submitAnalysisReports(analysisId,result);
 
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
     }catch(error){
         console.log("error in submit analysis Reports",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"submit analysis report failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"submit analysis report failed"});
     }
   };
 
-  async cancelAnalysisReports (req:Request,res:Response):Promise<any>{
+  async cancelAnalysisReports (req:Request,res:Response):Promise<void>{
     try{
         const { analysisId,userId,fee } = req.body;
         if(!analysisId){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             return
         }
         const response = await this._ReportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
     }catch(error){
         console.log("error in cancel analysis Reports",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"cancel analysis report failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"cancel analysis report failed"});
     }
   }
 

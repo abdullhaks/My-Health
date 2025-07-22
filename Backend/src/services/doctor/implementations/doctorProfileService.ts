@@ -20,8 +20,7 @@ import { getSignedImageURL, uploadFileToS3 } from "../../../middlewares/common/u
 import IPaymentRepository from "../../../repositories/interfaces/IPaymentRepository";
 
 console.log("User auth service is running....");
-console.log("NODE_ENV: ", process.env.EMAIL_USER);
-console.log("NODE_ENV: ", process.env.EMAIL_PASS);
+
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",

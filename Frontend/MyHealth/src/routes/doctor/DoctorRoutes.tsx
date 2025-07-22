@@ -20,6 +20,10 @@ import DoctorVideoCall from "../../components/doctorComponents/DoctorVideoCall";
 import VideoCall from "../../sharedComponents/VideoCall";
 import { DoctorReportAnalysis } from "../../components/doctorComponents/DoctorReportAnalysis";
 import DoctorSubscriptionPlans from "../../components/doctorComponents/DoctorSubscription";
+import DoctorBlogs from "../../components/doctorComponents/DoctorBlogs";
+import DoctorBlogEditAndCreate from "../../components/doctorComponents/DoctorBlogEditAndCreate";
+import DoctorBlogDetails from "../../components/doctorComponents/DoctorBlog";
+import DoctorAdvertisementCreate from "../../components/doctorComponents/DoctorAdvertisementCreation";
 
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
@@ -51,6 +55,10 @@ const DoctorRoutes = () => {
           <Route path="video-call/:appointmentId" element={<VideoCall role="doctor" />} />
           <Route path="report-analysis" element={< DoctorReportAnalysis/>} />
           <Route path="plans" element={< DoctorSubscriptionPlans/>} />
+          <Route path="blogs" element={< DoctorBlogs/>} />
+          <Route path="blog-create-edit" element={< DoctorBlogEditAndCreate/>} />
+          <Route path="blog" element={< DoctorBlogDetails/>} />
+          <Route path="advertisement-create" element={< DoctorAdvertisementCreate/>} />
           
 
         </Route>

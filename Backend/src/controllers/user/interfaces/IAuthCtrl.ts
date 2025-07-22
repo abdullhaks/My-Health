@@ -3,7 +3,7 @@ import { NextFunction,Request,Response } from "express";
 export default interface IUserAuthCtrl{
     userLogin(req:Request,res:Response):Promise<void>
 
-    userLogout(req:Request,res:Response):Promise<any>
+    userLogout(req:Request,res:Response):Promise<void>
 
     userSignup(req:Request,res:Response,next:NextFunction):Promise<void>
 
@@ -21,9 +21,9 @@ export default interface IUserAuthCtrl{
 
     refreshToken(req:Request,res:Response):Promise<void>
 
-    googleLoginRedirect (req: Request, res: Response): Promise<any>
+    googleLoginRedirect (req: Request, res: Response): Promise<void>
 
-    googleCallback (req: Request, res: Response):Promise <any>
+    googleCallback (req: Request, res: Response):Promise <void>
 
-    getMe(req:Request,res:Response):Promise<any>
+    getMe(req:Request,res:Response):Promise<void>
 }

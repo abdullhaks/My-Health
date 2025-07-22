@@ -10,16 +10,22 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IAppointmentDocument } from "../../../entities/appointmentEntities";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IReportAnalysisRepository from "../../../repositories/interfaces/IReportAnalysisRepository";
+import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
+import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
+
+
 
 @injectable()
 export default class PaymentService implements IPaymentService {
   constructor(
-    @inject("IPaymentRepository")
-    private _paymentRepository: IPaymentRepository,
+    @inject("IPaymentRepository") private _paymentRepository: IPaymentRepository,
     @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository,
     @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
     @inject("IUserRepository") private _userRepository:IUserRepository,
-    @inject("IReportAnalysisRepository") private _reportAnalysisRepository: IReportAnalysisRepository
+    @inject("IReportAnalysisRepository") private _reportAnalysisRepository: IReportAnalysisRepository,
+    @inject("IAnalyticsRepository") private _analyticsRepository: IAnalyticsRepository,
+    @inject("ITransactionRepository") private _transactionRepository: ITransactionRepository,
+
 
   ) {}
 
@@ -32,7 +38,7 @@ export default class PaymentService implements IPaymentService {
       
 
       // console.log("event is..................", event);
-      // console.log("session is..................", session);
+      console.log("session is..................", session);
 
       const metadata = session.metadata;
 
@@ -74,6 +80,13 @@ export default class PaymentService implements IPaymentService {
 
             var tempDate = new Date(metadata.start).toISOString().split("T")[0];
 
+            var invoiceUrl: string | null | undefined 
+
+            const invoice = await stripe.invoices.retrieve(session.invoice as string);
+            if(invoice){
+            invoiceUrl = invoice.hosted_invoice_url
+            }
+
             const appointmentData: Partial<IAppointmentDocument> = {
               userId: metadata.userId,
               doctorId: metadata.doctorId,
@@ -88,12 +101,24 @@ export default class PaymentService implements IPaymentService {
               fee: parseInt(metadata.fee),
               slotId: metadata.slotId,
               stripeSessionId: session.id,
+              invoice:invoiceUrl || "",
               paymentType: "stripe",
               paymentStatus: "completed",
               appointmentStatus: "booked",
             };
 
+            const updateAnalytics = await this._analyticsRepository.uptadeOneWithUpsert({dataSet:"1"},{ $inc: { totalRevenue: parseInt(metadata.fee)} });
+            const transaction = await this._transactionRepository.create({
+                      from:"user",
+                      to:"admin",
+                      method:"stripe",
+                      amount:parseInt(metadata.fee),
+                      paymentFor:"appointment",
+                      transactionId:session.id,
+                      invoice:invoiceUrl || "",
+                      doctorId:metadata.doctorId.toString(),
 
+            })
 
           const appointment = await this._appointmentsRepository.create(
               appointmentData

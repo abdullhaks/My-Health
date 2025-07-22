@@ -60,7 +60,9 @@ export const ROUTES = {
     directFileUpload: "/doctor/directFileUpload",
     cancelAnalysisReports: "/doctor/cancelAnalysisReports",
     getSubscriptions: "/doctor/getSubscriptions",
-
+    getBlogs: "/doctor/getBlogs",
+    createBlog: "/doctor/blog",
+    createAdvertisement: "/doctor/advertisement"
     
 
   },
@@ -93,7 +95,9 @@ export const ROUTES = {
     updateSubscription: "/admin/updateSubscription",
     getUserAnalytics:(filter:string) => `/admin/getUserAnalytics/${filter}`,
     getDoctorAnalytics:(filter:string) => `/admin/getDoctorAnalytics/${filter}`,
-    getTotalAnalytics : "/admin/getTotalAnalytics"
+    getTotalAnalytics : "/admin/getTotalAnalytics",
+    getTransactions : "/admin/getTransactions",
+    
     
   },
   

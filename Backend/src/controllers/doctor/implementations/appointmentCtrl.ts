@@ -16,7 +16,7 @@ export default class DoctorAppointmentController implements IDoctorAppointmentCo
         this._appointmentService = DoctorAppointmentService;
     };
 
-async getAppointments (req: Request, res: Response): Promise<any> {
+async getAppointments (req: Request, res: Response): Promise<void> {
 try{
   const doctorId = req.query.doctorId;
   console.log("doctor id is///",doctorId);

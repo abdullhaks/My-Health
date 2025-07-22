@@ -11,6 +11,7 @@ import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
 import { useDispatch } from "react-redux";
 import { logoutAdmin } from "../../redux/slices/adminSlices";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
 
 interface NavbarProps {
   children: React.ReactNode;
@@ -77,6 +78,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Doctors", path: "/admin/doctors", icon: <FaUserMd /> },
     { name: "Plans", path: "/admin/subscriptionPlans", icon: <FaStar /> },
     { name: "Appointments", path: "/admin/appointments", icon: <FaCalendarAlt /> },
+    { name: "Transactions", path: "/admin/transactions", icon: <FaMoneyBillTransfer /> },
   ];
 
   const renderMenuItems = (items: any) => {

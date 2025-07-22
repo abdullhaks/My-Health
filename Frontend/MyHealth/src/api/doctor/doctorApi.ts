@@ -324,3 +324,72 @@ export const getSubscriptions = async() => {
     throw error;
   }
 };
+
+
+export const getBlogs = async (authorId:string,page:number, limit:number)=>{
+    try{
+        const response = await doctorInstance.get(ROUTES.doctor.getBlogs,{
+      params: {
+        authorId,
+        page,
+        limit,
+      }});
+
+      console.log("response from frontend....",response);
+
+        return response.data.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
+
+export const createBlog = async (blogData:any)=>{
+    try{
+     
+        const response = await doctorInstance.post("/doctor/blog", blogData);
+
+        return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
+
+export const updateBlog = async (blogData:any)=>{
+    try{
+      console.log("blogdate from frndend...",blogData);
+      
+        // const response = await doctorInstance.post(ROUTES.doctor.createBlog,blogData);
+        // return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
+
+export const deleteBlog = async (blogId:any)=>{
+    try{
+      console.log("deleteBlog from frndend...",blogId);
+      
+        // const response = await doctorInstance.post(ROUTES.doctor.createBlog,blogData);
+        // return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
+
+
+export const createAdvertisement = async (AddData:any)=>{
+    try{
+      console.log("deleteBlog from frndend...",AddData);
+      
+        const response = await doctorInstance.post(ROUTES.doctor.createAdvertisement,AddData);
+        return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
+

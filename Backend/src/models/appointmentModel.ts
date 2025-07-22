@@ -53,6 +53,9 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       type: String,
       required: false,
     },
+    invoice:{
+      type:String
+    },
     userName: {
       type: String,
       required: true,

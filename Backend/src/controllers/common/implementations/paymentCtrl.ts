@@ -18,7 +18,7 @@ private _paymentService: IPaymentService;
   }
 
 
-  async stripeWebhookController (req:Request , res:Response):Promise<any>{
+  async stripeWebhookController (req:Request , res:Response):Promise<void>{
 
     const sig = req.headers["stripe-signature"] as string;
     let event: Stripe.Event;
@@ -33,19 +33,19 @@ private _paymentService: IPaymentService;
 
       const response =await this._paymentService.handleWebhookEvent(event)
 
-      if (response) return  res.status(HttpStatusCode.OK).json({ received: true })
-      else return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Webhook signature verification failed..." });
+      if (response)   res.status(HttpStatusCode.OK).json({ received: true })
+      else  res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Webhook signature verification failed..." });
 
     }catch(error){
       console.error("Webhook signature verification failed.", error);
-      return res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(error as Error).message}`);
+       res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(error as Error).message}`);
     }
   };
 
   
 
 
-  async createOneTimePaymentSession(req: Request, res: Response): Promise<any> {
+  async createOneTimePaymentSession(req: Request, res: Response): Promise<void> {
     const { amount, metadata } = req.body;
     console.log("Creating one-time payment session with amount:", amount, "and metadata:", metadata);
     
@@ -62,10 +62,10 @@ private _paymentService: IPaymentService;
       });
 
       console.log("One-time payment session:", session);
-      return res.status(HttpStatusCode.OK).json({ url: session.url });
+       res.status(HttpStatusCode.OK).json({ url: session.url });
     } catch (err) {
       console.error("Stripe one-time payment error:", err);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "One-time payment session creation failed" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "One-time payment session creation failed" });
     }
   }
 
@@ -82,48 +82,48 @@ private _paymentService: IPaymentService;
 
 
 
-export const stripeWebhookController = async (req: Request, res: Response):Promise<any> => {
-    const sig = req.headers["stripe-signature"] as string;
+// export const stripeWebhookController = async (req: Request, res: Response):Promise<void> => {
+//     const sig = req.headers["stripe-signature"] as string;
   
-    let event: Stripe.Event;
+//     var event: Stripe.Event;
   
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET!
-      );
-    } catch (err) {
-      console.error("Webhook signature verification failed.", err);
-      return res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(err as Error).message}`);
-    }
+//     try {
+//       event = stripe.webhooks.constructEvent(
+//         req.body,
+//         sig,
+//         process.env.STRIPE_WEBHOOK_SECRET!
+//       );
+//     } catch (err) {
+//       console.error("Webhook signature verification failed.", err);
+//        res.status(HttpStatusCode.BAD_REQUEST).send(`Webhook Error: ${(err as Error).message}`);
+//     }
   
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const metadata = session.metadata;
+//     if (event.type === "checkout.session.completed") {
+//       const session = event.data.object as Stripe.Checkout.Session;
+//       const metadata = session.metadata;
 
-      if (!metadata) {
-        console.error("Metadata is null or undefined.");
-        return res.status(HttpStatusCode.BAD_REQUEST).send("Invalid session metadata.");
-      }
+//       if (!metadata) {
+//         console.error("Metadata is null or undefined.");
+//          res.status(HttpStatusCode.BAD_REQUEST).send("Invalid session metadata.");
+//       }
 
-      switch (metadata.role) {
-        case "user":
-            console.log("session data after webhook event ",session);
+//       switch (metadata.role) {
+//         case "user":
+//             console.log("session data after webhook event ",session);
             
-        //   await handleUserPayment(session);
-          break;
-        case "doctor":
-            console.log("session data after webhook event ",session);
-        //   await handleDoctorPayment(session);
-          break;
-        case "admin":
-            console.log("session data after webhook event ",session);
-        //   await handleAdminPayment(session);
-          break;
-      }
-    }
+//         //   await handleUserPayment(session);
+//           break;
+//         case "doctor":
+//             console.log("session data after webhook event ",session);
+//         //   await handleDoctorPayment(session);
+//           break;
+//         case "admin":
+//             console.log("session data after webhook event ",session);
+//         //   await handleAdminPayment(session);
+//           break;
+//       }
+//     }
   
-    res.status(HttpStatusCode.OK).json({ received: true });
-  };
+//     res.status(HttpStatusCode.OK).json({ received: true });
+//   };
   

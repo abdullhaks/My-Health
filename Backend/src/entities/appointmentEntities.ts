@@ -11,10 +11,11 @@ export interface IAppointment {
   fee: number;
   appointmentStatus: "booked" | "cancelled" | "completed" | "pending";
   stripeSessionId?: string;
+  invoice?:string;
   userName: string;
   userEmail: string; 
   doctorName: string; 
-  doctorSpecialization: string; 
+  doctorSpecialization?: string; 
   paymentType: "stripe" | "wallet";
   paymentStatus: "pending" | "completed" | "failed" | "refunded";
   doctorCategory?: string; 

@@ -15,7 +15,7 @@ private _uploadService: IDirectDocUploadS3Service;
   };
 
 
-  async directUpload(req: Request, res: Response): Promise<any> {
+  async directUpload(req: Request, res: Response): Promise<void> {
    try {
       const file = req.file
 
@@ -24,7 +24,8 @@ private _uploadService: IDirectDocUploadS3Service;
       console.log("Request file:", req.file);
 
       if (!file) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: "No file uploaded" });
+        //  res.status(HttpStatusCode.BAD_REQUEST).json({ message: "No file uploaded" });
+        throw new Error("No file uploaded")
       };
 
       const allowedTypes = [
@@ -33,14 +34,24 @@ private _uploadService: IDirectDocUploadS3Service;
         "image/png",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "video/mp4",
+        "video/quicktime",               
+        "video/x-msvideo",               
+        "video/x-matroska",             
+        "video/webm",                    
+        "video/mpeg",                    
+        "video/3gpp",                  
+        "video/ogg"                      
       ];
       if (!allowedTypes.includes(file.mimetype)) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: `Unsupported file type: ${file.mimetype}` });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ message: `Unsupported file type: ${file.mimetype}` });
+         return;
       };
 
       const location = req.body.location ;
        if (!location) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ message: `files upload failed` });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ message: `files upload failed` });
+         return
       };
 
       const uploadResult = await this._uploadService.directUpload(file,location);

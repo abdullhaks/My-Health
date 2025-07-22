@@ -1,7 +1,6 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { FiSend, FiCheck, FiCheckCircle,FiX } from "react-icons/fi";
+import { FiSend, FiCheck, FiCheckCircle, FiX } from "react-icons/fi";
 import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
@@ -30,7 +29,7 @@ interface User {
 
 interface Conversation {
   _id: string;
-  members: [any]; 
+  members: { _id: string; name: string; avatar: string }[];
   lastMessage?: string;
 }
 
@@ -49,10 +48,8 @@ const DoctorChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [docMessage, setDocMessage] = useState<File | null>(null);
-  
-  
 
   const getAccessToken = async () => {
     try {
@@ -131,7 +128,7 @@ const DoctorChat = () => {
       if (!doctorId) return;
       setLoading(true);
       try {
-        const res = await getDoctorConversations(doctorId,"User");
+        const res = await getDoctorConversations(doctorId, "User");
         console.log("Fetched conversations:", res);
         setConversations(res);
       } catch (err) {
@@ -142,62 +139,38 @@ const DoctorChat = () => {
       }
     };
 
-    // Temporarily hardcoded users until /api/user/all is implemented
-    setUsers([
-      { _id: "6808e21a670e6cfc73176507", fullName: "Luthfi KS" },
-    ]);
+    setUsers([{ _id: "6808e21a670e6cfc73176507", fullName: "Luthfi KS" }]);
 
     if (doctorId) {
       fetchConversations();
     }
   }, [doctorId]);
 
- useEffect(() => {
-  if (!currentChat || !socketRef.current) return;
+  useEffect(() => {
+    if (!currentChat || !socketRef.current) return;
 
-  socketRef.current.emit("join", currentChat._id); // Join conversation room
+    socketRef.current.emit("join", currentChat._id);
 
-  const fetchMessages = async () => {
-    setLoading(true);
-    try {
-      const res = await getDoctorMessages(currentChat._id);
-      setMessages(res);
-      socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
-    } catch (err) {
-      console.error("Failed to fetch messages:", err);
-      message.error("Failed to fetch messages. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchMessages = async () => {
+      setLoading(true);
+      try {
+        const res = await getDoctorMessages(currentChat._id);
+        setMessages(res);
+        socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
+      } catch (err) {
+        console.error("Failed to fetch messages:", err);
+        message.error("Failed to fetch messages. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchMessages();
+    fetchMessages();
 
-  return () => {
-    socketRef.current?.emit("leave", currentChat._id); // Leave conversation room on cleanup
-  };
-}, [currentChat]);
-
-
-
-     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          if (file.size > 10 * 1024 * 1024) {
-            message.error("File size must be less than 10MB");
-            return;
-          }
-          setDocMessage(file);
-          setNewMessage("");
-        }
-      };
-    
-      const handleCancelFile = () => {
-        setDocMessage(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // Reset file input
-        }
-      };
+    return () => {
+      socketRef.current?.emit("leave", currentChat._id);
+    };
+  }, [currentChat]);
 
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
@@ -205,15 +178,14 @@ const DoctorChat = () => {
     const socket = socketRef.current;
 
     const handleMessage = (msg: Message) => {
-    if (msg.conversationId === currentChat._id) {
-      setMessages((prev) => {
-        // Avoid duplicates
-        if (prev.some((m) => m._id === msg._id)) return prev;
-        return [...prev, msg];
-      });
-      socket.emit("markSeen", { conversationId: msg.conversationId });
-    }
-  };
+      if (msg.conversationId === currentChat._id) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+        socket.emit("markSeen", { conversationId: msg.conversationId });
+      }
+    };
 
     const handleSeen = ({ conversationId, userId }: { conversationId: string; userId: string }) => {
       setMessages((prev) =>
@@ -224,7 +196,6 @@ const DoctorChat = () => {
         )
       );
     };
-
 
     const handleTyping = ({ userId, role, conversationId }: { userId: string; role: string; conversationId: string }) => {
       if (currentChat._id === conversationId) {
@@ -254,90 +225,93 @@ const DoctorChat = () => {
     };
   }, [currentChat, users]);
 
-   const handleSendMessage = async () => {
-     if (!currentChat || (!newMessage.trim() && !docMessage)) return;
- 
-     let messageData: any;
-     let tempMessage: Message;
- 
-     // setLoading(true);
- 
-     try {
-       if (docMessage) {
- 
-         const formData = new FormData();
-         formData.append("doc", docMessage);
-         formData.append("location","chatDoc")
-         const uploadResult = await directFileUpload(formData);
-         if (!uploadResult?.url) {
-           throw new Error("Failed to upload file");
-         }
- 
-         messageData = {
-           senderId: doctorId,
-           conversationId: currentChat._id,
-           type: "file",
-           content: uploadResult.url,
-           fileName: docMessage.name,
-         };
- 
-         tempMessage = {
-           _id: uuidv4(),
-           conversationId: currentChat._id,
-           senderId: doctorId,
-           content: uploadResult.url,
-           type: "file",
-           fileName: docMessage.name, // Include fileName in tempMessage
-           timestamp: new Date().toISOString(),
-           readBy: [doctorId],
-           status: "sent",
-         };
-       } else {
-         messageData = {
-           senderId: doctorId,
-           conversationId: currentChat._id,
-           type: "text",
-           content: newMessage,
-         };
- 
-         tempMessage = {
-           _id: uuidv4(),
-           conversationId: currentChat._id,
-           senderId: doctorId,
-           content: newMessage,
-           type: "text",
-           timestamp: new Date().toISOString(),
-           readBy: [doctorId],
-           status: "sent",
-         };
-       }
- 
-       // setMessages((prev) => [...prev, tempMessage]);
-       setNewMessage("");
-       setDocMessage(null);
-       if (fileInputRef.current) {
-         fileInputRef.current.value = ""; // Reset file input after sending
-       }
- 
-       // Send message to server
-       // const response = await sendDoctorMessage(messageData);
-       // setMessages((prev) =>
-       //   prev.map((msg) =>
-       //     msg._id === tempMessage._id
-       //       ? { ...tempMessage, ...response.data, status: "sent" }
-       //       : msg
-       //   )
-       // );
- 
-       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
-     } catch (error: any) {
-       console.error("Message send failed:", error);
-       message.error(error.response?.data?.message || "Failed to send message");
-       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
-     } finally {
-       // setLoading(false);
-     }
-   };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        message.error("File size must be less than 10MB");
+        return;
+      }
+      setDocMessage(file);
+      setNewMessage("");
+    }
+  };
+
+  const handleCancelFile = () => {
+    setDocMessage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!currentChat || (!newMessage.trim() && !docMessage)) return;
+
+    let messageData: any;
+    let tempMessage: Message;
+
+    try {
+      if (docMessage) {
+        const formData = new FormData();
+        formData.append("doc", docMessage);
+        formData.append("location", "chatDoc");
+        const uploadResult = await directFileUpload(formData);
+        if (!uploadResult?.url) {
+          throw new Error("Failed to upload file");
+        }
+
+        messageData = {
+          senderId: doctorId,
+          conversationId: currentChat._id,
+          type: "file",
+          content: uploadResult.url,
+          fileName: docMessage.name,
+        };
+
+        tempMessage = {
+          _id: uuidv4(),
+          conversationId: currentChat._id,
+          senderId: doctorId,
+          content: uploadResult.url,
+          type: "file",
+          fileName: docMessage.name,
+          timestamp: new Date().toISOString(),
+          readBy: [doctorId],
+          status: "sent",
+        };
+      } else {
+        messageData = {
+          senderId: doctorId,
+          conversationId: currentChat._id,
+          type: "text",
+          content: newMessage,
+        };
+
+        tempMessage = {
+          _id: uuidv4(),
+          conversationId: currentChat._id,
+          senderId: doctorId,
+          content: newMessage,
+          type: "text",
+          timestamp: new Date().toISOString(),
+          readBy: [doctorId],
+          status: "sent",
+        };
+      }
+
+      setNewMessage("");
+      setDocMessage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
+    } catch (error: any) {
+      console.error("Message send failed:", error);
+      message.error(error.response?.data?.message || "Failed to send message");
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+    }
+  };
 
   const handleCreateConversation = async () => {
     if (!selectedUser) {
@@ -372,33 +346,11 @@ const DoctorChat = () => {
     }, 3000);
   };
 
-  // const getUserDetails = (userId: string) => {
-  //   const user = users.find((u) => u._id === userId);
-  //   return {
-  //     name: user?.fullName || "Unknown User",
-  //     avatar: user?.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png",
-  //   };
-  // };
-
-  // const filteredConversations = conversations.filter((c) => {
-  //   console.log("Conversation:", c); // Debug log
-  //   if (!c.members || !Array.isArray(c.members)) {
-  //     console.warn("Invalid conversation, missing or invalid members:", c);
-  //     return false;
-  //   }
-  //   const otherUserId = c.members.find((id) => id !== doctorId);
-  //   if (!otherUserId) {
-  //     console.warn("No other user found in conversation:", c);
-  //     return false;
-  //   }
-  //   const { name } = getUserDetails(otherUserId);
-  //   return name.toLowerCase().includes(searchTerm.toLowerCase());
-  // });
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
- const formatMessageTime = (timestamp: string) => {
+
+  const formatMessageTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -433,6 +385,7 @@ const DoctorChat = () => {
       });
     }
   };
+
   const needsDateHeader = (currentMsg: Message, prevMsg?: Message) => {
     if (!prevMsg) return true;
     const currentDate = new Date(currentMsg.timestamp).setHours(0, 0, 0, 0);
@@ -481,32 +434,29 @@ const DoctorChat = () => {
             <div className="p-4 text-gray-500 text-sm">Loading conversations...</div>
           ) : (
             <ul className="divide-y divide-gray-200">
-              {conversations.map((c) => {
-                
-                return c.members.map((m)=>{
-                const { name, avatar } =m
-                return (
-                  <li
-                    key={c._id}
-                    className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
-                      currentChat?._id === c._id ? "bg-green-50" : ""
-                    }`}
-                    onClick={() => setCurrentChat(c)}
-                  >
-                    <img
-                      src={avatar}
-                      alt={name}
-                      className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-                      {/* <p className="text-xs text-gray-500 truncate">{c.lastMessage || "No messages yet"}</p> */}
-                    </div>
-                  </li>
-                );
-
+              {conversations.map((c) =>
+                c.members.map((m) => {
+                  const { name, avatar } = m;
+                  return (
+                    <li
+                      key={c._id}
+                      className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
+                        currentChat?._id === c._id ? "bg-green-50" : ""
+                      }`}
+                      onClick={() => setCurrentChat(c)}
+                    >
+                      <img
+                        src={avatar}
+                        alt={name}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
+                      </div>
+                    </li>
+                  );
                 })
-              })}
+              )}
             </ul>
           )}
         </div>
@@ -519,14 +469,12 @@ const DoctorChat = () => {
             {/* Chat Header */}
             <div className="bg-white border-b border-gray-200 p-4 flex items-center space-x-3 sticky top-0 z-5 shadow-sm">
               <img
-                src={currentChat.members[0].avatar|| "Unknown User"}
+                src={currentChat.members[0].avatar || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
                 alt={currentChat.members[0].name}
                 className="w-10 h-10 rounded-full object-cover border border-gray-200"
               />
               <div>
-                <p className="text-sm font-medium text-gray-900">
-                  {currentChat.members[0].name}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{currentChat.members[0].name}</p>
                 {typingUser && <p className="text-xs text-green-600">{typingUser}</p>}
               </div>
             </div>
@@ -546,70 +494,60 @@ const DoctorChat = () => {
               ) : (
                 <div className="space-y-2">
                   {messages.map((msg, index) => (
-                  <div key={msg._id}>
-                    {needsDateHeader(msg, messages[index - 1]) && (
-                      <div className="text-center my-4">
-                        <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
-                          {formatDateHeader(msg.timestamp)}
-                        </span>
-                      </div>
-                    )}
-                    <div
-                      className={`flex ${
-                        msg.senderId === doctorId ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`relative max-w-xs p-3 rounded-lg shadow-sm ${
-                          msg.senderId === doctorId
-                            ? "bg-green-500 text-white"
-                            : "bg-white text-gray-900"
-                        }`}
-                      >
-                        <div
-                          className={`absolute top-2 ${
-                            msg.senderId === doctorId ? "-right-2" : "-left-2"
-                          } w-0 h-0 border-t-8 border-t-transparent ${
-                            msg.senderId === doctorId
-                              ? "border-l-8 border-l-green-500"
-                              : "border-r-8 border-r-white"
-                          } border-b-8 border-b-transparent`}
-                        />
-                        {msg.type === "file" ? (
-                          <div className="flex items-center space-x-2">
-                            <IoDocumentAttachOutline className="text-lg" />
-                            <a
-                              href={msg.content}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm underline"
-                            >
-                              {msg.fileName || "Document"}
-                            </a>
-                          </div>
-                        ) : (
-                          <p className="text-sm">{msg.content}</p>
-                        )}
-                        <div className="flex items-center justify-end mt-1 space-x-1">
-                          <span className="text-xs text-gray-300">
-                            {formatMessageTime(msg.timestamp)}
+                    <div key={msg._id}>
+                      {needsDateHeader(msg, messages[index - 1]) && (
+                        <div className="text-center my-4">
+                          <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-full">
+                            {formatDateHeader(msg.timestamp)}
                           </span>
-                          {msg.senderId === doctorId && (
-                            <span className="flex items-center">
-                              {msg.status === "read" ? (
-                                <FiCheckCircle className="text-blue-500" size={14} />
-                              ) : msg.status === "delivered" ? (
-                                <FiCheck className="text-gray-300" size={14} />
-                              ) : (
-                                <FiCheck className="text-gray-300" size={14} />
-                              )}
-                            </span>
+                        </div>
+                      )}
+                      <div className={`flex ${msg.senderId === doctorId ? "justify-end" : "justify-start"}`}>
+                        <div
+                          className={`relative max-w-xs p-3 rounded-lg shadow-sm ${
+                            msg.senderId === doctorId ? "bg-green-500 text-white" : "bg-white text-gray-900"
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-2 ${
+                              msg.senderId === doctorId ? "-right-2" : "-left-2"
+                            } w-0 h-0 border-t-8 border-t-transparent ${
+                              msg.senderId === doctorId ? "border-l-8 border-l-green-500" : "border-r-8 border-r-white"
+                            } border-b-8 border-b-transparent`}
+                          />
+                          {msg.type === "file" ? (
+                            <div className="flex items-center space-x-2">
+                              <IoDocumentAttachOutline className="text-lg" />
+                              <a
+                                href={msg.content}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm underline"
+                              >
+                                {msg.fileName || "Document"}
+                              </a>
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.content}</p>
                           )}
+                          <div className="flex items-center justify-end mt-1 space-x-1">
+                            <span className="text-xs text-gray-300">{formatMessageTime(msg.timestamp)}</span>
+                            {msg.senderId === doctorId && (
+                              <span className="flex items-center">
+                                {msg.status === "read" ? (
+                                  <FiCheckCircle className="text-blue-500" size={14} />
+                                ) : msg.status === "delivered" ? (
+                                  <FiCheck className="text-gray-300" size={14} />
+                                ) : (
+                                  <FiCheck className="text-gray-300" size={14} />
+                                )}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
                   <div ref={messagesEndRef} />
                 </div>
               )}
@@ -617,35 +555,28 @@ const DoctorChat = () => {
 
             {/* Input Section */}
             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
-              <label className="cursor-pointer">
-              <IoDocumentAttachOutline
-                className="text-xl text-gray-500 hover:text-gray-700"
-                onClick={() => fileInputRef.current?.click()}
-              />
               <input
                 id="docMessageInput"
                 type="file"
                 name="docMessage"
                 className="hidden"
-                ref={fileInputRef} // Attach ref to input
+                ref={fileInputRef}
                 onChange={handleFileChange}
               />
-            </label>
+              <label htmlFor="docMessageInput" className="cursor-pointer">
+                <IoDocumentAttachOutline className="text-xl text-gray-500 hover:text-gray-700" />
+              </label>
 
-            {docMessage && (
-              <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
-                <IoDocumentAttachOutline className="text-gray-500" />
-                <span className="text-sm text-gray-700 ml-1">
-                  {docMessage.name}
-                </span>
-                <button
-                  onClick={handleCancelFile}
-                  className="ml-2 text-red-500 hover:text-red-700"
-                >
-                  <FiX size={16} />
-                </button>
-              </div>
-            )}
+              {docMessage && (
+                <div className="flex items-center bg-gray-100 rounded-lg px-2 py-1">
+                  <IoDocumentAttachOutline className="text-gray-500" />
+                  <span className="text-sm text-gray-700 ml-1">{docMessage.name}</span>
+                  <button onClick={handleCancelFile} className="ml-2 text-red-500 hover:text-red-700">
+                    <FiX size={16} />
+                  </button>
+                </div>
+              )}
+
               <input
                 type="text"
                 value={newMessage}
@@ -656,10 +587,12 @@ const DoctorChat = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                 placeholder="Type a message..."
                 className="flex-1 p-2.5 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                disabled={!!docMessage}
               />
               <button
                 onClick={handleSendMessage}
-                className="text-xl text-green-600 hover:text-green-700 transition-colors"
+                className={`text-xl ${loading ? "text-gray-400" : "text-green-600 hover:text-green-700"} transition-colors`}
+                disabled={loading}
               >
                 <FiSend />
               </button>
@@ -676,8 +609,6 @@ const DoctorChat = () => {
 };
 
 export default DoctorChat;
-
-
 
 {/* <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
   <BsEmojiSmile className="text-xl text-gray-500 cursor-pointer hover:text-gray-700" />

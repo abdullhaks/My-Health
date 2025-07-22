@@ -11,35 +11,37 @@ export default class UserReportAnalyisController implements IUserReportAnalysisC
     private _ReportAnalyisService: IUserReportAnalysisService
   ) {}
 
-async getReports (req:Request,res:Response):Promise<any>{
+async getReports (req:Request,res:Response):Promise<void>{
     try{
         const userId =  req.query.userId;
         if(userId){
         const response = await this._ReportAnalyisService.getReports(userId.toString());
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
+         return
         }
-        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+         res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
 
 
     }catch(error){
         console.log("error in get analysis Reports",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get analysis report failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get analysis report failed"});
     }
 };
 
 
 
-async cancelAnalysisReports (req:Request,res:Response):Promise<any>{
+async cancelAnalysisReports (req:Request,res:Response):Promise<void>{
     try{
         const { analysisId,userId,fee } = req.body;
         if(!analysisId){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+             return
         }
         const response = await this._ReportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
     }catch(error){
         console.log("error in cancel analysis Reports",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"cancel analysis report failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"cancel analysis report failed"});
     }
   }
 }

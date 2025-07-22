@@ -11,33 +11,34 @@ export default class DoctorSessionController implements IDoctorSessionCtrl {
     private _sessionService: IDoctorSessionService
   ) {}
 
-  async addSessions(req: Request, res: Response): Promise<any> {
+  async addSessions(req: Request, res: Response): Promise<void> {
     try {
       const { sessionData } = req.body;
       console.log("session data is ", sessionData);
 
       const response = await this._sessionService.addSessions(sessionData);
 
-      return res.status(HttpStatusCode.CREATED).json(response);
+       res.status(HttpStatusCode.CREATED).json(response);
     } catch (error) {
       console.error("error in add sessions :", error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "add sessions failed" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "add sessions failed" });
     }
   }
 
-async getSessions (req:Request,res:Response):Promise<any>{
+async getSessions (req:Request,res:Response):Promise<void>{
     try{
         const doctorId =  req.query.doctorId;
         if(doctorId){
         const response = await this._sessionService.getSessions(doctorId.toString());
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
+         return
         }
-        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+         res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
 
 
     }catch(error){
         console.log("error in get sessions",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
     }
 }
 

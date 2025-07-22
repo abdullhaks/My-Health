@@ -1,0 +1,61 @@
+import { IAdvertisementDocument } from "../entities/advertisementEntitites";
+import { model,Schema } from "mongoose";
+
+const advertisementSchema = new Schema<IAdvertisementDocument>(
+
+    {
+        author:{
+            type:String,
+            required:true
+        },
+        authorId:{
+            type:String,
+            required:true
+        },
+        location:{
+            type:Object,
+            required:true
+        },
+        tags:{
+            type:[String],
+            required:true
+        },
+        videoUrl:{
+            type:String,
+            required:true,
+        },
+        pack:{
+            type:String,
+            required:true
+        },
+        fee:{
+            type:Number,
+            required:true
+        },
+        views:{
+            type:Number,
+            required:true,
+            default:0
+        },
+        clicks:{
+            type:Number,
+            required:true,
+            default:0
+        },
+        expDate:{
+            type:Date,
+            required:true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now,
+        },
+
+
+    }
+
+);
+
+
+export default model<IAdvertisementDocument>("Advertisement",advertisementSchema);
+

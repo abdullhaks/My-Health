@@ -8,6 +8,7 @@ import IAppointmentsRepository from "../interfaces/IAppointmentsRepository";
 
 export default class AppointmentsRepository extends BaseRepository<IAppointmentDocument> implements IAppointmentsRepository{
 
+    
     constructor(
         @inject("appointmentModel") private _appointmentModel: any,
       

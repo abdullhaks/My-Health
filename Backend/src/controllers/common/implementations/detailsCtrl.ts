@@ -15,7 +15,7 @@ private _detailsService: IDetailsService;
   }
 
 
-  async getDoctor(req:Request,res:Response):Promise<any>{
+  async getDoctor(req:Request,res:Response):Promise<void>{
 
     try{
 
@@ -23,7 +23,7 @@ private _detailsService: IDetailsService;
         console.log("doctor id is ",doctorId);
       if (doctorId) {
       const response = await this._detailsService.getDoctor(doctorId.toString());
-        return  res.status(HttpStatusCode.OK).json(response);
+          res.status(HttpStatusCode.OK).json(response);
 
     };
 

@@ -16,7 +16,7 @@ export default class DirectDocUploadS3Service implements IDirectDocUploadS3Servi
       }
 
       const fileUrl: string = await uploadFileToS3(
-        file.buffer,
+        file.buffer, 
         file.originalname,
         location,
         file.mimetype

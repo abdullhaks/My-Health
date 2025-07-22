@@ -10,6 +10,9 @@ import sessionModel from "../models/sessionModel";
 import appointmentModel from "../models/appointmentModel";
 import reportAnalysisModel from "../models/reportAnalysisModel";
 import analyticsModel from "../models/analyticsModel";
+import transactionModel from "../models/transactionModel";
+import blogModel from "../models/blogModel";
+import advertisementModel from "../models/advertisementModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -36,6 +39,8 @@ import AdminAppointmentController from "../controllers/admin/implementations/app
 import IAdminAppointmentController from "../controllers/admin/interfaces/IAppointmentCtrl";
 import AdminAnalyticsContorller from "../controllers/admin/implementations/analyticsCtrl";
 import IAdminAnalyticsController from "../controllers/admin/interfaces/IAnalyticsCtrl";
+import AdminTransactionController from "../controllers/admin/implementations/transactionCtrl";
+import IAdminTransactionController from "../controllers/admin/interfaces/ITransactionCtrl";
 
 
 import DoctorAuthController from "../controllers/doctor/implementations/authCtrl";
@@ -50,6 +55,10 @@ import DoctorReportAnalysisController from "../controllers/doctor/implementation
 import IDoctorReportAnalysisCtrl from "../controllers/doctor/interfaces/IReportAnalysisCtrl";
 import DoctorPlansController from "../controllers/doctor/implementations/planCtrl";
 import IDoctorPlanCtrl from "../controllers/doctor/interfaces/IPlanCtrl";
+import DoctorBlogController from "../controllers/doctor/implementations/blogCtrl";
+import IDoctorBlogController from "../controllers/doctor/interfaces/IBlogCtrl";
+import IDoctorAdvertisementController from "../controllers/doctor/interfaces/IAdvertisementCtrl";
+import DoctorAdvertisementController from "../controllers/doctor/implementations/advertisementCtrl";
 
 
 
@@ -88,6 +97,10 @@ import AdminAppointmentService from "../services/admin/implementations/adminAppo
 import IAdminAppointmentsService from "../services/admin/interfaces/IAdminAppointmentServices";
 import AdminAnalyticsServices from "../services/admin/implementations/adminAnalyticsServices";
 import IAdminAnalyticsServices from "../services/admin/interfaces/IAdminAnalyticsServices";
+import AdminTransactionsService from "../services/admin/implementations/adminTransactionServices";
+import IAdminTransactionsService from "../services/admin/interfaces/IAdminTransactionServices";
+
+
 
 import DoctorAuthService from "../services/doctor/implementations/doctorAuthServices";
 import IDoctorAuthService from "../services/doctor/interfaces/IDoctorAuthServices";
@@ -99,6 +112,10 @@ import DoctorAppointmentService from "../services/doctor/implementations/doctorA
 import IDoctorAppointmentService from "../services/doctor/interfaces/IDoctorAppointmentService";
 import DoctorReportAnalysisService from "../services/doctor/implementations/doctorReportAnalysis";
 import IDoctorReportAnalysisService from "../services/doctor/interfaces/IDoctorReportAnalysis";
+import DoctorBlogService from "../services/doctor/implementations/doctorBlogServices";
+import IDoctorBlogService from "../services/doctor/interfaces/IDoctorBlogServices";
+import IDoctorAdvertisementService from "../services/doctor/interfaces/IDoctorAdvertisementServices";
+import DoctorAdvertisementService from "../services/doctor/implementations/doctorAdvertisementServices";
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -148,6 +165,16 @@ import IReportAnalysisRepository from "../repositories/interfaces/IReportAnalysi
 import AnalyticsRepository from "../repositories/implementations/analyticsRepository";
 import IAnalyticsRepository from "../repositories/interfaces/IAnalyticsRepository";
 
+import TransactionRepository from "../repositories/implementations/transactionRepositoty";
+import ITransactionRepository from "../repositories/interfaces/ITransactionRepository";
+
+import IBlogRepository from "../repositories/interfaces/IBlogRepository";
+import BlogsRepository from "../repositories/implementations/blogRepository";
+
+import IAdvertisementRepository from "../repositories/interfaces/IAdvertisementRepository";
+import AdvertisementRepository from "../repositories/implementations/advertisementRepositoty";
+
+
 
 //.................................................................................
 
@@ -165,6 +192,9 @@ container.bind("sessionModel").toConstantValue(sessionModel);
 container.bind("appointmentModel").toConstantValue(appointmentModel);
 container.bind("reportAnalysisModel").toConstantValue(reportAnalysisModel);
 container.bind("analyticsModel").toConstantValue(analyticsModel);
+container.bind("transactionModel").toConstantValue(transactionModel);
+container.bind("blogModel").toConstantValue(blogModel);
+container.bind("advertisementModel").toConstantValue(advertisementModel);
 
 //...................................................................
 
@@ -181,6 +211,8 @@ container.bind<IAdminDoctorCtrl>("IAdminDoctorCtrl").to(AdminDoctorController);
 container.bind<IAdminProductCtrl>("IAdminProductCtrl").to(AdminProductController);
 container.bind<IAdminAppointmentController>("IAdminAppointmentController").to(AdminAppointmentController);
 container.bind<IAdminAnalyticsController>("IAdminAnalyticsController").to(AdminAnalyticsContorller);
+container.bind<IAdminTransactionController>("IAdminTransactionController").to(AdminTransactionController);
+
 
 container.bind<IDoctorAuthCtrl>("IDoctorAuthCtrl").to(DoctorAuthController)
 container.bind<IDoctorProfileCtrl>("IDoctorProfileCtrl").to(DoctorProfileController);
@@ -188,6 +220,9 @@ container.bind<IDoctorSessionCtrl>("IDoctorSessionCtrl").to(DoctorSessionControl
 container.bind<IDoctorAppointmentController>("IDoctorAppointmentController").to(DoctorAppointmentController);
 container.bind<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl").to(DoctorReportAnalysisController);
 container.bind<IDoctorPlanCtrl>("IDoctorPlanCtrl").to(DoctorPlansController);
+container.bind<IDoctorBlogController>("IDoctorBlogController").to(DoctorBlogController);
+container.bind<IDoctorAdvertisementController>("IDoctorAdvertisementController").to(DoctorAdvertisementController);
+
 
 
 
@@ -216,6 +251,8 @@ container.bind<IAdminUserService>("IAdminUserService").to(AdminUserService);
 container.bind<IAdminDoctorService>("IAdminDoctorService").to(AdminDoctorService);
 container.bind<IAdminAppointmentsService>("IAdminAppointmentsService").to(AdminAppointmentService);
 container.bind<IAdminAnalyticsServices>("IAdminAnalyticsServices").to(AdminAnalyticsServices);
+container.bind<IAdminTransactionsService>("IAdminTransactionsService").to(AdminTransactionsService)
+
 
 
 container.bind<IDoctorAuthService>("IDoctorAuthService").to(DoctorAuthService);
@@ -223,6 +260,8 @@ container.bind<IDoctorProfileService>("IDoctorProfileService").to(DoctorProfileS
 container.bind<IDoctorSessionService>("IDoctorSessionService").to(DoctorSessionService);
 container.bind<IDoctorAppointmentService>("IDoctorAppointmentService").to(DoctorAppointmentService);
 container.bind<IDoctorReportAnalysisService>("IDoctorReportAnalysisService").to(DoctorReportAnalysisService);
+container.bind<IDoctorBlogService>("IDoctorBlogService").to(DoctorBlogService);
+container.bind<IDoctorAdvertisementService>("IDoctorAdvertisementService").to(DoctorAdvertisementService);
 
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
@@ -246,6 +285,9 @@ container.bind<ISessionRepository>("ISessionRepository").to(SessionRepository);
 container.bind<IAppointmentsRepository>("IAppointmentsRepository").to(AppointmentsRepository);
 container.bind<IReportAnalysisRepository>("IReportAnalysisRepository").to(ReportAnalysisRepository);
 container.bind<IAnalyticsRepository>("IAnalyticsRepository").to(AnalyticsRepository);
+container.bind<ITransactionRepository>("ITransactionRepository").to(TransactionRepository);
+container.bind<IBlogRepository>("IBlogRepository").to(BlogsRepository);
+container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(AdvertisementRepository);
 
 
 export default container;

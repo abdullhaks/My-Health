@@ -19,7 +19,7 @@ export default class UserAuthController implements IUserAuthCtrl {
     this._userService = UserAuthService;
   }
 
-  async userLogin(req: Request, res: Response): Promise<any> {
+  async userLogin(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -28,7 +28,8 @@ export default class UserAuthController implements IUserAuthCtrl {
       console.log("result is ", result);
 
       if (!result) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
+         return
       };
 
 
@@ -47,33 +48,34 @@ export default class UserAuthController implements IUserAuthCtrl {
           maxAge: 7 * 24 * 60 * 60 * 1000,
         }); 
 
-      return res.status(HttpStatusCode.OK).json({message:result.message,user:result.user});
+       res.status(HttpStatusCode.OK).json({message:result.message,user:result.user});
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
     }
   };
 
 
 
-  async getMe(req: Request, res: Response): Promise<any> {
+  async getMe(req: Request, res: Response): Promise<void> {
     try {
       const { userEmail } = req.cookies;
   
       console.log("user email from auth ctrl....",userEmail);
       if (!userEmail) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Unauthorized" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Unauthorized" });
+         return
       }
   
       const result = await this._userService.getMe(userEmail);
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async userLogout(req: Request, res: Response): Promise<any> {
+  async userLogout(req: Request, res: Response): Promise<void> {
     try {
 
         console.log("log out ............ ctrl....")
@@ -100,7 +102,7 @@ export default class UserAuthController implements IUserAuthCtrl {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<any> {
+  ): Promise<void> {
     try {
       const { fullName, email, password, confirmPassword } = req.body;
 
@@ -112,79 +114,81 @@ export default class UserAuthController implements IUserAuthCtrl {
 
       console.log("user  is ", user);
 
-      return res.status(HttpStatusCode.CREATED).json(user);
+       res.status(HttpStatusCode.CREATED).json(user);
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async verifyOtp(req: Request, res: Response): Promise<any> {
+  async verifyOtp(req: Request, res: Response): Promise<void> {
     try {
       const { otp, email } = req.body;
 
       console.log(`otp is ${otp} & email is ${email}`);
 
       const otpRecord = await this._userService.verifyOtp(email, otp);
-      return res.status(HttpStatusCode.OK).json({ otp, email });
+       res.status(HttpStatusCode.OK).json({ otp, email });
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async resentOtp(req: Request, res: Response): Promise<any> {
+  async resentOtp(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.query;
       if (!email || typeof email !== "string") {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
+         return
       }
 
       const result = await this._userService.resentOtp(email);
-      return res.status(HttpStatusCode.OK).json(result);
-    } catch (error: any) {
+       res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
       console.error(error);
-      return res
+       res
         .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-        .json({ msg: error.message || "Internal server error" });
+        .json({ msg: "Internal server error" });
     }
   }
 
-  async forgotPassword(req: Request, res: Response): Promise<any> {
+  async forgotPassword(req: Request, res: Response): Promise<void> {
     try {
       const email = req.query.email;
 
       if (typeof email !== "string") {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email must be provided " });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email must be provided " });
+         return
       }
       const result = await this._userService.forgotPassword(email);
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async getRecoveryPassword(req: Request, res: Response): Promise<any> {
+  async getRecoveryPassword(req: Request, res: Response): Promise<void> {
     try {
       const { email } = req.body;
       const resp = this._userService.forgotPassword(email);
 
-      return res.status(HttpStatusCode.OK).json(resp);
+       res.status(HttpStatusCode.OK).json(resp);
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async verifyRecoveryPassword(req: Request, res: Response): Promise<any> {
+  async verifyRecoveryPassword(req: Request, res: Response): Promise<void> {
     try {
       const { email, recoveryCode } = req.body;
 
       if (!email || !recoveryCode) {
-        return res
-          .status(HttpStatusCode.BAD_REQUEST)
+         res.status(HttpStatusCode.BAD_REQUEST)
           .json({ msg: "Email and recovery code are required" });
+          return
       }
 
       const isValid = await this._userService.verifyRecoveryPassword(
@@ -193,19 +197,20 @@ export default class UserAuthController implements IUserAuthCtrl {
       );
 
       if (!isValid) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Invalid recovery code" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Invalid recovery code" });
+         return
       }
 
-      return res
+       res
         .status(HttpStatusCode.OK)
         .json({ msg: "Recovery code verified successfully" });
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Internal server error" });
     }
   }
 
-  async resetPassword(req: Request, res: Response): Promise<any> {
+  async resetPassword(req: Request, res: Response): Promise<void> {
     try {
 
       console.log("body is from reser password ",req.body);
@@ -214,28 +219,31 @@ export default class UserAuthController implements IUserAuthCtrl {
       const { newPassword, confirmPassword } = req.body.formData;
 
       if(newPassword != confirmPassword){
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "invalid inputs" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "invalid inputs" });
+         return
       }
       const response = this._userService.resetPassword(email, newPassword);
 
       if(!response){
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "user not found" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "user not found" });
+         return
       };
       
-      return res.status(HttpStatusCode.OK).json({ msg:"password updated" });
+       res.status(HttpStatusCode.OK).json({ msg:"password updated" });
 
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   }
 
-  async refreshToken(req: Request, res: Response): Promise<any> {
+  async refreshToken(req: Request, res: Response): Promise<void> {
     try {
       const { userRefreshToken } = req.cookies;
 
       if (!userRefreshToken) {
-        return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
+         res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
+         return
       }
 
       const result = await this._userService.refreshToken(userRefreshToken);
@@ -243,7 +251,8 @@ export default class UserAuthController implements IUserAuthCtrl {
       console.log("result from ctrl is ...", result);
 
       if (!result) {
-        return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
+         res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
+         return
       }
 
       const {accessToken} = result
@@ -257,16 +266,16 @@ export default class UserAuthController implements IUserAuthCtrl {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      return res.status(HttpStatusCode.OK).json(result);
+       res.status(HttpStatusCode.OK).json(result);
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   };
 
 
 
-  async googleLoginRedirect (req: Request, res: Response): Promise<any>  {
+  async googleLoginRedirect (req: Request, res: Response): Promise<void>  {
     const redirectURI = "http://localhost:3000/api/user/google/callback";
     const clientId = process.env.GOOGLE_CLIENT_ID!;
     const scope = encodeURIComponent("profile email");
@@ -274,7 +283,7 @@ export default class UserAuthController implements IUserAuthCtrl {
     res.redirect(url);
   };
 
-  async googleCallback (req: Request, res: Response):Promise <any> {
+  async googleCallback (req: Request, res: Response):Promise <void> {
     const code = req.query.code as string;
   
     try {
@@ -314,7 +323,8 @@ export default class UserAuthController implements IUserAuthCtrl {
         // });
 
         console.log("no account with this email")
-        return res.status(HttpStatusCode.BAD_REQUEST).send("user not found..");
+         res.status(HttpStatusCode.BAD_REQUEST).send("user not found..");
+         return
       };
 
 

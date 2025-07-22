@@ -14,6 +14,7 @@ import AdminDoctors from "../../components/adminComponents/AdminDoctors";
 import AdminDoctorDetails from "../../components/adminComponents/AdminDoctorDetails";
 import AdminSubscriptions from "../../components/adminComponents/AdminSubscriptions";
 import AdminAppointments from "../../components/adminComponents/AdminAppointments";
+import AdminTransactions from "../../components/adminComponents/AdminTransactions";
 
 const UserRoutes = () => {
   return (
@@ -36,6 +37,8 @@ const UserRoutes = () => {
           <Route path="doctor/:id" element={<AdminDoctorDetails/>} />
           <Route path="/subscriptionPlans" element={<AdminSubscriptions/> } />
           <Route path="/appointments" element={<AdminAppointments/> } />
+          <Route path="/transactions" element={<AdminTransactions/> } />
+          
 
         </Route>
       </Route>

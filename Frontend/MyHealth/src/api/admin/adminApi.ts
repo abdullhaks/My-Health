@@ -284,6 +284,26 @@ export const getTotalAnalytics = async ()=>{
     }
 }
 
+export const getTransactions = async (page:number, limit:number,filters:any)=>{
+    try{
+
+        const response = await adminInstance.get(ROUTES.admin.getTransactions,{
+      params: {
+        page,
+        limit,
+        ...filters,
+      }});
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+};
+
+
+
 
 
 

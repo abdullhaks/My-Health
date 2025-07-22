@@ -15,7 +15,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
     this._doctorService = DoctorAuthService;
   }
 
-  async doctorLogin(req: Request, res:Response): Promise<any> {
+  async doctorLogin(req: Request, res:Response): Promise<void> {
     try {
       const { email, password } = req.body;
 
@@ -24,7 +24,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       console.log("result is ", result);
 
       if (!result) {
-        return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
+         res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
       };
 
       res.cookie("doctorRefreshToken", result.refreshToken, {
@@ -41,15 +41,15 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-      return res.status(HttpStatusCode.OK).json({message:result.message,doctor:result.doctor});
+       res.status(HttpStatusCode.OK).json({message:result.message,doctor:result.doctor});
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "Envalid credentials" });
     }
   };
 
 
-  async doctorSignup(req: Request,res: Response,): Promise<any> {
+  async doctorSignup(req: Request,res: Response,): Promise<void> {
     try {
 
       const { fullName, email, password, graduation, category, registerNo, } = req.body;
@@ -107,54 +107,56 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       // Save to DB or upload to S3 as needed
       const response = await this._doctorService.signup(doctor, certificates, parsedSpecializations);
 
-      return res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
+       res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
 
       
     } catch (error) {
       console.log(error);
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
     }
   };
 
 
-  async verifyOtp(req: Request, res: Response): Promise<any> {
+  async verifyOtp(req: Request, res: Response): Promise<void> {
       try {
         const { otp, email } = req.body;
   
         console.log(`otp is ${otp} & email is ${email}`);
   
         const otpRecord = await this._doctorService.verifyOtp(email, otp);
-        return res.status(HttpStatusCode.OK).json({ otp, email });
+         res.status(HttpStatusCode.OK).json({ otp, email });
       } catch (error) {
         console.log(error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
       }
     }
   
-    async resentOtp(req: Request, res: Response): Promise<any> {
+    async resentOtp(req: Request, res: Response): Promise<void> {
       try {
         const { email } = req.query;
         if (!email || typeof email !== "string") {
-          return res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
+           res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email is required" });
+           throw new Error("Email is required")
         }
   
         const result = await this._doctorService.resentOtp(email);
-        return res.status(HttpStatusCode.OK).json(result);
+         res.status(HttpStatusCode.OK).json(result);
       } catch (error: any) {
         console.error(error);
-        return res
+         res
           .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
           .json({ msg: error.message || "Internal server error" });
       }
     };
 
 
-      async refreshToken(req: Request, res: Response): Promise<any> {
+
+      async refreshToken(req: Request, res: Response): Promise<void> {
         try {
           const { doctorRefreshToken } = req.cookies;
     
           if (!doctorRefreshToken) {
-            return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
+             res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
           }
     
           const result = await this._doctorService.refreshToken(doctorRefreshToken);
@@ -162,7 +164,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           console.log("result from ctrl is ...", result);
     
           if (!result) {
-            return res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
+             res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
           }
     
           const {accessToken} = result
@@ -176,23 +178,23 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
             maxAge: 7 * 24 * 60 * 60 * 1000,
           });
     
-          return res.status(HttpStatusCode.OK).json(result);
+           res.status(HttpStatusCode.OK).json(result);
         } catch (error) {
           console.log(error);
-          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+           res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
       };
 
 
-      async getRefreshToken(req:Request , res:Response , next:NextFunction):Promise<any>{
+      async getRefreshToken(req:Request , res:Response , next:NextFunction):Promise<void>{
 
         try{
         const doctorRefreshToken = req.cookies.doctorRefreshToken
-        return res.status(HttpStatusCode.OK).json(doctorRefreshToken);
+         res.status(HttpStatusCode.OK).json(doctorRefreshToken);
 
         }catch(error){
           console.log(error);
-          return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+           res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
         }
 
       }

@@ -14,8 +14,7 @@ import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPass
 import {IResponseDTO} from "../../../dto/commonDTO";
 
 console.log("Admin auth service is running....");
-console.log("NODE_ENV: ", process.env.EMAIL_USER);
-console.log("NODE_ENV: ", process.env.EMAIL_PASS);
+
 
 const transporter = nodemailer.createTransport({
     service: "Gmail",

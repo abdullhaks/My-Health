@@ -11,37 +11,39 @@ export default class UserSessionController implements IUserSessionCtrl {
     private _sessionService: IUserSessionService
   ) {}
 
-async getSessions (req:Request,res:Response):Promise<any>{
+async getSessions (req:Request,res:Response):Promise<void>{
     try{
         const doctorId =  req.query.doctorId;
         if(doctorId){
         const response = await this._sessionService.getSessions(doctorId.toString());
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
+         return
         }
-        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+         res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
 
 
     }catch(error){
         console.log("error in get sessions",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
     }
 };
 
 
 
-async getBookedSlots (req:Request,res:Response):Promise<any>{
+async getBookedSlots (req:Request,res:Response):Promise<void>{
     try{
         const {doctorId, selectedDate} =  req.query;
         if(doctorId && selectedDate){
         const response = await this._sessionService.getBookedSlots(doctorId.toString(),selectedDate.toString());
-        return res.status(HttpStatusCode.OK).json(response);
+         res.status(HttpStatusCode.OK).json(response);
+         return
         }
-        return res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+         res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
 
 
     }catch(error){
         console.log("error in get sessions",error);
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get sessions failed"});
     }
 }
 

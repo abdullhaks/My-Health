@@ -38,7 +38,7 @@ async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment
 
         console.log("doctorId and formatted date is :" , doctorId,formattedDate);
 
-        const response = await this._appointmentRepository.findAll({doctorId:doctorId,date:formattedDate});
+        const response = await this._appointmentRepository.findAll({doctorId:doctorId,date:formattedDate,appointmentStatus:{ $in: ["booked", "completed"] },});
 
         console.log("booked appointmets are:",response);
         return response;

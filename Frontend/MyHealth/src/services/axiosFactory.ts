@@ -44,9 +44,9 @@ declare module "axios" {
 
 const apiUrl = import.meta.env.VITE_API_URL as string;
 
-/**
- * Helper to determine role from URL path
- */
+
+ //Helper to determine role from URL path
+
 const getRoleFromURL = (url?: string): "user" | "doctor" | "admin" | null => {
   
   if (!url) return null;
@@ -111,16 +111,16 @@ const handleTokenRefresh = async (
   }
 };
 
-/**
- * Factory for role-based axios instances
- */
- const createAxiosInstance = (): AxiosInstance => {
+
+  //Factory for role-based axios instances
+ 
+const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
     baseURL: apiUrl,
     withCredentials: true,
   });
 
-  instance.interceptors.response.use(
+  instance.interceptors.response.use( 
     (response: AxiosResponse) => response,
     async (error: AxiosError<ErrorResponse>) => {
       const originalRequest = error.config as InternalAxiosRequestConfig;
@@ -145,6 +145,7 @@ const handleTokenRefresh = async (
   );
 
   return instance;
+  
 };
 
 

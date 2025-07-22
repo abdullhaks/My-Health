@@ -19,7 +19,7 @@ export default class UserAppointmentController implements IUserAppointmentContro
     };
 
 
-    async fetchingDoctors(req: Request, res: Response): Promise<any> {
+    async fetchingDoctors(req: Request, res: Response): Promise<void> {
   try {
     const { search = "", location = "", category = "", sort = "", page = "1", limit = "10" } = req.query;
 
@@ -32,6 +32,7 @@ export default class UserAppointmentController implements IUserAppointmentContro
       parseInt(limit as string)
     );
 
+    
     res.status(HttpStatusCode.OK).json(doctors);
   } catch (err) {
     console.error("Error in controller fetchingDoctors:", err);
@@ -41,7 +42,7 @@ export default class UserAppointmentController implements IUserAppointmentContro
 
 
 
-async getAppointments (req: Request, res: Response): Promise<any> {
+async getAppointments (req: Request, res: Response): Promise<void> {
 
 try{
   const {userId,page,limit} = req.query
@@ -62,7 +63,7 @@ try{
 };
 
 
-async cancelAppointment(req:Request, res: Response) : Promise <any> {
+async cancelAppointment(req:Request, res: Response) : Promise <void> {
 
   try{
 
@@ -80,14 +81,14 @@ async cancelAppointment(req:Request, res: Response) : Promise <any> {
   }
 }
 
-async walletPayment(req:Request, res: Response) : Promise<any>{
+async walletPayment(req:Request, res: Response) : Promise<void>{
 
   try{
     const data  = req.body;
     console.log("data in backend is :.....",data);
     const response = await this._appointmentService.walletPayment(data);
 
-    return res.status(HttpStatusCode.CREATED).json({appointment:response});
+     res.status(HttpStatusCode.CREATED).json({appointment:response});
 
   }catch(err){
     console.error("Error in wallet payment:", err);

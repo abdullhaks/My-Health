@@ -14,7 +14,7 @@ export interface IAppointmentDocument extends  Document {
   userName: string;
   userEmail: string; 
   doctorName: string; 
-  doctorSpecialization: string; 
+  doctorSpecialization?: string; 
   paymentType: "stripe" | "wallet";
   paymentStatus: "pending" | "completed" | "failed" | "refunded";
   doctorCategory?: string; 
