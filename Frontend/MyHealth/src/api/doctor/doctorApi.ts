@@ -385,7 +385,7 @@ export const createAdvertisement = async (AddData:any)=>{
     try{
       console.log("deleteBlog from frndend...",AddData);
       
-        const response = await doctorInstance.post(ROUTES.doctor.createAdvertisement,AddData);
+        const response = await doctorInstance.post(ROUTES.doctor.advertisement,AddData);
         return response.data;
     }catch(err){
         console.log("error in get total analytics");
@@ -393,3 +393,17 @@ export const createAdvertisement = async (AddData:any)=>{
     }
 };
 
+
+export const getAdds = async (doctorId:any,page:number, limit:number)=>{
+    try{
+      console.log("deleteBlog from frndend...",doctorId);
+      
+        const response = await doctorInstance.get(ROUTES.doctor.getAdvertisements,{
+          params:{doctorId,page,limit}
+        });
+        return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};

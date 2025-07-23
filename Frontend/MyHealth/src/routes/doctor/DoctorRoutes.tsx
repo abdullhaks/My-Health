@@ -24,6 +24,7 @@ import DoctorBlogs from "../../components/doctorComponents/DoctorBlogs";
 import DoctorBlogEditAndCreate from "../../components/doctorComponents/DoctorBlogEditAndCreate";
 import DoctorBlogDetails from "../../components/doctorComponents/DoctorBlog";
 import DoctorAdvertisementCreate from "../../components/doctorComponents/DoctorAdvertisementCreation";
+import DoctorAdds from "../../components/doctorComponents/DoctorAdvertisements";
 
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
@@ -58,6 +59,7 @@ const DoctorRoutes = () => {
           <Route path="blogs" element={< DoctorBlogs/>} />
           <Route path="blog-create-edit" element={< DoctorBlogEditAndCreate/>} />
           <Route path="blog" element={< DoctorBlogDetails/>} />
+          <Route path="adds" element={< DoctorAdds/>} />
           <Route path="advertisement-create" element={< DoctorAdvertisementCreate/>} />
           
 

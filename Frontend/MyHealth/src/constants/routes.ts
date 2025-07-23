@@ -62,7 +62,8 @@ export const ROUTES = {
     getSubscriptions: "/doctor/getSubscriptions",
     getBlogs: "/doctor/getBlogs",
     createBlog: "/doctor/blog",
-    createAdvertisement: "/doctor/advertisement"
+    advertisement: "/doctor/advertisement",
+    getAdvertisements: "/doctor/advertisements",
     
 
   },

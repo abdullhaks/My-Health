@@ -12,6 +12,7 @@ import ISessionCtrl from "../../controllers/doctor/interfaces/ISessionCtrl";
 import IDoctorReportAnalysisCtrl from "../../controllers/doctor/interfaces/IReportAnalysisCtrl";
 import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
 import IDoctorBlogController from "../../controllers/doctor/interfaces/IBlogCtrl";
+import IDoctorAdvertisementController from "../../controllers/doctor/interfaces/IAdvertisementCtrl";
 
 const doctorRoutes = Router();
 
@@ -25,6 +26,7 @@ const ReportAnalysisCtrl = container.get<IDoctorReportAnalysisCtrl>("IDoctorRepo
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
 const planCtrl = container.get<IDoctorPlanCtrl>("IDoctorPlanCtrl");
 const blogCtrl = container.get<IDoctorBlogController>("IDoctorBlogController");
+const addCtrl = container.get<IDoctorAdvertisementController>("IDoctorAdvertisementController")
 
 
 
@@ -129,7 +131,10 @@ doctorRoutes.get("/getBlogs",verifyAccessTokenMidleware("doctor"),(req,res)=>blo
 
 doctorRoutes.post("/blog",verifyAccessTokenMidleware("doctor"),(req,res)=>blogCtrl.createBlog(req,res));
 
-doctorRoutes.post("/advertisement",verifyAccessTokenMidleware("doctor"),(req,res)=>blogCtrl.createBlog(req,res));
+doctorRoutes.post("/advertisement",verifyAccessTokenMidleware("doctor"),(req,res)=>addCtrl.createAdvertisement(req,res));
+
+doctorRoutes.get("/advertisements",verifyAccessTokenMidleware("doctor"),(req,res)=>addCtrl.getAdds(req,res));
+
 
 
 export default doctorRoutes;

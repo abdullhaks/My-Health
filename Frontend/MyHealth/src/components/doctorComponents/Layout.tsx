@@ -5,6 +5,7 @@ import {
   FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight,
   FaSearch, FaBell, FaEnvelope,FaCalendarAlt,FaUser,FaBlog
 } from "react-icons/fa";
+import { GrAnnounce } from "react-icons/gr";
 import { BiSolidAnalyse } from "react-icons/bi";
 import { GiRoyalLove } from "react-icons/gi"; 
 import applogoBlue from "../../assets/applogoblue.png";
@@ -73,6 +74,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "Consultation Slots",path: "/doctor/slots",icon: <FaCalendarCheck />,premium: true},
     { name: "Chat", path: "/doctor/chat",icon: <FaComments />,premium: true},
     { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },
+    { name: "My Adds", path: "/doctor/adds", icon: <GrAnnounce /> },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
 
   ];

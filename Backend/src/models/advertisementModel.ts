@@ -4,6 +4,12 @@ import { model,Schema } from "mongoose";
 const advertisementSchema = new Schema<IAdvertisementDocument>(
 
     {
+
+        
+        title:{
+            type:String,
+            required:true
+        },
         author:{
             type:String,
             required:true
@@ -26,11 +32,11 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
         },
         pack:{
             type:String,
-            required:true
+            required:false
         },
         fee:{
             type:Number,
-            required:true
+            required:false
         },
         views:{
             type:Number,
@@ -44,15 +50,16 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
         },
         expDate:{
             type:Date,
-            required:true
+            required:false,
         },
         createdAt: {
             type: Date,
             default: Date.now,
         },
 
-
     }
+
+
 
 );
 

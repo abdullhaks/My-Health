@@ -11,7 +11,17 @@ export default class DoctorAdvertisementService implements IDoctorAdvertisementS
 
 
     async createAdvertisement(addData: any): Promise<any> {
-        
+
+        const response = await this._advertisementRepository.create(addData);
+        return response;
+
     };
+
+    async getAdds(doctorId:string,pageNumber: number, limitNumber: number): Promise<any> {
+        
+        const response = await this._advertisementRepository.getAdds(doctorId,pageNumber,limitNumber);
+        console.log("blog response....",response)
+        return response;
+    }
     
 }

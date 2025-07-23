@@ -3,7 +3,7 @@ import { FaSave, FaTimes, FaTag, FaVideo, FaUpload, FaMapMarkerAlt } from 'react
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { 
-//   createAdvertisement,
+  createAdvertisement,
   directFileUpload, 
   // updateAdvertisement 
 } from '../../api/doctor/doctorApi';
@@ -19,45 +19,45 @@ interface ILocation {
 const DoctorAdvertisementCreate = () => {
     
   const location = useLocation();
-  const { advertisement } = location.state || { advertisement: null };
+  const { add } = location.state || { advertisement: null };
   const navigate = useNavigate();
   const Doctor = useSelector((state: any) => state.doctor.doctor);
 
   const [formData, setFormData] = useState({
-    title: advertisement?.title || '',
-    video: advertisement?.video || '',
+    title: add?.title || '',
+    video: add?.video || '',
     newVideo: '',
-    location: advertisement?.location || {
+    location: add?.location || {
       type: "Point" as const,
       coordinates: [NaN, NaN] as [number, number],
       text: ''
     },
-    tags: advertisement?.tags || [],
+    tags: add?.tags || [],
   });
   
   const [newTag, setNewTag] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [originalVideo, setOriginalVideo] = useState(advertisement?.video || '');
+  const [originalVideo, setOriginalVideo] = useState(add?.videoUrl || '');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(false);
 
   useEffect(() => {
-    if (advertisement) {
+    if (add) {
       setFormData({
-        title: advertisement.title || '',
-        video: advertisement.video || '',
+        title: add.title || '',
+        video: add.videoUrl || '',
         newVideo: '',
-        location: advertisement.location || {
+        location: add.location || {
           type: "Point",
           coordinates: [NaN, NaN],
           text: ''
         },
-        tags: advertisement.tags || [],
+        tags: add.tags || [],
       });
-      setOriginalVideo(advertisement.video || '');
+      setOriginalVideo(add.video || '');
     }
-  }, [advertisement]);
+  }, [add]);
 
   const validateForm = useCallback(() => {
     const newErrors: { [key: string]: string } = {};
@@ -218,19 +218,19 @@ const DoctorAdvertisementCreate = () => {
 
       const advertisementPayload = {
         title: formData.title.trim(),
-        video: newVideoUrl || formData.video,
+        videoUrl: newVideoUrl || formData.video,
         location: formData.location,
-        author: advertisement?.author || Doctor?.fullName || 'Unknown Author',
+        author: add?.author || Doctor?.fullName || '',
         authorId: Doctor?._id,
         tags: formData.tags,
       };
 
-      if (advertisement) {
+      if (add) {
         // await updateAdvertisement(advertisement._id, advertisementPayload);
         message.success('Advertisement updated successfully!');
       } else {
         console.log("create advertisement........", advertisementPayload);
-        // await createAdvertisement(advertisementPayload);
+        await createAdvertisement(advertisementPayload);
         message.success('Advertisement created successfully!');
       }
       
@@ -244,7 +244,7 @@ const DoctorAdvertisementCreate = () => {
     } finally {
       setLoading(false);
     }
-  }, [formData, videoFile, advertisement, navigate, validateForm, Doctor]);
+  }, [formData, videoFile, add, navigate, validateForm, Doctor]);
 
   const onCancel = useCallback(() => {
     // Clean up any object URLs
@@ -354,10 +354,10 @@ const DoctorAdvertisementCreate = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                {advertisement ? 'Edit Advertisement' : 'Create New Advertisement'}
+                {add ? 'Edit Advertisement' : 'Create New Advertisement'}
               </h1>
               <p className="text-gray-600">
-                {advertisement ? 'Update your existing advertisement video' : 'Create a video advertisement to promote your services'}
+                {add ? 'Update your existing add video' : 'Create a video add to promote your services'}
               </p>
             </div>
             <div className="flex gap-3">
@@ -400,7 +400,7 @@ const DoctorAdvertisementCreate = () => {
               className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${
                 errors.title ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-gray-300'
               }`}
-              placeholder="Enter a catchy title for your advertisement..."
+              placeholder="Enter a catchy title for your add..."
               disabled={loading}
             />
             {errors.title && (

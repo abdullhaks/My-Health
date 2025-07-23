@@ -68,13 +68,13 @@ export default class DoctorBlogController implements IDoctorBlogController  {
     const limitNumber = limit ? parseInt(limit as string, 10) : 10;
 
     if(!authorId){
-      res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog posting failed" });
+      res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog fetching failed" });
         return;
     }
 
     const response = await this._blogService.getBLogs(authorId?.toString(),pageNumber,limitNumber);
     if(!response){
-        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog posting failed" });
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog fetching failed" });
         return;
       };
 
