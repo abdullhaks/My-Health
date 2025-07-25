@@ -347,7 +347,7 @@ export const getBlogs = async (authorId:string,page:number, limit:number)=>{
 export const createBlog = async (blogData:any)=>{
     try{
      
-        const response = await doctorInstance.post("/doctor/blog", blogData);
+        const response = await doctorInstance.post(ROUTES.doctor.blog, blogData);
 
         return response.data;
     }catch(err){
@@ -356,12 +356,12 @@ export const createBlog = async (blogData:any)=>{
     }
 };
 
-export const updateBlog = async (blogData:any)=>{
+export const updateBlog = async (blogId:string,blogData:any)=>{
     try{
       console.log("blogdate from frndend...",blogData);
       
-        // const response = await doctorInstance.post(ROUTES.doctor.createBlog,blogData);
-        // return response.data;
+        const response = await doctorInstance.put(ROUTES.doctor.blog,{blogId,blogData});
+        return response.data;
     }catch(err){
         console.log("error in get total analytics");
         throw err
@@ -407,3 +407,15 @@ export const getAdds = async (doctorId:any,page:number, limit:number)=>{
         throw err
     }
 };
+
+export const getNotifications = async (id:string)=>{
+  try{
+
+    const response = await doctorInstance.get(ROUTES.doctor.notifications,{params: {id}});
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get notifications");
+    throw error;
+  }
+}

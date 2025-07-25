@@ -120,7 +120,7 @@ const UserChat = () => {
         token = await getAccessToken();
       }
 
-      const socket = io("http://localhost:3000", {
+      const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL||"http://localhost:3000", {
         transports: ["websocket"],
         reconnection: true,
         auth: { token },

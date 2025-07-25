@@ -21,8 +21,13 @@ export default class DoctorBlogService implements IDoctorBlogService {
         const response = await this._blogRepository.getBlogs(authorId,pageNumber,limitNumber);
         console.log("blog response....",response)
         return response;
-    }
+    };
 
+    async updateBLog(blogId:string,blogData:object): Promise<any> {
+        const response = await this._blogRepository.update(blogId,blogData);
+        return response;
+        
+    };
 
 
 

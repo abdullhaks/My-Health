@@ -3,6 +3,20 @@ import { Container } from "inversify";
 import IMessageService from "../../services/common/interfaces/IMessageService";
 import { verifyAccessToken } from "../../utils/jwt";
 import IAppointmentsRepository from "../../repositories/interfaces/IAppointmentsRepository";
+import INotificationRepository from "../../repositories/interfaces/INotificationRepository";
+
+interface Notification {
+  date: Date;
+  message: string;
+  userId:string;
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  isRead: boolean;
+  link?: string;
+  mention?: string;
+ 
+}
+
+
 
 interface AuthenticatedSocket extends Socket {
   data: {
@@ -16,6 +30,7 @@ const rooms = new Map<string, { users: Set<string> }>();
 export const setupSocket = (io: Server, container: Container) => {
   const messageService = container.get<IMessageService>("IMessageService");
   const appointmentsRepository = container.get<IAppointmentsRepository>("IAppointmentsRepository");
+  const notificationRepository = container.get<INotificationRepository>("INotificationRepository");
 
   io.use(async (socket: Socket, next) => {
     const token = socket.handshake.auth.token;
@@ -57,6 +72,34 @@ export const setupSocket = (io: Server, container: Container) => {
       socket.join(conversationId);
       console.log(`${role} ${userId} joined conversation: ${conversationId}`);
     });
+
+
+    socket.on("sendNotification", async (notification: Notification) => {
+      try {
+
+        console.log("notificarion is .....",notification);
+        if (!notification || !notification.message || !notification.type || !notification.userId) {
+          console.warn(`Invalid notification data from ${userId}`);
+          socket.emit("error", { message: "Invalid notification data." });
+          return;
+        }
+
+        const response = await notificationRepository.create(notification);
+
+        console.log("notification created:",response);
+        
+        // Emit notification to the target user
+        io.to(notification.userId).emit("notification", response);
+        console.log(`Notification sent to user ${notification.userId}: ${notification.message}`);
+      } catch (err) {
+        console.error("Error sending notification:", err);
+        socket.emit("error", { message: "Failed to send notification." });
+      }
+    });
+
+
+
+
 
     socket.on("sendMessage", async (msg: { conversationId: string; senderId: string; content: string ; type:string}) => {
       if (msg.senderId !== userId) {
@@ -237,6 +280,12 @@ export const setupSocket = (io: Server, container: Container) => {
       console.error(`Socket error for ${userId}:`, err);
       socket.emit("error", { message: "Socket connection error." });
     });
+
+
+
+
+
+
   });
 };
 

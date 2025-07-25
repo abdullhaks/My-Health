@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserAppointments, cancelAppointment } from "../../api/user/userApi";
 import { useNavigate } from "react-router-dom";
 import { Popconfirm, message } from "antd";
 import { updateUser } from "../../redux/slices/userSlices";
+import { io, Socket } from "socket.io-client";
+import axios from "axios";
+
+
 
 interface IAppointment {
   _id: string;
   userId: string;
   doctorId: string;
   slotId: string;
+  date:string;
   start: string;
   end: string;
   duration: number;
@@ -36,6 +41,83 @@ const UserAppointments = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
+  const socketRef = useRef<Socket | null>(null);
+
+
+    const getAccessToken = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/api/user/refreshToken",
+          {},
+          { withCredentials: true }
+        );
+        return response.data.accessToken;
+      } catch (error) {
+        console.error("Failed to fetch access token:", error);
+        message.error("Session expired. Please log in again.");
+        throw error;
+      }
+    };
+  
+    useEffect(() => {
+      const setupSocket = async () => {
+        if (!user?._id) return;
+  
+        let token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("userAccessToken="))
+          ?.split("=")[1];
+  
+        if (!token) {
+          token = await getAccessToken();
+        }
+  
+        const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
+          transports: ["websocket"],
+          reconnection: true,
+          auth: { token },
+        });
+  
+        socketRef.current = socket;
+  
+        socket.on("connect", () => {
+          console.log(`Socket connected for user ${user._id}`);
+          socket.emit("join", user._id);
+        });
+  
+        socket.on("connect_error", async (err) => {
+          console.error("Socket connection error:", err.message);
+          if (err.message.includes("Invalid or expired token")) {
+            try {
+              const newToken = await getAccessToken();
+              socket.auth = { token: newToken };
+              socket.connect();
+            } catch {
+              message.error("Failed to reconnect. Please log in again.");
+            }
+          } else {
+            message.error("Failed to connect to notification server: " + err.message);
+          }
+        });
+  
+        socket.on("error", ({ message }) => {
+          console.error("Socket error:", message);
+          message.error(message);
+        });
+  
+        return () => {
+          socket.disconnect();
+        };
+      };
+  
+      setupSocket();
+      return () => {
+        socketRef.current?.disconnect();
+      };
+    }, [user?._id]);
+
+
+  
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -57,33 +139,81 @@ const UserAppointments = () => {
     if (user._id) fetchAppointments();
   }, [user._id, page]);
 
-  const handleCancel = async (appointmentId: string) => {
-    try {
-      setIsCanceling(true);
-      setErrorMessage("");
-      const response = await cancelAppointment(appointmentId);
-      if (response.status) {
-        dispatch(updateUser(response.updatedUser));
-        message.success(response.message);
-        setAppointments((prev) =>
-          prev.map((appt) =>
-            appt._id === appointmentId
-              ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "refunded" }
-              : appt
-          )
-        );
+  interface Notification {
+  userId:string;
+  message: string;
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  isRead: boolean;
+  link?: string;
+  mention?: string;
+  createdAt: string;
+}
+
+const handleCancel = async (appointmentId: string) => {
+  try {
+    setIsCanceling(true);
+    setErrorMessage("");
+    const response = await cancelAppointment(appointmentId);
+    if (response.status) {
+      dispatch(updateUser(response.updatedUser));
+      message.success(response.message);
+
+      let userName: string = "";
+      let doctorId: string = "";
+      let date: string = "";
+
+      // Find the appointment and extract values
+      const targetAppointment = appointments.find((appt) => appt._id === appointmentId);
+      if (targetAppointment) {
+        userName = targetAppointment.userName || response.updatedUser?.fullName || "Patient";
+        doctorId = targetAppointment.doctorId || "";
+        date = targetAppointment.date || "";
       } else {
-        message.error(response.message);
+        console.warn("Appointment not found in state.");
       }
-    } catch (error: any) {
-      console.error("Error cancelling appointment:", error);
-      setErrorMessage(
-        error.response?.data?.message || "Failed to cancel appointment. Please try again."
+
+      // Update appointments
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt._id === appointmentId
+            ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "refunded" }
+            : appt
+        )
       );
-    } finally {
-      setIsCanceling(false);
+
+      // Send notification to the doctor
+      if (doctorId) {
+        const notification: Notification = {
+          userId: doctorId, // Target the doctor
+          message: `Your appointment with ${userName} on ${new Date(date).toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })} has been cancelled.`,
+          type: "appointment",
+          isRead: false,
+          link: "/doctor/appointments", 
+          mention: userName,
+          createdAt: new Date().toISOString(),
+        };
+
+        socketRef.current?.emit("sendNotification", notification);
+      } else {
+        console.warn("Missing doctorId for notification.");
+      }
+    } else {
+      message.error(response.message);
     }
-  };
+  } catch (error: any) {
+    console.error("Error cancelling appointment:", error);
+    setErrorMessage(
+      error.response?.data?.message || "Failed to cancel appointment. Please try again."
+    );
+  } finally {
+    setIsCanceling(false);
+  }
+};
 
   const handleJoin = (appointmentId: string) => {
     navigate(`/user/video-call/${appointmentId}`);

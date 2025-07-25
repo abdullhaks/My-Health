@@ -96,6 +96,50 @@ export default class DoctorBlogController implements IDoctorBlogController  {
 
     
     async updateBlog(req: Request, res: Response): Promise<void> {
+
+      try {
+      
+      const { title, content, author,authorId, thumbnail, img1, img2, img3, tags } = req.body.blogData;
+      const {blogId} = req.body;
+
+      if (!title || !content || !tags || !author) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          message: "Missing required fields: title, content,tags and author are required",
+        });
+        return;
+      }
+
+   
+      const blogData = {
+        title,
+        content,
+        author,
+        authorId,
+        thumbnail,
+        img1: img1 || "",
+        img2: img2 || "",
+        img3: img3 || "",
+        tags: tags,
+      };
+
+      console.log("Blog data to update......:", blogData);
+
+      const response = await this._blogService.updateBLog(blogId,blogData);
+
+      if(!response){
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog updating failed" });
+        return;
+      }
+      res.status(HttpStatusCode.OK).json({
+        message: "Blog updated successfully",
+        data: blogData,
+      });
+    } catch (err) {
+      console.error("Error creating blog:", err);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+        message: "Failed to update blog" });
+    }
+
         
     }
     

@@ -13,6 +13,7 @@ import analyticsModel from "../models/analyticsModel";
 import transactionModel from "../models/transactionModel";
 import blogModel from "../models/blogModel";
 import advertisementModel from "../models/advertisementModel";
+import notificationModel from "../models/notificationModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -72,6 +73,10 @@ import DetailsController from "../controllers/common/implementations/detailsCtrl
 import IDetailsCtrl from "../controllers/common/interfaces/IDetailsCtrl";
 import DirectDocUploadS3Controller from "../controllers/common/implementations/directDocUploadS3";
 import IDirectDocUploadS3Ctrl from "../controllers/common/interfaces/IDirectDocUploadS3";
+import NotificationController from "../controllers/common/implementations/notificationCtrl";
+import INotificationController from "../controllers/common/interfaces/INotificationCtrl";
+
+
 //.................................................................................
 
 //services.....................................................................
@@ -128,6 +133,8 @@ import DetailsService from "../services/common/implementations/detailsService";
 import IDetailsService from "../services/common/interfaces/IDetailsService";
 import DirectDocUploadS3Service from "../services/common/implementations/directDocUploadS3Service";
 import IDirectDocUploadS3Service from "../services/common/interfaces/IDirectDocUploadS3Service";
+import NotificationService from "../services/common/implementations/notificationService";
+import INotificationServices from "../services/common/interfaces/INotificationService";
 
 //.................................................................................
 
@@ -174,6 +181,9 @@ import BlogsRepository from "../repositories/implementations/blogRepository";
 import IAdvertisementRepository from "../repositories/interfaces/IAdvertisementRepository";
 import AdvertisementRepository from "../repositories/implementations/advertisementRepositoty";
 
+import INotificationRepository from "../repositories/interfaces/INotificationRepository";
+import NotificationRepository from "../repositories/implementations/notificationRepository";
+
 
 
 //.................................................................................
@@ -195,6 +205,7 @@ container.bind("analyticsModel").toConstantValue(analyticsModel);
 container.bind("transactionModel").toConstantValue(transactionModel);
 container.bind("blogModel").toConstantValue(blogModel);
 container.bind("advertisementModel").toConstantValue(advertisementModel);
+container.bind("notificationModel").toConstantValue(notificationModel);
 
 //...................................................................
 
@@ -231,7 +242,7 @@ container.bind<IConversationCtrl>("IConversationCtrl").to(ConversationController
 container.bind<IMessageCtrl>("IMessageCtrl").to(MessageController)
 container.bind<IDetailsCtrl>("IDetailsCtrl").to(DetailsController);
 container.bind<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl").to(DirectDocUploadS3Controller);
-
+container.bind<INotificationController>("INotificationController").to(NotificationController);
 
 
 
@@ -269,6 +280,7 @@ container.bind<IConversationService>("IConversationService").to(ConversationServ
 container.bind<IMessageService>("IMessageService").to(MessageService);
 container.bind<IDetailsService>("IDetailsService").to(DetailsService);
 container.bind<IDirectDocUploadS3Service>("IDirectDocUploadS3Service").to(DirectDocUploadS3Service);
+container.bind<INotificationServices>("INotificationServices").to(NotificationService);
 
 
 //..............................................................................
@@ -288,6 +300,8 @@ container.bind<IAnalyticsRepository>("IAnalyticsRepository").to(AnalyticsReposit
 container.bind<ITransactionRepository>("ITransactionRepository").to(TransactionRepository);
 container.bind<IBlogRepository>("IBlogRepository").to(BlogsRepository);
 container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(AdvertisementRepository);
+container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
+
 
 
 export default container;

@@ -108,7 +108,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
         amount: response.fee,
         paymentFor: "refund",
         userId: response.userId,
-      });
+      }); 
 
       if (updateWalet) {
         const { password, ...userWithoutPassword } = updateWalet.toObject();

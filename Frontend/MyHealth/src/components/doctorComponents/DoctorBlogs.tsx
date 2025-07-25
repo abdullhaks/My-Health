@@ -17,7 +17,8 @@ const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
     <img
       src={blog.thumbnail}
       alt={blog.title}
-      className="w-full h-48 object-cover rounded-t-xl"
+      className="w-full h-48 object-cover rounded-t-xl cursor-pointer"
+      onClick={() => onView(blog)}
       loading="lazy"
     />
     <div className="p-4 space-y-2">
@@ -42,21 +43,21 @@ const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
         <div className="flex gap-2">
           <button
             onClick={() => onView(blog)}
-            className="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+            className="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition-colors cursor-pointer"
             aria-label={`View ${blog.title}`}
           >
             <FaEye />
           </button>
           <button
             onClick={() => onEdit(blog)}
-            className="text-green-500 hover:bg-green-50 p-2 rounded-lg transition-colors"
+            className="text-green-500 hover:bg-green-50 p-2 rounded-lg transition-colors cursor-pointer"
             aria-label={`Edit ${blog.title}`}
           >
             <FaEdit />
           </button>
           <button
             onClick={() => onDelete(blog._id)}
-            className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
+            className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
             aria-label={`Delete ${blog.title}`}
           >
             <FaTrash />

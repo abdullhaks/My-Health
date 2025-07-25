@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { 
   createBlog,
   directFileUpload, 
-  // updateBlog 
+  updateBlog 
 } from '../../api/doctor/doctorApi';
 import { message } from 'antd';
 
@@ -290,7 +290,7 @@ const DoctorBlogEditAndCreate = () => {
 
 
       if (blog) {
-        // await updateBlog(blog._id, formDataToSend);
+        await updateBlog(blog._id, blogPayload);
         message.success('Blog updated successfully!');
       } else {
 

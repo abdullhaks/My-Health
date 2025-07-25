@@ -1,3 +1,5 @@
+import { notification } from "antd";
+
 // src/constants/routes.ts
 export const ROUTES = {
   user: {
@@ -30,6 +32,7 @@ export const ROUTES = {
     getAnalysisReport : "/user/getAnalysisReports",
     cancelAnalysisReport : "/user/cancelAnalysisReports",
     walletPayment : "/user/walletPayment",
+    notifications : "/user/notifications"
     
     
   },
@@ -61,9 +64,10 @@ export const ROUTES = {
     cancelAnalysisReports: "/doctor/cancelAnalysisReports",
     getSubscriptions: "/doctor/getSubscriptions",
     getBlogs: "/doctor/getBlogs",
-    createBlog: "/doctor/blog",
+    blog: "/doctor/blog",
     advertisement: "/doctor/advertisement",
     getAdvertisements: "/doctor/advertisements",
+    notifications : "/doctor/notifications"
     
 
   },

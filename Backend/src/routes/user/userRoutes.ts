@@ -12,6 +12,7 @@ import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
 import IPaymentCtrl from "../../controllers/common/interfaces/IPaymentCtrl";
 import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
 import IUserReportAnalysisCtrl from "../../controllers/user/interfaces/IReportAnalysisCtrl";
+import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
 
 const userRoutes = Router();
 
@@ -24,7 +25,8 @@ const sessionCtrl = container.get<IUserSessionCtrl>("IUserSessionCtrl");
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
 const paymentCtrl =  container.get<IPaymentCtrl>("IPaymentCtrl");
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
-const ReportAnalysisCtrl = container.get<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl");
+const reportAnalysisCtrl = container.get<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl");
+const notificationCtrl = container.get<INotificationController>("INotificationController")
 
 
 
@@ -112,14 +114,16 @@ userRoutes.get("/getAppointments",verifyAccessTokenMidleware("user"),(req,res)=>
 userRoutes.patch("/cancelAppointments",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.cancelAppointment(req,res))
 
 userRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
-  ReportAnalysisCtrl.getReports(req, res)) 
+  reportAnalysisCtrl.getReports(req, res)) 
 
 userRoutes.post("/cancelAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
-  ReportAnalysisCtrl.cancelAnalysisReports(req, res));
+  reportAnalysisCtrl.cancelAnalysisReports(req, res));
 
 userRoutes.get("/bookedSlots",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getBookedSlots(req,res))
 
 userRoutes.post("/walletPayment",verifyAccessTokenMidleware("user"),(req,res)=> appointmentCtrl.walletPayment(req,res))
+
+userRoutes.get("/notifications",verifyAccessTokenMidleware("user"),(req,res)=> notificationCtrl.getNewNotifications(req,res) )
 
 
 export default userRoutes; 

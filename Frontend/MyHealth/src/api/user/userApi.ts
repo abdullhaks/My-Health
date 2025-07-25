@@ -383,3 +383,16 @@ export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
     throw error;
   }
 };
+
+
+export const getNotifications = async (id:string,limit:number,notificationSet:number)=>{
+  try{
+
+    const response = await userInstance.get(ROUTES.user.notifications,{params: {id,limit,notificationSet}});
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get notifications");
+    throw error;
+  }
+}

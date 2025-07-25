@@ -19,12 +19,12 @@ private _detailsService: IDetailsService;
 
     try{
 
-        const doctorId = req.query.doctorId;
+        const doctorId = req.query.doctorId; 
         console.log("doctor id is ",doctorId);
       if (doctorId) {
       const response = await this._detailsService.getDoctor(doctorId.toString());
           res.status(HttpStatusCode.OK).json(response);
-
+          return
     };
 
       res.status(HttpStatusCode.BAD_REQUEST).json({ message: "doctor ID is required" });
