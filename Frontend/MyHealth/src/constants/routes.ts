@@ -68,7 +68,9 @@ export const ROUTES = {
     blog: "/doctor/blog",
     advertisement: "/doctor/advertisement",
     getAdvertisements: "/doctor/advertisements",
-    notifications : "/doctor/notifications"
+    notifications : "/doctor/notifications",
+    prescription : "/doctor/prescription",
+    prescriptions : "/doctor/prescriptions"
     
 
   },

@@ -14,6 +14,7 @@ import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectD
 import IDoctorBlogController from "../../controllers/doctor/interfaces/IBlogCtrl";
 import IDoctorAdvertisementController from "../../controllers/doctor/interfaces/IAdvertisementCtrl";
 import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
+import IDoctorPrescriptionCtrl from "../../controllers/doctor/interfaces/IPrescriptionCtrl"
 
 
 const doctorRoutes = Router();
@@ -30,6 +31,7 @@ const planCtrl = container.get<IDoctorPlanCtrl>("IDoctorPlanCtrl");
 const blogCtrl = container.get<IDoctorBlogController>("IDoctorBlogController");
 const addCtrl = container.get<IDoctorAdvertisementController>("IDoctorAdvertisementController")
 const notificationCtrl = container.get<INotificationController>("INotificationController")
+const prescriptionsCtrl = container.get<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl")
 
 
 
@@ -85,7 +87,7 @@ doctorRoutes.post("/verifySubscription", (req, res) =>
   profileCtrl.verifyingSubscription(req, res)
 );
 
-// doctorRoutes.get("/me", authCtrl.getMe.bind(authCtrl));
+
 
 doctorRoutes.post(
   "/conversation",
@@ -143,6 +145,9 @@ doctorRoutes.get("/advertisements",verifyAccessTokenMidleware("doctor"),(req,res
 
 doctorRoutes.get("/notifications",verifyAccessTokenMidleware("doctor"),(req,res)=> notificationCtrl.getAllNotifications(req,res) )
 
+doctorRoutes.get("/prescriptions",verifyAccessTokenMidleware("doctor"),(req,res)=> prescriptionsCtrl.getPrescriptions(req,res))
+
+doctorRoutes.post("/prescription",verifyAccessTokenMidleware("doctor"),(req,res)=> prescriptionsCtrl.submitPrescription(req,res))
 
 export default doctorRoutes;
 

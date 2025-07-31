@@ -1,20 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import PeerService, { initializeSocket } from "../services/peerServices";
-import { useParams } from "react-router-dom";
-import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs } from "antd";
-import {
-  AudioOutlined,
-  AudioMutedOutlined,
-  VideoCameraOutlined,
-  VideoCameraFilled,
-  PhoneOutlined,
-  MessageOutlined,
-  SendOutlined,
-  SnippetsOutlined,
-  PlusOutlined,
-  MinusCircleOutlined
-} from '@ant-design/icons';
+import { useLocation, useParams } from "react-router-dom";
+import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs ,message as antAlert } from "antd";
+import {AudioOutlined,AudioMutedOutlined,VideoCameraOutlined, VideoCameraFilled,PhoneOutlined,
+  MessageOutlined, SendOutlined,SnippetsOutlined,PlusOutlined,MinusCircleOutlined} from '@ant-design/icons';
 import { io } from "socket.io-client";
+import { getPrescriptions,submitPrescription} from "../api/doctor/doctorApi";
 
 interface VideoCallProps {
   role: "doctor" | "user";
@@ -126,7 +117,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const [showPrescription, setShowPrescription] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>(dummy);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [newPrescription, setNewPrescription] = useState<Prescription>({
     appointmentId: appointmentId || "",
     userId: "",
@@ -142,6 +133,8 @@ const VideoCall = ({ role }: VideoCallProps) => {
   } | null>(null);
   const [remoteVideoStatus, setRemoteVideoStatus] = useState("Connecting...");
   const [form] = Form.useForm();
+  const location = useLocation();
+  const {appointment} = location.state
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -240,12 +233,13 @@ const VideoCall = ({ role }: VideoCallProps) => {
   };
 
   // Fetch prescriptions (mock implementation - replace with actual API call)
-  const fetchPrescriptions = async () => {
+  const fetchPrescriptions = async (userId:string) => {
+
     try {
-      // Replace with actual API call
-      const response = await fetch(`/api/prescriptions?userId=${otherParticipant?.id}`);
-      const data = await response.json();
-      setPrescriptions(data);
+      const response = await getPrescriptions(userId);
+      if(response) antAlert.info("prescriptions fetched");
+
+      setPrescriptions(response);
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
     }
@@ -253,9 +247,9 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
   const handleAddPrescription = async (values: any) => {
     const newPrescriptionData: Prescription = {
-      appointmentId: appointmentId || "",
-      userId: otherParticipant?.id || "",
-      doctorId: socketRef.current?.id || "",
+      appointmentId: appointmentId ||appointment._id || "",
+      userId: otherParticipant?.id ||appointment.userId|| "",
+      doctorId: appointment.doctorId || "",
       medicalCondition:values.medicalCondition || "",
       medications: values.medications || [],
       notes: values.notes,
@@ -264,13 +258,10 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
     try {
       // Replace with actual API call
-      const response = await fetch('/api/prescriptions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPrescriptionData)
-      });
-      const savedPrescription = await response.json();
-      setPrescriptions([...prescriptions, savedPrescription]);
+      const response = await submitPrescription(newPrescriptionData)
+        
+      
+      setPrescriptions([...prescriptions, response]);
       form.resetFields();
     } catch (error) {
       console.error('Error saving prescription:', error);
@@ -327,10 +318,8 @@ const VideoCall = ({ role }: VideoCallProps) => {
             const offer = await peer.createOffer();
             if (offer) {
               socket.emit("user:call", { to: remoteId, offer });
-            }
-            if (role === "doctor") {
-              fetchPrescriptions();
-            }
+            };
+            
           });
 
           socket.on("incomming:call", async ({ from, offer }) => {
@@ -384,6 +373,9 @@ const VideoCall = ({ role }: VideoCallProps) => {
             durationInterval = setInterval(() => {
               setCallDuration(prev => prev + 1);
             }, 1000);
+
+            
+
           });
 
           socket.on("callEnded", cleanup);
@@ -415,6 +407,12 @@ const VideoCall = ({ role }: VideoCallProps) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(()=>{
+     if (role === "doctor") {
+              fetchPrescriptions(appointment.userId);
+        }
+  },[])
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -582,7 +580,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
                 layout="vertical"
               >
                 <Form.Item
-                  name="medical-condition"
+                  name="medicalCondition"
                   label="Medical Condition"
                 >
                   <Input.TextArea rows={2} placeholder="Medical conditions..." />
@@ -665,14 +663,17 @@ const VideoCall = ({ role }: VideoCallProps) => {
               </Form>
             </Tabs.TabPane>
             <Tabs.TabPane tab="Previous Prescriptions" key="2">
+
+            { prescriptions.length == 0 ?
+              <div className="text-center text-gray-500 py-4">No Previous Prescriptions...</div>:
+
               <List
                 dataSource={prescriptions}
                 renderItem={(prescription) => (
                   <List.Item>
                     <div className="w-full">
                       <div className="text-sm font-medium">
-                        {/* Date: {new Date(prescription.createdAt).toLocaleDateString()} */}
-                        Date: {`prescription.createdAt`}
+                        Date: {prescription.createdAt?new Date(prescription.createdAt).toLocaleDateString():""}
                       </div>
                       {prescription.medications.map((med, index) => (
                         <div key={index} className="ml-4 mt-2">
@@ -690,6 +691,9 @@ const VideoCall = ({ role }: VideoCallProps) => {
                   </List.Item>
                 )}
               />
+                 
+            }
+              
             </Tabs.TabPane>
           </Tabs>
         </Modal>

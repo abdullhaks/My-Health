@@ -81,8 +81,8 @@ const DoctorAppointments = () => {
     }
   };
 
-  const handleJoin = (appointmentId:string) => {
-    navigate(`/doctor/video-call/${appointmentId}`);
+  const handleJoin = (appointmentId:string,appointment:any) => {
+    navigate(`/doctor/video-call/${appointmentId}`,{ state: { appointment } });
   };
 
   const isJoinable = (start:any, end:any) => {
@@ -144,7 +144,7 @@ const DoctorAppointments = () => {
                 <div className="flex gap-2">
                   {appt.appointmentStatus === "booked" && (
                     <button
-                      onClick={() => handleJoin(appt._id)}
+                      onClick={() => handleJoin(appt._id,appt)}
                       disabled={!isJoinable(appt.start, appt.end)}
                       className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
                         isJoinable(appt.start, appt.end)

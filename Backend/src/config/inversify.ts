@@ -14,6 +14,7 @@ import transactionModel from "../models/transactionModel";
 import blogModel from "../models/blogModel";
 import advertisementModel from "../models/advertisementModel";
 import notificationModel from "../models/notificationModel";
+import prescriptionModel from "../models/prescriptionModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -62,7 +63,8 @@ import DoctorBlogController from "../controllers/doctor/implementations/blogCtrl
 import IDoctorBlogController from "../controllers/doctor/interfaces/IBlogCtrl";
 import IDoctorAdvertisementController from "../controllers/doctor/interfaces/IAdvertisementCtrl";
 import DoctorAdvertisementController from "../controllers/doctor/implementations/advertisementCtrl";
-
+import IDoctorPrescriptionCtrl from "../controllers/doctor/interfaces/IPrescriptionCtrl";
+import DoctorPrescriptionController from "../controllers/doctor/implementations/prescriptionCtrl";
 
 
 import PaymentController from "../controllers/common/implementations/paymentCtrl"
@@ -125,6 +127,9 @@ import DoctorBlogService from "../services/doctor/implementations/doctorBlogServ
 import IDoctorBlogService from "../services/doctor/interfaces/IDoctorBlogServices";
 import IDoctorAdvertisementService from "../services/doctor/interfaces/IDoctorAdvertisementServices";
 import DoctorAdvertisementService from "../services/doctor/implementations/doctorAdvertisementServices";
+import IDoctorPrescriptionService from "../services/doctor/interfaces/IDoctorPrescriptionService";
+import DoctorPrescriptionService from "../services/doctor/implementations/doctorPrescriptionService";
+
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -189,6 +194,10 @@ import INotificationRepository from "../repositories/interfaces/INotificationRep
 import NotificationRepository from "../repositories/implementations/notificationRepository";
 
 
+import IPrescriptionRepository from "../repositories/interfaces/IPrescriptionRepositiory";
+import PrescriptionRepository from "../repositories/implementations/prescriptionrRepository";
+
+
 
 //.................................................................................
 
@@ -210,6 +219,7 @@ container.bind("transactionModel").toConstantValue(transactionModel);
 container.bind("blogModel").toConstantValue(blogModel);
 container.bind("advertisementModel").toConstantValue(advertisementModel);
 container.bind("notificationModel").toConstantValue(notificationModel);
+container.bind("prescriptionModel").toConstantValue(prescriptionModel);
 
 //...................................................................
 
@@ -239,7 +249,7 @@ container.bind<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl").to(Doctor
 container.bind<IDoctorPlanCtrl>("IDoctorPlanCtrl").to(DoctorPlansController);
 container.bind<IDoctorBlogController>("IDoctorBlogController").to(DoctorBlogController);
 container.bind<IDoctorAdvertisementController>("IDoctorAdvertisementController").to(DoctorAdvertisementController);
-
+container.bind<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl").to(DoctorPrescriptionController);
 
 
 
@@ -280,6 +290,8 @@ container.bind<IDoctorAppointmentService>("IDoctorAppointmentService").to(Doctor
 container.bind<IDoctorReportAnalysisService>("IDoctorReportAnalysisService").to(DoctorReportAnalysisService);
 container.bind<IDoctorBlogService>("IDoctorBlogService").to(DoctorBlogService);
 container.bind<IDoctorAdvertisementService>("IDoctorAdvertisementService").to(DoctorAdvertisementService);
+container.bind<IDoctorPrescriptionService>("IDoctorPrescriptionService").to(DoctorPrescriptionService);
+
 
 
 container.bind<IPaymentService>("IPaymentService").to(PaymentService);
@@ -308,6 +320,7 @@ container.bind<ITransactionRepository>("ITransactionRepository").to(TransactionR
 container.bind<IBlogRepository>("IBlogRepository").to(BlogsRepository);
 container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(AdvertisementRepository);
 container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
+container.bind<IPrescriptionRepository>("IPrescriptionRepository").to(PrescriptionRepository);
 
 
 

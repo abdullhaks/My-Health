@@ -4,13 +4,14 @@ import { doctorInstance } from "../../services/axiosFactory";
 
 export const signupDoctor = async (doctorData: any) => {
   try {
-
     for (const [key, value] of doctorData.entries()) {
-        console.log(`api side...${key}:`, value);
-      }
+      console.log(`api side...${key}:`, value);
+    }
 
-    
-    const response = await doctorInstance.post(ROUTES.doctor.signup, doctorData);
+    const response = await doctorInstance.post(
+      ROUTES.doctor.signup,
+      doctorData
+    );
     message.success("Signup successful!");
     return response.data;
   } catch (error) {
@@ -19,21 +20,18 @@ export const signupDoctor = async (doctorData: any) => {
   }
 };
 
-export const getMe = async ()=>{
-  try{
-
-    console.log("get me calling......")
+export const getMe = async () => {
+  try {
+    console.log("get me calling......");
     const response = await doctorInstance.get(ROUTES.doctor.me);
-    console.log("me me me...",response.data);
+    console.log("me me me...", response.data);
 
-    return response.data
-  }catch(error){
+    return response.data;
+  } catch (error) {
     console.error("Error signing up user:", error);
     throw error;
   }
-  
-
-}
+};
 
 export const loginDoctor = async (doctorData: any) => {
   try {
@@ -46,11 +44,13 @@ export const loginDoctor = async (doctorData: any) => {
   }
 };
 
-
 export const verifyDoctorOtp = async (otpData: any) => {
   try {
     console.log("OTP data:", otpData);
-    const response = await doctorInstance.post(ROUTES.doctor.verifyOtp, otpData);
+    const response = await doctorInstance.post(
+      ROUTES.doctor.verifyOtp,
+      otpData
+    );
     return response.data;
   } catch (error) {
     console.error("Error verifying OTP:", error);
@@ -70,12 +70,11 @@ export const resendDoctorOtp = async (email: string) => {
   }
 };
 
-
 export const refreshToken = async () => {
   try {
     const response = await doctorInstance.post(ROUTES.doctor.refreshToken);
 
-    console.log("user api response is ",response);
+    console.log("user api response is ", response);
 
     return response.data;
   } catch (error) {
@@ -94,90 +93,98 @@ export const logoutDoctor = async () => {
   }
 };
 
-export const handlePayment = async (priceId:any,metadata:any) =>{
-  try{
-
-    const response = await doctorInstance.post(ROUTES.doctor.stripe.createCheckoutSession,{priceId,metadata});
+export const handlePayment = async (priceId: any, metadata: any) => {
+  try {
+    const response = await doctorInstance.post(
+      ROUTES.doctor.stripe.createCheckoutSession,
+      { priceId, metadata }
+    );
 
     return response.data;
-
-  }catch(error) {
-
-    console.log("Error in handle stripe payment :",error);
+  } catch (error) {
+    console.log("Error in handle stripe payment :", error);
     throw error;
   }
-}
+};
 
-export const verifySubscription = async (sessionId:string) =>{
-try{
+export const verifySubscription = async (sessionId: string) => {
+  try {
+    const response = await doctorInstance.post(
+      ROUTES.doctor.verifySubscription,
+      { sessionId }
+    );
 
-  const response = await doctorInstance.post(ROUTES.doctor.verifySubscription,{sessionId});
-
-  return response.data;
-
-}catch(error){
-  console.log("Error in verify subscription.. :",error);
+    return response.data;
+  } catch (error) {
+    console.log("Error in verify subscription.. :", error);
     throw error;
-}
-}
+  }
+};
 
+export const changePassword = async (data: any, userId: string) => {
+  console.log("new password....", data, userId);
 
-export const changePassword = async (data:any ,userId:string)=>{
-  console.log("new password....",data,userId);
+  try {
+    const response = await doctorInstance.patch(
+      ROUTES.doctor.changePassword(userId),
+      {
+        data,
+      }
+    );
 
-  try{
-    const response = await doctorInstance.patch(ROUTES.doctor.changePassword(userId),{
-      data
-    });
-
-    console.log("resop......",response);
+    console.log("resop......", response);
     return response != null;
-    
-  }catch(error){
+  } catch (error) {
     console.error("Error in change password :", error);
     throw error;
   }
-}
+};
 
-
-export const updateDoctorProfile = async (userData: any,userId:string) => {
+export const updateDoctorProfile = async (userData: any, userId: string) => {
   try {
-
     console.log("User data for update:", userData);
-    
-    const response = await doctorInstance.patch(ROUTES.doctor.updateProfile(userId), userData, {
-    
-    });
+
+    const response = await doctorInstance.patch(
+      ROUTES.doctor.updateProfile(userId),
+      userData,
+      {}
+    );
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error updating profile:", error);
     throw error;
   }
 };
 
-export const updateProfileImage = async(formData:any, userId:string) =>{
-
-  try{
-  console.log("doctor dp changin api is working......")
-    const response = await doctorInstance.patch(ROUTES.doctor.updateDp(userId),formData,{
-      headers: {
-        "Content-Type": "multipart/form-data"
-      }
-    });
-    console.log("response from api is ", response)
-    return response.data;
-
-  }catch(error){
-    console.error("Error updating profile:", error);
-    throw error;
-  }
-  
-};
-
-export const getDoctorConversations = async (doctorId: string,from:string) => {
+export const updateProfileImage = async (formData: any, userId: string) => {
   try {
-    const response = await doctorInstance.get(ROUTES.doctor.conversation(doctorId), { params: { from } });
+    console.log("doctor dp changin api is working......");
+    const response = await doctorInstance.patch(
+      ROUTES.doctor.updateDp(userId),
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log("response from api is ", response);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+};
+
+export const getDoctorConversations = async (
+  doctorId: string,
+  from: string
+) => {
+  try {
+    const response = await doctorInstance.get(
+      ROUTES.doctor.conversation(doctorId),
+      { params: { from } }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);
@@ -185,10 +192,11 @@ export const getDoctorConversations = async (doctorId: string,from:string) => {
   }
 };
 
-
 export const getDoctorMessages = async (conversationId: string) => {
   try {
-    const response = await doctorInstance.get(ROUTES.doctor.getMessage(conversationId));
+    const response = await doctorInstance.get(
+      ROUTES.doctor.getMessage(conversationId)
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching messages:", error);
@@ -196,11 +204,17 @@ export const getDoctorMessages = async (conversationId: string) => {
   }
 };
 
-
-export const sendDoctorMessage = async (messageData: { conversationId: string; senderId: string; content: string }) => {
+export const sendDoctorMessage = async (messageData: {
+  conversationId: string;
+  senderId: string;
+  content: string;
+}) => {
   try {
     console.log("Message data:", messageData);
-    const response = await doctorInstance.post(ROUTES.doctor.message, messageData);
+    const response = await doctorInstance.post(
+      ROUTES.doctor.message,
+      messageData
+    );
     return response.data;
   } catch (error: any) {
     console.error("Error sending message:", error);
@@ -209,88 +223,95 @@ export const sendDoctorMessage = async (messageData: { conversationId: string; s
   }
 };
 
-export const setSessions = async (sessionData:any)=>{
-  try{
-    console.log("session data is ",sessionData);
+export const setSessions = async (sessionData: any) => {
+  try {
+    console.log("session data is ", sessionData);
 
-    const response = await doctorInstance.post(ROUTES.doctor.sessions, {sessionData});
+    const response = await doctorInstance.post(ROUTES.doctor.sessions, {
+      sessionData,
+    });
     return response.data;
-
-  }catch(error){
+  } catch (error) {
     console.error("Error in set sessions", error);
-    throw error;
-  }
-}
-
-export const getSessions = async (doctorId:string)=>{
-  try{
-    console.log("doctor id",doctorId);
-
-    const response = await doctorInstance.get(ROUTES.doctor.sessions, { params: { doctorId } });
-    return response.data;
-
-  }catch(error){
-    console.log("Error in get sessions",error);
     throw error;
   }
 };
 
+export const getSessions = async (doctorId: string) => {
+  try {
+    console.log("doctor id", doctorId);
 
-export const getDoctorAppointments = async(doctorId:string) => {
-  try{
+    const response = await doctorInstance.get(ROUTES.doctor.sessions, {
+      params: { doctorId },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error in get sessions", error);
+    throw error;
+  }
+};
 
-    const response = await doctorInstance.get(ROUTES.doctor.getAppointments,{
-      params: { doctorId: doctorId }
+export const getDoctorAppointments = async (doctorId: string) => {
+  try {
+    const response = await doctorInstance.get(ROUTES.doctor.getAppointments, {
+      params: { doctorId: doctorId },
     });
 
-    console.log("response data is ....",response.data)
+    console.log("response data is ....", response.data);
     return response.data;
-
-  }catch(error){
+  } catch (error) {
     console.error("Error in get doctor's appointments..:", error);
     throw error;
   }
 };
 
-export const getAnalysisReports = async (doctorId:string)=>{
-  try{
-    console.log("doctorId id",doctorId);
-
-    const response = await doctorInstance.get(ROUTES.doctor.getAnalysisReport, { params: { doctorId } });
-    return response.data;
-
-  }catch(error){
-    console.log("Error in get sessions",error);
-    throw error;
-  }
-};
-
-
-export const submitAnalysisReports = async (analysisId:string,result:string)=>{
-  try{
-    console.log("analysisId id",analysisId);
-
-    const response = await doctorInstance.post(ROUTES.doctor.submitAnalysisReport, {analysisId, result});
-    return response.data;
-
-  }catch(error){
-    console.log("Error in get sessions",error);
-    throw error;
-  }
-};
-
-export const directFileUpload = async (formData:any) => {
+export const getAnalysisReports = async (doctorId: string) => {
   try {
+    console.log("doctorId id", doctorId);
 
-     for (const [key, value] of formData.entries()) {
-    console.log(`api side...${key}:`, value);
-  }
-
-    const response = await doctorInstance.post(ROUTES.doctor.directFileUpload, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await doctorInstance.get(ROUTES.doctor.getAnalysisReport, {
+      params: { doctorId },
     });
+    return response.data;
+  } catch (error) {
+    console.log("Error in get sessions", error);
+    throw error;
+  }
+};
+
+export const submitAnalysisReports = async (
+  analysisId: string,
+  result: string
+) => {
+  try {
+    console.log("analysisId id", analysisId);
+
+    const response = await doctorInstance.post(
+      ROUTES.doctor.submitAnalysisReport,
+      { analysisId, result }
+    );
+    return response.data;
+  } catch (error) {
+    console.log("Error in get sessions", error);
+    throw error;
+  }
+};
+
+export const directFileUpload = async (formData: any) => {
+  try {
+    for (const [key, value] of formData.entries()) {
+      console.log(`api side...${key}:`, value);
+    }
+
+    const response = await doctorInstance.post(
+      ROUTES.doctor.directFileUpload,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
@@ -299,123 +320,160 @@ export const directFileUpload = async (formData:any) => {
   }
 };
 
+export const cancelAnalysisReports = async (
+  analysisId: string,
+  userId: string,
+  fee: number
+) => {
+  try {
+    console.log("analysisId id", analysisId);
 
-export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:number)=>{
-  try{
-    console.log("analysisId id",analysisId);
-
-    const response = await doctorInstance.post(ROUTES.doctor.cancelAnalysisReports,{ analysisId,userId,fee });
+    const response = await doctorInstance.post(
+      ROUTES.doctor.cancelAnalysisReports,
+      { analysisId, userId, fee }
+    );
     return response.data;
-
-  }catch(error){
-    console.log("Error in get sessions",error);
+  } catch (error) {
+    console.log("Error in get sessions", error);
     throw error;
   }
 };
 
-
-export const getSubscriptions = async() => {
-  try{
+export const getSubscriptions = async () => {
+  try {
     const response = await doctorInstance.get(ROUTES.doctor.getSubscriptions);
-    console.log("response data is ....",response.data)
+    console.log("response data is ....", response.data);
     return response.data;
-  }catch(error){
+  } catch (error) {
     console.error("Error in get subscriptions..:", error);
     throw error;
   }
 };
 
-
-export const getBlogs = async (authorId:string,page:number, limit:number)=>{
-    try{
-        const response = await doctorInstance.get(ROUTES.doctor.getBlogs,{
+export const getBlogs = async (
+  authorId: string,
+  page: number,
+  limit: number
+) => {
+  try {
+    const response = await doctorInstance.get(ROUTES.doctor.getBlogs, {
       params: {
         authorId,
         page,
         limit,
-      }});
+      },
+    });
 
-      console.log("response from frontend....",response);
+    console.log("response from frontend....", response);
 
-        return response.data.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
+    return response.data.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
 };
 
-export const createBlog = async (blogData:any)=>{
-    try{
-     
-        const response = await doctorInstance.post(ROUTES.doctor.blog, blogData);
+export const createBlog = async (blogData: any) => {
+  try {
+    const response = await doctorInstance.post(ROUTES.doctor.blog, blogData);
 
-        return response.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
+    return response.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
 };
 
-export const updateBlog = async (blogId:string,blogData:any)=>{
-    try{
-      console.log("blogdate from frndend...",blogData);
-      
-        const response = await doctorInstance.put(ROUTES.doctor.blog,{blogId,blogData});
-        return response.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
+export const updateBlog = async (blogId: string, blogData: any) => {
+  try {
+    console.log("blogdate from frndend...", blogData);
+
+    const response = await doctorInstance.put(ROUTES.doctor.blog, {
+      blogId,
+      blogData,
+    });
+    return response.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
 };
 
-export const deleteBlog = async (blogId:any)=>{
-    try{
-      console.log("deleteBlog from frndend...",blogId);
-      
-        // const response = await doctorInstance.post(ROUTES.doctor.createBlog,blogData);
-        // return response.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
+export const deleteBlog = async (blogId: any) => {
+  try {
+    console.log("deleteBlog from frndend...", blogId);
+
+    // const response = await doctorInstance.post(ROUTES.doctor.createBlog,blogData);
+    // return response.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
+};
+
+export const createAdvertisement = async (AddData: any) => {
+  try {
+    console.log("deleteBlog from frndend...", AddData);
+
+    const response = await doctorInstance.post(
+      ROUTES.doctor.advertisement,
+      AddData
+    );
+    return response.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
+};
+
+export const getAdds = async (doctorId: any, page: number, limit: number) => {
+  try {
+    console.log("deleteBlog from frndend...", doctorId);
+
+    const response = await doctorInstance.get(ROUTES.doctor.getAdvertisements, {
+      params: { doctorId, page, limit },
+    });
+    return response.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
+};
+
+export const getNotifications = async (id: string) => {
+  try {
+    const response = await doctorInstance.get(ROUTES.doctor.notifications, {
+      params: { id },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error in get notifications");
+    throw error;
+  }
+};
+
+export const getPrescriptions = async (userId: string) => {
+  try {
+    const response = await doctorInstance.get(ROUTES.doctor.prescriptions, {
+      params: { userId },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error in get prescriptions");
+    throw error;
+  }
 };
 
 
-export const createAdvertisement = async (AddData:any)=>{
-    try{
-      console.log("deleteBlog from frndend...",AddData);
-      
-        const response = await doctorInstance.post(ROUTES.doctor.advertisement,AddData);
-        return response.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
-};
-
-
-export const getAdds = async (doctorId:any,page:number, limit:number)=>{
-    try{
-      console.log("deleteBlog from frndend...",doctorId);
-      
-        const response = await doctorInstance.get(ROUTES.doctor.getAdvertisements,{
-          params:{doctorId,page,limit}
-        });
-        return response.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
-};
-
-export const getNotifications = async (id:string)=>{
+export const submitPrescription = async (prescriptionData:any) => {
   try{
 
-    const response = await doctorInstance.get(ROUTES.doctor.notifications,{params: {id}});
+    console.log("prescriptionData is............",prescriptionData);
+    const response = await doctorInstance.post(ROUTES.doctor.prescription,{prescriptionData});
     return response.data;
 
   }catch(error){
-    console.log("Error in get notifications");
+    console.log("Error in submiting prescription");
     throw error;
   }
 }
