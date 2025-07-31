@@ -32,7 +32,8 @@ export const ROUTES = {
     getAnalysisReport : "/user/getAnalysisReports",
     cancelAnalysisReport : "/user/cancelAnalysisReports",
     walletPayment : "/user/walletPayment",
-    notifications : "/user/notifications"
+    notifications : "/user/notifications",
+    getBlogs: "/user/getBlogs",
     
     
   },

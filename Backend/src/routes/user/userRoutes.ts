@@ -13,6 +13,7 @@ import IPaymentCtrl from "../../controllers/common/interfaces/IPaymentCtrl";
 import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
 import IUserReportAnalysisCtrl from "../../controllers/user/interfaces/IReportAnalysisCtrl";
 import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
+import IUserBlogController from "../../controllers/user/interfaces/IBlogCtrl";
 
 const userRoutes = Router();
 
@@ -26,7 +27,8 @@ const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
 const paymentCtrl =  container.get<IPaymentCtrl>("IPaymentCtrl");
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
 const reportAnalysisCtrl = container.get<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl");
-const notificationCtrl = container.get<INotificationController>("INotificationController")
+const notificationCtrl = container.get<INotificationController>("INotificationController");
+const blogCtrl = container.get<IUserBlogController>("IUserBlogController");
 
 
 
@@ -125,5 +127,6 @@ userRoutes.post("/walletPayment",verifyAccessTokenMidleware("user"),(req,res)=> 
 
 userRoutes.get("/notifications",verifyAccessTokenMidleware("user"),(req,res)=> notificationCtrl.getNewNotifications(req,res) )
 
+userRoutes.get("/getBlogs",verifyAccessTokenMidleware("user"),(req,res)=>blogCtrl.getBlogs(req,res));
 
 export default userRoutes; 

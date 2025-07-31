@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import PeerService, { initializeSocket } from "../services/peerServices";
 import { useParams } from "react-router-dom";
-import { Button, Tooltip, Input, List, Avatar } from "antd";
+import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs } from "antd";
 import {
   AudioOutlined,
   AudioMutedOutlined,
   VideoCameraOutlined,
   VideoCameraFilled,
   PhoneOutlined,
-  PictureOutlined,
-  SettingOutlined,
   MessageOutlined,
-  SendOutlined
+  SendOutlined,
+  SnippetsOutlined,
+  PlusOutlined,
+  MinusCircleOutlined
 } from '@ant-design/icons';
 import { io } from "socket.io-client";
 
@@ -28,6 +29,87 @@ interface ChatMessage {
   senderRole?: "doctor" | "user";
 }
 
+interface Prescription {
+  _id?: string;
+  appointmentId: string;
+  userId: string;
+  doctorId: string;
+  medicalCondition:string;
+  medications: {
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    instructions?: string;
+  }[];
+  notes?: string;
+  createdAt?: Date;
+};
+
+let dummy = [
+  {
+    "_id": "prescription_001",
+    "appointmentId": "appointment_123",
+    "userId": "user_456",
+    "doctorId": "doctor_789",
+    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
+    "medications": [
+      {
+        "name": "Ibuprofen",
+        "dosage": "200 mg",
+        "frequency": "Twice daily",
+        "duration": "5 days",
+        "instructions": "Take with food"
+      },
+      {
+        "name": "Amoxicillin",
+        "dosage": "500 mg",
+        "frequency": "Three times daily",
+        "duration": "7 days",
+        "instructions": "Complete full course"
+      }
+    ],
+    "notes": "Follow up in one week if symptoms persist.",
+    "updatedAt": "2025-07-20T10:30:00Z"
+  },
+  {
+    "_id": "prescription_002",
+    "appointmentId": "appointment_124",
+    "userId": "user_456",
+    "doctorId": "doctor_789",
+    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
+    "medications": [
+      {
+        "name": "Loratadine",
+        "dosage": "10 mg",
+        "frequency": "Once daily",
+        "duration": "10 days",
+        "instructions": "Take in the morning"
+      }
+    ],
+    "notes": "Avoid allergens and monitor for side effects.",
+    "updatedAt": "2025-07-15T14:00:00Z"
+  },
+  {
+    "_id": "prescription_003",
+    "appointmentId": "appointment_125",
+    "userId": "user_456",
+    "doctorId": "doctor_790",
+    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
+    "medications": [
+      {
+        "name": "Paracetamol",
+        "dosage": "500 mg",
+        "frequency": "Every 6 hours as needed",
+        "duration": "3 days",
+        "instructions": "Do not exceed 4 doses in 24 hours"
+      }
+    ],
+    "notes": "Rest and stay hydrated.",
+    "updatedAt": "2025-07-10T09:15:00Z"
+  }
+]
+
 const VideoCall = ({ role }: VideoCallProps) => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -41,13 +123,25 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const [callDuration, setCallDuration] = useState(0);
   const [callStarted, setCallStarted] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showPrescription, setShowPrescription] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>(dummy);
+  const [newPrescription, setNewPrescription] = useState<Prescription>({
+    appointmentId: appointmentId || "",
+    userId: "",
+    doctorId: "",
+    medicalCondition:"",
+    medications: [],
+    notes: "",
+    createdAt: new Date()
+  });
   const [otherParticipant, setOtherParticipant] = useState<{
     id: string;
     role: "doctor" | "user";
   } | null>(null);
   const [remoteVideoStatus, setRemoteVideoStatus] = useState("Connecting...");
+  const [form] = Form.useForm();
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -87,6 +181,10 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
   const toggleChat = () => {
     setShowChat(!showChat);
+  };
+
+  const togglePrescription = () => {
+    setShowPrescription(!showPrescription);
   };
 
   const sendMessage = () => {
@@ -141,6 +239,44 @@ const VideoCall = ({ role }: VideoCallProps) => {
     setMessages([]);
   };
 
+  // Fetch prescriptions (mock implementation - replace with actual API call)
+  const fetchPrescriptions = async () => {
+    try {
+      // Replace with actual API call
+      const response = await fetch(`/api/prescriptions?userId=${otherParticipant?.id}`);
+      const data = await response.json();
+      setPrescriptions(data);
+    } catch (error) {
+      console.error('Error fetching prescriptions:', error);
+    }
+  };
+
+  const handleAddPrescription = async (values: any) => {
+    const newPrescriptionData: Prescription = {
+      appointmentId: appointmentId || "",
+      userId: otherParticipant?.id || "",
+      doctorId: socketRef.current?.id || "",
+      medicalCondition:values.medicalCondition || "",
+      medications: values.medications || [],
+      notes: values.notes,
+      createdAt: new Date()
+    };
+
+    try {
+      // Replace with actual API call
+      const response = await fetch('/api/prescriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPrescriptionData)
+      });
+      const savedPrescription = await response.json();
+      setPrescriptions([...prescriptions, savedPrescription]);
+      form.resetFields();
+    } catch (error) {
+      console.error('Error saving prescription:', error);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
     let durationInterval: NodeJS.Timeout;
@@ -168,7 +304,6 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
         socket.emit("joinVideoCall", appointmentId);
         
-        // Setup socket event listeners
         const setupSocketEvents = () => {
           const createPeer = (remoteId: string): PeerService => {
             const peer = new PeerService(remoteId);
@@ -192,6 +327,9 @@ const VideoCall = ({ role }: VideoCallProps) => {
             const offer = await peer.createOffer();
             if (offer) {
               socket.emit("user:call", { to: remoteId, offer });
+            }
+            if (role === "doctor") {
+              fetchPrescriptions();
             }
           });
 
@@ -293,6 +431,16 @@ const VideoCall = ({ role }: VideoCallProps) => {
               className="flex items-center justify-center bg-gray-100 hover:bg-gray-200"
             />
           </Tooltip>
+          {role === "doctor" && (
+            <Tooltip title={showPrescription ? "Hide prescription" : "Show prescription"}>
+              <Button 
+                icon={<SnippetsOutlined />} 
+                shape="circle" 
+                onClick={togglePrescription}
+                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200"
+              />
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -308,6 +456,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
                 autoPlay 
                 playsInline 
                 className="w-full h-full object-cover"
+                style={{ transform: 'scaleX(-1)' }}
               />
               <div className="absolute bottom-4 left-4 bg-white bg-opacity-80 text-gray-800 px-3 py-1 rounded-lg shadow-sm flex items-center">
                 <span className="font-medium">
@@ -327,6 +476,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
               muted 
               playsInline 
               className="w-full h-full object-cover"
+              style={{ transform: 'scaleX(-1)' }}
             />
             {localVideoRef.current?.srcObject && (
               <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs flex items-center">
@@ -406,10 +556,148 @@ const VideoCall = ({ role }: VideoCallProps) => {
         )}
       </div>
 
+      {/* Prescription Modal */}
+      {role === "doctor" && (
+        <Modal
+          title="Prescription Management"
+          open={showPrescription}
+          onCancel={togglePrescription}
+          footer={null}
+          width={1200}
+          style={{ top: 20 }}
+          zIndex={1000}
+          styles={{
+            body: {
+              maxHeight: '70vh',
+              overflowY: 'auto',
+              padding: '16px'
+            }
+          }}
+        >
+          <Tabs defaultActiveKey="1">
+            <Tabs.TabPane tab="Add New Prescription" key="1">
+              <Form
+                form={form}
+                onFinish={handleAddPrescription}
+                layout="vertical"
+              >
+                <Form.Item
+                  name="medical-condition"
+                  label="Medical Condition"
+                >
+                  <Input.TextArea rows={2} placeholder="Medical conditions..." />
+                </Form.Item>
+                <Form.List name="medications">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <div key={key} className="flex space-x-2 mb-2">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'name']}
+                            rules={[{ required: true, message: 'Missing medication name' }]}
+                            className="flex-1"
+                          >
+                            <Input placeholder="Medication Name" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'dosage']}
+                            rules={[{ required: true, message: 'Missing dosage' }]}
+                            className="w-1/12"
+                          >
+                            <Input placeholder="Dosage" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'frequency']}
+                            rules={[{ required: true, message: 'Missing frequency' }]}
+                            className="w-1/10"
+                          >
+                            <Input placeholder="Frequency" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'duration']}
+                            rules={[{ required: true, message: 'Missing duration' }]}
+                            className="w-1/6"
+                          >
+                            <Input placeholder="Duration" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'instructions']}
+                            className="flex-1"
+                          >
+                            <Input placeholder="Instructions (optional)" />
+                          </Form.Item>
+                          <Button
+                            danger
+                            onClick={() => remove(name)}
+                            icon={<MinusCircleOutlined />}
+                          />
+                        </div>
+                      ))}
+                      <Form.Item>
+                        <Button
+                          type="dashed"
+                          onClick={() => add()}
+                          block
+                          icon={<PlusOutlined />}
+                        >
+                          Add Medication
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+                <Form.Item
+                  name="notes"
+                  label="Additional Notes"
+                >
+                  <Input.TextArea rows={4} placeholder="Additional notes..." />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit" block>
+                    Save Prescription
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Previous Prescriptions" key="2">
+              <List
+                dataSource={prescriptions}
+                renderItem={(prescription) => (
+                  <List.Item>
+                    <div className="w-full">
+                      <div className="text-sm font-medium">
+                        {/* Date: {new Date(prescription.createdAt).toLocaleDateString()} */}
+                        Date: {`prescription.createdAt`}
+                      </div>
+                      {prescription.medications.map((med, index) => (
+                        <div key={index} className="ml-4 mt-2">
+                          <div><strong>Name:</strong> {med.name}</div>
+                          <div><strong>Dosage:</strong> {med.dosage}</div>
+                          <div><strong>Frequency:</strong> {med.frequency}</div>
+                          <div><strong>Duration:</strong> {med.duration}</div>
+                          {med.instructions && <div><strong>Instructions:</strong> {med.instructions}</div>}
+                        </div>
+                      ))}
+                      {prescription.notes && (
+                        <div className="mt-2"><strong>Notes:</strong> {prescription.notes}</div>
+                      )}
+                    </div>
+                  </List.Item>
+                )}
+              />
+            </Tabs.TabPane>
+          </Tabs>
+        </Modal>
+      )}
+
       {/* Controls */}
       <div className="bg-white py-3 px-6 shadow-md border-t border-gray-200">
         <div className="flex justify-center space-x-6">
-          {/* Audio Control */}
           <Tooltip title={isAudioMuted ? "Unmute" : "Mute"}>
             <button
               onClick={toggleAudio}
@@ -418,8 +706,6 @@ const VideoCall = ({ role }: VideoCallProps) => {
               {isAudioMuted ? <AudioMutedOutlined className="text-lg" /> : <AudioOutlined className="text-lg" />}
             </button>
           </Tooltip>
-
-          {/* Video Control */}
           <Tooltip title={isVideoOff ? "Turn on video" : "Turn off video"}>
             <button
               onClick={toggleVideo}
@@ -428,8 +714,6 @@ const VideoCall = ({ role }: VideoCallProps) => {
               {isVideoOff ? <VideoCameraFilled className="text-lg" /> : <VideoCameraOutlined className="text-lg" />}
             </button>
           </Tooltip>
-
-          {/* End Call */}
           <Tooltip title="End call">
             <button
               onClick={endCall}
@@ -438,20 +722,6 @@ const VideoCall = ({ role }: VideoCallProps) => {
               <PhoneOutlined className="text-lg" />
             </button>
           </Tooltip>
-
-          {/* More Options */}
-          {/* <Tooltip title="More options">
-            <button className="p-3 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 flex items-center justify-center">
-              <SettingOutlined className="text-lg" />
-            </button>
-          </Tooltip> */}
-
-          {/* Screen Share */}
-          {/* <Tooltip title="Share screen">
-            <button className="p-3 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 flex items-center justify-center">
-              <PictureOutlined className="text-lg" />
-            </button>
-          </Tooltip> */}
         </div>
       </div>
     </div>

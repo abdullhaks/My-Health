@@ -299,7 +299,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Report Analysis", path: "/user/report-analysis", icon: <BiSolidAnalyse /> },
     { name: "Chat", path: "/user/chat", icon: <FaComments /> },
     { name: "MyHealth-Ai", path: "/user/ai", icon: <FaPodcast /> },
-    { name: "Medical Records", path: "/user/records", icon: <FaFileMedical /> },
+    { name: "Blogs", path: "/user/blogs", icon: <FaBlog /> },
     { name: "Prescriptions", path: "/user/prescriptions", icon: <FaClipboardList /> },
     { name: "My Profile", path: "/user/profile", icon: <FaUserFriends /> },
   ];

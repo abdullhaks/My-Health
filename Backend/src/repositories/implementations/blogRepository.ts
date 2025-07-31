@@ -37,4 +37,30 @@ export default class BlogsRepository extends BaseRepository<IBlogDocument> {
         }
     };
 
+
+    async getBlogsWithSearch(search: string, pageNumber: number, limitNumber: number): Promise<{ blogs: IBlogDocument[]; totalPages: number }> {
+    try {
+      const query: any = search
+        ? { title: { $regex: search, $options: 'i' } } // Case-insensitive search on title
+        : {};
+
+      const skip = (pageNumber - 1) * limitNumber;
+
+      const blogs = await this._blogModel
+        .find(query)
+        .skip(skip)
+        .limit(limitNumber)
+        .lean(); // Use lean() for better performance
+
+      const total = await this._blogModel.countDocuments(query);
+      return {
+        blogs,
+        totalPages: Math.ceil(total / limitNumber),
+      };
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+      throw new Error('Failed to fetch blogs');
+    }
+  }
+
 }

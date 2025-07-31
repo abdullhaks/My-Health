@@ -25,6 +25,8 @@ import AiHealthStatusGenerator from "../../components/userComponents/AiHealthSta
 import UserHealthReportAnalysis from "../../components/userComponents/UserHealthReportAnalysis";
 import VideoCall from "../../sharedComponents/VideoCall";
 import { UserReportAnalysis } from "../../components/userComponents/UserReportAnalysis";
+import UserBlogs from "../../components/userComponents/userBlogs";
+import UserBlogDetails from "../../components/userComponents/UserBlog";
 
 const UserRoutes = () => {
   return (
@@ -57,6 +59,10 @@ const UserRoutes = () => {
           <Route path="ai" element={< AiHealthStatusGenerator/>} />
           <Route path="health-report-analysis" element={< UserHealthReportAnalysis/>} />
           <Route path="report-analysis" element={< UserReportAnalysis/>} />
+          <Route path="blogs" element={< UserBlogs/>} />
+          <Route path="blog" element={< UserBlogDetails/>} />
+          
+
           
           
         </Route>

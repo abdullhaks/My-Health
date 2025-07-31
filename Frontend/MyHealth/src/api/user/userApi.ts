@@ -395,4 +395,23 @@ export const getNotifications = async (id:string,limit:number,notificationSet:nu
     console.log("Error in get notifications");
     throw error;
   }
-}
+};
+
+
+export const getBlogs = async (search:string,page:number, limit:number)=>{
+    try{
+        const response = await userInstance.get(ROUTES.user.getBlogs,{
+      params: {
+        search,
+        page,
+        limit,
+      }});
+
+      console.log("response from frontend....",response);
+
+        return response.data.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+    }
+};
