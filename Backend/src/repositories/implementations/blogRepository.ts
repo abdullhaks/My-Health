@@ -63,4 +63,19 @@ export default class BlogsRepository extends BaseRepository<IBlogDocument> {
     }
   }
 
+
+
+  async getBlogsByTimePeriod(startDate: Date): Promise<IBlogDocument[]> {
+    try {
+      const blogs = await this._blogModel
+        .find({ createdAt: { $gte: startDate } })
+        .limit(3) // Limit to 3 blogs for dashboard
+        .lean();
+      return blogs;
+    } catch (error) {
+      console.error('Error fetching blogs by time period:', error);
+      throw new Error('Failed to fetch blogs');
+    }
+  }
+
 }

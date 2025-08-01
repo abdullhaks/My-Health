@@ -35,4 +35,18 @@ export default class AdvertisementRepository extends BaseRepository<IAdvertiseme
         }
     };
 
+
+    async getAdvertisementsByTimePeriod(startDate: Date): Promise<IAdvertisementDocument[]> {
+    try {
+      const advertisements = await this._advertisementModel
+        .find({ createdAt: { $gte: startDate } })
+        .limit(5) // Limit to 5 ads for carousel
+        .lean();
+      return advertisements;
+    } catch (error) {
+      console.error('Error fetching advertisements by time period:', error);
+      throw new Error('Failed to fetch advertisements');
+    }
+  }
+
 }

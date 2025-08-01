@@ -398,20 +398,34 @@ export const getNotifications = async (id:string,limit:number,notificationSet:nu
 };
 
 
-export const getBlogs = async (search:string,page:number, limit:number)=>{
-    try{
-        const response = await userInstance.get(ROUTES.user.getBlogs,{
+export const getBlogs = async (search: string, page: number, limit: number) => {
+  try {
+    const response = await userInstance.get(ROUTES.user.getBlogs, {
       params: {
         search,
         page,
         limit,
-      }});
+      },
+    });
 
-      console.log("response from frontend....",response);
+    console.log("response from frontend....", response);
 
-        return response.data.data;
-    }catch(err){
-        console.log("error in get total analytics");
-        throw err
-    }
+    return response.data.data;
+  } catch (err) {
+    console.log("error in get total analytics");
+    throw err;
+  }
+};
+
+export const getDashboardContent = async (days: number) => {
+  try {
+    const response = await userInstance.get(ROUTES.user.dashboard, {
+      params: { days },
+    });
+    console.log('Dashboard API response:', response.data);
+    return response.data.data;
+  } catch (err) {
+    console.error('Error fetching dashboard content:', err);
+    throw new Error('Failed to fetch dashboard content');
+  }
 };
