@@ -17,6 +17,7 @@ interface ILocation {
 
 interface ProfileData {
   fullName: string;
+  medicalTags:string,
   location: ILocation;
   dob: string;
   phone: string;
@@ -49,6 +50,10 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
         if (!/^\+?[0-9\s]{10,15}$/.test(value.replace(/\s/g, "")))
           error = "Invalid phone number format";
         break;
+      case "medicalTags":
+      if (value.length>40)
+        error = "character limit exceeded";
+      break;
     }
 
     setErrors(prev => ({
@@ -102,6 +107,18 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
                 className={`w-full px-3 py-2 border rounded-md ${errors.fullName ? "border-red-500" : "border-gray-300"}`}
               />
               {errors.fullName && <p className="text-sm text-red-600">{errors.fullName}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="medicalTags">medical tags</label>
+              <input
+                type="text"
+                name="medicalTags"
+                value={formData.medicalTags}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-md ${errors.medicalTags ? "border-red-500" : "border-gray-300"}`}
+              />
+              {errors.medicalTags && <p className="text-sm text-red-600">{errors.medicalTags}</p>}
             </div>
 
             {/* Location */}

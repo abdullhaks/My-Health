@@ -273,11 +273,11 @@ export const createOneTimePayment = async (amount: number, metadata: any) => {
   }
 };
 
-export const getUserAppointments = async(userId:string,page:number,limit:number) => {
+export const getUserAppointments = async(userId:string,page:number,limit:number,filter:{ appointmentStatus?: string; startDate?: string; endDate?: string }) => {
   try{
 
     const response = await userInstance.get(ROUTES.user.getAppointments,{
-      params: { userId,page,limit}
+      params: { userId,page,limit,filter}
     });
 
     console.log("response data is ....",response.data)

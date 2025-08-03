@@ -2,19 +2,19 @@ import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserAppointments, cancelAppointment } from "../../api/user/userApi";
 import { useNavigate } from "react-router-dom";
-import { Popconfirm, message } from "antd";
+import { Popconfirm, message, Table, Select, DatePicker, Button, Pagination } from "antd";
 import { updateUser } from "../../redux/slices/userSlices";
 import { io, Socket } from "socket.io-client";
+import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import axios from "axios";
-
-
+import moment from "moment";
 
 interface IAppointment {
   _id: string;
   userId: string;
   doctorId: string;
   slotId: string;
-  date:string;
+  date: string;
   start: string;
   end: string;
   duration: number;
@@ -30,101 +30,120 @@ interface IAppointment {
   updatedAt: string;
 }
 
+interface Notification {
+  userId: string;
+  message: string;
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  isRead: boolean;
+  link?: string;
+  mention?: string;
+  createdAt: string;
+}
+
+const { Option } = Select;
+const { RangePicker } = DatePicker;
+
 const UserAppointments = () => {
   const [appointments, setAppointments] = useState<IAppointment[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
   const user = useSelector((state: any) => state.user.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
   const socketRef = useRef<Socket | null>(null);
+  const [filters, setFilters] = useState({
+      appointmentStatus: "booked",
+      dateRange: null as [moment.Moment, moment.Moment] | null,
+    });
 
 
-    const getAccessToken = async () => {
-      try {
-        const response = await axios.post(
-          "http://localhost:3000/api/user/refreshToken",
-          {},
-          { withCredentials: true }
-        );
-        return response.data.accessToken;
-      } catch (error) {
-        console.error("Failed to fetch access token:", error);
-        message.error("Session expired. Please log in again.");
-        throw error;
-      }
-    };
-  
-    useEffect(() => {
-      const setupSocket = async () => {
-        if (!user?._id) return;
-  
-        let token = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("userAccessToken="))
-          ?.split("=")[1];
-  
-        if (!token) {
-          token = await getAccessToken();
-        }
-  
-        const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
-          transports: ["websocket"],
-          reconnection: true,
-          auth: { token },
-        });
-  
-        socketRef.current = socket;
-  
-        socket.on("connect", () => {
-          console.log(`Socket connected for user ${user._id}`);
-          socket.emit("join", user._id);
-        });
-  
-        socket.on("connect_error", async (err) => {
-          console.error("Socket connection error:", err.message);
-          if (err.message.includes("Invalid or expired token")) {
-            try {
-              const newToken = await getAccessToken();
-              socket.auth = { token: newToken };
-              socket.connect();
-            } catch {
-              message.error("Failed to reconnect. Please log in again.");
-            }
-          } else {
-            message.error("Failed to connect to notification server: " + err.message);
-          }
-        });
-  
-        socket.on("error", ({ message }) => {
-          console.error("Socket error:", message);
-          message.error(message);
-        });
-  
-        return () => {
-          socket.disconnect();
-        };
-      };
-  
-      setupSocket();
-      return () => {
-        socketRef.current?.disconnect();
-      };
-    }, [user?._id]);
-
-
-  
+  const getAccessToken = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/user/refreshToken",
+        {},
+        { withCredentials: true }
+      );
+      return response.data.accessToken;
+    } catch (error) {
+      console.error("Failed to fetch access token:", error);
+      message.error("Session expired. Please log in again.");
+      throw error;
+    }
+  };
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const setupSocket = async () => {
+      if (!user?._id) return;
+
+      let token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("userAccessToken="))
+        ?.split("=")[1];
+
+      if (!token) {
+        token = await getAccessToken();
+      }
+
+      const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
+        transports: ["websocket"],
+        reconnection: true,
+        auth: { token },
+      });
+
+      socketRef.current = socket;
+
+      socket.on("connect", () => {
+        console.log(`Socket connected for user ${user._id}`);
+        socket.emit("join", user._id);
+      });
+
+      socket.on("connect_error", async (err) => {
+        console.error("Socket connection error:", err.message);
+        if (err.message.includes("Invalid or expired token")) {
+          try {
+            const newToken = await getAccessToken();
+            socket.auth = { token: newToken };
+            socket.connect();
+          } catch {
+            message.error("Failed to reconnect. Please log in again.");
+          }
+        } else {
+          message.error("Failed to connect to notification server: " + err.message);
+        }
+      });
+
+      socket.on("error", ({ message }) => {
+        console.error("Socket error:", message);
+        message.error(message);
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    };
+
+    setupSocket();
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, [user?._id]);
+
+  const fetchAppointments = async (page: number) => {
       try {
         setIsFetching(true);
         setErrorMessage("");
-        const response = await getUserAppointments(user._id, page, limit);
+        const response = await getUserAppointments(user._id, page, limit,{
+        appointmentStatus: filters.appointmentStatus,
+        startDate: filters.dateRange ? filters.dateRange[0].toISOString().split("T")[0] : undefined,
+        endDate: filters.dateRange ? filters.dateRange[1].toISOString().split("T")[0] : undefined,
+      });
+
+
         setAppointments(response.appointments || []);
         setTotalPages(response.totalPages || 1);
       } catch (error: any) {
@@ -136,202 +155,235 @@ const UserAppointments = () => {
         setIsFetching(false);
       }
     };
-    if (user._id) fetchAppointments();
-  }, [user._id, page]);
 
-  interface Notification {
-  userId:string;
-  message: string;
-  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
-  isRead: boolean;
-  link?: string;
-  mention?: string;
-  createdAt: string;
-}
+  useEffect(() => {
+    if (user._id) fetchAppointments(currentPage);
+  }, [user._id, currentPage,filters]);
 
-const handleCancel = async (appointmentId: string) => {
-  try {
-    setIsCanceling(true);
-    setErrorMessage("");
-    const response = await cancelAppointment(appointmentId);
-    if (response.status) {
-      dispatch(updateUser(response.updatedUser));
-      message.success(response.message);
+   const handleFilterChange = (key: string, value: string | [moment.Moment, moment.Moment] | null) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+      setCurrentPage(1); // Reset to first page when filters change
+    };
 
-      let userName: string = "";
-      let doctorId: string = "";
-      let date: string = "";
 
-      // Find the appointment and extract values
-      const targetAppointment = appointments.find((appt) => appt._id === appointmentId);
-      if (targetAppointment) {
-        userName = targetAppointment.userName || response.updatedUser?.fullName || "Patient";
-        doctorId = targetAppointment.doctorId || "";
-        date = targetAppointment.date || "";
+
+  const handleCancel = async (appointmentId: string) => {
+    try {
+      setIsCanceling(true);
+      setErrorMessage("");
+      const response = await cancelAppointment(appointmentId);
+      if (response.status) {
+        dispatch(updateUser(response.updatedUser));
+        message.success(response.message);
+
+        let userName: string = "";
+        let doctorId: string = "";
+        let date: string = "";
+
+        const targetAppointment = appointments.find((appt) => appt._id === appointmentId);
+        if (targetAppointment) {
+          userName = targetAppointment.userName || response.updatedUser?.fullName || "Patient";
+          doctorId = targetAppointment.doctorId || "";
+          date = targetAppointment.date || "";
+        } else {
+          console.warn("Appointment not found in state.");
+        }
+
+        setAppointments((prev) =>
+          prev.map((appt) =>
+            appt._id === appointmentId
+              ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "refunded" }
+              : appt
+          )
+        );
+
+        if (doctorId) {
+          const notification: Notification = {
+            userId: doctorId,
+            message: `Your appointment with ${userName} on ${new Date(date).toLocaleDateString("en-US", {
+              weekday: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })} has been cancelled.`,
+            type: "appointment",
+            isRead: false,
+            link: "/doctor/appointments",
+            mention: userName,
+            createdAt: new Date().toISOString(),
+          };
+
+          socketRef.current?.emit("sendNotification", notification);
+        } else {
+          console.warn("Missing doctorId for notification.");
+        }
       } else {
-        console.warn("Appointment not found in state.");
+        message.error(response.message);
       }
-
-      // Update appointments
-      setAppointments((prev) =>
-        prev.map((appt) =>
-          appt._id === appointmentId
-            ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "refunded" }
-            : appt
-        )
+    } catch (error: any) {
+      console.error("Error cancelling appointment:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Failed to cancel appointment. Please try again."
       );
-
-      // Send notification to the doctor
-      if (doctorId) {
-        const notification: Notification = {
-          userId: doctorId, // Target the doctor
-          message: `Your appointment with ${userName} on ${new Date(date).toLocaleDateString("en-US", {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })} has been cancelled.`,
-          type: "appointment",
-          isRead: false,
-          link: "/doctor/appointments", 
-          mention: userName,
-          createdAt: new Date().toISOString(),
-        };
-
-        socketRef.current?.emit("sendNotification", notification);
-      } else {
-        console.warn("Missing doctorId for notification.");
-      }
-    } else {
-      message.error(response.message);
+    } finally {
+      setIsCanceling(false);
     }
-  } catch (error: any) {
-    console.error("Error cancelling appointment:", error);
-    setErrorMessage(
-      error.response?.data?.message || "Failed to cancel appointment. Please try again."
-    );
-  } finally {
-    setIsCanceling(false);
-  }
-};
+  };
 
-  const handleJoin = (appointmentId: string,appointment:any) => {
-    navigate(`/user/video-call/${appointmentId}`,{ state: { appointment } });
+  const handleJoin = (appointmentId: string, appointment: any) => {
+    navigate(`/user/video-call/${appointmentId}`, { state: { appointment } });
   };
 
   const isJoinable = (start: string, end: string) => {
+
     // const now = new Date().getTime();
     // const startTime = new Date(start).getTime();
     // const endTime = new Date(end).getTime();
-    // const buffer = 5 * 60 * 1000; // 5-minute buffer before/after
+    // const buffer = 5 * 60 * 1000; // 5-minute buffer
     // return now >= startTime - buffer && now <= endTime + buffer;
-    return true
+
+    return true;
   };
 
-  const formatDateTime = (date: string) =>
-    new Date(date).toLocaleString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const columns = [
+    {
+      title: "Doctor Name",
+      dataIndex: "doctorName",
+      key: "doctorName",
+      render: (text: string, record: IAppointment) => `Dr. ${text} (${record.doctorCategory})`,
+    },
+    {
+      title: "Date & Time",
+      key: "dateTime",
+      render: (_: any, record: IAppointment) =>
+        `${moment(record.start).format("MMM DD, YYYY h:mm A")} - ${moment(record.end).format("h:mm A")}`,
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      key: "duration",
+      render: (duration: number) => `${duration} minutes`,
+    },
+    {
+      title: "Fee",
+      dataIndex: "fee",
+      key: "fee",
+      render: (fee: number) => `₹${fee}`,
+    },
+    {
+      title: "Status",
+      dataIndex: "appointmentStatus",
+      key: "appointmentStatus",
+      render: (status: string) => status.charAt(0).toUpperCase() + status.slice(1),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: IAppointment) => (
+        <div className="flex gap-2">
+          {record.appointmentStatus === "booked" && (
+            <button
+              onClick={() => handleJoin(record._id, record)}
+              disabled={!isJoinable(record.start, record.end)}
+              className={`px-4 py-1 rounded-lg text-white font-medium transition-colors ${
+                isJoinable(record.start, record.end)
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Join
+            </button>
+          )}
+          {record.appointmentStatus === "booked" && (
+            <Popconfirm
+              title="Cancel Appointment"
+              description="Are you sure to cancel this appointment?"
+              onConfirm={() => handleCancel(record._id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <button
+                disabled={isCanceling || record.appointmentStatus !== "booked"}
+                className={`px-4 py-1 rounded-lg text-white font-medium transition-colors ${
+                  isCanceling ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                Cancel
+              </button>
+            </Popconfirm>
+          )}
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">My Appointments</h2>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">My Appointments</h2>
+
+         {/* Filters */}
+                <div className="mb-6 bg-white p-4 rounded-lg shadow-sm flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <FilterOutlined className="text-gray-600" />
+                    <Select
+                      placeholder="Filter by Status"
+                      style={{ width: 200 }}
+                      value={filters.appointmentStatus}
+                      onChange={(value) => handleFilterChange("appointmentStatus", value)}
+                      allowClear
+                    >
+                      <Option value="booked">Booked</Option>
+                      <Option value="cancelled">Cancelled</Option>
+                      <Option value="completed">Completed</Option>
+                      
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FilterOutlined className="text-gray-600" />
+                    <RangePicker
+                      onChange={(dates) => {
+                        if (dates && dates[0] && dates[1]) {
+                          handleFilterChange("dateRange", [moment(dates[0].toDate()), moment(dates[1].toDate())]);
+                        } else {
+                          handleFilterChange("dateRange", null);
+                        }
+                      }}
+                      format="YYYY-MM-DD"
+                    />
+                  </div>
+                  <Button
+                    type="primary"
+                    icon={<SearchOutlined />}
+                    onClick={() => fetchAppointments(currentPage)}
+                  >
+                    Apply Filters
+                  </Button>
+                </div>
+        
 
         {errorMessage && (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">{errorMessage}</div>
         )}
-        {isFetching ? (
-          <div className="text-center text-gray-500 py-4">Loading appointments...</div>
-        ) : appointments.length === 0 ? (
-          <div className="text-center text-gray-500 py-4">No appointments found.</div>
-        ) : (
-          <div className="space-y-4">
-            {appointments.map((appt) => (
-              <div
-                key={appt._id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Dr. {appt.doctorName} ({appt.doctorCategory})
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Date & Time:</span>{" "}
-                    {formatDateTime(appt.start)} - {formatDateTime(appt.end)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Duration:</span> {appt.duration} minutes
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Fee:</span> ₹{appt.fee}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Status:</span> {appt.appointmentStatus}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {appt.appointmentStatus === "booked" && (
-                    <button
-                      onClick={() => handleJoin(appt._id,appt)}
-                      disabled={!isJoinable(appt.start, appt.end)}
-                      className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-                        isJoinable(appt.start, appt.end)
-                          ? "bg-green-600 hover:bg-green-700"
-                          : "bg-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      Join
-                    </button>
-                  )}
-                  <Popconfirm
-                    title="Cancel Appointment"
-                    description="Are you sure to cancel this appointment?"
-                    onConfirm={() => handleCancel(appt._id)}
-                    okText="Yes"
-                    cancelText="No"
-                  >
-                    {appt.appointmentStatus === "booked" && (
-                      <button
-                        disabled={isCanceling || appt.appointmentStatus !== "booked"}
-                        className={`px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-                          isCanceling ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
-                        }`}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </Popconfirm>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      <div className="flex justify-center items-center mt-6 space-x-2">
-        <button
-          disabled={page === 1 || isFetching}
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          Prev
-        </button>
-        <span className="text-gray-700">
-          Page {page} of {totalPages}
-        </span>
-        <button
-          disabled={page === totalPages || isFetching}
-          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-          className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          Next
-        </button>
+        <Table
+          dataSource={appointments}
+          columns={columns}
+          rowKey="_id"
+          loading={isFetching}
+          pagination={false}
+          className="bg-white rounded-lg shadow-sm"
+        />
+
+        <div className="mt-6 flex justify-end">
+          <Pagination
+            current={currentPage}
+            total={totalPages * limit}
+            pageSize={limit}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
+        </div>
       </div>
     </div>
   );

@@ -67,6 +67,8 @@ import IDoctorAdvertisementController from "../controllers/doctor/interfaces/IAd
 import DoctorAdvertisementController from "../controllers/doctor/implementations/advertisementCtrl";
 import IDoctorPrescriptionCtrl from "../controllers/doctor/interfaces/IPrescriptionCtrl";
 import DoctorPrescriptionController from "../controllers/doctor/implementations/prescriptionCtrl";
+import IDoctorDashboardController from "../controllers/doctor/interfaces/IDashboardCtrl";
+import DoctorDashboardController from "../controllers/doctor/implementations/dashboardCtrl";
 
 
 import PaymentController from "../controllers/common/implementations/paymentCtrl"
@@ -133,6 +135,8 @@ import IDoctorAdvertisementService from "../services/doctor/interfaces/IDoctorAd
 import DoctorAdvertisementService from "../services/doctor/implementations/doctorAdvertisementServices";
 import IDoctorPrescriptionService from "../services/doctor/interfaces/IDoctorPrescriptionService";
 import DoctorPrescriptionService from "../services/doctor/implementations/doctorPrescriptionService";
+import IDoctorDashboardService from "../services/doctor/interfaces/IDoctorDashboardService";
+import DoctorDashboardService from "../services/doctor/implementations/doctorDashboardService";
 
 
 
@@ -255,6 +259,7 @@ container.bind<IDoctorPlanCtrl>("IDoctorPlanCtrl").to(DoctorPlansController);
 container.bind<IDoctorBlogController>("IDoctorBlogController").to(DoctorBlogController);
 container.bind<IDoctorAdvertisementController>("IDoctorAdvertisementController").to(DoctorAdvertisementController);
 container.bind<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl").to(DoctorPrescriptionController);
+container.bind<IDoctorDashboardController>("IDoctorDashboardController").to(DoctorDashboardController);
 
 
 
@@ -297,6 +302,7 @@ container.bind<IDoctorReportAnalysisService>("IDoctorReportAnalysisService").to(
 container.bind<IDoctorBlogService>("IDoctorBlogService").to(DoctorBlogService);
 container.bind<IDoctorAdvertisementService>("IDoctorAdvertisementService").to(DoctorAdvertisementService);
 container.bind<IDoctorPrescriptionService>("IDoctorPrescriptionService").to(DoctorPrescriptionService);
+container.bind<IDoctorDashboardService>("IDoctorDashboardService").to(DoctorDashboardService);
 
 
 

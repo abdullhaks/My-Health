@@ -7,18 +7,27 @@ import IBaseRepository from "../interfaces/IBaseRepository";
 export default class BaseRepository<T extends Document> implements IBaseRepository<T> {
   constructor(private _model: Model<T>) {}
 
-  async findOne(filter: FilterQuery<T>): Promise<T | null> {
-    try {
-      return await this._model.findOne(filter).exec();
-    } catch (error) {
-      console.error("Error finding document:", error);
-      return null;
+  async findOne(filter: FilterQuery<T>, options: { sort?: any } = {}): Promise<T | null> {
+        try {
+            let query = this._model.findOne(filter);
+            if (options.sort) {
+                query = query.sort(options.sort);
+            }
+            return await query.exec();
+        } catch (error) {
+            console.error("Error finding document:", error);
+            return null;
+        }
     }
-  }
 
-  async findAll(filter: FilterQuery<T> = {}): Promise<T[]> {
+  async findAll(filter: FilterQuery<T> = {},options: { sort?: any } = {}): Promise<T[] | []> {
     try {
-      return await this._model.find(filter).exec();
+      let query = this._model.find(filter);
+
+      if (options.sort) {
+                query = query.sort(options.sort);
+            }
+      return await query.exec() ;
     } catch (error) {
       console.error("Error finding documents:", error);
       return [];

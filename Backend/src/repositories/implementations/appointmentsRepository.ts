@@ -1,82 +1,86 @@
-import { injectable , inject } from "inversify";
-import { IAppointmentDocument } from "../../entities/appointmentEntities"; 
+import { injectable, inject } from "inversify";
+import { IAppointmentDocument } from "../../entities/appointmentEntities";
 import BaseRepository from "./baseRepository";
 import IAppointmentsRepository from "../interfaces/IAppointmentsRepository";
 
-
 @injectable()
+export default class AppointmentsRepository
+  extends BaseRepository<IAppointmentDocument>
+  implements IAppointmentsRepository
+{
+  constructor(@inject("appointmentModel") private _appointmentModel: any) {
+    super(_appointmentModel);
+  }
 
-export default class AppointmentsRepository extends BaseRepository<IAppointmentDocument> implements IAppointmentsRepository{
+  async getUserAppointments(
+    userId: string,
+    page: number,
+    limit: number
+  ): Promise<any> {
+    try {
+      const query: any = { userId: userId };
 
-    
-    constructor(
-        @inject("appointmentModel") private _appointmentModel: any,
-      
-    ) {
-        super(_appointmentModel);
-    };
+      const skip = (page - 1) * limit;
 
-    async getUserAppointments(userId:string,page: number,limit: number): Promise<any> {
-        try {
-            const query: any = {userId: userId };
+      const appointments = await this._appointmentModel
+        .find(query)
+        .skip(skip)
+        .limit(limit);
 
-            const skip = (page - 1) * limit;
+      const total = await this._appointmentModel.countDocuments(query);
+      return {
+        appointments,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch users");
+    }
+  }
 
-            const appointments = await this._appointmentModel
-                .find(query)
-                .skip(skip)
-                .limit(limit);
+  async getAppointments(page: number, limit: number): Promise<any> {
+    try {
+      const query: any = {};
 
-                const total = await this._appointmentModel.countDocuments(query);
-            return {
-                appointments,
-                totalPages: Math.ceil(total / limit),
-            };
-        } catch (error) {
-            console.log(error);
-            throw new Error("Failed to fetch users");
-        }
-    };
+      const skip = (page - 1) * limit;
 
+      const appointments = await this._appointmentModel
+        .find(query)
+        .skip(skip)
+        .limit(limit);
 
-    async getAppointments(page: number,limit: number): Promise<any> {
-        try {
-            const query: any = {};
+      const total = await this._appointmentModel.countDocuments(query);
+      return {
+        appointments,
+        totalPages: Math.ceil(total / limit),
+      };
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to fetch users");
+    }
+  }
 
-            const skip = (page - 1) * limit;
-
-            const appointments = await this._appointmentModel
-                .find(query)
-                .skip(skip)
-                .limit(limit);
-
-                const total = await this._appointmentModel.countDocuments(query);
-            return {
-                appointments,
-                totalPages: Math.ceil(total / limit),
-            };
-        } catch (error) {
-            console.log(error);
-            throw new Error("Failed to fetch users");
-        }
-    };
-
-
-    async getAllAppointments(page: number, limit: number, query: any = {}): Promise<any> {
+  async getAllAppointments(
+    page: number,
+    limit: number,
+    query: any = {}
+  ): Promise<any> {
     try {
       const skip = (page - 1) * limit;
-      const appointments = await await this._appointmentModel.find(query)
+      const appointments = await this._appointmentModel
+        .find(query)
+        .sort({ start: 1 }) // Sort by start time ascending
         .skip(skip)
         .limit(limit)
-        .populate("userId", "name email") // Assuming userId references a User model with name and email
-        .populate("doctorId", "name category") // Assuming doctorId references a Doctor model with name and category
+        .populate("userId", "name email")
+        .populate("doctorId", "name category")
         .lean();
 
-      const total = await  this._appointmentModel.countDocuments(query);
+      const total = await this._appointmentModel.countDocuments(query);
       const totalPages = Math.ceil(total / limit);
 
       return {
-        appointments: appointments.map((appointment:any) => ({
+        appointments: appointments.map((appointment: any) => ({
           _id: appointment._id.toString(),
           userId: appointment.userId.toString(),
           userName: appointment.userName,
@@ -103,7 +107,7 @@ export default class AppointmentsRepository extends BaseRepository<IAppointmentD
       console.error("Error fetching appointments:", err);
       throw new Error("Failed to fetch appointments");
     }
-  }
+  };
 
-
+  
 }

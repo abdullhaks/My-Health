@@ -82,11 +82,11 @@ const UserProfile = () => {
     toast.success("Refer ID copied to clipboard!");
   };
 
-  const handleCopyMHID = () => {
-    navigator.clipboard.writeText("2342422");
-    // You could add a toast notification here
-    toast.success("MH ID copied to clipboard!");
-  };
+  // const handleCopyMHID = () => {
+  //   navigator.clipboard.writeText("2342422");
+  //   // You could add a toast notification here
+  //   toast.success("MH ID copied to clipboard!");
+  // };
 
   // Function to handle profile update
   const handleProfileUpdate = async(updatedData:any) => {
@@ -192,7 +192,7 @@ const UserProfile = () => {
               
               <div className="mt-2 text-sm text-gray-500 space-y-1">
                 <div className="flex items-center gap-2 justify-center md:justify-start">
-                  <span>refer id : www.myhealth.com/id:{profileData._id}</span>
+                  <span>referral : www.myhealth.com/id:{profileData._id}</span>
                   <button 
                     onClick={handleCopyReferID}
                     className="text-blue-500 hover:text-blue-700 cursor-pointer"
@@ -203,14 +203,8 @@ const UserProfile = () => {
                 </div>
                 
                 <div className="flex items-center gap-2 justify-center md:justify-start">
-                  <span>mh-id : 2342422</span>
-                  <button 
-                    onClick={handleCopyMHID}
-                    className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                    title="Copy MH ID"
-                  >
-                    <FiCopy />
-                  </button>
+                  <span>medical tags : {profileData.medicalTags || ''} </span>
+                  
                 </div>
               </div>
             </div>
@@ -299,6 +293,7 @@ const UserProfile = () => {
         onSave={handleProfileUpdate}
         initialData={{
           fullName: profileData.fullName,
+          medicalTags:profileData.medicalTags,
           location: profileData.location,
           dob: profileData.dob,
           phone: profileData.phone,

@@ -24,7 +24,7 @@ export default class UserProfileController implements IUserProfileCtrl {
 
             const userData = req.body;
             const dobStr = new Date(userData.dob).toLocaleDateString();
-
+ 
             const [month, day, year] = dobStr.split("/");
             userData.dob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 

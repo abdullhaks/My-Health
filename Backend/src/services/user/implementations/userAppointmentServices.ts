@@ -34,7 +34,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
     page: number,
     limit: number
   ): Promise<{ doctors: IDoctor[] }> {
-    const doctors = await this._appointmentRepository.fetchingDoctors(
+    const response = await this._doctorRepository.fetchingDoctors(
       search,
       location,
       category,
@@ -43,9 +43,9 @@ export default class UserAppointmentService implements IUserAppointmentService {
       limit
     );
 
-    if (doctors.doctors.length > 0) {
+    if (response.doctors.length > 0) {
       const result = await Promise.all(
-        doctors.doctors.map(async (doctor: IDoctor) => {
+        response.doctors.map(async (doctor: IDoctor) => {
           const { password, ...userWithoutPassword } = doctor.toObject();
           if (userWithoutPassword.profile) {
             userWithoutPassword.profile = await getSignedImageURL(
@@ -57,24 +57,34 @@ export default class UserAppointmentService implements IUserAppointmentService {
       );
 
       console.log("doctors list from backend.......", result);
-      return { doctors: result };
-    }
 
+     
+      response.doctors = result;
+      return response;
+    }
     return { doctors: [] };
   }
 
   async getUserAppointments(
     userId: string,
-    pageNumber: number,
-    limitNumber: number
-  ): Promise<IAppointment[]> {
+    page: number,
+    limit: number,
+    filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
+  ): Promise<{ appointments: IAppointment[]; totalPages: number }> {
     console.log("userid from service...", userId);
 
-    const appointments = await this._appointmentsRepository.getUserAppointments(
-      userId,
-      pageNumber,
-      limitNumber
-    );
+    const query: any = { userId };
+    if (filters.appointmentStatus) {
+      query.appointmentStatus = filters.appointmentStatus;
+    }
+    if (filters.startDate && filters.endDate) {
+      query.date = {
+        $gte: filters.startDate,
+        $lte: filters.endDate,
+      };
+    }
+
+    const appointments = await this._appointmentsRepository.getAllAppointments(page, limit, query);
     console.log("appointments from service...", appointments);
 
     return appointments;
@@ -108,6 +118,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
         amount: response.fee,
         paymentFor: "refund",
         userId: response.userId,
+        doctorId:response.doctorId
       }); 
 
       if (updateWalet) {
@@ -167,6 +178,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
       amount: data.fee,
       paymentFor: "appointment",
       userId: userUpdate?._id.toString(),
+      doctorId: data.doctorId
     });
 
     console.log("updated user is ......", userUpdate);

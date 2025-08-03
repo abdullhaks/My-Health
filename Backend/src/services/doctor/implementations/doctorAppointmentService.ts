@@ -12,16 +12,30 @@ export default class DoctorAppointmentService implements IDoctorAppointmentServi
       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository
     ){   }
 
-async getDoctorAppointments(doctorId:string):Promise<IAppointment[]>{
-  console.log("userid from service...",doctorId);
+async getDoctorAppointments(
+    doctorId: string,
+    page: number,
+    limit: number,
+    filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
+  ): Promise<{ appointments: IAppointment[]; totalPages: number }> {
+    console.log("Doctor ID from service...", doctorId);
 
-  const appointments = await this._appointmentsRepository.findAll({doctorId:doctorId});
-  console.log("appointments from service...",appointments);
+    const query: any = { doctorId };
+    if (filters.appointmentStatus) {
+      query.appointmentStatus = filters.appointmentStatus;
+    }
+    if (filters.startDate && filters.endDate) {
+      query.date = {
+        $gte: filters.startDate,
+        $lte: filters.endDate,
+      };
+    }
 
+    const appointments = await this._appointmentsRepository.getAllAppointments(page, limit, query);
+    console.log("Appointments from service...", appointments);
 
-  return appointments;
-
-}
+    return appointments;
+  }
 
 
 }

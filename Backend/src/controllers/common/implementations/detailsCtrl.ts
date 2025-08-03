@@ -35,4 +35,26 @@ private _detailsService: IDetailsService;
     }
   }
 
+
+
+   async getUser(req:Request,res:Response):Promise<void>{
+
+    try{
+
+        const userId = req.query.userId; 
+        console.log("user id is ",userId);
+      if (userId) {
+      const response = await this._detailsService.getUser(userId.toString());
+          res.status(HttpStatusCode.OK).json(response);
+          return
+    };
+
+      res.status(HttpStatusCode.BAD_REQUEST).json({ message: "user ID is required" });
+        return 
+    }catch(error){
+      console.error("Error fetching user details:", error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to fetch user details" });
+    }
+  }
+
 }

@@ -1,8 +1,7 @@
 import BaseRepository from "../implementations/baseRepository";
-import { IDoctorDocument } from "../../entities/doctorEntities";
 
 
-export default interface IAppointmentRepository extends BaseRepository<IDoctorDocument>{
+export default interface IAppointmentRepository extends BaseRepository<any>{
 
     fetchingDoctors(
   search: string,

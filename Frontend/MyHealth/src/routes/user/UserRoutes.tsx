@@ -27,6 +27,7 @@ import VideoCall from "../../sharedComponents/VideoCall";
 import { UserReportAnalysis } from "../../components/userComponents/UserReportAnalysis";
 import UserBlogs from "../../components/userComponents/userBlogs";
 import UserBlogDetails from "../../components/userComponents/UserBlog";
+import UserDoctorDetails from "../../components/userComponents/UserDoctorDetails";
 
 const UserRoutes = () => {
   return (
@@ -61,6 +62,8 @@ const UserRoutes = () => {
           <Route path="report-analysis" element={< UserReportAnalysis/>} />
           <Route path="blogs" element={< UserBlogs/>} />
           <Route path="blog" element={< UserBlogDetails/>} />
+          <Route path="doctor-details/:doctorId" element={< UserDoctorDetails/>} />
+          
           
 
           

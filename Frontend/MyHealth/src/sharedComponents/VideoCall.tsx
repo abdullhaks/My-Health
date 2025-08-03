@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import PeerService, { initializeSocket } from "../services/peerServices";
 import { useLocation, useParams } from "react-router-dom";
-import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs ,message as antAlert } from "antd";
+import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs ,message as antAlert, Card, Badge, Divider, Tag, Space, Timeline, Descriptions } from "antd";
 import {AudioOutlined,AudioMutedOutlined,VideoCameraOutlined, VideoCameraFilled,PhoneOutlined,
-  MessageOutlined, SendOutlined,SnippetsOutlined,PlusOutlined,MinusCircleOutlined} from '@ant-design/icons';
+  MessageOutlined, SendOutlined,SnippetsOutlined,PlusOutlined,MinusCircleOutlined, UserOutlined, CalendarOutlined, MedicineBoxOutlined, AlertOutlined, HistoryOutlined} from '@ant-design/icons';
 import { io } from "socket.io-client";
-import { getPrescriptions,submitPrescription} from "../api/doctor/doctorApi";
+import { getPrescriptions,submitPrescription , getUser} from "../api/doctor/doctorApi";
 
 interface VideoCallProps {
   role: "doctor" | "user";
@@ -36,70 +36,6 @@ interface Prescription {
   notes?: string;
   createdAt?: Date;
 };
-
-let dummy = [
-  {
-    "_id": "prescription_001",
-    "appointmentId": "appointment_123",
-    "userId": "user_456",
-    "doctorId": "doctor_789",
-    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
-    "medications": [
-      {
-        "name": "Ibuprofen",
-        "dosage": "200 mg",
-        "frequency": "Twice daily",
-        "duration": "5 days",
-        "instructions": "Take with food"
-      },
-      {
-        "name": "Amoxicillin",
-        "dosage": "500 mg",
-        "frequency": "Three times daily",
-        "duration": "7 days",
-        "instructions": "Complete full course"
-      }
-    ],
-    "notes": "Follow up in one week if symptoms persist.",
-    "updatedAt": "2025-07-20T10:30:00Z"
-  },
-  {
-    "_id": "prescription_002",
-    "appointmentId": "appointment_124",
-    "userId": "user_456",
-    "doctorId": "doctor_789",
-    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
-    "medications": [
-      {
-        "name": "Loratadine",
-        "dosage": "10 mg",
-        "frequency": "Once daily",
-        "duration": "10 days",
-        "instructions": "Take in the morning"
-      }
-    ],
-    "notes": "Avoid allergens and monitor for side effects.",
-    "updatedAt": "2025-07-15T14:00:00Z"
-  },
-  {
-    "_id": "prescription_003",
-    "appointmentId": "appointment_125",
-    "userId": "user_456",
-    "doctorId": "doctor_790",
-    "medicalCondition":"dfgdg dfgdfg dgdfgd dfgdggdygdfv fghfdgd",
-    "medications": [
-      {
-        "name": "Paracetamol",
-        "dosage": "500 mg",
-        "frequency": "Every 6 hours as needed",
-        "duration": "3 days",
-        "instructions": "Do not exceed 4 doses in 24 hours"
-      }
-    ],
-    "notes": "Rest and stay hydrated.",
-    "updatedAt": "2025-07-10T09:15:00Z"
-  }
-]
 
 const VideoCall = ({ role }: VideoCallProps) => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
@@ -134,12 +70,27 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const [remoteVideoStatus, setRemoteVideoStatus] = useState("Connecting...");
   const [form] = Form.useForm();
   const location = useLocation();
-  const {appointment} = location.state
+  const {appointment} = location.state;
+  const [patient,setPatient] = useState<any>({});
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+
+   const calculateAge = (dateOfBirth:any) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
   };
 
   const toggleAudio = () => {
@@ -237,9 +188,17 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
     try {
       const response = await getPrescriptions(userId);
+      const patientResp = await getUser(userId);
+
+      console.log("prescripton are....",response);
+      console.log("patientResp are....",patientResp);
+
+      
       if(response) antAlert.info("prescriptions fetched");
 
       setPrescriptions(response);
+      setPatient(patientResp || {});
+
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
     }
@@ -557,7 +516,12 @@ const VideoCall = ({ role }: VideoCallProps) => {
       {/* Prescription Modal */}
       {role === "doctor" && (
         <Modal
-          title="Prescription Management"
+          title={
+            <div className="flex items-center space-x-2">
+              <MedicineBoxOutlined className="text-blue-600" />
+              <span>Prescription Management</span>
+            </div>
+          }
           open={showPrescription}
           onCancel={togglePrescription}
           footer={null}
@@ -572,8 +536,69 @@ const VideoCall = ({ role }: VideoCallProps) => {
             }
           }}
         >
+          {/* Patient Information Card */}
+          <Card className="mb-4" style={{ backgroundColor: '#f8fafc' }}>
+            <div className="flex items-start space-x-4">
+
+              <img
+                  src={patient.profile || 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png'}
+                  alt="Patient"
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+             
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {patient?.fullName || patient?.name || 'Patient Name'}
+                  </h3>
+                  <Badge 
+                    count={prescriptions.length} 
+                    showZero 
+                    style={{ backgroundColor: '#52c41a' }}
+                    title="Total Prescriptions"
+                  />
+                </div>
+                
+                <Descriptions size="small" column={2}>
+                  <Descriptions.Item label="Age">
+                    {calculateAge(patient?.dob) || 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Gender">
+                    {patient?.gender || 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Phone">
+                    {patient?.phone || 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    {patient?.email || 'N/A'}
+                  </Descriptions.Item>
+                </Descriptions>
+
+                {patient?.medicalTags && (
+                  <div className="mt-3">
+                    <div className="flex items-center mb-2">
+                      <AlertOutlined className="text-orange-500 mr-2" />
+                      <span className="font-medium text-gray-700">Medical Alerts:</span>
+                    </div>
+                    <Tag color="orange" className="text-sm px-3 py-1">
+                      {patient.medicalTags}
+                    </Tag>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+
           <Tabs defaultActiveKey="1">
-            <Tabs.TabPane tab="Add New Prescription" key="1">
+            <Tabs.TabPane 
+              tab={
+                <span>
+                  <PlusOutlined />
+                  Add New Prescription
+                </span>
+              } 
+              key="1"
+            >
               <Form
                 form={form}
                 onFinish={handleAddPrescription}
@@ -583,65 +608,87 @@ const VideoCall = ({ role }: VideoCallProps) => {
                   name="medicalCondition"
                   label="Medical Condition"
                 >
-                  <Input.TextArea rows={2} placeholder="Medical conditions..." />
+                  <Input.TextArea rows={2} placeholder="Describe the medical condition..." />
                 </Form.Item>
                 <Form.List name="medications">
                   {(fields, { add, remove }) => (
                     <>
                       {fields.map(({ key, name, ...restField }) => (
-                        <div key={key} className="flex space-x-2 mb-2">
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'name']}
-                            rules={[{ required: true, message: 'Missing medication name' }]}
-                            className="flex-1"
-                          >
-                            <Input placeholder="Medication Name" />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'dosage']}
-                            rules={[{ required: true, message: 'Missing dosage' }]}
-                            className="w-1/12"
-                          >
-                            <Input placeholder="Dosage" />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'frequency']}
-                            rules={[{ required: true, message: 'Missing frequency' }]}
-                            className="w-1/10"
-                          >
-                            <Input placeholder="Frequency" />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'duration']}
-                            rules={[{ required: true, message: 'Missing duration' }]}
-                            className="w-1/6"
-                          >
-                            <Input placeholder="Duration" />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'instructions']}
-                            className="flex-1"
-                          >
-                            <Input placeholder="Instructions (optional)" />
-                          </Form.Item>
-                          <Button
-                            danger
-                            onClick={() => remove(name)}
-                            icon={<MinusCircleOutlined />}
-                          />
-                        </div>
+                        <Card key={key} size="small" className="mb-3" style={{ backgroundColor: '#fafafa' }}>
+                          <div className="grid grid-cols-12 gap-3 items-end">
+                            <div className="col-span-3">
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'name']}
+                                label="Medication"
+                                rules={[{ required: true, message: 'Required' }]}
+                                className="mb-0"
+                              >
+                                <Input placeholder="Medicine name" />
+                              </Form.Item>
+                            </div>
+                            <div className="col-span-2">
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'dosage']}
+                                label="Dosage"
+                                rules={[{ required: true, message: 'Required' }]}
+                                className="mb-0"
+                              >
+                                <Input placeholder="e.g., 500mg" />
+                              </Form.Item>
+                            </div>
+                            <div className="col-span-2">
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'frequency']}
+                                label="Frequency"
+                                rules={[{ required: true, message: 'Required' }]}
+                                className="mb-0"
+                              >
+                                <Input placeholder="e.g., 2x daily" />
+                              </Form.Item>
+                            </div>
+                            <div className="col-span-2">
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'duration']}
+                                label="Duration"
+                                rules={[{ required: true, message: 'Required' }]}
+                                className="mb-0"
+                              >
+                                <Input placeholder="e.g., 7 days" />
+                              </Form.Item>
+                            </div>
+                            <div className="col-span-2">
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'instructions']}
+                                label="Instructions"
+                                className="mb-0"
+                              >
+                                <Input placeholder="Optional notes" />
+                              </Form.Item>
+                            </div>
+                            <div className="col-span-1">
+                              <Button
+                                danger
+                                onClick={() => remove(name)}
+                                icon={<MinusCircleOutlined />}
+                                size="small"
+                              />
+                            </div>
+                          </div>
+                        </Card>
                       ))}
+
                       <Form.Item>
                         <Button
                           type="dashed"
                           onClick={() => add()}
                           block
                           icon={<PlusOutlined />}
+                          size="large"
                         >
                           Add Medication
                         </Button>
@@ -651,49 +698,133 @@ const VideoCall = ({ role }: VideoCallProps) => {
                 </Form.List>
                 <Form.Item
                   name="notes"
-                  label="Additional Notes"
+                  label="Additional Notes & Instructions"
                 >
-                  <Input.TextArea rows={4} placeholder="Additional notes..." />
+                  <Input.TextArea rows={4} placeholder="Additional notes, follow-up instructions, warnings..." />
                 </Form.Item>
                 <Form.Item>
-                  <Button type="primary" htmlType="submit" block>
+                  <Button type="primary" htmlType="submit" block size="large">
                     Save Prescription
                   </Button>
                 </Form.Item>
               </Form>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="Previous Prescriptions" key="2">
+            
+            <Tabs.TabPane 
+              tab={
+                <span>
+                  <HistoryOutlined />
+                   Medical History ({prescriptions.length})
+                </span>
+              } 
+              key="2"
+            >
+              {prescriptions.length === 0 ? (
+                <div className="text-center py-0">
+                  <MedicineBoxOutlined className="text-4xl text-gray-300 mb-4" />
+                  <p className="text-gray-500 text-lg">No previous prescriptions found</p>
+                  <p className="text-gray-400 text-sm">This patient's medical history will appear here</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Timeline mode="left">
+                    {prescriptions
+                      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+                      .map((prescription, index) => (
+                        <Timeline.Item
+                          key={prescription._id || index}
+                          dot={<MedicineBoxOutlined className="text-blue-600" />}
+                          label={
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-700">
+                                {prescription.createdAt 
+                                  ? new Date(prescription.createdAt).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })
+                                  : 'Date unknown'
+                                }
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {prescription.createdAt 
+                                  ? new Date(prescription.createdAt).toLocaleTimeString('en-US', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })
+                                  : ''
+                                }
+                              </div>
+                            </div>
+                          }
+                        >
+                          <Card 
+                            className="ml-4"
+                            size="small"
+                            style={{ 
+                              borderLeft: '4px solid #1890ff',
+                              backgroundColor: index === 0 ? '#f6ffed' : '#ffffff'
+                            }}
+                          >
+                            {prescription.medicalCondition && (
+                              <div className="mb-3">
+                                <Tag color="blue" className="mb-2">Medical Condition</Tag>
+                                <p className="text-gray-700 text-sm">{prescription.medicalCondition}</p>
+                              </div>
+                            )}
+                            
+                            <div className="mb-3">
+                              <div className="flex items-center mb-2">
+                                <MedicineBoxOutlined className="text-green-600 mr-2" />
+                                <span className="font-medium text-gray-700">Medications Prescribed:</span>
+                              </div>
+                              <div className="space-y-2">
+                                {prescription.medications.map((med, medIndex) => (
+                                  <Card key={medIndex} size="small" className="bg-gray-50">
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <div>
+                                        <div className="font-semibold text-blue-700">{med.name}</div>
+                                        <div className="text-sm text-gray-600">
+                                          <span className="inline-block w-28">Dosage: {med.dosage}</span> 
+                                        </div>
+                                        <div className="text-sm text-gray-600">
+                                          <span className="inline-block w-28">Frequency: {med.frequency}</span>
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-600">
+                                          <span className="inline-block w-16">Duration:</span> {med.duration}
+                                        </div>
+                                        {med.instructions && (
+                                          <div className="text-sm text-gray-600 mt-1">
+                                            <span className="inline-block w-16">Notes:</span> 
+                                            <span className="italic">{med.instructions}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </Card>
+                                ))}
+                              </div>
+                            </div>
 
-            { prescriptions.length == 0 ?
-              <div className="text-center text-gray-500 py-4">No Previous Prescriptions...</div>:
-
-              <List
-                dataSource={prescriptions}
-                renderItem={(prescription) => (
-                  <List.Item>
-                    <div className="w-full">
-                      <div className="text-sm font-medium">
-                        Date: {prescription.createdAt?new Date(prescription.createdAt).toLocaleDateString():""}
-                      </div>
-                      {prescription.medications.map((med, index) => (
-                        <div key={index} className="ml-4 mt-2">
-                          <div><strong>Name:</strong> {med.name}</div>
-                          <div><strong>Dosage:</strong> {med.dosage}</div>
-                          <div><strong>Frequency:</strong> {med.frequency}</div>
-                          <div><strong>Duration:</strong> {med.duration}</div>
-                          {med.instructions && <div><strong>Instructions:</strong> {med.instructions}</div>}
-                        </div>
+                            {prescription.notes && (
+                              <div className="mt-3 p-3 bg-yellow-50 rounded-md border-l-4 border-yellow-400">
+                                <div className="flex items-start">
+                                  <AlertOutlined className="text-yellow-600 mr-2 mt-1" />
+                                  <div>
+                                    <div className="font-medium text-yellow-800 mb-1">Doctor's Notes:</div>
+                                    <p className="text-yellow-700 text-sm">{prescription.notes}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </Card>
+                        </Timeline.Item>
                       ))}
-                      {prescription.notes && (
-                        <div className="mt-2"><strong>Notes:</strong> {prescription.notes}</div>
-                      )}
-                    </div>
-                  </List.Item>
-                )}
-              />
-                 
-            }
-              
+                  </Timeline>
+                </div>
+              )}
             </Tabs.TabPane>
           </Tabs>
         </Modal>

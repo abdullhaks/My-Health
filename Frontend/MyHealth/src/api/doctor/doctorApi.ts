@@ -251,10 +251,15 @@ export const getSessions = async (doctorId: string) => {
   }
 };
 
-export const getDoctorAppointments = async (doctorId: string) => {
+export const getDoctorAppointments = async (doctorId: string,page:number,limit:number,filter:{ appointmentStatus?: string; startDate?: string; endDate?: string }) => {
   try {
     const response = await doctorInstance.get(ROUTES.doctor.getAppointments, {
-      params: { doctorId: doctorId },
+      params: { 
+        doctorId: doctorId,
+        page,
+        limit,
+        filter
+      },
     });
 
     console.log("response data is ....", response.data);
@@ -476,4 +481,38 @@ export const submitPrescription = async (prescriptionData:any) => {
     console.log("Error in submiting prescription");
     throw error;
   }
+};
+
+export const getUser = async (userId:string) => {
+  try{
+
+   
+    const response = await doctorInstance.get(ROUTES.doctor.getUser,{
+      params:{userId:userId} });
+
+      return response.data;
+
+  }catch(error){
+    console.log("Error in get user detials");
+    throw error;
+  }
+  
 }
+
+
+
+export const getDashboardContent = async (doctorId: string) => {
+  try {
+
+    console.log(" doctor id ... is ...",doctorId);
+    
+    const response = await doctorInstance.get(ROUTES.doctor.dashboard,{
+      params:{doctorId:doctorId}
+    });
+    console.log('Dashboard API response:', response.data);
+    return response.data.data;
+  } catch (err) {
+    console.error('Error fetching dashboard content:', err);
+    throw new Error('Failed to fetch dashboard content');
+  }
+};

@@ -13,7 +13,12 @@ export default interface IUserAppointmentService {
   limit: number
 ): Promise<{doctors: IDoctor[] }> ,
 
-getUserAppointments(userId:string,pageNumber:number, limitNumber:number):Promise<IAppointment[]>,
+getUserAppointments(
+    userId:string,
+    page: number,
+    limit: number,
+    filters: { appointmentStatus?: string; startDate?: string; endDate?: string }):Promise<{ appointments: IAppointment[]; totalPages: number }>,
+
 cancelAppointment(appointmentId:string):Promise<{status:boolean;message:string;updatedUser:Partial<IUser>}>,
 walletPayment(data:any):Promise<IAppointment>,
 };

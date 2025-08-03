@@ -4,6 +4,11 @@ import { inject, injectable } from "inversify";
 import IUserAppointmentService from "../../../services/user/interfaces/IUserAppointmentServices";
 import { HttpStatusCode } from "../../../utils/enum";
 
+interface AppointmentFilter {
+  appointmentStatus?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
 injectable();
 
@@ -45,12 +50,35 @@ export default class UserAppointmentController implements IUserAppointmentContro
 async getAppointments (req: Request, res: Response): Promise<void> {
 
 try{
-  const {userId,page,limit} = req.query
-  console.log("user id is///",userId);
-  const pageNumber = page ? parseInt(page as string, 10) : 1;
-  const limitNumber = limit ? parseInt(limit as string, 10) : 10;
+  const { userId, page = "1", limit = "10", filter } = req.query;
+  
+        // Parse and validate filter
+        let parsedFilter: AppointmentFilter = {};
+        if (typeof filter === "string") {
+          try {
+            const filterObj = JSON.parse(filter);
+            parsedFilter = {
+              appointmentStatus: typeof filterObj.appointmentStatus === "string" ? filterObj.appointmentStatus : undefined,
+              startDate: typeof filterObj.startDate === "string" ? filterObj.startDate : undefined,
+              endDate: typeof filterObj.endDate === "string" ? filterObj.endDate : undefined,
+            };
+          } catch (err) {
+            console.error("Error parsing filter:", err);
+            res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid filter format" });
+            return;
+          }
+        } else if (typeof filter === "object" && filter !== null && !Array.isArray(filter)) {
+          // If filter is already an object (unlikely with query params, but handling for completeness)
+          parsedFilter = {
+            appointmentStatus: typeof filter.appointmentStatus === "string" ? filter.appointmentStatus : undefined,
+            startDate: typeof filter.startDate === "string" ? filter.startDate : undefined,
+            endDate: typeof filter.endDate === "string" ? filter.endDate : undefined,
+          };
+        }
 
-  const appointments = await this._appointmentService.getUserAppointments(String(userId), pageNumber, limitNumber);
+  const appointments = await this._appointmentService.getUserAppointments(String(userId), Number(page),
+        Number(limit),
+        parsedFilter);
 
     res.status(HttpStatusCode.OK).json(appointments);
 

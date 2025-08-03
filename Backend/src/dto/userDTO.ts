@@ -21,6 +21,7 @@ export interface IUserDocument extends Document{
     isBlocked:boolean;
     isVerified:boolean;
     bmi:string;
+    medicalTags:string;
     latestHealthSummary:string;
     walletBalance:number;
     tags:string[];
