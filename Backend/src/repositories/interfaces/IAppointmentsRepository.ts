@@ -6,5 +6,6 @@ export default interface IAppointmentsRepository extends BaseRepository<IAppoint
 getUserAppointments(userId:string,page: number,limit: number): Promise<any>,
 getAppointments(page: number,limit: number): Promise<any>,
 getAllAppointments(page: number, limit: number, query?: any): Promise<any>;
+getAllAppointmentsAdmin(page: number, limit: number, query?: any): Promise<any>;
 
 }

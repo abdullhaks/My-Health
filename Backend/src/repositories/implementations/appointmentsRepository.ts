@@ -109,5 +109,56 @@ export default class AppointmentsRepository
     }
   };
 
+
+   async getAllAppointmentsAdmin(
+    page: number,
+    limit: number,
+    query: any = {}
+  ): Promise<any> {
+    try {
+      const skip = (page - 1) * limit;
+      const appointments = await this._appointmentModel
+        .find(query)
+        .sort({ createdAt: -1 }) // Sort by start time ascending
+        .skip(skip)
+        .limit(limit)
+        .populate("userId", "name email")
+        .populate("doctorId", "name category")
+        .lean();
+
+      const total = await this._appointmentModel.countDocuments(query);
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        appointments: appointments.map((appointment: any) => ({
+          _id: appointment._id.toString(),
+          userId: appointment.userId.toString(),
+          userName: appointment.userName,
+          userEmail: appointment.userEmail,
+          doctorId: appointment.doctorId.toString(),
+          doctorName: appointment.doctorName,
+          doctorCategory: appointment.doctorCategory,
+          date: appointment.date,
+          start: appointment.start,
+          end: appointment.end,
+          duration: appointment.duration,
+          fee: appointment.fee,
+          paymentStatus: appointment.paymentStatus,
+          paymentType: appointment.paymentType,
+          appointmentStatus: appointment.appointmentStatus,
+          callStartTime: appointment.callStartTime,
+          createdAt: appointment.createdAt,
+          updatedAt: appointment.updatedAt,
+          slotId: appointment.slotId,
+        })),
+        totalPages,
+      };
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+      throw new Error("Failed to fetch appointments");
+    }
+  };
+
+
   
 }

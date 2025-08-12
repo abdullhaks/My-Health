@@ -71,15 +71,13 @@ export default class PaymentService implements IPaymentService {
               throw new Error("Doctor not found.");
             };
 
-            const appointmentsWithSameDoc =await this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorId});
+            // const appointmentsWithSameDoc =await this._appointmentsRepository.findAll({userId:metadata.userId , doctorId:metadata.doctorId});
 
-            if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
+            // if(appointmentsWithSameDoc && appointmentsWithSameDoc.length > 3){
 
 
-              throw new Error("with in a week you can only make 3 appointment with same doctor");
-
-              
-            }
+            //   throw new Error("with in a week you can only make 3 appointment with same doctor");
+            // }
 
             var tempDate = new Date(metadata.start).toISOString().split("T")[0];
 

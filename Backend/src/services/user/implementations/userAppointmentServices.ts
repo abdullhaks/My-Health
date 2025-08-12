@@ -186,6 +186,10 @@ export default class UserAppointmentService implements IUserAppointmentService {
     if (typeof data.fee !== "number") {
       throw new Error("Fee is required for wallet payment");
     }
+
+    // Generate a unique transactionId for wallet payment
+    const transactionId = `wallet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     const userUpdate = await this._userRepository.update(data.userId, {
       $inc: { walletBalance: -data.fee },
     });
@@ -200,7 +204,8 @@ export default class UserAppointmentService implements IUserAppointmentService {
       amount: data.fee,
       paymentFor: "appointment",
       userId: userUpdate?._id.toString(),
-      doctorId: data.doctorId
+      doctorId: data.doctorId,
+      transactionId
     });
 
     console.log("updated user is ......", userUpdate);

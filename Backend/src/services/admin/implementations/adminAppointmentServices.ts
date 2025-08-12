@@ -41,7 +41,7 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
       };
     }
 
-    const appointments = await this._appointmentsRepository.getAllAppointments(pageNumber, limitNumber, query);
+    const appointments = await this._appointmentsRepository.getAllAppointmentsAdmin(pageNumber, limitNumber, query);
     console.log("appointments from service...", appointments);
 
     return appointments;

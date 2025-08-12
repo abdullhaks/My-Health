@@ -21,6 +21,7 @@ constructor(
       const skip = (page - 1) * limit;
       const transactions = await this._transactionModel
         .find(query)
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
