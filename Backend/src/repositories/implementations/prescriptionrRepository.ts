@@ -14,4 +14,18 @@ export default class PrescriptionRepository extends BaseRepository<IPrescription
         super(_prescriptionModel)
     }
     
+    async uptadeOneWithUpsert(
+        filter: any,
+        update: any
+    ): Promise<IPrescriptionDocument> {
+        try {
+            const options = { upsert: true, new:true, strict: false };
+            const updatedDocument = await this._prescriptionModel.findOneAndUpdate(filter, update, options);
+            return updatedDocument;
+        } catch (err) {
+           console.log("Error updating document",err);
+           throw err;
+        }
+    
+    };
 }

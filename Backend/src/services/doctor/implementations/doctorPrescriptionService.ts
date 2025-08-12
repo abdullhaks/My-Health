@@ -19,7 +19,7 @@ export default class DoctorPrescriptionService implements IDoctorPrescriptionSer
 
     async submitPrescription(prescriptionData: any): Promise<any> {
         
-        const response = await this._prescriptionRepository.create(prescriptionData);
+        const response = await this._prescriptionRepository.uptadeOneWithUpsert({appointmentId:prescriptionData.appointmentId},prescriptionData);
         return response;
     }
 

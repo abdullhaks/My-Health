@@ -245,8 +245,10 @@ export const setupSocket = (io: Server, container: Container) => {
       socket.to(appointmentId).emit("mute", { userId, type, muted });
     });
 
-    socket.on("endCall", async (appointmentId: string) => {
+    socket.on("endCall", async (appointmentId: string,role:string) => {
       try {
+        if(role!="user"){
+     
         await appointmentsRepository.update(appointmentId, {
           callEndTime: new Date(),
           appointmentStatus: "completed",
@@ -254,10 +256,13 @@ export const setupSocket = (io: Server, container: Container) => {
         socket.to(appointmentId).emit("callEnded", { userId });
         rooms.delete(appointmentId);
         console.log(`Call ended for appointment ${appointmentId} by user ${userId}. Room cleaned up.`);
+
+      }
       } catch (err) {
         console.error(`Error ending call for ${appointmentId} by ${userId}:`, err);
         socket.emit("error", { message: "Failed to end call." });
-      }
+      
+    }
     });
 
     socket.on("disconnect", () => {

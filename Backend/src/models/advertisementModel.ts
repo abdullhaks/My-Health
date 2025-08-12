@@ -63,6 +63,7 @@ const advertisementSchema = new Schema<IAdvertisementDocument>(
 
 );
 
+advertisementSchema.index({ location: "2dsphere" });
 
 export default model<IAdvertisementDocument>("Advertisement",advertisementSchema);
 

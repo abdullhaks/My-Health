@@ -417,10 +417,12 @@ export const getBlogs = async (search: string, page: number, limit: number) => {
   }
 };
 
-export const getDashboardContent = async (days: number) => {
+export const getDashboardContent = async (days:number,userId: string,latitude:number,longitude:number) => {
   try {
+
+    console.log("lati and longi ... are ...",latitude,longitude);
     const response = await userInstance.get(ROUTES.user.dashboard, {
-      params: { days },
+      params: { userId,days,latitude,longitude},
     });
     console.log('Dashboard API response:', response.data);
     return response.data.data;
@@ -429,3 +431,20 @@ export const getDashboardContent = async (days: number) => {
     throw new Error('Failed to fetch dashboard content');
   }
 };
+
+
+export const getPrescription = async (appointmentId:string)=>{
+
+  console.log("appointemkszjf id is ",appointmentId);
+   try {
+    const response = await userInstance.get(ROUTES.user.prescription, {
+      params: { appointmentId },
+    });
+    console.log('getPrescription API response:', response.data);
+    return response.data;
+  } catch (err) {
+    console.error('Error in fetching prescrition:', err);
+    throw new Error('Failed to fetch prescrition');
+  }
+  
+}

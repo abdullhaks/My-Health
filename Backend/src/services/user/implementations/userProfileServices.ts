@@ -24,6 +24,20 @@ export default class UserProfileService implements IUserProfileService {
         console.log("user id from service ",userId);
 
         try {
+
+            const findedUser = await this._userRepository.findOne({_id:userId});
+
+            if(!findedUser){
+              throw new Error("Profile updation faild");
+            }
+
+            if(userData.location?.text){
+              var locTags = userData.location.text.split(",").splice(0,2).map(tag => tag.toLowerCase().trim());
+              userData.tags = [
+                ...(Array.isArray(findedUser.tags) ? findedUser.tags : typeof findedUser.tags === 'string' ? [findedUser.tags] : []),
+                ...locTags
+              ];
+            }
             const updatedUser = await this._userRepository.update(userId, userData);
             console.log("Updated user: ", updatedUser);
 

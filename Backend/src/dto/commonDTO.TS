@@ -9,4 +9,6 @@ export interface IResponseDTO{
     data?: any;
     subscription?: string;
     accessToken?:string;
-  }
+  };
+
+ 

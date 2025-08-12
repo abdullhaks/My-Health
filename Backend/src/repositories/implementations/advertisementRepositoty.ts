@@ -36,17 +36,71 @@ export default class AdvertisementRepository extends BaseRepository<IAdvertiseme
     };
 
 
-    async getAdvertisementsByTimePeriod(startDate: Date): Promise<IAdvertisementDocument[]> {
+    async getAdvertisementsByTimePeriodAndTags(startDate: Date,tags:string[],latitude:number,longitude:number): Promise<IAdvertisementDocument[]> {
     try {
-      const advertisements = await this._advertisementModel
+
+      console.log("tags from get adds by tags ....",tags);
+
+      let advertisements = []
+
+      let locationBased = await this.getAdsNearLocation(latitude,longitude,30);
+
+      console.log("locaitoin based adds are....",locationBased);
+
+      if(locationBased){
+        advertisements = locationBased;
+      }
+
+      if(tags.length>0){
+        // const escapedTags = tags.map(tag => tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        let tagAdds = await this._advertisementModel
+          .find({
+            $or: [
+                { tags: { $in: tags.map(t => new RegExp(`^${t}$`, "i")) } },
+               
+                { title: { $regex: tags.join("|"), $options: "i" } }
+              ]
+          })
+          .limit(5)
+          .sort({createdAt:1})
+          .lean();
+
+          advertisements = [...advertisements,...tagAdds]
+          console.log("adds wiht tags......",advertisements);
+          
+      }else{
+        let latestAdd = await this._advertisementModel
         .find({ createdAt: { $gte: startDate } })
         .limit(5) // Limit to 5 ads for carousel
         .lean();
+
+        advertisements = [...advertisements,...latestAdd]
+
+      }
+       
       return advertisements;
     } catch (error) {
       console.error('Error fetching advertisements by time period:', error);
       throw new Error('Failed to fetch advertisements');
     }
+  };
+
+
+
+  async getAdsNearLocation(lat: number, lng: number, maxDistanceKm: number) {
+  const maxDistanceMeters = maxDistanceKm * 1000; 
+
+  return this._advertisementModel.find({
+    location: {
+      $near: {
+        $geometry: { type: "Point", coordinates: [lng, lat] },
+        $maxDistance: maxDistanceMeters
+      }
+    }
+  })
+  .limit(5)
+  .lean();
+
   }
 
 }

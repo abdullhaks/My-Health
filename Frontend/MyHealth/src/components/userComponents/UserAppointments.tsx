@@ -28,6 +28,7 @@ interface IAppointment {
   doctorCategory: string;
   createdAt: string;
   updatedAt: string;
+  profile?:string;
 }
 
 interface Notification {
@@ -234,6 +235,12 @@ const UserAppointments = () => {
     navigate(`/user/video-call/${appointmentId}`, { state: { appointment } });
   };
 
+   const handleGetPrescription = (appointmentId: string) => {
+    navigate(`/user/prescription/${appointmentId}`);
+  };
+
+  
+
   const isJoinable = (start: string, end: string) => {
 
     // const now = new Date().getTime();
@@ -250,7 +257,16 @@ const UserAppointments = () => {
       title: "Doctor Name",
       dataIndex: "doctorName",
       key: "doctorName",
-      render: (text: string, record: IAppointment) => `Dr. ${text} (${record.doctorCategory})`,
+      render: (text: string, record: IAppointment) => (
+        <div className="flex gap-1 items-center">
+          <img
+                  src={record?.profile || 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png'}
+                  alt="Doctor"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+          <p>Dr. {text} ({record.doctorCategory})</p>
+        </div>
+        ),
     },
     {
       title: "Date & Time",
@@ -294,6 +310,16 @@ const UserAppointments = () => {
               Join
             </button>
           )}
+
+          {record.appointmentStatus === "completed" && (
+            <button
+              onClick={() => handleGetPrescription(record._id)}
+              className={`px-4 py-1 rounded-lg text-white font-medium transition-colors bg-blue-600 hover:bg-blue-700`}
+            >
+              get prescription
+            </button>
+          )}
+
           {record.appointmentStatus === "booked" && (
             <Popconfirm
               title="Cancel Appointment"

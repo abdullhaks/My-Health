@@ -34,7 +34,8 @@ export const ROUTES = {
     walletPayment : "/user/walletPayment",
     notifications : "/user/notifications",
     getBlogs: "/user/getBlogs",
-    dashboard: "/user/dashboard"
+    dashboard: "/user/dashboard",
+    prescription: "/user/prescription"
     
     
   },

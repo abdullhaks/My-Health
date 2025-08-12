@@ -24,6 +24,8 @@ interface IAppointment {
   doctorCategory: string;
   createdAt: string;
   updatedAt: string;
+  profile?:string;
+
 }
 
 const { Option } = Select;
@@ -120,6 +122,16 @@ const DoctorAppointments = () => {
       title: "User Name",
       dataIndex: "userName",
       key: "userName",
+      render: (text: string, record: IAppointment) => (
+        <div className="flex gap-1 items-center">
+          <img
+                  src={record?.profile || 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png'}
+                  alt="Doctor"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+          <p>Dr. {text} ({record.doctorCategory})</p>
+        </div>
+        ),
     },
     {
       title: "Email",

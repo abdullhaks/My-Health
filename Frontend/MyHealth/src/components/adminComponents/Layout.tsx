@@ -78,7 +78,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Doctors", path: "/admin/doctors", icon: <FaUserMd /> },
     { name: "Plans", path: "/admin/subscriptionPlans", icon: <FaStar /> },
     { name: "Appointments", path: "/admin/appointments", icon: <FaCalendarAlt /> },
-    { name: "Transactions", path: "/admin/transactions", icon: <FaMoneyBillTransfer /> },
+    { name: "Revenue", path: "/admin/transactions", icon: <FaMoneyBillTransfer /> },
   ];
 
   const renderMenuItems = (items: any) => {

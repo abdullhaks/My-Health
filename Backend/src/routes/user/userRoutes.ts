@@ -15,6 +15,8 @@ import IUserReportAnalysisCtrl from "../../controllers/user/interfaces/IReportAn
 import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
 import IUserBlogController from "../../controllers/user/interfaces/IBlogCtrl";
 import IUserDashboardController from "../../controllers/user/interfaces/IDashboardCtrl";
+import IUserPrescriptionCtrl from "../../controllers/user/interfaces/IPrescriptionCtrl";
+import { resolve } from "path";
 
 const userRoutes = Router();
 
@@ -31,6 +33,7 @@ const reportAnalysisCtrl = container.get<IUserReportAnalysisCtrl>("IUserReportAn
 const notificationCtrl = container.get<INotificationController>("INotificationController");
 const blogCtrl = container.get<IUserBlogController>("IUserBlogController");
 const dashboardCtrl = container.get<IUserDashboardController>("IUserDashboardController");
+const prescriptionCtrl = container.get<IUserPrescriptionCtrl>("IUserPrescriptionCtrl");
 
 
 
@@ -132,6 +135,8 @@ userRoutes.get("/notifications",verifyAccessTokenMidleware("user"),(req,res)=> n
 userRoutes.get("/getBlogs",verifyAccessTokenMidleware("user"),(req,res)=>blogCtrl.getBlogs(req,res));
 
 userRoutes.get("/dashboard",verifyAccessTokenMidleware("user"),(req,res)=> dashboardCtrl.getDashboardContent(req,res));
+
+userRoutes.get("/prescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getPrescription(req,res) );
 
 
 export default userRoutes; 

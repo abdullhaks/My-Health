@@ -17,15 +17,29 @@ export default class UserDashboardController implements IUserDashboardController
 
     
     try {
-      const { days = '30' } = req.query;
+      const { days = '30',userId,latitude=0,longitude=0} = req.query;
       const daysNumber = parseInt(days as string, 10);
 
-      if (isNaN(daysNumber) || daysNumber < 1) {
-        res.status(HttpStatusCode.BAD_REQUEST).json({ message: 'Invalid days parameter' });
+        console.log("query is.......",req.query);
+
+     
+      if(latitude&&longitude){
+        console.log("latitude,longitude........",latitude,longitude);
+      }
+     
+      if(!userId){
+        throw new Error ("credentials missed");
+   
+      }
+        
+      // const response1 = await this._dashboardService.getDashboardContent(daysNumber, userId.toString(),parseFloat(latitude as string),parseFloat(longitude as string));
+
+      if (isNaN(daysNumber) || daysNumber < 1 || !userId) {
+        res.status(HttpStatusCode.BAD_REQUEST).json({ message: 'Fetching Addvertisement failed' });
         return;
       }
 
-      const response = await this._dashboardService.getDashboardContent(daysNumber);
+      const response = await this._dashboardService.getDashboardContent(daysNumber,userId.toString(),parseFloat(latitude as string),parseFloat(longitude as string));
       if (!response || (!response.blogs && !response.advertisements)) {
         res.status(HttpStatusCode.NOT_FOUND).json({ message: 'No content found' });
         return;

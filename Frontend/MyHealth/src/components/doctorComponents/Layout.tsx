@@ -18,6 +18,7 @@ import { io, Socket } from "socket.io-client";
 import axios from "axios";
 import { message } from "antd";
 import { getNotifications } from "../../api/doctor/doctorApi"; // Adjusted import for doctor-specific API
+import { FaMoneyBillTransfer } from "react-icons/fa6";
 
 interface Notification {
   id: string;
@@ -305,6 +306,8 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },
     { name: "My Adds", path: "/doctor/adds", icon: <GrAnnounce /> },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
+    { name: "Revenue", path: "/doctor/transactions", icon: <FaMoneyBillTransfer /> },
+    
   ];
 
   const renderMenuItems = () => {

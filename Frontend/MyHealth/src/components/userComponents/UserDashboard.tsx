@@ -4,6 +4,8 @@ import { Eye, Calendar, Clock, User, ChevronLeft, ChevronRight,
    Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { getDashboardContent } from '../../api/user/userApi';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { message } from 'antd';
 
 interface Blog {
   _id: string;
@@ -33,27 +35,35 @@ const UserDashboard = () => {
   const [isHovering, setIsHovering] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const navigate = useNavigate();
+  const user = useSelector((state:any)=>state.user.user);
+  const [location, setLocation] = useState<any>(null);
+  const [latitude, setLatitude] = useState<any>(null);
+  const [longitude, setLongitude] = useState<any>(null);
 
 
-const fetchDashboardContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      const days = 30;
-      const response = await getDashboardContent(days);
-      setBlogs(response.blogs || []);
-      setAdvertisements(response.advertisements || []);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load dashboard content. Please try again.');
-      console.error('Error fetching dashboard content:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+const fetchDashboardContent = async () => {
+  setLoading(true);
+  try {
+    const days = 30;
+    const userId = user._id;
+    const response = await getDashboardContent(days, userId, latitude, longitude);
+    setBlogs(response.blogs || []);
+    setAdvertisements(response.advertisements || []);
+    setError(null);
+  } catch (err) {
+    setError('Failed to load dashboard content. Please try again.');
+    console.error('Error fetching dashboard content:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  useEffect(() => {
+
+ useEffect(() => {
+  if (latitude && longitude) {
     fetchDashboardContent();
-  }, [fetchDashboardContent]);
+  }
+}, [latitude, longitude]);
 
   // Initialize video refs
   useEffect(() => {
@@ -146,6 +156,43 @@ const fetchDashboardContent = useCallback(async () => {
       year: 'numeric'
     });
   };
+
+
+useEffect(() => {
+    if (!navigator.geolocation) {
+        message.error("locaiton accessign failed")
+      return;
+    }
+
+    const successHandler = (position:any) => {
+
+       console.log("location is ...",position);
+
+      setLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+
+      setLatitude(position.coords.latitude)
+      setLongitude(position.coords.longitude)
+
+     
+   
+    };
+
+    const errorHandler = (err:any) => {
+      message.error("locaiton accessign failed",err)
+      setLocation(null); 
+      setLatitude(null);
+      setLongitude(null);
+
+    };
+    navigator.geolocation.getCurrentPosition(successHandler, errorHandler);
+
+  }, []);
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-2 lg:p-4">
@@ -417,3 +464,7 @@ const fetchDashboardContent = useCallback(async () => {
 };
 
 export default UserDashboard;
+
+function userSelector(arg0: (state: any) => any) {
+  throw new Error('Function not implemented.');
+}

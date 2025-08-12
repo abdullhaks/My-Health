@@ -2,6 +2,7 @@ import {inject,injectable} from "inversify";
 import IUserDashboardService from "../interfaces/IUserDashboardService";
 import IBlogRepository from "../../../repositories/interfaces/IBlogRepository";
 import IAdvertisementRepository from "../../../repositories/interfaces/IAdvertisementRepository";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IBlogDocument } from "../../../entities/blogEntities";
 import { IAdvertisementDocument } from "../../../entities/advertisementEntitites";
 
@@ -11,26 +12,36 @@ export default class UserDashboardService implements IUserDashboardService {
 
     constructor(
         @inject('IBlogRepository') private _blogRepository: IBlogRepository,
-        @inject('IAdvertisementRepository') private _advertisementRepository: IAdvertisementRepository
+        @inject('IAdvertisementRepository') private _advertisementRepository: IAdvertisementRepository,
+        @inject('IUserRepository') private _userRepository : IUserRepository,
     ){}
 
 
-    async getDashboardContent(days: number): Promise<{
+    async getDashboardContent(days: number,userId:string,latitude:number,longitude:number): Promise<{
     blogs: IBlogDocument[];
     advertisements: IAdvertisementDocument[];
   }> {
+
     try {
+
+      
+
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      const blogs = await this._blogRepository.getBlogsByTimePeriod(startDate);
-      const advertisements = await this._advertisementRepository.getAdvertisementsByTimePeriod(startDate);
+      let user = await this._userRepository.findOne({_id:userId});
+     
 
-      console.log("blogs are................",blogs);
-      console.log("advertisements are................",advertisements);
-      
+      if (!user) {
+        throw new Error(`User with id ${userId} not found`);
+      }
+
+      const blogs = await this._blogRepository.getBlogsByTimePeriod(startDate);
+      const advertisements = await this._advertisementRepository.getAdvertisementsByTimePeriodAndTags(startDate, user.tags,latitude,longitude);
 
       return { blogs, advertisements };
+      
+
     } catch (error) {
       console.error('Error in getDashboardContent:', error);
       throw new Error('Failed to fetch dashboard content');

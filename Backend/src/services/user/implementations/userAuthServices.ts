@@ -333,16 +333,16 @@ export default class UserAuthService implements IUserAuthService {
         
             const verified = verifyRefreshToken(refreshToken);
 
-            console.log("is verified from refresh token auth service...",verified);
+            // console.log("is verified from refresh token auth service...",verified);
 
             if (!verified) {
                throw new Error("Invalid refresh token" );
             }
         
-            console.log("verified is ", verified);
+            // console.log("verified is ", verified);
             const accessToken = generateAccessToken({ id: verified.id, role: verified.role });
 
-            console.log("new access token is ...............",accessToken);
+            // console.log("new access token is ...............",accessToken);
         
             return {accessToken} ;
         };

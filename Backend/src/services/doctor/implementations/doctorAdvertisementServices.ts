@@ -12,6 +12,9 @@ export default class DoctorAdvertisementService implements IDoctorAdvertisementS
 
     async createAdvertisement(addData: any): Promise<any> {
 
+        if(addData.tags.length){
+            addData.tags= addData.tags.map((item:string)=>item.toLowerCase());
+        }
         const response = await this._advertisementRepository.create(addData);
         return response;
 

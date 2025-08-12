@@ -76,11 +76,11 @@ try{
           };
         }
 
-  const appointments = await this._appointmentService.getUserAppointments(String(userId), Number(page),
+  const response = await this._appointmentService.getUserAppointments(String(userId), Number(page),
         Number(limit),
         parsedFilter);
 
-    res.status(HttpStatusCode.OK).json(appointments);
+    res.status(HttpStatusCode.OK).json(response);
 
 
 }catch(err){

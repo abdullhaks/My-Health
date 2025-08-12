@@ -28,6 +28,7 @@ import { UserReportAnalysis } from "../../components/userComponents/UserReportAn
 import UserBlogs from "../../components/userComponents/userBlogs";
 import UserBlogDetails from "../../components/userComponents/UserBlog";
 import UserDoctorDetails from "../../components/userComponents/UserDoctorDetails";
+import UserPrescriptionDetails from "../../components/userComponents/UserPrescription";
 
 const UserRoutes = () => {
   return (
@@ -63,8 +64,9 @@ const UserRoutes = () => {
           <Route path="blogs" element={< UserBlogs/>} />
           <Route path="blog" element={< UserBlogDetails/>} />
           <Route path="doctor-details/:doctorId" element={< UserDoctorDetails/>} />
+          <Route path="prescription/:appointmentId" element={< UserPrescriptionDetails/>} />
           
-          
+       
 
           
           

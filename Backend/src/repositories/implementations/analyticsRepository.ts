@@ -13,7 +13,7 @@ constructor(
 ){
     super(_analyticsModel)
 };
-
+ 
 async uptadeOneWithUpsert(
     filter: any,
     update: any

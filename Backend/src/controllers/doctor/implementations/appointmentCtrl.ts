@@ -49,14 +49,14 @@ export default class DoctorAppointmentController implements IDoctorAppointmentCo
       }
 
       console.log("Doctor ID is:", doctorId);
-      const appointments = await this._appointmentService.getDoctorAppointments(
+      const response = await this._appointmentService.getDoctorAppointments(
         String(doctorId),
         Number(page),
         Number(limit),
         parsedFilter
       );
 
-      res.status(HttpStatusCode.OK).json(appointments);
+      res.status(HttpStatusCode.OK).json(response);
     } catch (err) {
       console.error("Error fetching user appointments:", err);
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });

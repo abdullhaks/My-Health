@@ -4,6 +4,6 @@ import { IAdvertisementDocument } from "../../entities/advertisementEntitites";
 export default interface IAdvertisementRepository extends BaseRepository<IAdvertisementDocument>{
     
     getAdds(doctorId:string,pageNumber: number,limitNumber: number): Promise<any>
-    getAdvertisementsByTimePeriod(startDate: Date): Promise<IAdvertisementDocument[]>;
+    getAdvertisementsByTimePeriodAndTags(startDate: Date,tags:string[],latitude:number,longitude:number): Promise<IAdvertisementDocument[]>;
 
 }

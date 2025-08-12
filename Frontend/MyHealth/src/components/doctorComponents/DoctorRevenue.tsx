@@ -24,7 +24,7 @@ interface Transaction {
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const AdminTransactions = () => {
+const DoctorTransactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -197,4 +197,4 @@ const AdminTransactions = () => {
   );
 };
 
-export default AdminTransactions;
+export default DoctorTransactions;

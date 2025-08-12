@@ -300,13 +300,13 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Chat", path: "/user/chat", icon: <FaComments /> },
     { name: "MyHealth-Ai", path: "/user/ai", icon: <FaPodcast /> },
     { name: "Blogs", path: "/user/blogs", icon: <FaBlog /> },
-    { name: "Prescriptions", path: "/user/prescriptions", icon: <FaClipboardList /> },
+    // { name: "Prescriptions", path: "/user/prescriptions", icon: <FaClipboardList /> },
     { name: "My Profile", path: "/user/profile", icon: <FaUserFriends /> },
   ];
 
   const secondaryMenuItems = [
-    { name: "Analytics", path: "/user/analytics", icon: <FaChartLine /> },
-    { name: "Notifications", path: "/user/notifications", icon: <FaBell /> },
+    // { name: "Analytics", path: "/user/analytics", icon: <FaChartLine /> },
+    // { name: "Notifications", path: "/user/notifications", icon: <FaBell /> },
     { name: "Settings", path: "/user/settings", icon: <FaCog /> },
   ];
 

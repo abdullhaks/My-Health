@@ -10,6 +10,7 @@ import ITransactionRepository from "../../../repositories/interfaces/ITransactio
 import { IAppointment } from "../../../dto/appointmentDTO";
 import { IUser } from "../../../dto/userDTO";
 import {IDoctor} from "../../../dto/doctorDTO";
+import appointmentModel from "../../../models/appointmentModel";
 
 @injectable()
 export default class UserAppointmentService implements IUserAppointmentService {
@@ -84,12 +85,33 @@ export default class UserAppointmentService implements IUserAppointmentService {
       };
     }
 
-    const appointments = await this._appointmentsRepository.getAllAppointments(page, limit, query);
-    console.log("appointments from service...", appointments);
+    const {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
 
-    return appointments;
+    const profile = new Map();
+  const updatedAppointments = await Promise.all(
+    appointments.map(async (item: any) => {
+      if (profile.has(item.doctorId)) {
+        item.profile = profile.get(item.doctorId);
+        return item;
+      } else {
+        const doctor = await this._doctorRepository.findOne({ _id: item.doctorId });
+        if (doctor) {
+          const url = await getSignedImageURL(doctor.profile);
+          if (url) {
+            profile.set(item.doctorId, url);
+            item.profile = url;
+          }else{
+            item.profile = ""
+          }
+        }
+        return item;
+      }
+    })
+  );
+
+    return {appointments:updatedAppointments,totalPages};
   }
-
+ 
   async cancelAppointment(
     appointmentId: string
   ): Promise<{

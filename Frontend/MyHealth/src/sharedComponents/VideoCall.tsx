@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PeerService, { initializeSocket } from "../services/peerServices";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Button, Tooltip, Input, List, Avatar, Modal, Form, Select, DatePicker, Tabs ,message as antAlert, Card, Badge, Divider, Tag, Space, Timeline, Descriptions } from "antd";
 import {AudioOutlined,AudioMutedOutlined,VideoCameraOutlined, VideoCameraFilled,PhoneOutlined,
   MessageOutlined, SendOutlined,SnippetsOutlined,PlusOutlined,MinusCircleOutlined, UserOutlined, CalendarOutlined, MedicineBoxOutlined, AlertOutlined, HistoryOutlined} from '@ant-design/icons';
@@ -72,6 +72,8 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const location = useLocation();
   const {appointment} = location.state;
   const [patient,setPatient] = useState<any>({});
+  const navigate = useNavigate();
+
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -161,7 +163,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
   const endCall = () => {
     if (socketRef.current) {
-      socketRef.current.emit("endCall", appointmentId);
+      socketRef.current.emit("endCall", appointmentId,role);
     }
     cleanup();
   };
@@ -181,6 +183,8 @@ const VideoCall = ({ role }: VideoCallProps) => {
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
     peerRef.current = null;
     setMessages([]);
+
+    // navigate("/appointments", { replace: true });
   };
 
   // Fetch prescriptions (mock implementation - replace with actual API call)
@@ -337,7 +341,11 @@ const VideoCall = ({ role }: VideoCallProps) => {
 
           });
 
-          socket.on("callEnded", cleanup);
+          socket.on("callEnded",()=> {
+            
+            cleanup()
+            navigate(`/${role}/appointments`, { replace: true });
+        });
           socket.on("userLeft", () => {
             setRemoteVideoStatus("Participant left");
             cleanup();
