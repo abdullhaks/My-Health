@@ -40,6 +40,9 @@ export interface IDoctorDocument extends Document{
     specializations:ISpecializations[];
     verificationId:string;
     walletBalance:number;
+    bankAccNo?:string,
+    bankAccHolderName?:string,
+    bankIfscCode?:string,
     createdAt:Date;
     updatedAt:Date
 

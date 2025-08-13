@@ -71,7 +71,10 @@ const DoctorProfile = () => {
 
   const handleProfileUpdate = async (updatedData: any) => {
     try {
-      const response = await updateDoctorProfile(updatedData, doctor._id);
+
+      console.log("updated data is ",updatedData);
+
+      const response = await updateDoctorProfile(updatedData,doctor._id);
 
       console.log("response is ",response);
       
@@ -203,6 +206,25 @@ const DoctorProfile = () => {
           </div>
         </div>
 
+
+         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-t">
+          <div>
+            <p className="text-sm text-gray-500">Bank Account No</p>
+            <p>{profileData.bankAccNo || "Not provided"}</p>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500">Account Holder Name</p>
+            <p>{profileData.bankAccHolderName || "Not provided"}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">IFSC Code</p>
+            <p>{profileData.bankIfscCode || "Not provided"}</p>
+          </div>
+          
+        </div>
+
         <div className="p-6 border-t flex justify-between items-center">
           <div>
             <p className="text-sm">Change Password</p>
@@ -214,8 +236,14 @@ const DoctorProfile = () => {
             </button>
           </div>
           <div>
-            <p className="text-sm">Wallet Balance</p>
+            <p className="text-sm">Earnings</p>
             <p className="text-gray-700 font-semibold">{profileData.walletBalance || 0} ₹</p>
+            <button
+              // onClick={() => setIsChangePasswordModalOpen(true)}
+              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm hover:bg-blue-50"
+            >
+              Payout
+            </button>
           </div>
         </div>
       </div>

@@ -24,6 +24,9 @@ export interface IUserDocument extends Document{
     medicalTags:string;
     latestHealthSummary:string;
     walletBalance:number;
+    bankAcNo:string,
+    bankAcHolderName:string,
+    bankIfscCode:string,
     tags:string[];
     createdAt:Date;
     updatedAt:Date

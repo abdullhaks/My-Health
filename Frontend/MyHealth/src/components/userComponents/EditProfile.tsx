@@ -2,12 +2,6 @@ import { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import GeoapifyAutocomplete from "../../sharedComponents/GeoapifyAutocomplete";
 
-interface EditProfileModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (profileData: ProfileData) => void;
-  initialData: ProfileData;
-}
 
 interface ILocation {
   type: "Point";
@@ -23,7 +17,17 @@ interface ProfileData {
   phone: string;
   gender: string;
   locationText?: string;
+ 
 }
+
+interface EditProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (profileData: ProfileData) => void;
+  initialData: ProfileData;
+}
+
+
 
 const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileModalProps) => {
   const [formData, setFormData] = useState<ProfileData>(initialData);
@@ -86,7 +90,7 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
 
   return (
     <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md relative animate-fadeIn">
+      <div className="bg-white rounded-lg shadow-xl w-full max-h-[80vh] overflow-hidden overflow-y-scroll max-w-md relative animate-fadeIn">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold text-gray-800">Edit Profile</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
@@ -146,6 +150,7 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
             </div>
 
             {/* Phone Number */}
+
             <div>
               <label htmlFor="phone">Phone Number</label>
               <input
@@ -158,6 +163,7 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
               />
               {errors.phone && <p className="text-sm text-red-600">{errors.phone}</p>}
             </div>
+
 
             {/* Gender */}
             <div>
@@ -174,11 +180,13 @@ const EditProfileModal = ({ isOpen, onClose, onSave, initialData }: EditProfileM
                 <option value="other">Other</option>
               </select>
             </div>
+
+             
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="btn border-gray-300 bg-white text-gray-700">Cancel</button>
-            <button type="submit" className="btn bg-blue-600 text-white">Save Changes</button>
+            <button type="submit" className="p-1 rounded-sm btn bg-blue-600 text-white cursor-pointer hover:bg-blue-800">Save Changes</button>
           </div>
         </form>
       </div>
