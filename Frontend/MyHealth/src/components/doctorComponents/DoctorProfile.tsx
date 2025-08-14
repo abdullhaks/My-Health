@@ -123,6 +123,10 @@ const DoctorProfile = () => {
       };
 
       console.log("reponse is ",response);
+
+      dispatch(updateDoctor(response.data.updatedDoctor));
+      // setProfileData(response.updatedDoctor);
+      
       toast.success("Payout requested");
     } catch {
       toast.error("Requestin payout failed");
@@ -286,7 +290,18 @@ const DoctorProfile = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleProfileUpdate}
-        initialData={rest}
+        initialData={{
+          fullName: doctor.fullName,
+          location: doctor.location.text,
+          dob: doctor.dob,
+          phone: doctor.phone,
+          gender: doctor.gender,
+          specialization: doctor.specialization,
+          experience: doctor.experience,
+          bankAccNo: doctor.bankAccNo,
+          bankAccHolderName: doctor.bankAccHolderName,
+          bankIfscCode: doctor.bankIfscCode,
+        }}
       />
 
       {/* Change Password Modal */}

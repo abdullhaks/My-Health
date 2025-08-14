@@ -37,7 +37,7 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
     },
     appointmentStatus: {
       type: String,
-      enum: ["booked", "cancelled", "completed", "pending",],
+      enum: ["booked", "cancelled", "completed", "pending"],
       default: "booked",
     },
     paymentType:{

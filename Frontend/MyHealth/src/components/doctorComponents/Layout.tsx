@@ -305,8 +305,9 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "Chat", path: "/doctor/chat", icon: <FaComments />, premium: true },
     { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },
     { name: "My Adds", path: "/doctor/adds", icon: <GrAnnounce /> },
+    { name: "Payouts", path: "/doctor/payout", icon: <FaMoneyBillTransfer /> },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
-    { name: "Revenue", path: "/doctor/transactions", icon: <FaMoneyBillTransfer /> },
+    
     
   ];
 

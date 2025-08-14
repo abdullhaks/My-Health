@@ -534,4 +534,150 @@ export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
     console.log("Error in requesting payout");
     throw new Error ("requesting payment failed");
   }
-}
+};
+
+
+export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
+  try{
+    console.log("data id",doctorId, selectedDate);
+
+    const response = await doctorInstance.get(ROUTES.doctor.bookedSlots, { params: { doctorId, selectedDate } });
+    return response.data;
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const addSession = async (sessionToAdd:any )=>{
+  try{
+    console.log("data id",sessionToAdd);
+    // const response = await axios.post('/api/doctor/sessions', session);
+//   return response.data;
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+export const updateSession = async ( sessionId:string, editingSession:any)=>{
+  try{
+    console.log("data id",sessionId, editingSession);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+export const deleteSession = async ( id:string)=>{
+  try{
+    console.log("data id",id);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const getUnavailableSlots = async ( doctorId:string, localDate:string )=>{
+  try{
+    console.log("data id",doctorId,localDate);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const makeSlotsUnavailable = async (doctorId:string, localDate:any, slotId:any )=>{
+  try{
+    console.log("data id",doctorId, localDate, slotId);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const makeSlotsAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
+  try{
+    console.log("data id",doctorId, localDate, slotId);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const cancelAppointment = async (appointmentId:string )=>{
+  try{
+    console.log("data id",appointmentId);
+
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+
+export const getPayouts = async (doctorId:string,page:number, limit:number,filters:any)=>{
+    try{
+
+        const response = await doctorInstance.get(ROUTES.doctor.getPayouts,{
+      params: {
+        doctorId,
+        page,
+        limit,
+        ...filters,
+      }});
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+};
+
+
+
+
+
+// Note: Add these new API functions to ../../api/doctor/doctorApi.ts
+// export const addSession = async (session: Session) => {
+//   const response = await axios.post('/api/doctor/sessions', session);
+//   return response.data;
+// };
+// export const updateSession = async (id: string, session: Partial<Session>) => {
+  // const response = await axios.put(`/api/doctor/sessions/${id}`, session);
+  // return response.data;
+// };
+// export const deleteSession = async (id: string) => {
+//   const response = await axios.delete(`/api/doctor/sessions/${id}`);
+//   return response.data;
+// };
+// export const getUnavailableSlots = async (doctorId: string, date: string) => {
+//   const response = await axios.get(`/api/doctor/unavailableSlots?doctorId=${doctorId}&date=${date}`);
+//   return response.data; // Assume returns string[] of slotIds
+// };
+// export const makeSlotsUnavailable = async (doctorId: string, date: string, slotIds: string[]) => {
+//   const response = await axios.post('/api/doctor/makeUnavailable', { doctorId, date, slotIds });
+//   return response.data;
+// };
+// export const makeSlotsAvailable = async (doctorId: string, date: string, slotIds: string[]) => {
+//   const response = await axios.post('/api/doctor/makeAvailable', { doctorId, date, slotIds });
+//   return response.data;
+// };
+// export const cancelAppointment = async (appointmentId: string) => {
+//   const response = await axios.post(`/api/doctor/cancelAppointment/${appointmentId}`);
+//   return response.data;
+// };

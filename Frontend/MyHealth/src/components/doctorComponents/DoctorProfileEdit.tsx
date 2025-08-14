@@ -17,7 +17,7 @@ interface DoctorProfileData {
   gender: string;
   specialization: string;
   experience: string;
-  qualification: string;
+  qualification?: string;
   locationText?: string;
   bankAccNo?: string;
   bankAccHolderName?: string;
@@ -239,7 +239,7 @@ const EditDoctorProfileModal = ({ isOpen, onClose, onSave, initialData }: EditDo
             <div>
               <label htmlFor="location">Location</label>
               <GeoapifyAutocomplete
-                value={formData.location.text || ""}
+                value={formData.location.text}
                 onChange={(val) => setFormData((prev) => ({ ...prev, location: val }))}
                 setError={(error) => setErrors((prev) => ({ ...prev, locationText: error }))}
                 className={errors.locationText ? "border-red-500" : "border-gray-300"}

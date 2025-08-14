@@ -73,7 +73,6 @@ const UserAppointmentSlots = () => {
     const fetchBookedSlots = async () => {
       try {
 
-
         console.log("selected date is >>>>>>>",selectedDate);
         setIsLoading(true);
         setErrorMessage("");

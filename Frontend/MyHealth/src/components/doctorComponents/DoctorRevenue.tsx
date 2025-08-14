@@ -1,22 +1,23 @@
 
 
 import { useEffect, useState } from "react";
-import { getTransactions } from "../../api/admin/adminApi";
+import { getPayouts } from "../../api/doctor/doctorApi"; 
 import { Table, Select, DatePicker, Button, Pagination } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 interface Transaction {
   _id: string;
-  from: string;
-  to: string;
-  method: string;
-  amount: number;
-  paymentFor: string;
+  bankAccNo: string;
+  bankAccHolderName: string;
+  bankIfscCode: string;
+  totalAmount: number;
+  paid: number;
+  serviceAmount: number;
+  status: string;
   transactionId?: string;
-  userId?: string;
-  doctorId?: string;
-  date: string;
+  invoiceLink?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,27 +26,29 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const DoctorTransactions = () => {
+  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctorId = doctor._id;
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(5);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    method: "",
-    paymentFor: "",
+    status: "",
+    // paymentFor: "",
     dateRange: null as [moment.Moment, moment.Moment] | null,
   });
 
   const fetchTransactions = async (page: number) => {
     setLoading(true);
     try {
-      const response = await getTransactions(page, limit, {
-        method: filters.method,
-        paymentFor: filters.paymentFor,
+      const response = await getPayouts(doctorId,page, limit, {
+        status: filters.status,
+        // paymentFor: filters.paymentFor,
         startDate: filters.dateRange ? filters.dateRange[0].toISOString() : undefined,
         endDate: filters.dateRange ? filters.dateRange[1].toISOString() : undefined,
       });
-      setTransactions(response.transactions);
+      setTransactions(response.payouts);
       setTotalPages(response.totalPages);
     } catch (err) {
       console.error("Error fetching transactions:", err);
@@ -65,56 +68,96 @@ const DoctorTransactions = () => {
 
   const columns = [
     {
-      title: "From",
-      dataIndex: "from",
-      key: "from",
-      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
-    },
-    {
-      title: "To",
-      dataIndex: "to",
-      key: "to",
-      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
-    },
-    {
-      title: "Method",
-      dataIndex: "method",
-      key: "method",
-      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (amount: number) => `Rs ${amount}`,
-    },
-    {
-      title: "Purpose",
-      dataIndex: "paymentFor",
-      key: "paymentFor",
-      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
-    },
-    {
       title: "Date",
       dataIndex: "date",
       key: "date",
       render: (date: string) => moment(date).format("MMM DD, YYYY h:mm A"),
     },
+    // {
+    //   title: "From",
+    //   dataIndex: "from",
+    //   key: "from",
+    //   render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
+    // },
+    // {
+    //   title: "To",
+    //   dataIndex: "to",
+    //   key: "to",
+    //   render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
+    // },
+    // {
+    //   title: "Method",
+    //   dataIndex: "method",
+    //   key: "method",
+    //   render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
+    // },
     {
-      title: "Transaction ID",
+      title: "Acc.No",
+      dataIndex: "bankAccNo",
+      key: "bankAccNo",
+      render: (text: string) => text,
+    },
+    {
+      title: "Acc.Holder",
+      dataIndex: "bankAccHolderName",
+      key: "bankAccHolderName",
+      render: (text: string) => text,
+    },
+    {
+      title: "IFSC",
+      dataIndex: "bankIfscCode",
+      key: "bankIfscCode",
+      render: (text: string) => text,
+    },
+    {
+      title: "Total",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (amount: number) => `Rs ${amount}`,
+    },
+    {
+      title: "paid",
+      dataIndex: "paid",
+      key: "paid",
+      render: (amount: number) => `Rs ${amount}`,
+    },
+    {
+      title: "Service Amount",
+      dataIndex: "serviceAmount",
+      key: "serviceAmount",
+      render: (amount: number) => `Rs ${amount}`,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (text: string) => text,
+    },
+    {
+      title: "TransactionId",
       dataIndex: "transactionId",
       key: "transactionId",
-      render:(text: string, record: any) => {
-    if (record.invoice) {
-      return (
-        <a href={record.invoice} target="_blank" rel="noopener noreferrer">
-          {text}
-        </a>
-      );
-    }
-    return text || "N/A";
-  },
+      render: (text: string) => text,
     },
+    
+  //   {
+  //     title: "Transaction ID",
+  //     dataIndex: "transactionId",
+  //     key: "transactionId",
+  //     render:(text: string, record: any) => {
+  //   if (record.invoice) {
+  //     return (
+  //       <a href={record.invoice} target="_blank" rel="noopener noreferrer">
+  //         {text}
+  //       </a>
+  //     );
+  //   }
+  //   return text || "N/A";
+  // },
+  //   },
+
+
+
   ];
 
   return (
@@ -126,17 +169,17 @@ const DoctorTransactions = () => {
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <Select
-            placeholder="Filter by Method"
+            placeholder="Filter by Status"
             style={{ width: 200 }}
-            onChange={(value) => handleFilterChange("method", value)}
+            onChange={(value) => handleFilterChange("status", value)}
             allowClear
           >
-            <Option value="stripe">Stripe</Option>
-            <Option value="wallet">Wallet</Option>
-            <Option value="bank">Bank</Option>
+            <Option value="requested">Requested</Option>
+            <Option value="paid">Paid</Option>
+            <Option value="rejected">Rejected</Option>
           </Select>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <Select
             placeholder="Filter by Purpose"
@@ -150,7 +193,7 @@ const DoctorTransactions = () => {
             <Option value="refund">Refund</Option>
             <Option value="salary">Salary</Option>
           </Select>
-        </div>
+        </div> */}
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <RangePicker

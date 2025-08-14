@@ -162,5 +162,11 @@ doctorRoutes.get("/dashboard",verifyAccessTokenMidleware("doctor"),(req,res)=> d
 
 doctorRoutes.post("/requestPayout",verifyAccessTokenMidleware("doctor"),(req,res) => payoutCtrl.requestPayout(req,res))
 
+doctorRoutes.get("/bookedSlots",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getBookedSlots(req,res))
+
+doctorRoutes.get("/getPayouts",verifyAccessTokenMidleware("doctor"),(req,res)=>payoutCtrl.getPayouts(req,res));
+
+
+
 export default doctorRoutes;
 

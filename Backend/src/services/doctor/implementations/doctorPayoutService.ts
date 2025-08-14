@@ -5,6 +5,11 @@ import IPayoutRepository from "../../../repositories/interfaces/IPayoutRepositor
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
+interface filter {
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
 
 @injectable()
 export default class DoctorPayoutService implements IDoctorPayoutService {
@@ -52,6 +57,28 @@ export default class DoctorPayoutService implements IDoctorPayoutService {
             };
         
     };
+
+
+     async getgetPayouts(doctorId:string,pageNumber:number, limitNumber:number, filters:filter = {}): Promise<any[]> {
+    const query: any = {doctorId:doctorId};
+
+    if (filters.status) {
+      console.log("status....",filters.status)
+      query.status = filters.status;
+    }
+   
+    if (filters.startDate && filters.endDate) {
+      query.date = {
+        $gte: new Date(filters.startDate),
+        $lte: new Date(filters.endDate),
+      };
+    }
+
+    const transactions = await this._payoutRepository.getPayouts(pageNumber, limitNumber, query);
+    console.log("transactions from service...", transactions);
+
+    return transactions;
+  }
 
 
 }
