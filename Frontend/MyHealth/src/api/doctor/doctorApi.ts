@@ -512,7 +512,26 @@ export const getDashboardContent = async (doctorId: string) => {
     console.log('Dashboard API response:', response.data);
     return response.data.data;
   } catch (err) {
-    console.error('Error fetching dashboard content:', err);
+    console.log('Error fetching dashboard content:', err);
     throw new Error('Failed to fetch dashboard content');
   }
 };
+
+
+export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
+  try{
+    console.log("payoutDetails is",payoutDetails);
+    console.log("doctorId is",doctorId);
+
+    const response = await doctorInstance.post(ROUTES.doctor.requestPayout,{
+      doctorId,
+      payoutDetails
+    });
+
+    return response.data;
+
+  }catch(err){
+    console.log("Error in requesting payout");
+    throw new Error ("requesting payment failed");
+  }
+}

@@ -8,6 +8,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 import axios from "axios";
 import User from "../../../models/userModel"; 
 import { generateAccessToken, generateRefreshToken } from "../../../utils/jwt";
+import { UserLoginRequestDTO } from "../../../dto/userDTO";
 
 
 
@@ -21,9 +22,11 @@ export default class UserAuthController implements IUserAuthCtrl {
 
   async userLogin(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body;
+      
+      const loginDTO: UserLoginRequestDTO = req.body;
 
-      const result = await this._userService.login({email, password });
+      console.log("loginDTO...........",loginDTO);
+      const result = await this._userService.login(loginDTO);
 
       console.log("result is ", result);
 

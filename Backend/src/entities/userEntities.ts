@@ -17,7 +17,7 @@ export interface IUserDocument extends Document{
     phone:string;
     location:ILocation;
     gender:string;
-    dob:String;
+    dob:string;
     isBlocked:boolean;
     isVerified:boolean;
     bmi:string;

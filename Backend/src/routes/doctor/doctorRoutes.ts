@@ -17,6 +17,7 @@ import INotificationController from "../../controllers/common/interfaces/INotifi
 import IDoctorPrescriptionCtrl from "../../controllers/doctor/interfaces/IPrescriptionCtrl";
 import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
 import IDoctorDashboardController from "../../controllers/doctor/interfaces/IDashboardCtrl";
+import IDoctorPayoutController from "../../controllers/doctor/interfaces/IPayoutCtrl";
 
 
 
@@ -36,7 +37,8 @@ const addCtrl = container.get<IDoctorAdvertisementController>("IDoctorAdvertisem
 const notificationCtrl = container.get<INotificationController>("INotificationController")
 const prescriptionsCtrl = container.get<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl")
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
-const dashboardCtrl = container.get<IDoctorDashboardController>("IDoctorDashboardController")
+const dashboardCtrl = container.get<IDoctorDashboardController>("IDoctorDashboardController");
+const payoutCtrl = container.get<IDoctorPayoutController>("IDoctorPayoutController")
 
 
 
@@ -158,7 +160,7 @@ doctorRoutes.get("/getUser",verifyAccessTokenMidleware("doctor"),(req,res)=> det
 
 doctorRoutes.get("/dashboard",verifyAccessTokenMidleware("doctor"),(req,res)=> dashboardCtrl.getDashboardContent(req,res));
 
-
+doctorRoutes.post("/requestPayout",verifyAccessTokenMidleware("doctor"),(req,res) => payoutCtrl.requestPayout(req,res))
 
 export default doctorRoutes;
 

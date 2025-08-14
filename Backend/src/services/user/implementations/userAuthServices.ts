@@ -18,6 +18,10 @@ import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPass
 import { IResponseDTO } from "../../../dto/commonDTO";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 
+import { UserMapper } from "../../../mappers/user.mapper";
+import { AuthResponseDTO } from "../../../dto/userDTO";
+import { UserLoginRequestDTO } from "../../../dto/userDTO";
+
 console.log("User auth service is running....");
 
 const transporter = nodemailer.createTransport({
@@ -41,7 +45,7 @@ export default class UserAuthService implements IUserAuthService {
     }
 
 
-    async login(userData: IUser): Promise<Partial<IUserResponse>> {
+    async login(userData: UserLoginRequestDTO): Promise<AuthResponseDTO> {
         console.log("user data from service....", userData);
       
         if (!userData.email || !userData.password) {
@@ -96,18 +100,20 @@ export default class UserAuthService implements IUserAuthService {
         //   maxAge: 7 * 24 * 60 * 60 * 1000,
         // }); 
       
-        const { password, ...userWithoutPassword } = existingUser.toObject();
       
-        if(userWithoutPassword.profile){
-        userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
+        if(existingUser.profile){
+        existingUser.profile = await getSignedImageURL(existingUser.profile)
         };
 
-        return {
-          message: "Login successful",
-          user: userWithoutPassword,
-          accessToken,
-          refreshToken,
-        };
+         const userDTO = await UserMapper.toUserResponseDTO(existingUser);
+
+         console.log("userDTO........",userDTO)
+  return {
+    message: "Login successful",
+    user: userDTO,
+    accessToken,
+    refreshToken
+  };
       }
       
 

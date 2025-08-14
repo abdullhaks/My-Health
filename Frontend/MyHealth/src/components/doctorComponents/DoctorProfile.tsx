@@ -4,8 +4,10 @@ import { FiEdit, FiCopy, FiCamera } from "react-icons/fi";
 import toast from "react-hot-toast";
 import EditDoctorProfileModal from "./DoctorProfileEdit";
 import ChangePasswordModal from "./DoctorChangePassword";
-import { updateProfileImage, updateDoctorProfile, changePassword } from "../../api/doctor/doctorApi";
+import DoctorPayoutModal from "./DoctorPayoutModal";
+import { updateProfileImage, updateDoctorProfile, changePassword, payoutRequest } from "../../api/doctor/doctorApi";
 import { updateDoctor } from "../../redux/slices/doctorSlices";
+import { message } from "antd";
 
 const DoctorProfile = () => {
   const doctor = useSelector((state: any) => state.doctor.doctor);
@@ -21,6 +23,7 @@ const DoctorProfile = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
 
   useEffect(() => {
     setProfileData(doctor);
@@ -33,6 +36,17 @@ const DoctorProfile = () => {
       setPreviewImage(URL.createObjectURL(file));
     }
   };
+
+  const handlePayout = async ()=>{
+
+    if(doctor.walletBalance < 1){
+      message.warning("you haven't sufficient balance to payout!");
+      return;
+    }
+
+    setIsPayoutModalOpen(true)
+    
+  }
 
   const handleSaveImage = async () => {
     if (!selectedImage) return;
@@ -98,6 +112,25 @@ const DoctorProfile = () => {
       toast.error("Password change failed");
     }
   };
+
+
+   const handlePayoutRequest = async (payoutDetails: any) => {
+    try {
+      const response = await payoutRequest(payoutDetails, doctor._id);
+      if (!response) {
+        toast.error("Requestin payout failed");
+        return;
+      };
+
+      console.log("reponse is ",response);
+      toast.success("Payout requested");
+    } catch {
+      toast.error("Requestin payout failed");
+    }
+
+    };
+
+
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -230,7 +263,7 @@ const DoctorProfile = () => {
             <p className="text-sm">Change Password</p>
             <button
               onClick={() => setIsChangePasswordModalOpen(true)}
-              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm hover:bg-blue-50"
+              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm  cursor-pointer hover:bg-blue-700 hover:text-white"
             >
               Change
             </button>
@@ -239,8 +272,8 @@ const DoctorProfile = () => {
             <p className="text-sm">Earnings</p>
             <p className="text-gray-700 font-semibold">{profileData.walletBalance || 0} ₹</p>
             <button
-              // onClick={() => setIsChangePasswordModalOpen(true)}
-              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm hover:bg-blue-50"
+              onClick={() => handlePayout()}
+              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm cursor-pointer hover:bg-blue-700 hover:text-white"
             >
               Payout
             </button>
@@ -262,6 +295,20 @@ const DoctorProfile = () => {
         onClose={() => setIsChangePasswordModalOpen(false)}
         onSave={handlePasswordChange}
       />
+
+      {/* payout modal */}
+
+      <DoctorPayoutModal
+      isOpen={isPayoutModalOpen}
+      onClose={()=> setIsPayoutModalOpen(false)}
+      onSave = {handlePayoutRequest}
+      initialData={{
+        bankAccNo: doctor.bankAccNo,
+        bankAccHolderName: doctor.bankAccHolderName,
+        bankIfscCode: doctor.bankIfscCode
+      }}
+      />
+      
     </div>
   );
 };

@@ -15,6 +15,7 @@ import blogModel from "../models/blogModel";
 import advertisementModel from "../models/advertisementModel";
 import notificationModel from "../models/notificationModel";
 import prescriptionModel from "../models/prescriptionModel";
+import payoutModel from "../models/payoutModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/authCtrl";
@@ -71,6 +72,8 @@ import IDoctorPrescriptionCtrl from "../controllers/doctor/interfaces/IPrescript
 import DoctorPrescriptionController from "../controllers/doctor/implementations/prescriptionCtrl";
 import IDoctorDashboardController from "../controllers/doctor/interfaces/IDashboardCtrl";
 import DoctorDashboardController from "../controllers/doctor/implementations/dashboardCtrl";
+import IDoctorPayoutController from "../controllers/doctor/interfaces/IPayoutCtrl";
+import DoctorPayoutController from "../controllers/doctor/implementations/payoutCtrl";
 
 
 import PaymentController from "../controllers/common/implementations/paymentCtrl"
@@ -141,6 +144,8 @@ import IDoctorPrescriptionService from "../services/doctor/interfaces/IDoctorPre
 import DoctorPrescriptionService from "../services/doctor/implementations/doctorPrescriptionService";
 import IDoctorDashboardService from "../services/doctor/interfaces/IDoctorDashboardService";
 import DoctorDashboardService from "../services/doctor/implementations/doctorDashboardService";
+import IDoctorPayoutService from "../services/doctor/interfaces/IDoctorPayoutService";
+import DoctorPayoutService from "../services/doctor/implementations/doctorPayoutService";
 
 
 
@@ -210,6 +215,8 @@ import IPrescriptionRepository from "../repositories/interfaces/IPrescriptionRep
 import PrescriptionRepository from "../repositories/implementations/prescriptionrRepository";
 
 
+import IPayoutRepository from "../repositories/interfaces/IPayoutRepository";
+import PayoutRepository from "../repositories/implementations/payoutRepository";
 
 //.................................................................................
 
@@ -232,6 +239,7 @@ container.bind("blogModel").toConstantValue(blogModel);
 container.bind("advertisementModel").toConstantValue(advertisementModel);
 container.bind("notificationModel").toConstantValue(notificationModel);
 container.bind("prescriptionModel").toConstantValue(prescriptionModel);
+container.bind("payoutModel").toConstantValue(payoutModel)
 
 //...................................................................
 
@@ -265,7 +273,7 @@ container.bind<IDoctorBlogController>("IDoctorBlogController").to(DoctorBlogCont
 container.bind<IDoctorAdvertisementController>("IDoctorAdvertisementController").to(DoctorAdvertisementController);
 container.bind<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl").to(DoctorPrescriptionController);
 container.bind<IDoctorDashboardController>("IDoctorDashboardController").to(DoctorDashboardController);
-
+container.bind<IDoctorPayoutController>("IDoctorPayoutController").to(DoctorPayoutController)
 
 
 container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
@@ -309,6 +317,8 @@ container.bind<IDoctorBlogService>("IDoctorBlogService").to(DoctorBlogService);
 container.bind<IDoctorAdvertisementService>("IDoctorAdvertisementService").to(DoctorAdvertisementService);
 container.bind<IDoctorPrescriptionService>("IDoctorPrescriptionService").to(DoctorPrescriptionService);
 container.bind<IDoctorDashboardService>("IDoctorDashboardService").to(DoctorDashboardService);
+container.bind<IDoctorPayoutService>("IDoctorPayoutService").to(DoctorPayoutService);
+
 
 
 
@@ -339,6 +349,7 @@ container.bind<IBlogRepository>("IBlogRepository").to(BlogsRepository);
 container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(AdvertisementRepository);
 container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
 container.bind<IPrescriptionRepository>("IPrescriptionRepository").to(PrescriptionRepository);
+container.bind<IPayoutRepository>("IPayoutRepository").to(PayoutRepository);
 
 
 

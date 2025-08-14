@@ -1,11 +1,12 @@
 import { IUser } from "../../../dto/userDTO"
 import { IUserResponse } from "../../../dto/userDTO";
 import { IResponseDTO } from "../../../dto/commonDTO";
-
+import { AuthResponseDTO } from "../../../dto/userDTO";
+import { UserLoginRequestDTO } from "../../../dto/userDTO";
 
 export default interface IUserAuthService {
 
-    login(userData:Partial<IUser>):Promise<Partial<IUserResponse>>
+    login(userData:UserLoginRequestDTO):Promise<AuthResponseDTO>
     signup(userData:Partial<IUser>):Promise<Partial<IUserResponse>>
     sendMail(email:string,otp:string):Promise<void>
     verifyOtp(email:string,otp:string):Promise<Partial<IUserResponse>>

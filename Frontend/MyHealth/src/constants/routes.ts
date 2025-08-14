@@ -74,8 +74,8 @@ export const ROUTES = {
     prescription : "/doctor/prescription",
     prescriptions : "/doctor/prescriptions",
     getUser: "/doctor/getUser",
-    dashboard: "/doctor/dashboard"
-    
+    dashboard: "/doctor/dashboard",
+    requestPayout : "/doctor/requestPayout"
 
   },
 

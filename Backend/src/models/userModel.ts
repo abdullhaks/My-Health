@@ -31,7 +31,9 @@ const userSchema : Schema<IUserDocument> = new Schema ({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 
-});
+},
+{ timestamps: true, toObject: { versionKey: false } }
+);
 
 
 const userModel = mongoose.model<IUserDocument>("User",userSchema);
