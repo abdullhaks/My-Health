@@ -23,10 +23,9 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
   async findAll(filter: FilterQuery<T> = {},options: { sort?: any } = {}): Promise<T[] | []> {
     try {
       let query = this._model.find(filter);
-
       if (options.sort) {
                 query = query.sort(options.sort);
-            }
+          }
       return await query.exec() ;
     } catch (error) {
       console.error("Error finding documents:", error);

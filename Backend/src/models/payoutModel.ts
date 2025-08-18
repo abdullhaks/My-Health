@@ -11,6 +11,7 @@ const payoutSchema : Schema<IPayoutDocument> = new Schema ({
     paid:{type:Number},
     serviceAmount:{type:Number},
     status : { type: String,enum: ["requested","paid","rejected"],default:"requested"},
+    on:{type:Date},
     transactionId: { type: String},
     invoiceLink:{type:String},
     createdAt: { type: Date, default: Date.now },

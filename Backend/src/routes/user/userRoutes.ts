@@ -1,28 +1,28 @@
 import { Router } from "express";
 import container from "../../config/inversify";
-import IUserAuthCtrl from "../../controllers/user/interfaces/IAuthCtrl";
-import IUserProfileCtrl from "../../controllers/user/interfaces/IProfileCtrl";
+import IUserAuthCtrl from "../../controllers/user/interfaces/IUserAuthCtrl";
+import IUserProfileCtrl from "../../controllers/user/interfaces/IUserProfileCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
-import IUserAppointmentController from "../../controllers/user/interfaces/IAppointmentCtrl";
+import IUserAppointmentCtrl from "../../controllers/user/interfaces/IUserAppointmentCtrl";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
-import IUserSessionCtrl from "../../controllers/user/interfaces/ISessionCtrl";
+import IUserSessionCtrl from "../../controllers/user/interfaces/IUserSessionCtrl";
 import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
 import IPaymentCtrl from "../../controllers/common/interfaces/IPaymentCtrl";
 import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
-import IUserReportAnalysisCtrl from "../../controllers/user/interfaces/IReportAnalysisCtrl";
-import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
-import IUserBlogController from "../../controllers/user/interfaces/IBlogCtrl";
-import IUserDashboardController from "../../controllers/user/interfaces/IDashboardCtrl";
-import IUserPrescriptionCtrl from "../../controllers/user/interfaces/IPrescriptionCtrl";
+import IUserReportAnalysisCtrl from "../../controllers/user/interfaces/IUserReportAnalysisCtrl";
+import INotificationCtrl from "../../controllers/common/interfaces/INotificationCtrl";
+import IUserBlogCtrl from "../../controllers/user/interfaces/IUserBlogCtrl";
+import IUserDashboardCtrl from "../../controllers/user/interfaces/IUserDashboardCtrl";
+import IUserPrescriptionCtrl from "../../controllers/user/interfaces/IUserPrescriptionCtrl";
 import { resolve } from "path";
 
 const userRoutes = Router();
 
 const authCtrl = container.get<IUserAuthCtrl>("IUserAuthCtrl");
 const profileCtrl = container.get<IUserProfileCtrl>("IUserProfileCtrl");
-const appointmentCtrl = container.get<IUserAppointmentController>("IUserAppointmentController");
+const appointmentCtrl = container.get<IUserAppointmentCtrl>("IUserAppointmentCtrl");
 const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl");
 const sessionCtrl = container.get<IUserSessionCtrl>("IUserSessionCtrl");
@@ -30,9 +30,9 @@ const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
 const paymentCtrl =  container.get<IPaymentCtrl>("IPaymentCtrl");
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
 const reportAnalysisCtrl = container.get<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl");
-const notificationCtrl = container.get<INotificationController>("INotificationController");
-const blogCtrl = container.get<IUserBlogController>("IUserBlogController");
-const dashboardCtrl = container.get<IUserDashboardController>("IUserDashboardController");
+const notificationCtrl = container.get<INotificationCtrl>("INotificationCtrl");
+const blogCtrl = container.get<IUserBlogCtrl>("IUserBlogCtrl");
+const dashboardCtrl = container.get<IUserDashboardCtrl>("IUserDashboardCtrl");
 const prescriptionCtrl = container.get<IUserPrescriptionCtrl>("IUserPrescriptionCtrl");
 
 

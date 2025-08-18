@@ -3,6 +3,7 @@ import IAdminAnalyticsServices from "../interfaces/IAdminAnalyticsServices";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
+import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 import {MESSAGES} from "../../../utils/messages"
 
 
@@ -14,6 +15,9 @@ export default class AdminAnalyticsServices implements IAdminAnalyticsServices {
         @inject( "IUserRepository") private _userRepository:IUserRepository,
         @inject("IDoctorRepository") private _doctorRepository:IDoctorRepository,
         @inject("IAnalyticsRepository") private _analyticsRepository:IAnalyticsRepository,
+        @inject("ITransactionRepository") private _transactionRepository:ITransactionRepository,
+
+        
     ){}
 
 async getUserAnalytics(filter: string): Promise<{ name: string; value: number }[]> {

@@ -12,6 +12,7 @@ export interface IPayoutDocument extends Document{
     paid:number;
     serviceAmount:number
     status:string;
+    on:Date;
     transactionId:string;
     invoiceLink?:string;
     createdAt:Date;

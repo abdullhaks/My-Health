@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { getDoctorAnalytics, getUserAnalytics ,getTotalAnalytics} from "../../api/admin/adminApi";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { getDoctorAnalytics, getUserAnalytics, getTotalAnalytics, getTransactions } from "../../api/admin/adminApi"; // Added getTransactions
 import adminimg from "../../assets/doctorLogin.png";
 import { FaCalendarCheck, FaUsers } from "react-icons/fa";
 import { FaMoneyBillTransfer, FaMoneyBillTrendUp, FaUserDoctor } from "react-icons/fa6";
+import { Table, DatePicker, Button, Pagination, Tag } from "antd"; // Imported necessary antd components
+import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
+import dayjs, { Dayjs } from "dayjs";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // Import the plugin
 
+// Extend jsPDF with autoTable
+(jsPDF as any).autoTable = autoTable;
 
 interface SummaryCardProps {
   title: string;
@@ -13,8 +20,6 @@ interface SummaryCardProps {
   trendColor: string;
   icon?: any;
 };
-
-
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendColor, icon }) => (
   <div className="bg-white rounded-2xl p-6 shadow-lg flex flex-col gap-3 transition-transform transform hover:scale-105">
@@ -30,25 +35,40 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendCol
 );
 
 const AdminDashboard = () => {
-  const [userData, setUserData] = useState([]);
-  const [userFilter, setUserFilter] = useState("day");
-  const [doctorData,setDoctorData] = useState([]);
-  const [doctorFilter, setDoctorFilter] = useState("day");
-  const [totaldata,setTotalData] = useState({totalConsultations:0,
-                                             totalDoctors:0,
-                                             totalPaid:0,
-                                             totalRevenue:0,
-                                             totalUsers:0 })
+  interface AnalyticsItem {
+    name: string;
+    value: number;
+  }
+
+  const [userData, setUserData] = useState<AnalyticsItem[]>([]);
+  const [doctorData, setDoctorData] = useState<AnalyticsItem[]>([]);
+  const [combinedData, setCombinedData] = useState<{ name: string; users: number; doctors: number }[]>([]);
+  const [analyticsFilter, setAnalyticsFilter] = useState("day"); // Combined filter
+  const [totaldata, setTotalData] = useState({
+    totalConsultations: 0,
+    totalDoctors: 0,
+    totalPaid: 0,
+    totalRevenue: 0,
+    totalUsers: 0,
+  });
+
+  // Transactions states
+  const [transactions, setTransactions] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(2);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    dateRange: null as [Dayjs, Dayjs] | null,
+  });
 
   useEffect(() => {
     const fetchTotalAnalytics = async () => {
       try {
         const response = await getTotalAnalytics();
-
-        console.log("total analytics response is ...",response);
-        setTotalData(response); 
+        setTotalData(response);
       } catch (error) {
-        console.error("Failed to fetch user analytics:", error);
+        console.error("Failed to fetch total analytics:", error);
       }
     };
     fetchTotalAnalytics();
@@ -57,26 +77,146 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchUserAnalytics = async () => {
       try {
-        const response = await getUserAnalytics(userFilter);
-        setUserData(response); 
+        const response = await getUserAnalytics(analyticsFilter);
+        setUserData(response);
       } catch (error) {
         console.error("Failed to fetch user analytics:", error);
       }
     };
     fetchUserAnalytics();
-  }, [userFilter]);
+  }, [analyticsFilter]);
 
   useEffect(() => {
     const fetchDoctorAnalytics = async () => {
       try {
-        const response = await getDoctorAnalytics(doctorFilter);
-        setDoctorData(response); 
+        const response = await getDoctorAnalytics(analyticsFilter);
+        setDoctorData(response);
       } catch (error) {
-        console.error("Failed to fetch user analytics:", error);
+        console.error("Failed to fetch doctor analytics:", error);
       }
     };
     fetchDoctorAnalytics();
-  }, [doctorFilter]);
+  }, [analyticsFilter]);
+
+  // Combine user and doctor data for the graph
+  useEffect(() => {
+    if (userData.length > 0 && doctorData.length > 0 && userData.length === doctorData.length) {
+      const combined = userData.map((u, i) => ({
+        name: u.name,
+        users: u.value,
+        doctors: doctorData[i].value,
+      }));
+      setCombinedData(combined);
+    } else {
+      setCombinedData([]);
+    }
+  }, [userData, doctorData]);
+
+  // Fetch transactions
+  const fetchTransactions = async (page: number) => {
+    setLoading(true);
+    try {
+      const response = await getTransactions(page, limit, {
+        startDate: filters.dateRange ? filters.dateRange[0].toISOString() : undefined,
+        endDate: filters.dateRange ? filters.dateRange[1].toISOString() : undefined,
+      });
+      setTransactions(response.transactions);
+      setTotalPages(response.totalPages);
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions(currentPage);
+  }, [currentPage, filters]);
+
+  const handleFilterChange = (key: string, value: [Dayjs, Dayjs] | null) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1);
+  };
+
+  // Handle PDF download
+  const handleDownload = async () => {
+    if (!filters.dateRange) {
+      alert("Please select a date range to download.");
+      return;
+    }
+    try {
+      // Fetch all transactions with high limit for download
+      const response = await getTransactions(1, 10000, {
+        startDate: filters.dateRange[0].toISOString(),
+        endDate: filters.dateRange[1].toISOString(),
+      });
+      const allTransactions = response.transactions;
+
+      const doc = new jsPDF();
+      autoTable(doc, {
+        head: [['Date','Method', 'Amount', 'Payment For', 'Transaction ID', ]],
+        body: allTransactions.map((t: any) => [
+          dayjs(t.createdAt).format("MMM DD, YYYY h:mm A"),
+          
+          t.method,
+          `Rs ${t.amount}`,
+          t.paymentFor,
+          t.transactionId || 'N/A',
+         
+        ]),
+      });
+      doc.save(`admin_revenue_${dayjs().format('YYYYMMDD')}.pdf`);
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+    }
+  };
+
+  // Transaction table columns
+  const columns = [
+    {
+      title: "Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) => dayjs(date).format("MMM DD, YYYY h:mm A"),
+    },
+    // {
+    //   title: "From",
+    //   dataIndex: "from",
+    //   key: "from",
+    // },
+    {
+      title: "Method",
+      dataIndex: "method",
+      key: "method",
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (amount: number) => `Rs ${amount}`,
+    },
+    {
+      title: "Payment For",
+      dataIndex: "paymentFor",
+      key: "paymentFor",
+      render: (text: string) => <Tag color="blue">{text.toUpperCase()}</Tag>,
+    },
+    // {
+    //   title: "Transaction ID",
+    //   dataIndex: "transactionId",
+    //   key: "transactionId",
+    // },
+    // {
+    //   title: "User ID",
+    //   dataIndex: "userId",
+    //   key: "userId",
+    // },
+    // {
+    //   title: "Doctor ID",
+    //   dataIndex: "doctorId",
+    //   key: "doctorId",
+    // },
+  ];
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
@@ -136,14 +276,69 @@ const AdminDashboard = () => {
         />
       </div>
 
-      {/* User Analytics Chart */}
+      {/* Transaction Listing */}
+      <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+        <h3 className="text-xl font-semibold text-gray-800 mb-6">Admin Revenue Transactions</h3>
+        
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <FilterOutlined className="text-gray-600" />
+            <DatePicker.RangePicker
+              onChange={(dates) => {
+                if (dates && dates[0] && dates[1]) {
+                  handleFilterChange(
+                    "dateRange",
+                    [dates[0], dates[1]]
+                  );
+                } else {
+                  handleFilterChange("dateRange", null);
+                }
+              }}
+              format="YYYY-MM-DD"
+            />
+          </div>
+          <Button
+            type="primary"
+            icon={<SearchOutlined />}
+            onClick={() => fetchTransactions(currentPage)}
+          >
+            Apply Filters
+          </Button>
+          <Button onClick={handleDownload}>
+            Download PDF
+          </Button>
+        </div>
+
+        {/* Table */}
+        <Table
+          dataSource={transactions}
+          columns={columns}
+          rowKey="_id"
+          loading={loading}
+          pagination={false}
+        />
+
+        {/* Pagination */}
+        <div className="mt-6 flex justify-end">
+          <Pagination
+            current={currentPage}
+            total={totalPages * limit}
+            pageSize={limit}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
+        </div>
+      </div>
+
+      {/* Combined Analytics Chart */}
       <div className="mt-8 p-6 bg-white rounded-2xl shadow-lg">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">User Analytics</h3>
+          <h3 className="text-xl font-semibold text-gray-800">User & Doctor Analytics</h3>
           <select
             className="border border-gray-300 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            value={userFilter}
-            onChange={(e) => setUserFilter(e.target.value)}
+            value={analyticsFilter}
+            onChange={(e) => setAnalyticsFilter(e.target.value)}
           >
             <option value="day">Day</option>
             <option value="week">Week</option>
@@ -151,68 +346,35 @@ const AdminDashboard = () => {
             <option value="year">Year</option>
           </select>
         </div>
-       <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={userData.length > 0 ? userData : [{ name: "", value: 0 }]}>
-          <XAxis dataKey="name" stroke="#6b7280" />
-          <YAxis stroke="#6b7280" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#3b82f6"
-            strokeWidth={3}
-            dot={{ r: 5, fill: "#3b82f6" }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={combinedData.length > 0 ? combinedData : [{ name: "", users: 0, doctors: 0 }]}>
+            <XAxis dataKey="name" stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              }}
+            />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="users"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={{ r: 5, fill: "#3b82f6" }}
+            />
+            <Line
+              type="monotone"
+              dataKey="doctors"
+              stroke="#10b981"
+              strokeWidth={3}
+              dot={{ r: 5, fill: "#10b981" }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
-
-
-
-      {/* Doctor Analytics Chart */}
-      <div className="mt-8 p-6 bg-white rounded-2xl shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">Doctor Analytics</h3>
-          <select
-            className="border border-gray-300 px-4 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-            value={doctorFilter}
-            onChange={(e) => setDoctorFilter(e.target.value)}
-          >
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
-            <option value="year">Year</option>
-          </select>
-        </div>
-       <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={doctorData.length > 0 ? doctorData : [{ name: "", value: 0 }]}>
-          <XAxis dataKey="name" stroke="#6b7280" />
-          <YAxis stroke="#6b7280" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke="#3b82f6"
-            strokeWidth={3}
-            dot={{ r: 5, fill: "#3b82f6" }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-      </div>
-
-
     </div>
   );
 };

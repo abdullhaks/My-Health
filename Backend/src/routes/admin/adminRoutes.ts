@@ -1,12 +1,13 @@
 import { Router } from "express";
 import container from "../../config/inversify";
-import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAuthCtrl";
-import IAdminUserCtrl from "../../controllers/admin/interfaces/IUserCtrl";
-import IAdminDoctorCtrl from "../../controllers/admin/interfaces/IDoctorCtrl";
-import IAdminProductCtrl from "../../controllers/admin/interfaces/IProductCtrl";
-import IAdminAppointmentController from "../../controllers/admin/interfaces/IAppointmentCtrl";
-import IAdminAnalyticsController from "../../controllers/admin/interfaces/IAnalyticsCtrl";
-import IAdminTransactionController from "../../controllers/admin/interfaces/ITransactionCtrl";
+import IAdminAuthCtrl from "../../controllers/admin/interfaces/IAdminAuthCtrl";
+import IAdminUserCtrl from "../../controllers/admin/interfaces/IAdminUserCtrl";
+import IAdminDoctorCtrl from "../../controllers/admin/interfaces/IAdminDoctorCtrl";
+import IAdminProductCtrl from "../../controllers/admin/interfaces/IAdminProductCtrl";
+import IAdminAppointmentController from "../../controllers/admin/interfaces/IAdminAppointmentController";
+import IAdminAnalyticsController from "../../controllers/admin/interfaces/IAdminAnalyticsController";
+import IAdminTransactionController from "../../controllers/admin/interfaces/IAdminTransactionController";
+import IAdminPayoutController from "../../controllers/admin/interfaces/IAdminPayoutController";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 
 
@@ -19,6 +20,7 @@ const productCtrl = container.get<IAdminProductCtrl>("IAdminProductCtrl");
 const appointmentCtrl = container.get<IAdminAppointmentController>("IAdminAppointmentController");
 const analyticsCtrl = container.get<IAdminAnalyticsController>("IAdminAnalyticsController");
 const transactionCtrl = container.get<IAdminTransactionController>("IAdminTransactionController");
+const payoutCtrl = container.get<IAdminPayoutController>("IAdminPayoutController");
 
 
 adminRoutes.post("/login",(req,res)=>authCtrl.adminLogin(req,res));
@@ -61,5 +63,11 @@ adminRoutes.get("/getDoctorAnalytics/:filter",verifyAccessTokenMidleware("admin"
 adminRoutes.get("/getTotalAnalytics",verifyAccessTokenMidleware("admin"),(req,res)=>analyticsCtrl.getTotalAnalytics(req,res));
 
 adminRoutes.get("/getTransactions",verifyAccessTokenMidleware("admin"),(req,res)=>transactionCtrl.getTransactions(req,res));
+
+adminRoutes.get("/payouts",verifyAccessTokenMidleware("admin"),(req,res)=>payoutCtrl.getPayouts(req,res));
+
+adminRoutes.post("/payouts",verifyAccessTokenMidleware("admin"),(req,res)=>payoutCtrl.updatePayout(req,res));
+
+
 
 export default adminRoutes; 

@@ -1,6 +1,6 @@
 import { Request,Response } from "express";
 
-export default interface INotificationController {
+export default interface INotificationCtrl {
 
     createNotification (req:Request,res:Response):Promise<void>
     readAllNotifications (req:Request,res:Response):Promise<void>

@@ -302,8 +302,41 @@ export const getTransactions = async (page:number, limit:number,filters:any)=>{
     }
 };
 
+export const getPayouts = async (page:number, limit:number,filters:any)=>{
+    try{
+
+        const response = await adminInstance.get(ROUTES.admin.payouts,{
+      params: {
+        page,
+        limit,
+        ...filters,
+      }});
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+};
 
 
+
+export const updatePayout = async (id:string, updateData:any)=>{
+    try{
+
+        const response = await adminInstance.post(ROUTES.admin.payouts,{
+            id,
+            ...updateData
+        });
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+};
 
 
 

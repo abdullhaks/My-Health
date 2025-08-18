@@ -4,8 +4,9 @@ import {
   FaHome, FaUserMd, FaUsers, FaSignOutAlt, FaBars, FaTimes, FaChevronLeft,
   FaChevronRight, FaSearch, FaBell, FaEnvelope,
   FaStar,
-  FaCalendarAlt
+  FaCalendarAlt, 
 } from "react-icons/fa";
+import { MdAttachMoney } from "react-icons/md";
 import applogoBlue from "../../assets/applogoblue.png";
 import defaultAvatar from "../../assets/avatar.png";
 import ConfirmModal from "../../sharedComponents/ConfirmModal";
@@ -78,6 +79,7 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Doctors", path: "/admin/doctors", icon: <FaUserMd /> },
     { name: "Plans", path: "/admin/subscriptionPlans", icon: <FaStar /> },
     { name: "Appointments", path: "/admin/appointments", icon: <FaCalendarAlt /> },
+    { name: "Payouts", path: "/admin/payout", icon: <MdAttachMoney /> },
     { name: "Revenue", path: "/admin/transactions", icon: <FaMoneyBillTransfer /> },
   ];
 

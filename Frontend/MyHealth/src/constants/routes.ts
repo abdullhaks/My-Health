@@ -112,6 +112,8 @@ export const ROUTES = {
     getDoctorAnalytics:(filter:string) => `/admin/getDoctorAnalytics/${filter}`,
     getTotalAnalytics : "/admin/getTotalAnalytics",
     getTransactions : "/admin/getTransactions",
+    payouts:"/admin/payouts",
+
     
     
   },

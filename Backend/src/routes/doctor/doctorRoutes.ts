@@ -1,23 +1,23 @@
 import { Router } from "express";
 import container from "../../config/inversify";
-import IDoctorAuthCtrl from "../../controllers/doctor/interfaces/IAuthCtrl";
-import IDoctorProfileCtrl from "../../controllers/doctor/interfaces/IProfileCtrl";
-import IDoctorAppointmentController from "../../controllers/doctor/interfaces/IAppointmentCtrl";
-import IDoctorPlanCtrl from "../../controllers/doctor/interfaces/IPlanCtrl";
+import IDoctorAuthCtrl from "../../controllers/doctor/interfaces/IDoctorAuthCtrl";
+import IDoctorProfileCtrl from "../../controllers/doctor/interfaces/IDoctorProfileCtrl";
+import IDoctorAppointmentCtrl from "../../controllers/doctor/interfaces/IDoctorAppointmentCtrl";
+import IDoctorPlanCtrl from "../../controllers/doctor/interfaces/IDoctorPlanCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
-import ISessionCtrl from "../../controllers/doctor/interfaces/ISessionCtrl";
-import IDoctorReportAnalysisCtrl from "../../controllers/doctor/interfaces/IReportAnalysisCtrl";
+import ISessionCtrl from "../../controllers/doctor/interfaces/IDoctorSessionCtrl";
+import IDoctorReportAnalysisCtrl from "../../controllers/doctor/interfaces/IDoctorReportAnalysisCtrl";
 import IDirectDocUploadS3Ctrl from "../../controllers/common/interfaces/IDirectDocUploadS3";
-import IDoctorBlogController from "../../controllers/doctor/interfaces/IBlogCtrl";
-import IDoctorAdvertisementController from "../../controllers/doctor/interfaces/IAdvertisementCtrl";
-import INotificationController from "../../controllers/common/interfaces/INotificationCtrl";
-import IDoctorPrescriptionCtrl from "../../controllers/doctor/interfaces/IPrescriptionCtrl";
+import IDoctorBlogCtrl from "../../controllers/doctor/interfaces/IDoctorBlogCtrl";
+import IDoctorAdvertisementCtrl from "../../controllers/doctor/interfaces/IDoctorAdvertisementCtrl";
+import IDoctorPrescriptionCtrl from "../../controllers/doctor/interfaces/IDoctorPrescriptionCtrl";
 import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
-import IDoctorDashboardController from "../../controllers/doctor/interfaces/IDashboardCtrl";
-import IDoctorPayoutController from "../../controllers/doctor/interfaces/IPayoutCtrl";
+import IDoctorDashboardCtrl from "../../controllers/doctor/interfaces/IDoctorDashboardCtrl";
+import IDoctorPayoutCtrl from "../../controllers/doctor/interfaces/IDoctorPayoutCtrl";
+import INotificationCtrl from "../../controllers/common/interfaces/INotificationCtrl";
 
 
 
@@ -28,17 +28,17 @@ const profileCtrl = container.get<IDoctorProfileCtrl>("IDoctorProfileCtrl");
 const conversationCtrl = container.get<IConversationCtrl>("IConversationCtrl");
 const messageCtrl = container.get<IMessageCtrl>("IMessageCtrl")
 const sessionCtrl = container.get<ISessionCtrl>("IDoctorSessionCtrl");
-const appointmentCtrl = container.get<IDoctorAppointmentController>("IDoctorAppointmentController");
+const appointmentCtrl = container.get<IDoctorAppointmentCtrl>("IDoctorAppointmentCtrl");
 const ReportAnalysisCtrl = container.get<IDoctorReportAnalysisCtrl>("IDoctorReportAnalysisCtrl");
 const directUploadCtrl = container.get<IDirectDocUploadS3Ctrl>("IDirectDocUploadS3Ctrl");
 const planCtrl = container.get<IDoctorPlanCtrl>("IDoctorPlanCtrl");
-const blogCtrl = container.get<IDoctorBlogController>("IDoctorBlogController");
-const addCtrl = container.get<IDoctorAdvertisementController>("IDoctorAdvertisementController")
-const notificationCtrl = container.get<INotificationController>("INotificationController")
+const blogCtrl = container.get<IDoctorBlogCtrl>("IDoctorBlogCtrl");
+const addCtrl = container.get<IDoctorAdvertisementCtrl>("IDoctorAdvertisementCtrl")
+const notificationCtrl = container.get<INotificationCtrl>("INotificationCtrl")
 const prescriptionsCtrl = container.get<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl")
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
-const dashboardCtrl = container.get<IDoctorDashboardController>("IDoctorDashboardController");
-const payoutCtrl = container.get<IDoctorPayoutController>("IDoctorPayoutController")
+const dashboardCtrl = container.get<IDoctorDashboardCtrl>("IDoctorDashboardCtrl");
+const payoutCtrl = container.get<IDoctorPayoutCtrl>("IDoctorPayoutCtrl")
 
 
 
