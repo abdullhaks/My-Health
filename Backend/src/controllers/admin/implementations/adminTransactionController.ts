@@ -10,13 +10,11 @@ injectable()
 
 export default class AdminTransactionController implements IAdminTransactionController {
 
-    private _transactionService: IAdminTransactionsService;
+   
 
     constructor(
-        @inject("IAdminTransactionsService") AdminTransactionService: IAdminTransactionsService
-    ) {
-        this._transactionService = AdminTransactionService;
-    };
+        @inject("IAdminTransactionsService") private _adminTransactionService: IAdminTransactionsService
+    ) { };
 
  async getTransactions(req: Request, res: Response): Promise<void> {
     try {
@@ -32,7 +30,7 @@ export default class AdminTransactionController implements IAdminTransactionCont
         endDate: endDate as string,
       };
 
-      const transactions = await this._transactionService.getTransactions(pageNumber, limitNumber, filters);
+      const transactions = await this._adminTransactionService.getTransactions(pageNumber, limitNumber, filters);
 
       res.status(HttpStatusCode.OK).json(transactions);
     } catch (err) {

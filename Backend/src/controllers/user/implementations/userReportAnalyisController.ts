@@ -8,14 +8,14 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class UserReportAnalyisController implements IUserReportAnalysisCtrl {
   constructor(
     @inject("IUserReportAnalysisService")
-    private _ReportAnalyisService: IUserReportAnalysisService
+    private _reportAnalyisService: IUserReportAnalysisService
   ) {}
 
 async getReports (req:Request,res:Response):Promise<void>{
     try{
         const userId =  req.query.userId;
         if(userId){
-        const response = await this._ReportAnalyisService.getReports(userId.toString());
+        const response = await this._reportAnalyisService.getReports(userId.toString());
          res.status(HttpStatusCode.OK).json(response);
          return
         }
@@ -37,7 +37,7 @@ async cancelAnalysisReports (req:Request,res:Response):Promise<void>{
              res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
              return
         }
-        const response = await this._ReportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
+        const response = await this._reportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
          res.status(HttpStatusCode.OK).json(response);
     }catch(error){
         console.log("error in cancel analysis Reports",error);

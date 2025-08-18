@@ -10,7 +10,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class DoctorPrescriptionController implements IDoctorPrescriptionCtrl {
 
     constructor (
-        @inject("IDoctorPrescriptionService") private _prescriptionService : IDoctorPrescriptionService
+        @inject("IDoctorPrescriptionService") private _doctorPrescriptionService : IDoctorPrescriptionService
     ){}
 
 
@@ -20,7 +20,7 @@ export default class DoctorPrescriptionController implements IDoctorPrescription
 
             const {userId} = req.query
             if(userId){
-                 const response =await this._prescriptionService.getPrescriptions(userId.toString());
+                 const response =await this._doctorPrescriptionService.getPrescriptions(userId.toString());
             if(!response){
                 res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
                 return
@@ -52,7 +52,7 @@ export default class DoctorPrescriptionController implements IDoctorPrescription
              const {prescriptionData} = req.body;
 
 
-        const response = await this._prescriptionService.submitPrescription(prescriptionData);
+        const response = await this._doctorPrescriptionService.submitPrescription(prescriptionData);
         if(!response){
             res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
             return

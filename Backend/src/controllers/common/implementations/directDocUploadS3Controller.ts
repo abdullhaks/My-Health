@@ -8,11 +8,10 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class DirectDocUploadS3Controller implements IDirectDocUploadS3Ctrl {
-private _uploadService: IDirectDocUploadS3Service;
 
-  constructor(@inject("IDirectDocUploadS3Service")DirectDocUploadS3Service:IDirectDocUploadS3Service ){
-    this._uploadService = DirectDocUploadS3Service
-  };
+
+  constructor(@inject("IDirectDocUploadS3Service") private _uploadService: IDirectDocUploadS3Service )
+  { };
 
 
   async directUpload(req: Request, res: Response): Promise<void> {

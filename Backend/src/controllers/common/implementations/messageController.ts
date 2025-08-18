@@ -9,11 +9,10 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class MessageController implements IMessageCtrl {
-private _messageService: IMessageService;
 
-  constructor(@inject("IMessageService")MessageService:IMessageService ){
-    this._messageService = MessageService
-  }
+
+  constructor(@inject("IMessageService") private _messageService: IMessageService )
+  {  }
 
 async sendMessage(req: Request, res: Response): Promise<void> {
     try {

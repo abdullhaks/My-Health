@@ -11,7 +11,7 @@ export default class AdminAnalyticsContorller implements IAdminAnalyticsControll
 
     constructor(
         @inject("IAdminAnalyticsServices")
-        private _AnalyticsService: IAdminAnalyticsServices
+        private _adminAnalyticsService: IAdminAnalyticsServices
 
     ){}
 
@@ -19,7 +19,7 @@ export default class AdminAnalyticsContorller implements IAdminAnalyticsControll
     try {
       const filter = req.params.filter;
       console.log("Filter received:", filter);
-      const response = await this._AnalyticsService.getUserAnalytics(filter);
+      const response = await this._adminAnalyticsService.getUserAnalytics(filter);
       console.log("response is ....",response);
        res.status(200).json(response);
     } catch (error) {
@@ -34,7 +34,7 @@ export default class AdminAnalyticsContorller implements IAdminAnalyticsControll
     try {
       const filter = req.params.filter;
       console.log("Filter received:", filter);
-      const response = await this._AnalyticsService.getDoctorAnalytics(filter);
+      const response = await this._adminAnalyticsService.getDoctorAnalytics(filter);
       console.log("response is ....",response);
        res.status(200).json(response);
     } catch (error) {
@@ -47,7 +47,7 @@ export default class AdminAnalyticsContorller implements IAdminAnalyticsControll
   async getTotalAnalytics (req:Request,res:Response):Promise<void>{
     try{
 
-      const response = await this._AnalyticsService.getTotalAnalytics();
+      const response = await this._adminAnalyticsService.getTotalAnalytics();
       res.status(HttpStatusCode.OK).json(response);
 
     }catch(err){

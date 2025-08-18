@@ -9,11 +9,10 @@ import { HttpStatusCode } from "../../../utils/enum"
 
 @injectable()
 export default class DoctorProfileController implements IDoctorProfileCtrl {
-  private _doctorService: IDoctorProfileService;
 
-  constructor(@inject("IDoctorProfileService") DoctorProfileService: IDoctorProfileService) {
-    this._doctorService = DoctorProfileService;
-  }
+
+  constructor(@inject("IDoctorProfileService")   private _doctorProfileService: IDoctorProfileService
+) {  }
 
 
       async createCheckoutSession(req: Request, res: Response): Promise<void> {
@@ -68,7 +67,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
         try{
 
-          const response = await this._doctorService.verifySubscription(sessionId)
+          const response = await this._doctorProfileService.verifySubscription(sessionId)
 
            res.status(HttpStatusCode.OK).json(response);
 
@@ -92,7 +91,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
             console.log("updatedField is ",updatedFields);
             console.log("uploadedImageKey is ",uploadedImageKey);
 
-            const updatedDoctor = await this._doctorService.updateDoctorDp(id, updatedFields, uploadedImageKey);
+            const updatedDoctor = await this._doctorProfileService.updateDoctorDp(id, updatedFields, uploadedImageKey);
 
             res.status(HttpStatusCode.OK).json({updatedDoctor});
 
@@ -122,7 +121,7 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
            
 
             const userId = req.params.id;
-            const result = await this._doctorService.updateProfile(userId,userData);
+            const result = await this._doctorProfileService.updateProfile(userId,userData);
 
              res.status(HttpStatusCode.OK).json(result);
         }catch (error) {

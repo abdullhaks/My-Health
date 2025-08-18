@@ -8,14 +8,14 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class DoctorReportAnalyisController implements IDoctorReportAnalysisCtrl {
   constructor(
     @inject("IDoctorReportAnalysisService")
-    private _ReportAnalyisService: IDoctorReportAnalysisService
+    private _doctorReportAnalyisService: IDoctorReportAnalysisService
   ) {}
 
 async getReports (req:Request,res:Response):Promise<void>{
     try{
         const doctorId =  req.query.doctorId;
         if(doctorId){
-        const response = await this._ReportAnalyisService.getReports(doctorId.toString());
+        const response = await this._doctorReportAnalyisService.getReports(doctorId.toString());
         res.status(HttpStatusCode.OK).json(response);
         return 
         }
@@ -37,7 +37,7 @@ async submitAnalysisReports (req:Request,res:Response):Promise<void>{
              res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
              return
         }
-        const response = await this._ReportAnalyisService.submitAnalysisReports(analysisId,result);
+        const response = await this._doctorReportAnalyisService.submitAnalysisReports(analysisId,result);
 
          res.status(HttpStatusCode.OK).json(response);
     }catch(error){
@@ -53,7 +53,7 @@ async submitAnalysisReports (req:Request,res:Response):Promise<void>{
              res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
              return
         }
-        const response = await this._ReportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
+        const response = await this._doctorReportAnalyisService.cancelAnalysisReports(analysisId,userId,fee);
          res.status(HttpStatusCode.OK).json(response);
     }catch(error){
         console.log("error in cancel analysis Reports",error);

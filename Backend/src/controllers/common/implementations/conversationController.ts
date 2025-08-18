@@ -9,11 +9,9 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class ConversationController implements IConversationCtrl {
-private _conversationService: IConversationService;
 
-  constructor(@inject("IConversationService")ConversationService:IConversationService ){
-    this._conversationService = ConversationService
-  }
+  constructor(@inject("IConversationService") private _conversationService: IConversationService
+ ){  }
 
 async createConversation(req: Request, res: Response): Promise<void> {
     try {

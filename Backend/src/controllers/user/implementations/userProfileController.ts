@@ -8,13 +8,11 @@ injectable();
 
 export default class UserProfileController implements IUserProfileCtrl {
 
-    private _profileService: IUserProfileService;
+
 
     constructor(
-        @inject("IUserProfileService") UserProfileService: IUserProfileService
-    ) {
-        this._profileService = UserProfileService;
-    };
+        @inject("IUserProfileService") private _profileService: IUserProfileService
+    ) { };
 
 
     async updateProfile(req: Request, res: Response): Promise<void> {

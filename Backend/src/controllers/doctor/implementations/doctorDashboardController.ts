@@ -9,7 +9,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class DoctorDashboardController implements IDoctorDashboardCtrl{
 
     constructor(
-        @inject("IDoctorDashboardService") private _dashboardService : IDoctorDashboardService
+        @inject("IDoctorDashboardService") private _doctorDashboardService : IDoctorDashboardService
     ){}
 
 
@@ -25,7 +25,7 @@ export default class DoctorDashboardController implements IDoctorDashboardCtrl{
               return;
         }
 
-      const response = await this._dashboardService.getDashboardContent(doctorId.toString());
+      const response = await this._doctorDashboardService.getDashboardContent(doctorId.toString());
       if (!response) {
         res.status(HttpStatusCode.NOT_FOUND).json({ message: 'No content found' });
         return;

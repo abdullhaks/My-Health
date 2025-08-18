@@ -14,14 +14,12 @@ injectable();
 
 export default class UserAppointmentController implements IUserAppointmentCtrl {
 
-    private _appointmentService: IUserAppointmentService;
+
     
     
     constructor(
-        @inject("IUserAppointmentService") UserAppointmentService: IUserAppointmentService
-    ) {
-        this._appointmentService = UserAppointmentService;
-    };
+        @inject("IUserAppointmentService")  private _appointmentService: IUserAppointmentService
+    ) { };
 
 
     async fetchingDoctors(req: Request, res: Response): Promise<void> {

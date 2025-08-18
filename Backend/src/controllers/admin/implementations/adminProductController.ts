@@ -6,6 +6,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class AdminProductController implements IAdminProductCtrl {
+
   async getProducts(req:Request, res: Response): Promise<void> {
     try {
       const products = await stripe.products.list({
@@ -101,5 +102,7 @@ export default class AdminProductController implements IAdminProductCtrl {
       console.error("Error deleting product:", error);
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to delete product" });
     }
-  }
+  };
+
+  
 }

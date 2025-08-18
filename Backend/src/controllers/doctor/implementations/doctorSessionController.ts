@@ -8,7 +8,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class DoctorSessionController implements IDoctorSessionCtrl {
   constructor(
     @inject("IDoctorSessionService")
-    private _sessionService: IDoctorSessionService
+    private _doctorSessionService: IDoctorSessionService
   ) {}
 
   async addSessions(req: Request, res: Response): Promise<void> {
@@ -16,7 +16,7 @@ export default class DoctorSessionController implements IDoctorSessionCtrl {
       const { sessionData } = req.body;
       console.log("session data is ", sessionData);
 
-      const response = await this._sessionService.addSessions(sessionData);
+      const response = await this._doctorSessionService.addSessions(sessionData);
 
        res.status(HttpStatusCode.CREATED).json(response);
     } catch (error) {
@@ -29,7 +29,7 @@ async getSessions (req:Request,res:Response):Promise<void>{
     try{
         const doctorId =  req.query.doctorId;
         if(doctorId){
-        const response = await this._sessionService.getSessions(doctorId.toString());
+        const response = await this._doctorSessionService.getSessions(doctorId.toString());
          res.status(HttpStatusCode.OK).json(response);
          return
         }
@@ -47,7 +47,7 @@ async getBookedSlots (req:Request,res:Response):Promise<void>{
     try{
         const {doctorId, selectedDate} =  req.query;
         if(doctorId && selectedDate){
-        const response = await this._sessionService.getBookedSlots(doctorId.toString(),selectedDate.toString());
+        const response = await this._doctorSessionService.getBookedSlots(doctorId.toString(),selectedDate.toString());
          res.status(HttpStatusCode.OK).json(response);
          return
         }

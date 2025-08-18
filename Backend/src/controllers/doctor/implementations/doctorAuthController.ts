@@ -9,17 +9,16 @@ import {HttpStatusCode} from "../../../utils/enum"
 
 @injectable()
 export default class DoctorAuthController implements IDoctorAuthCtrl {
-  private _doctorService: IDoctorAuthService;
 
-  constructor(@inject("IDoctorAuthService") DoctorAuthService: IDoctorAuthService) {
-    this._doctorService = DoctorAuthService;
-  }
+
+  constructor(@inject("IDoctorAuthService")   private _doctorAuthService: IDoctorAuthService
+) { }
 
   async doctorLogin(req: Request, res:Response): Promise<void> {
     try {
       const { email, password } = req.body;
 
-      const result = await this._doctorService.login(res, { email, password });
+      const result = await this._doctorAuthService.login(res, { email, password });
 
       console.log("result is ", result);
 
@@ -105,7 +104,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       console.log("file are", certificates.registrationCertificate, certificates.graduationCertificate, certificates.verificationId);
       // Now you have everything properly parsed.
       // Save to DB or upload to S3 as needed
-      const response = await this._doctorService.signup(doctor, certificates, parsedSpecializations);
+      const response = await this._doctorAuthService.signup(doctor, certificates, parsedSpecializations);
 
        res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
 
@@ -123,7 +122,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   
         console.log(`otp is ${otp} & email is ${email}`);
   
-        const otpRecord = await this._doctorService.verifyOtp(email, otp);
+        const otpRecord = await this._doctorAuthService.verifyOtp(email, otp);
          res.status(HttpStatusCode.OK).json({ otp, email });
       } catch (error) {
         console.log(error);
@@ -139,7 +138,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
            throw new Error("Email is required")
         }
   
-        const result = await this._doctorService.resentOtp(email);
+        const result = await this._doctorAuthService.resentOtp(email);
          res.status(HttpStatusCode.OK).json(result);
       } catch (error: any) {
         console.error(error);
@@ -159,7 +158,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
              res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "refresh token not found" });
           }
     
-          const result = await this._doctorService.refreshToken(doctorRefreshToken);
+          const result = await this._doctorAuthService.refreshToken(doctorRefreshToken);
     
           console.log("result from ctrl is ...", result);
     

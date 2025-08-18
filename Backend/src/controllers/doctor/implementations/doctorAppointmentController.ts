@@ -12,13 +12,11 @@ interface AppointmentFilter {
 
 @injectable()
 export default class DoctorAppointmentController implements IDoctorAppointmentCtrl {
-  private _appointmentService: IDoctorAppointmentService;
+
 
   constructor(
-    @inject("IDoctorAppointmentService") DoctorAppointmentService: IDoctorAppointmentService
-  ) {
-    this._appointmentService = DoctorAppointmentService;
-  }
+    @inject("IDoctorAppointmentService")   private _doctorAppointmentService: IDoctorAppointmentService
+  ) {  }
 
   async getAppointments(req: Request, res: Response): Promise<void> {
     try {
@@ -49,7 +47,7 @@ export default class DoctorAppointmentController implements IDoctorAppointmentCt
       }
 
       console.log("Doctor ID is:", doctorId);
-      const response = await this._appointmentService.getDoctorAppointments(
+      const response = await this._doctorAppointmentService.getDoctorAppointments(
         String(doctorId),
         Number(page),
         Number(limit),

@@ -11,13 +11,11 @@ injectable()
 
 export default class AdminAppointmentController implements IAdminAppointmentController {
 
-    private _appointmentService: IAdminAppointmentService;
+
 
     constructor(
-        @inject("IAdminAppointmentsService") AdminAppointmentService: IAdminAppointmentService
-    ) {
-        this._appointmentService = AdminAppointmentService;
-    };
+        @inject("IAdminAppointmentsService") private _adminAppointmentService: IAdminAppointmentService
+    ) { };
 
  async getAppointments(req: Request, res: Response): Promise<void> {
     try {
@@ -33,7 +31,7 @@ export default class AdminAppointmentController implements IAdminAppointmentCont
         endDate: endDate as string,
       };
 
-      const appointments = await this._appointmentService.getAppointments(pageNumber, limitNumber, filters);
+      const appointments = await this._adminAppointmentService.getAppointments(pageNumber, limitNumber, filters);
 
       res.status(HttpStatusCode.OK).json(appointments);
     } catch (err) {

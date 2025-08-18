@@ -6,13 +6,11 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class AdminDoctorController implements IAdminDoctorCtrl {
-  private _adminService: IAdminDoctorService;
+
 
   constructor(
-    @inject("IAdminDoctorService") AdminDoctorService: IAdminDoctorService
-  ) {
-    this._adminService = AdminDoctorService;
-  }
+    @inject("IAdminDoctorService")  private _adminDoctorService: IAdminDoctorService
+  ) { }
 
   async getDoctors(req: Request, res: Response): Promise<void> {
     try {
@@ -23,7 +21,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
       const limitNumber = limit ? parseInt(limit as string, 10) : 10;
       const onlyPremiumBool = onlyPremium === "true" ? true : false;
 
-      const result = await this._adminService.getDoctors(
+      const result = await this._adminDoctorService.getDoctors(
         pageNumber,
         search as string | undefined,
         limitNumber,
@@ -47,7 +45,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
   async getDoctor(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const response = await this._adminService.getDoctor(id);
+      const response = await this._adminDoctorService.getDoctor(id);
 
       if (!response) {
          res
@@ -67,7 +65,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
   async verifyDoctor(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const response = await this._adminService.verifyDoctor(id);
+      const response = await this._adminDoctorService.verifyDoctor(id);
       if (!response) {
          res
           .status(HttpStatusCode.BAD_REQUEST)
@@ -89,7 +87,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
       const { reason } = req.body;
 
       console.log("reson is..........", reason);
-      const response = await this._adminService.declineDoctor(id, reason);
+      const response = await this._adminDoctorService.declineDoctor(id, reason);
       if (!response) {
          res
           .status(HttpStatusCode.BAD_REQUEST)
@@ -111,7 +109,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
 
       console.log("user id for block...", id);
 
-      const result = this._adminService.block(id);
+      const result = this._adminDoctorService.block(id);
 
       console.log("resposne form doctor blocking ctrl..", result);
 
@@ -135,7 +133,7 @@ export default class AdminDoctorController implements IAdminDoctorCtrl {
 
       console.log("doctor id for block...", id);
 
-      const result = this._adminService.unblock(id);
+      const result = this._adminDoctorService.unblock(id);
 
       console.log("resposne form doctor blocking ctrl..", result);
 

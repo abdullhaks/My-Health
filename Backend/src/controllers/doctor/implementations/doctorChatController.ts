@@ -8,11 +8,10 @@ import { HttpStatusCode } from "../../../utils/enum"
 
 @injectable()
 export default class DoctorChatController implements IDoctorChatCtrl {
-private _chatService: IDoctorChatService;
 
-  constructor(@inject("IDoctorChatService")DoctorChatService:IDoctorChatService ){
-    this._chatService = DoctorChatService
-  }
+
+  constructor(@inject("IDoctorChatService") private _doctorChatService: IDoctorChatService
+){ }
 
 async createConversation(req: Request, res: Response): Promise<void> {
     try {
@@ -28,7 +27,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   res.status(403).json({ message: "Doctor ID must be included in userIds" });
       //   return;
       // }
-      const conversation = await this._chatService.createOrGetConversation(userIds);
+      const conversation = await this._doctorChatService.createOrGetConversation(userIds);
       res.status(HttpStatusCode.CREATED).json(conversation);
     } catch (error) {
       console.error("Error creating conversation:", error);
@@ -47,7 +46,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
       //   res.status(403).json({ message: "Unauthorized access" });
       //   return;
       // }
-      const conversations = await this._chatService.getUserConversations(doctorId);
+      const conversations = await this._doctorChatService.getUserConversations(doctorId);
       res.status(HttpStatusCode.OK).json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
@@ -81,7 +80,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
         //   return;
         // }
   
-        const message = await this._chatService.sendMessage(conversationId, senderId, content);
+        const message = await this._doctorChatService.sendMessage(conversationId, senderId, content);
         res.status(HttpStatusCode.CREATED).json(message);
       } catch (error) {
         console.error("Error sending message:", error);
@@ -96,7 +95,7 @@ async createConversation(req: Request, res: Response): Promise<void> {
           res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Conversation ID is required" });
           return;
         }
-        const messages = await this._chatService.getMessages(conversationId);
+        const messages = await this._doctorChatService.getMessages(conversationId);
         res.status(HttpStatusCode.OK).json(messages);
       } catch (error) {
         console.error("Error fetching messages:", error);

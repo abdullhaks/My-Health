@@ -11,11 +11,10 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class PaymentController implements IPaymentCtrl {
-private _paymentService: IPaymentService;
 
-  constructor(@inject("IPaymentService")PaymentService:IPaymentService ){
-    this._paymentService = PaymentService
-  }
+
+  constructor(@inject("IPaymentService") private _paymentService: IPaymentService)
+  { }
 
 
   async stripeWebhookController (req:Request , res:Response):Promise<void>{

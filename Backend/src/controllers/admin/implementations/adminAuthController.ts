@@ -10,12 +10,12 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 export default class AdminAuthController implements IAuthCtrl {
 
-    private _adminService: IAdminAuthService;
+ 
 
     constructor( 
-        @inject("IAdminAuthService") AdminAuthService:IAdminAuthService
+        @inject("IAdminAuthService")   private _adminAuthService:IAdminAuthService
 
-    ){ this._adminService= AdminAuthService}
+    ){ }
 
     async adminLogin(req:Request,res:Response):Promise<void>{
 
@@ -25,7 +25,7 @@ export default class AdminAuthController implements IAuthCtrl {
 
             console.log("email and password are ",email,password);
             
-            const result =await this._adminService.login({email,password})
+            const result =await this._adminAuthService.login({email,password})
 
             console.log("result is ",result);
 
@@ -69,7 +69,7 @@ export default class AdminAuthController implements IAuthCtrl {
             //    res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email must be provided in query" });
             throw new Error("Email missing")
             }
-            const result = await this._adminService.forgotPassword(email);
+            const result = await this._adminAuthService.forgotPassword(email);
              res.status(HttpStatusCode.OK).json(result);
 
         }catch(error){
@@ -84,7 +84,7 @@ export default class AdminAuthController implements IAuthCtrl {
 
         try{
             const {email} = req.body;
-            const resp = this._adminService.forgotPassword(email)
+            const resp = this._adminAuthService.forgotPassword(email)
     
              res.status(HttpStatusCode.OK).json(resp)
 
@@ -104,7 +104,7 @@ export default class AdminAuthController implements IAuthCtrl {
              res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Email and recovery code are required" });
           }
       
-          const isValid = await this._adminService.verifyRecoveryPassword(email, recoveryCode);
+          const isValid = await this._adminAuthService.verifyRecoveryPassword(email, recoveryCode);
       
           if (!isValid) {
              res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Invalid recovery code" });
@@ -143,7 +143,7 @@ export default class AdminAuthController implements IAuthCtrl {
             if(!adminRefreshToken){
                  res.status(HttpStatusCode.UNAUTHORIZED).json({msg:"refresh token not found"});
             }
-            const result = await this._adminService.refreshToken(adminRefreshToken);
+            const result = await this._adminAuthService.refreshToken(adminRefreshToken);
             if (!result) {
              res.status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Refresh token expired" });
           }

@@ -14,11 +14,10 @@ import { UserLoginRequestDTO } from "../../../dto/userDTO";
 
 @injectable()
 export default class UserAuthController implements IUserAuthCtrl {
-  private _userService: IUserAuthService;
+ 
 
-  constructor(@inject("IUserAuthService") UserAuthService: IUserAuthService) {
-    this._userService = UserAuthService;
-  }
+  constructor(@inject("IUserAuthService")  private _userService: IUserAuthService
+) {  }
 
   async userLogin(req: Request, res: Response): Promise<void> {
     try {

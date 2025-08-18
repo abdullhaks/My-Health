@@ -6,13 +6,11 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class AdminUserController implements IAdminUserCtrl {
-  private _adminService: IAdminUserService;
+
 
   constructor(
-    @inject("IAdminUserService") AdminUserService: IAdminUserService
-  ) {
-    this._adminService = AdminUserService;
-  }
+    @inject("IAdminUserService")   private _adminUserService: IAdminUserService
+  ) { }
 
   async getUsers(req: Request, res: Response): Promise<void> {
     try {
@@ -22,7 +20,7 @@ export default class AdminUserController implements IAdminUserCtrl {
       const pageNumber = page ? parseInt(page as string, 10) : 1;
       const limitNumber = limit ? parseInt(limit as string, 10) : 10;
 
-      const result = await this._adminService.getUsers(
+      const result = await this._adminUserService.getUsers(
         pageNumber,
         search as string | undefined,
         limitNumber
@@ -46,7 +44,7 @@ export default class AdminUserController implements IAdminUserCtrl {
 
       console.log("user id for block...", id);
 
-      const result = this._adminService.block(id);
+      const result = this._adminUserService.block(id);
 
       console.log("resposne form user blocking ctrl..", result);
 
@@ -68,7 +66,7 @@ export default class AdminUserController implements IAdminUserCtrl {
 
       console.log("user id for block...", id);
 
-      const result = this._adminService.unblock(id);
+      const result = this._adminUserService.unblock(id);
 
       console.log("resposne form user blocking ctrl..", result);
 

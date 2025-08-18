@@ -7,7 +7,7 @@ import IDoctorBlogService from "../../../services/doctor/interfaces/IDoctorBlogS
 @injectable()
 export default class DoctorBlogController implements IDoctorBlogCtrl  {
     constructor(
-       @inject("IDoctorBlogService") private _blogService:IDoctorBlogService
+       @inject("IDoctorBlogService") private _doctorBlogService:IDoctorBlogService
     ){
       
     };
@@ -43,7 +43,7 @@ export default class DoctorBlogController implements IDoctorBlogCtrl  {
 
       console.log("Blog data to save:", blogData);
 
-      const response = await this._blogService.createBlog(blogData);
+      const response = await this._doctorBlogService.createBlog(blogData);
       if(!response){
         res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog posting failed" });
         return;
@@ -72,7 +72,7 @@ export default class DoctorBlogController implements IDoctorBlogCtrl  {
         return;
     }
 
-    const response = await this._blogService.getBLogs(authorId?.toString(),pageNumber,limitNumber);
+    const response = await this._doctorBlogService.getBLogs(authorId?.toString(),pageNumber,limitNumber);
     if(!response){
         res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog fetching failed" });
         return;
@@ -124,7 +124,7 @@ export default class DoctorBlogController implements IDoctorBlogCtrl  {
 
       console.log("Blog data to update......:", blogData);
 
-      const response = await this._blogService.updateBLog(blogId,blogData);
+      const response = await this._doctorBlogService.updateBLog(blogId,blogData);
 
       if(!response){
         res.status(HttpStatusCode.BAD_REQUEST).json({ message: "blog updating failed" });

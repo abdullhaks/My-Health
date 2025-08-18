@@ -9,7 +9,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 export default class DoctorAdvertisementController implements IDoctorAdvertisementCtrl {
 
     constructor(
-        @inject("IDoctorAdvertisementService") private _advertisementService : IDoctorAdvertisementService
+        @inject("IDoctorAdvertisementService") private _doctorAdvertisementService : IDoctorAdvertisementService
     ){};
 
     async createAdvertisement(req: Request, res: Response): Promise<void> {
@@ -24,7 +24,7 @@ export default class DoctorAdvertisementController implements IDoctorAdvertiseme
         };
 
         const add = {title, videoUrl, location,author,authorId,tags}
-        const response = await this._advertisementService.createAdvertisement(add);
+        const response = await this._doctorAdvertisementService.createAdvertisement(add);
         if(!response){
                 res.status(HttpStatusCode.BAD_REQUEST).json({ message: "add posting failed" });
                 return;
@@ -54,7 +54,7 @@ export default class DoctorAdvertisementController implements IDoctorAdvertiseme
             return;
         }
     
-        const response = await this._advertisementService.getAdds(doctorId?.toString(),pageNumber,limitNumber);
+        const response = await this._doctorAdvertisementService.getAdds(doctorId?.toString(),pageNumber,limitNumber);
         if(!response){
             res.status(HttpStatusCode.BAD_REQUEST).json({ message: "add fetching failed" });
             return;

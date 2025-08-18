@@ -8,11 +8,10 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 @injectable()
 export default class DetailsController implements IDetailsCtrl {
-private _detailsService: IDetailsService;
 
-  constructor(@inject("IDetailsService")DetailsService:IDetailsService ){
-    this._detailsService = DetailsService
-  }
+
+  constructor(@inject("IDetailsService") private _detailsService: IDetailsService)
+  { }
 
 
   async getDoctor(req:Request,res:Response):Promise<void>{
