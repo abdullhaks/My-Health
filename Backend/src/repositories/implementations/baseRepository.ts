@@ -7,7 +7,7 @@ import IBaseRepository from "../interfaces/IBaseRepository";
 export default class BaseRepository<T extends Document> implements IBaseRepository<T> {
   constructor(private _model: Model<T>) {}
 
-  async findOne(filter: FilterQuery<T>, options: { sort?: any } = {}): Promise<T | null> {
+  async findOne(filter: FilterQuery<T>, options: { sort?: Record<string, 1 | -1>  } = {}): Promise<T | null> {
         try {
             let query = this._model.findOne(filter);
             if (options.sort) {
@@ -20,7 +20,7 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
         }
     }
 
-  async findAll(filter: FilterQuery<T> = {},options: { sort?: any } = {}): Promise<T[] | []> {
+  async findAll(filter: FilterQuery<T> = {},options: { sort?: Record<string, 1 | -1>  } = {}): Promise<T[] | []> {
     try {
       let query = this._model.find(filter);
       if (options.sort) {
@@ -76,4 +76,6 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
       return null;
     }
   };
+
+  
 };

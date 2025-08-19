@@ -91,12 +91,13 @@ export default class AdminProductController implements IAdminProductCtrl {
     }
   }
 
-  async deleteProduct(req: Request, res: Response): Promise<void> {
+  async deActivateProduct(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
       console.log("id is .......:",id);
-      await stripe.products.del(id);
+      await stripe.products.update(id,{ active: false });
+
       res.status(HttpStatusCode.OK).json({ message: "Product deleted successfully" });
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -105,4 +106,18 @@ export default class AdminProductController implements IAdminProductCtrl {
   };
 
   
+
+   async activateProduct(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      console.log("id is .......:",id);
+      await stripe.products.update(id,{ active: true });
+
+      res.status(HttpStatusCode.OK).json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to delete product" });
+    }
+  };
 }

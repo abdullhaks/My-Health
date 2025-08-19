@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
-import { getSubscriptions, createSubscription, updateSubscription, deleteSubscription } from '../../api/admin/adminApi';
+import { getSubscriptions, createSubscription, updateSubscription, deActivateSubscription, ActivateSubscription } from '../../api/admin/adminApi';
+import { Popconfirm, Modal, Button } from 'antd';
 
 type Product = {
   id: string;
   name: string;
+  active: boolean;
   description?: string;
   default_price?: {
     unit_amount: number;
@@ -35,7 +37,7 @@ const AdminSubscriptions = () => {
     productId: null as string | null,
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
@@ -62,7 +64,20 @@ const AdminSubscriptions = () => {
     }
   };
 
-  const validateForm = (): boolean => {
+  const checkProductNameExists = async (name: string, productId: string | null): Promise<boolean> => {
+    try {
+      const response = await getSubscriptions();
+      return response.data.some((product: Product) => 
+        product.name.toLowerCase() === name.toLowerCase() && 
+        product.id !== productId
+      );
+    } catch (error) {
+      console.error('Error checking product name:', error);
+      return false;
+    }
+  };
+
+  const validateForm = async (): Promise<boolean> => {
     const newErrors: ValidationErrors = {};
 
     if (!formData.name.trim()) {
@@ -71,6 +86,11 @@ const AdminSubscriptions = () => {
       newErrors.name = 'Product name must be at least 3 characters';
     } else if (formData.name.length > 50) {
       newErrors.name = 'Product name cannot exceed 50 characters';
+    } else {
+      const nameExists = await checkProductNameExists(formData.name.trim(), formData.productId);
+      if (nameExists) {
+        newErrors.name = 'Product name already exists';
+      }
     }
 
     if (formData.description && formData.description.length > 500) {
@@ -102,7 +122,7 @@ const AdminSubscriptions = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    if (!(await validateForm())) {
       return;
     }
 
@@ -126,8 +146,8 @@ const AdminSubscriptions = () => {
       }
 
       resetForm();
+      setIsModalOpen(false);
       fetchProducts();
-      setShowForm(false);
     } catch (error: any) {
       toast.error(error.message || (isEditing ? 'Failed to update product' : 'Failed to create product'));
     } finally {
@@ -137,7 +157,6 @@ const AdminSubscriptions = () => {
 
   const handleEdit = (product: Product) => {
     setIsEditing(true);
-    setShowForm(true);
     setFormData({
       name: product.name || '',
       description: product.description || '',
@@ -146,17 +165,32 @@ const AdminSubscriptions = () => {
       interval: product.default_price?.recurring?.interval || 'month',
       productId: product.id,
     });
+    setIsModalOpen(true);
   };
 
-  const handleDelete = async (productId: string) => {
+  const handleDeActivate = async (productId: string) => {
     try {
       setDeleting(productId);
-      await deleteSubscription(productId);
-      toast.success('Product deleted successfully');
+      await deActivateSubscription(productId);
+      toast.success('Product deactivated successfully');
       fetchProducts();
       setDeleteConfirm(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete product');
+      toast.error(error.message || 'Failed to deactivate product');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const handleActivate = async (productId: string) => {
+    try {
+      setDeleting(productId);
+      await ActivateSubscription(productId);
+      toast.success('Product activated successfully');
+      fetchProducts();
+      setDeleteConfirm(null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to activate product');
     } finally {
       setDeleting(null);
     }
@@ -250,39 +284,46 @@ const AdminSubscriptions = () => {
         </div>
 
         <div className="mb-8">
-          <button
+          <Button
+            type="primary"
             onClick={() => {
-              if (showForm && isEditing && (formData.name || formData.description || formData.price)) {
-                if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
-                  return;
-                }
-              }
-              setShowForm(!showForm);
-              if (!showForm) {
-                resetForm();
-              }
+              resetForm();
+              setIsModalOpen(true);
             }}
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
-            aria-label={showForm ? 'Cancel product creation' : 'Create new product'}
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            {showForm ? 'Cancel' : 'Create New Product'}
-          </button>
+            Create New Product
+          </Button>
         </div>
 
-        {showForm && (
-          <div className="bg-white rounded-2xl p-8 shadow-2xl border border-slate-200 mb-8 animate-in slide-in-from-top duration-300">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+        <Modal
+          title={
+            <div className="flex items-center">
               <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
               {isEditing ? 'Edit Product' : 'Create New Product'}
-            </h2>
-            
+            </div>
+          }
+          open={isModalOpen}
+          onCancel={() => {
+            if (isEditing && (formData.name || formData.description || formData.price)) {
+              // if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
+              //   return;
+              // }
+            }
+            resetForm();
+            setIsModalOpen(false);
+          }}
+          footer={null}
+          width={800}
+        >
+          <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">Product Name</label>
@@ -400,37 +441,36 @@ const AdminSubscriptions = () => {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <button
+              <Button
+                type="primary"
                 onClick={handleSubmit}
                 disabled={submitting}
                 className={`px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 ${
                   submitting ? 'opacity-50 cursor-not-allowed' : 'hover:from-indigo-700 hover:to-purple-700'
                 }`}
-                aria-label={isEditing ? 'Update product' : 'Create product'}
               >
                 {submitting ? 'Processing...' : isEditing ? 'Update Product' : 'Create Product'}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => {
-                  if (isEditing && (formData.name || formData.description || formData.price)) {
-                    if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
-                      return;
-                    }
-                  }
+                  // if (isEditing && (formData.name || formData.description || formData.price)) {
+                  //   if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
+                  //     return;
+                  //   }
+                  // }
                   resetForm();
-                  setShowForm(false);
+                  setIsModalOpen(false);
                 }}
                 disabled={submitting}
                 className={`px-8 py-3 bg-slate-200 text-slate-700 font-medium rounded-xl transition-all duration-300 ${
                   submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-300'
                 }`}
-                aria-label="Cancel product creation"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
-        )}
+        </Modal>
 
         <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
           <div className="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
@@ -496,67 +536,55 @@ const AdminSubscriptions = () => {
                   
                   <div className="flex gap-2">
                     <button
+                      disabled={product.active === false}
                       onClick={() => handleEdit(product)}
-                      className="flex-1 px-4 py-2 bg-indigo-100 text-indigo-700 font-medium rounded-lg hover:bg-indigo-200 transition-all duration-300"
+                      className="flex-1 px-4 py-2 bg-indigo-100 text-indigo-700 font-medium rounded-lg hover:bg-indigo-200 transition-all duration-300 disabled:opacity-20"
                       aria-label={`Edit product ${product.name || 'Unnamed Product'}`}
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => setDeleteConfirm(product.id)}
-                      disabled={deleting === product.id}
-                      className={`flex-1 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-300 ${
-                        deleting === product.id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-200'
-                      }`}
-                      aria-label={`Delete product ${product.name || 'Unnamed Product'}`}
-                    >
-                      {deleting === product.id ? 'Deleting...' : 'Delete'}
-                    </button>
+
+                    {product.active ? (
+                      <Popconfirm
+                        title="Manage user"
+                        description="Are you sure to de-activate this plan?"
+                        onConfirm={() => handleDeActivate(product.id)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <button
+                          className={`flex-1 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-300 ${
+                            deleting === product.id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-200'
+                          }`}
+                          aria-label={`Deactivate product ${product.name || 'Unnamed Product'}`}
+                        >
+                          {deleting === product.id ? 'Deactivating...' : 'Deactivate'}
+                        </button>
+                      </Popconfirm>
+                    ) : (
+                      <Popconfirm
+                        title="Manage user"
+                        description="Are you sure to activate this plan?"
+                        onConfirm={() => handleActivate(product.id)}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <button
+                          className={`flex-1 px-4 py-2 bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-300 ${
+                            deleting === product.id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-200'
+                          }`}
+                          aria-label={`Activate product ${product.name || 'Unnamed Product'}`}
+                        >
+                          {deleting === product.id ? 'Activating...' : 'Activate'}
+                        </button>
+                      </Popconfirm>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-
-        {deleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl" role="dialog" aria-labelledby="delete-confirm-title">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.081 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 id="delete-confirm-title" className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
-              </div>
-              <p className="text-slate-600 mb-6">Are you sure you want to delete this product? This action cannot be undone.</p>
-              <div className="flex gap-3">
-                <button
-                  ref={deleteButtonRef}
-                  onClick={() => handleDelete(deleteConfirm)}
-                  disabled={deleting === deleteConfirm}
-                  className={`flex-1 px-4 py-2 bg-red-600 text-white font-medium rounded-lg transition-all duration-300 ${
-                    deleting === deleteConfirm ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
-                  }`}
-                  aria-label="Confirm delete product"
-                >
-                  {deleting === deleteConfirm ? 'Deleting...' : 'Delete'}
-                </button>
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  disabled={deleting === deleteConfirm}
-                  className={`flex-1 px-4 py-2 bg-slate-200 text-slate-700 font-medium rounded-lg transition-all duration-300 ${
-                    deleting === deleteConfirm ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-300'
-                  }`}
-                  aria-label="Cancel delete product"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

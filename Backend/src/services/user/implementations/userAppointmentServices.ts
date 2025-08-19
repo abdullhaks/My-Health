@@ -1,6 +1,5 @@
 import { inject , injectable } from "inversify";
 import IUserAppointmentService from "../interfaces/IUserAppointmentServices";
-import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
@@ -15,8 +14,7 @@ import appointmentModel from "../../../models/appointmentModel";
 @injectable()
 export default class UserAppointmentService implements IUserAppointmentService {
   constructor(
-    @inject("IAppointmentRepository")
-    private _appointmentRepository: IAppointmentRepository,
+ 
     @inject("IAppointmentsRepository")
     private _appointmentsRepository: IAppointmentsRepository,
     @inject("IUserRepository") private _userRepository: IUserRepository,

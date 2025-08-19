@@ -235,9 +235,21 @@ export const updateSubscription = async(payload:any) => {
 };
 
 
-export const deleteSubscription = async(productId:string) => {
+export const deActivateSubscription = async(productId:string) => {
   try{
-    const response = await adminInstance.delete(`${ROUTES.admin.deleteSubscription}/${productId}`);
+    const response = await adminInstance.delete(`${ROUTES.admin.deActivateSubscription}/${productId}`);
+    console.log("response data is ....",response.data)
+    return response.data;
+  }catch(error){
+    console.error("Error in delete subscription..:", error);
+    throw error;
+  }
+};
+
+
+export const ActivateSubscription = async(productId:string) => {
+  try{
+    const response = await adminInstance.delete(`${ROUTES.admin.activateSubscription}/${productId}`);
     console.log("response data is ....",response.data)
     return response.data;
   }catch(error){

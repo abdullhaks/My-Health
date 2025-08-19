@@ -53,7 +53,8 @@ adminRoutes.patch("/doctors/:id/unblock",verifyAccessTokenMidleware("admin"),(re
 
 adminRoutes.get("/getSubscriptions",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.getProducts(req,res))
 adminRoutes.put("/updateSubscription",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.updateProduct(req,res));
-adminRoutes.delete("/deleteSubscription/:id",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.deleteProduct(req,res))
+adminRoutes.delete("/deActivateSubscription/:id",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.deActivateProduct(req,res));
+adminRoutes.delete("/activateSubscription/:id",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.activateProduct(req,res));
 adminRoutes.post("/createSubscription",verifyAccessTokenMidleware("admin"),(req,res)=>productCtrl.createProduct(req,res));
 
 adminRoutes.get("/getAppointments",verifyAccessTokenMidleware("admin"),(req,res)=>appointmentCtrl.getAppointments(req,res));

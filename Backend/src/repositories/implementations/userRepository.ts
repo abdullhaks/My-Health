@@ -29,6 +29,54 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
     };
 
 
+     async getUsers(page: number, search: string | undefined, limit: number): Promise<any> {
+        try {
+            const query: any = {};
+            if (search) {
+                query.$or = [
+                    { fullName: { $regex: search, $options: "i" } },
+                    { email: { $regex: search, $options: "i" } }
+                ];
+            }
+            const skip = (page - 1) * limit;
+            const users = await this._userModel.find(query).skip(skip).limit(limit);
+                const total = await this._userModel.countDocuments(query);
+            return {
+                users,
+                totalPages: Math.ceil(total / limit),
+            };
+        } catch (error) {
+            console.log(error);
+            throw new Error("Failed to fetch users");
+        }
+    };
+
+
+    async blockUser(id:string):Promise<any>{
+        try{
+            const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:true}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+        }catch(error){
+            console.log(error);
+            throw new Error("user blockig has beeb failed")
+        }
+    };
+
+
+    async unblockUser(id:string):Promise<any>{
+        try{
+            const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:false}, { new: true });
+            console.log("resp form repo....",resp);
+            return resp;
+        }catch(error){
+            console.log(error);
+            throw new Error("user blockig has beeb failed")
+        }
+    }
+
+
+
     async create(userData : IUserDocument):Promise<IUserDocument>{
         try{
             

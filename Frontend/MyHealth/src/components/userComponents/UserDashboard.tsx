@@ -356,8 +356,8 @@ useEffect(() => {
                 </div>
                 
                 <div className="grid grid-cols-7 gap-1 text-xs">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                    <div key={day} className="text-center font-semibold text-gray-400 p-2">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day,indx) => (
+                    <div key={indx} className="text-center font-semibold text-gray-400 p-2">
                       {day}
                     </div>
                   ))}

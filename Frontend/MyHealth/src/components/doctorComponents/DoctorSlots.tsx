@@ -7,10 +7,11 @@ import { message } from "antd";
 
 import {
   getSessions,
-  getBookedSlots,
   addSession,
   updateSession,
   deleteSession,
+  
+  getBookedSlots,
   getUnavailableSlots,
   makeSlotsUnavailable,
   makeSlotsAvailable,

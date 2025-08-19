@@ -1,7 +1,5 @@
 import {inject,injectable} from "inversify";
 import IDoctorDashboardService from "../interfaces/IDoctorDashboardService";
-
-import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import IReportAnalysisRepository from "../../../repositories/interfaces/IReportAnalysisRepository";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 
@@ -33,7 +31,7 @@ export default class DoctorDashboardService implements IDoctorDashboardService {
                 $gte: startDateStr,
                 $lte: endDateStr
             }
-        },{sort:"date"});
+        }, { sort: { date: 1 } });
 
          const dateAppointmentCountMap = new Map<string, number>();
 

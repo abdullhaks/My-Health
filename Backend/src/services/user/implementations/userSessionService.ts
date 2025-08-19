@@ -2,7 +2,6 @@
 import { inject,injectable } from "inversify";
 import IUserSessionService from "../interfaces/IUserSessionService";
 import ISessionRepository from "../../../repositories/interfaces/ISessionRepository";
-import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import {ISession} from "../../../dto/sessionDTO";
 import { IAppointment } from "../../../dto/appointmentDTO";

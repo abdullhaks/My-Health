@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import IAdminDoctorService from "../interfaces/IAdminDoctorService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
+import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
@@ -21,7 +22,8 @@ const transporter = nodemailer.createTransport({
 @injectable()
 export default class AdminDoctorService implements IAdminDoctorService {
   constructor(
-    @inject("IAdminRepository") private _adminRepository: IAdminRepository
+    @inject("IAdminRepository") private _adminRepository: IAdminRepository,
+    @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
   ) {}
 
   async getDoctors(
@@ -30,7 +32,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     limit: number
     ,onlyPremium:boolean
   ): Promise<IDoctor[]> {
-    const response = await this._adminRepository.getDoctors(
+    const response = await this._doctorRepository.getDoctors(
       page,
       search,
       limit,
@@ -45,7 +47,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
   }
 
   async getDoctor(id: string): Promise<IDoctor> {
-    const response = await this._adminRepository.getDoctor(id);
+    const response = await this._doctorRepository.getDoctor(id);
     if (!response) {
       throw new Error("doctor not found..!");
     }
@@ -58,7 +60,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
   }
 
   async verifyDoctor(id: string): Promise<IDoctor> {
-    const response = await this._adminRepository.verifyDoctor(id);
+    const response = await this._doctorRepository.verifyDoctor(id);
 
     if (!response) {
       throw new Error("doctor verifying failed");
@@ -67,7 +69,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
   }
 
    async declineDoctor(id: string, reason: string): Promise<IDoctor> {
-    const response = await this._adminRepository.declineDoctor(id, reason);
+    const response = await this._doctorRepository.declineDoctor(id, reason);
 
     if (!response) {
       throw new Error("doctor declining failed");
@@ -75,7 +77,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
 
     // Send decline email
     try {
-      const doctor = await this._adminRepository.getDoctor(id);
+      const doctor = await this._doctorRepository.getDoctor(id);
       if (doctor && doctor.email) {
         const mailOptions = generateDeclineMail(doctor.email, reason);
         await transporter.sendMail(mailOptions);
@@ -92,7 +94,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
 
   async block(id: string): Promise<IDoctor> {
     console.log("id from block....", id);
-    const response = await this._adminRepository.blockDoctor(id);
+    const response = await this._doctorRepository.blockDoctor(id);
 
     console.log("blocked result is ", response);
 
@@ -101,7 +103,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
 
   async unblock(id: string): Promise<IDoctor> {
     console.log("id from block....", id);
-    const response = await this._adminRepository.unblockDoctor(id);
+    const response = await this._doctorRepository.unblockDoctor(id);
 
     console.log("blocked result is ", response);
 

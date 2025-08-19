@@ -2,18 +2,22 @@
 import { inject, injectable } from "inversify";
 import IAdminUserService from "../interfaces/IAdminUserService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import {IUser} from '../../../dto/userDTO'
 
 
 @injectable()
 export default class AdminUserService implements IAdminUserService {
 
-    constructor(@inject("IAdminRepository") private _adminRepository:IAdminRepository){
+    constructor(
+        @inject("IAdminRepository") private _adminRepository:IAdminRepository,
+        @inject("IUserRepository") private _userRepository: IUserRepository
+){
 
     }
     async getUsers(page:number,search:string | undefined,limit:number): Promise<IUser[]> {
 
-        const response =await this._adminRepository.getUsers(page,search,limit)
+        const response =await this._userRepository.getUsers(page,search,limit)
         return response
 
     };
@@ -21,7 +25,7 @@ export default class AdminUserService implements IAdminUserService {
     async block(id:string):Promise<IUser>{
             
             console.log("id from block....",id);
-            const response = await this._adminRepository.blockUser(id)
+            const response = await this._userRepository.blockUser(id)
 
             console.log("blocked result is ",response);
             
@@ -32,7 +36,7 @@ export default class AdminUserService implements IAdminUserService {
     async unblock(id:string):Promise<IUser>{
             
         console.log("id from block....",id);
-        const response = await this._adminRepository.unblockUser(id)
+        const response = await this._userRepository.unblockUser(id)
 
         console.log("blocked result is ",response);
         

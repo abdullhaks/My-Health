@@ -5,7 +5,6 @@ import Stripe from "stripe";
 import stripe from "../../../middlewares/common/stripe";
 import { ISubscriptionDocument } from "../../../entities/subscriptionEntities";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
-import IAppointmentRepository from "../../../repositories/interfaces/IAppointmentRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import { IAppointmentDocument } from "../../../entities/appointmentEntities";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";

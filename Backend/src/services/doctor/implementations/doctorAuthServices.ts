@@ -2,6 +2,7 @@ import IDoctorAuthService from "../interfaces/IDoctorAuthServices";
 import { Response } from "express";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
+import IOtpRepository from "../../../repositories/interfaces/IOtpRepository";
 import { IUser } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
@@ -58,7 +59,8 @@ interface IParsed {
 @injectable()
 export default class DoctorAuthService implements IDoctorAuthService {
   constructor(
-    @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
+    @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository,
+    @inject("IOtpRepository") private _otpRepository: IOtpRepository
   ) {}
 
   async login(res: Response, doctorData: Partial<IDoctor>): Promise<{message:string,doctor:IDoctor,accessToken?:string,refreshToken?:string}> {
@@ -257,7 +259,7 @@ async sendMail(email: string, otp: string): Promise<void> {
 
 
   async verifyOtp(email: string, otp: string): Promise<{message:string}> {
-    const otpRecord = await this._doctorRepository.findLatestOtpByEmail(email);
+    const otpRecord = await this._otpRepository.findLatestOtpByEmail(email);
     console.log("OTP record: ", otpRecord);
 
     if (!otpRecord) {

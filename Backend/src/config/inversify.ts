@@ -181,8 +181,8 @@ import IDoctorRepository from "../repositories/interfaces/IDoctorRepository";
 import PaymentRepository from "../repositories/implementations/paymentRepository";
 import IPaymentRepository from "../repositories/interfaces/IPaymentRepository";
 
-import AppointmentRepository from "../repositories/implementations/appointmentRepository";
-import IAppointmentRepository from "../repositories/interfaces/IAppointmentRepository";
+// import AppointmentRepository from "../repositories/implementations/appointmentRepository";
+// import IAppointmentRepository from "../repositories/interfaces/IAppointmentRepository";
 
 import ConversationRepository from "../repositories/implementations/conversationRepository";
 import IConversationRepository from "../repositories/interfaces/IConversationRepository";
@@ -221,6 +221,11 @@ import PrescriptionRepository from "../repositories/implementations/prescription
 
 import IPayoutRepository from "../repositories/interfaces/IPayoutRepository";
 import PayoutRepository from "../repositories/implementations/payoutRepository";
+
+
+import IOtpRepository from "../repositories/interfaces/IOtpRepository";
+import OtpRepository from "../repositories/implementations/otpRepository";
+
 
 //.................................................................................
 
@@ -341,7 +346,7 @@ container.bind<IUserRepository>("IUserRepository").to(UserRepository);
 container.bind<IAdminRepository>("IAdminRepository").to(AdminRepository);
 container.bind<IDoctorRepository>("IDoctorRepository").to(DoctorRepository)
 container.bind<IPaymentRepository>("IPaymentRepository").to(PaymentRepository);
-container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository);
+// container.bind<IAppointmentRepository>("IAppointmentRepository").to(AppointmentRepository);
 container.bind<IConversationRepository>("IConversationRepository").to(ConversationRepository);
 container.bind<IMessageRepository>("IMessageRepository").to(MessageRepository);
 container.bind<ISessionRepository>("ISessionRepository").to(SessionRepository);
@@ -354,6 +359,8 @@ container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(Advertis
 container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
 container.bind<IPrescriptionRepository>("IPrescriptionRepository").to(PrescriptionRepository);
 container.bind<IPayoutRepository>("IPayoutRepository").to(PayoutRepository);
+container.bind<IOtpRepository>("IOtpRepository").to(OtpRepository)
+
 
 
 
