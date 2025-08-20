@@ -27,7 +27,7 @@ export const ROUTES = {
       createOneTimePayment: "/user/stripe/create-one-time-payment",
     },
     getAppointments: "/user/getAppointments",
-    cancelAppointment: "/user/cancelAppointments",
+    cancelAppointment: "/user/cancelAppointment",
     directFileUpload: "/user/directFileUpload",
     getAnalysisReport : "/user/getAnalysisReports",
     cancelAnalysisReport : "/user/cancelAnalysisReports",
@@ -60,6 +60,7 @@ export const ROUTES = {
     getMessage: (conversationId: string) => `/doctor/message/${conversationId}`,
     message: "/doctor/message",
     sessions: "/doctor/sessions",
+    session: "/doctor/session",
     getAppointments: "/doctor/getAppointments",
     getAnalysisReport: "/doctor/getAnalysisReports",
     submitAnalysisReport: "/doctor/submitAnalysisReports",
@@ -77,7 +78,8 @@ export const ROUTES = {
     dashboard: "/doctor/dashboard",
     requestPayout : "/doctor/requestPayout",
     bookedSlots: "/doctor/bookedSlots",
-    getPayouts:"/doctor/getPayouts"
+    getPayouts:"/doctor/getPayouts",
+    cancelAppointment: "/doctor/cancelAppointment",
 
 
   },

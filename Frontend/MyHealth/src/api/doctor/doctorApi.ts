@@ -577,6 +577,14 @@ export const deleteSession = async ( id:string)=>{
   try{
     console.log("data id",id);
 
+
+    
+    const response = await doctorInstance.delete(ROUTES.doctor.session,{
+      params:{sessionId:id}
+    });
+    console.log('Dashboard API response:', response.data);
+    return response.data;
+
   }catch(error){
     console.log("Error in get doctor booked slots",error);
     throw error;
@@ -617,15 +625,23 @@ export const makeSlotsAvailable = async ( doctorId:string, localDate:any, slotId
 };
 
 
-export const cancelAppointment = async (appointmentId:string )=>{
+export const cancelAppointment = async (appointmentId:string) => {
   try{
-    console.log("data id",appointmentId);
+
+    console.log("appointment id is ",appointmentId);
+    const response = await doctorInstance.patch(ROUTES.doctor.cancelAppointment, null, {
+      params: { appointmentId }
+    });
+
+    console.log("response data is ....",response.data)
+    return response.data;
 
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.error("Error in cancel appointments..:", error);
     throw error;
   }
 };
+
 
 
 

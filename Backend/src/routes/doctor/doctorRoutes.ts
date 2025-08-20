@@ -127,7 +127,13 @@ doctorRoutes.post("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> s
 
 doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) );
 
+doctorRoutes.delete("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.deleteSession(req,res) );
+
+
 doctorRoutes.get("/getAppointments",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.getAppointments(req,res))
+
+doctorRoutes.patch("/cancelAppointment",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.cancelAppointment(req,res))
+
 
 doctorRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
   ReportAnalysisCtrl.getReports(req, res)) 

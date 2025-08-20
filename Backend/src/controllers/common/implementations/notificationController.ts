@@ -34,8 +34,8 @@ export default class NotificationController implements INotificationCtrl{
         };
 
         const response = await this._notificationService.getNewNotifications(id.toString(),Number(limit),Number(notificationSet));
-
-        
+         console.log("noti from ctrl....",response);
+        res.status(HttpStatusCode.OK).json(response);
     };
 
 
@@ -49,7 +49,7 @@ export default class NotificationController implements INotificationCtrl{
         };
 
         const response = await this._notificationService.getAllNotifications(id.toString());
-        console.log("noti from ctrl....",response);
+       
         res.status(HttpStatusCode.OK).json(response);
         
     }

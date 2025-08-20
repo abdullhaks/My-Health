@@ -118,7 +118,7 @@ userRoutes.post(
 userRoutes.get("/getAppointments",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.getAppointments(req,res))
 
 
-userRoutes.patch("/cancelAppointments",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.cancelAppointment(req,res))
+userRoutes.patch("/cancelAppointment",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.cancelAppointment(req,res))
 
 userRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("user"), (req, res) =>
   reportAnalysisCtrl.getReports(req, res)) 

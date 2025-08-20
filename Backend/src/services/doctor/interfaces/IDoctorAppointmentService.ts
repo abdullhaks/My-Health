@@ -8,4 +8,8 @@ getDoctorAppointments(
     filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
   ): Promise<{ appointments: IAppointment[]; totalPages: number }> 
 
+
+
+cancelAppointment(appointmentId:string):Promise<{status:boolean;message:string}>,
+
 }

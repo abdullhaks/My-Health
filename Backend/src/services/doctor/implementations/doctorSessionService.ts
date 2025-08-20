@@ -73,4 +73,31 @@ async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment
 }
 
 
+async deleteSession (sessionId:string):Promise<void>{
+    try{
+        console.log("sessionId is :", sessionId);
+
+
+        let existingAppointment = await this._appointmentRepository.findOne({sessionId: sessionId,
+            start:{$gte:new Date()}});
+ 
+            console.log("existing appointment is :", existingAppointment);
+            if(existingAppointment){
+                console.log("existing appointment found, deleting it");
+                await this._appointmentRepository.deleteAll({sessionId: sessionId});
+            }
+
+
+        await this._sessionRepository.delete(sessionId);
+
+
+
+        return;
+    }catch(error){
+        console.error("Error in delete session", error);
+        throw new Error("Failed to delete consultation session");
+    }   
+
 };
+
+}

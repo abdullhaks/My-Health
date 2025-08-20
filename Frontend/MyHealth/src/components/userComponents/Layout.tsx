@@ -49,6 +49,38 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
 
   const user = useSelector((state: any) => state.user.user);
 
+
+
+      const fetchNotifications = async () => {
+      if (!user?._id) return;
+      try {
+        const response = await getNotifications(user._id, limit, notificationSet);
+
+        console.log("noti respionse are",response);
+        setNotifications((prev) => {
+            const existingIds = new Set(prev.map((n) => n._id));
+            const newNotifications = response.notifications
+              .map((n: any) => ({
+                ...n,
+                date: new Date(n.createdAt),
+                createdAt: new Date(n.createdAt),
+              }))
+              .filter((n: Notification) => !existingIds.has(n._id));
+            return [...newNotifications, ...prev].sort(
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+
+        const unreadCount = response.notifications.filter((n: any) => !n.isRead).length;
+        setNotificationCount(unreadCount);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        message.error("Failed to load notifications.");
+      }
+    };
+
+
+
   const getAccessToken = async () => {
     try {
       const response = await axios.post(
@@ -106,28 +138,41 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
       });
 
       socket.on("notification", (notification: Notification) => {
-        setNotifications((prev) => [
-          { ...notification, date: new Date(notification.createdAt), createdAt: new Date(notification.createdAt) },
-          ...prev,
-        ]);
-        if (!notification.isRead) {
-          setNotificationCount((prev) => prev + 1);
-        }
+
+        fetchNotifications();
+        // setNotifications((prev) => {
+        //   // Prevent duplicate notifications by checking _id
+        //   if (prev.some((n) => n._id === notification._id)) {
+        //     return prev;
+        //   }
+        //   const newNotification = {
+        //     ...notification,
+        //     date: new Date(notification.createdAt),
+        //     createdAt: new Date(notification.createdAt),
+        //   };
+        //   return [newNotification, ...prev];
+        // });
+        // if (!notification.isRead) {
+        //   setNotificationCount((prev) => prev + 1);
+        // }
       });
 
       socket.on("error", ({ message }) => {
         console.error("Socket error:", message);
         message.error(message);
       });
-
-      return () => {
-        socket.disconnect();
-      };
     };
 
     setupSocket();
+
     return () => {
-      socketRef.current?.disconnect();
+      if (socketRef.current) {
+        socketRef.current.off("connect");
+        socketRef.current.off("connect_error");
+        socketRef.current.off("notification");
+        socketRef.current.off("error");
+        socketRef.current.disconnect();
+      }
     };
   }, [user?._id]);
 
@@ -137,23 +182,6 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
         setCollapsed(true);
       } else {
         setMobileOpen(false);
-      }
-    };
-
-    const fetchNotifications = async () => {
-      if (!user?._id) return;
-      try {
-        const response = await getNotifications(user._id, limit, notificationSet);
-        setNotifications(response.map((n: any) => ({
-          ...n,
-          date: new Date(n.createdAt),
-          createdAt: new Date(n.createdAt),
-        })));
-        const unreadCount = response.filter((n: any) => !n.isRead).length;
-        setNotificationCount(unreadCount);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-        message.error("Failed to load notifications.");
       }
     };
 

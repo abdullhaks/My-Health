@@ -4,6 +4,7 @@ export interface IAppointmentDocument extends  Document {
   userId: string;
   doctorId: string;
   slotId: string;
+  sessionId:string;
   date:string;
   start: Date;
   end: Date;

@@ -60,6 +60,20 @@ async getBookedSlots (req:Request,res:Response):Promise<void>{
     }
 }
 
+async  deleteSession (req:Request,res:Response):Promise<void>{
+    try{
+      let {sessionId} = req.query;
+        if(sessionId){
+        const response = await this._doctorSessionService.deleteSession(sessionId.toString());
+         res.status(HttpStatusCode.OK).json(response);
+         return
+        }
+         res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+    }catch(error){
+        console.log("error in delete session",error);
+         res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"delete session failed"});
+    }
 
+}
 
 }

@@ -4,6 +4,7 @@ export interface IAppointment {
   userId: string;
   doctorId: string;
   slotId: string;
+  sessionId:string;
   date:string;
   start: Date;
   end: Date;

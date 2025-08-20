@@ -109,6 +109,7 @@ export default class PaymentService implements IPaymentService {
               duration: parseInt(metadata.duration),
               fee: parseInt(metadata.fee),
               slotId: metadata.slotId,
+              sessionId:metadata.sessionId,
               stripeSessionId: session.id,
               invoice:invoiceUrl || "",
               paymentType: "stripe",

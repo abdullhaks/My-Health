@@ -21,7 +21,7 @@ import { getNotifications } from "../../api/doctor/doctorApi"; // Adjusted impor
 import { FaMoneyBillTransfer } from "react-icons/fa6";
 
 interface Notification {
-  id: string;
+  _id:string;
   date: Date;
   message: string;
   isRead: boolean;
@@ -54,6 +54,41 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
   const doctor = useSelector((state: RootState) => state.doctor.doctor);
   const isPremium = doctor?.premiumMembership;
+
+
+
+  
+    const fetchNotifications = async () => {
+      if (!doctor?._id) return;
+      try {
+        const response = await getNotifications(doctor._id);
+        console.log("noti resp is .......",response);
+
+        if(response){
+        setNotifications((prev) => {
+              const existingIds = new Set(prev.map((n) => n._id));
+              const newNotifications = response
+                .map((n: any) => ({
+                  ...n,
+                  date: new Date(n.createdAt),
+                  createdAt: new Date(n.createdAt),
+                }))
+                .filter((n: Notification) => !existingIds.has(n._id));
+              return [...newNotifications, ...prev].sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              );
+            });
+
+        const unreadCount = response.filter((n: any) => !n.isRead).length;
+        setNotificationCount(unreadCount);
+          }
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        message.error("Failed to load notifications.");
+      }
+    };
+
+
 
   const getAccessToken = async () => {
     try {
@@ -113,14 +148,25 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
       socket.on("notification", (notification: Notification) => {
 
-        console.log("coming notification is ....",notification);
-        setNotifications((prev) => [
-          notification,
-          ...prev,
-        ]);
-        if (!notification.isRead) {
-          setNotificationCount((prev) => prev + 1);
-        }
+        fetchNotifications();
+        // setNotifications((prev) => {
+        //   // Prevent duplicate notifications by checking _id
+        //   if (prev.some((n) => n._id === notification._id)) {
+        //     return prev;
+        //   }
+        //   const newNotification = {
+        //     ...notification,
+        //     date: new Date(notification.createdAt),
+        //     createdAt: new Date(notification.createdAt),
+        //   };
+        //   return [newNotification, ...prev];
+        // });
+
+
+        // if (!notification.isRead) {
+        //   setNotificationCount((prev) => prev + 1);
+        // }
+
       });
 
       socket.on("error", ({ message }) => {
@@ -145,20 +191,6 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
         setCollapsed(true);
       } else {
         setMobileOpen(false);
-      }
-    };
-
-    const fetchNotifications = async () => {
-      if (!doctor?._id) return;
-      try {
-        const response = await getNotifications(doctor._id);
-        console.log("noti resp is .......",response);
-        setNotifications(response);
-        const unreadCount = response.filter((n: any) => !n.isRead).length;
-        setNotificationCount(unreadCount);
-      } catch (error) {
-        console.error("Failed to fetch notifications:", error);
-        message.error("Failed to load notifications.");
       }
     };
 
@@ -247,14 +279,14 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     if (!notification.isRead) {
       setNotifications((prev) =>
         prev.map((n) =>
-          n.id === notification.id ? { ...n, isRead: true } : n
+          n._id === notification._id ? { ...n, isRead: true } : n
         )
       );
       setNotificationCount((prev) => prev - 1);
 
       try {
         await axios.put(
-          `http://localhost:3000/api/doctor/notifications/${notification.id}/read`,
+          `http://localhost:3000/api/doctor/notifications/${notification._id}/read`,
           {},
           { withCredentials: true }
         );
@@ -473,7 +505,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
                       ) : (
                         notifications.map((notification) => (
                           <div
-                            key={notification.id}
+                            key={notification._id}
                             className={`p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors ${
                               !notification.isRead ? "bg-purple-50" : ""
                             }`}

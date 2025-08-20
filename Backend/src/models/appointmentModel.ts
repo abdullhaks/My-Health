@@ -15,6 +15,10 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       type: String,
       required: true,
     },
+    sessionId:{
+      type:String,
+      required:true,
+    },
     date: {
       type: String,
       required: true,

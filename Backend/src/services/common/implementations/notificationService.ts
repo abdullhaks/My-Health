@@ -26,6 +26,8 @@ export default class NotificationService implements INotificationServices {
     async getNewNotifications(id:string,limit:number,notificationSet:number): Promise<any> {
 
         const response = await this._notificationRepository.getNewNotifications(id,limit,notificationSet);
+
+        console.log("noti resp from bakc end ...",response);
         return response;
         
         

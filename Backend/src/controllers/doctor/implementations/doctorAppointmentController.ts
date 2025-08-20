@@ -59,5 +59,30 @@ export default class DoctorAppointmentController implements IDoctorAppointmentCt
       console.error("Error fetching user appointments:", err);
       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
     }
+  };
+
+  
+async cancelAppointment(req:Request, res: Response) : Promise <void> {
+
+  try{
+
+    console.log("appointment id is ctrl...",req.query.appointmentId);
+
+    const appoinmentId = req.query.appointmentId;
+
+    const response = await this._doctorAppointmentService.cancelAppointment(String(appoinmentId));
+
+    res.status(HttpStatusCode.OK).json(response);
+
+  }catch(err){
+      console.error("Error in cancel appointments:", err);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
   }
+}
+
+
+
+
+
+
 }

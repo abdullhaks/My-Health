@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getDoctorAppointments } from "../../api/doctor/doctorApi";
+import { getDoctorAppointments,cancelAppointment } from "../../api/doctor/doctorApi";
 import { Popconfirm, message, Table, Select, DatePicker, Button, Pagination } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
+import { io, Socket } from "socket.io-client";
+import axios from "axios";
 
 interface IAppointment {
   _id: string;
@@ -12,6 +14,7 @@ interface IAppointment {
   doctorId: string;
   slotId: string;
   start: string;
+  date:string;
   end: string;
   duration: number;
   fee: number;
@@ -28,10 +31,22 @@ interface IAppointment {
 
 }
 
+interface Notification {
+  userId: string;
+  message: string;
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  isRead: boolean;
+  link?: string;
+  mention?: string;
+  createdAt: string;
+}
+
+
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const DoctorAppointments = () => {
+  const [isCanceling, setIsCanceling] = useState(false);
   const [appointments, setAppointments] = useState<IAppointment[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +59,83 @@ const DoctorAppointments = () => {
   });
   const doctor = useSelector((state: any) => state.doctor.doctor);
   const navigate = useNavigate();
+  const socketRef = useRef<Socket | null>(null);
+
+
+   const getAccessToken = async () => {
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/api/doctor/refreshToken",
+          {},
+          { withCredentials: true }
+        );
+        return response.data.accessToken;
+      } catch (error) {
+        console.error("Failed to fetch access token:", error);
+        message.error("Session expired. Please log in again.");
+        throw error;
+      }
+    };
+
+
+
+     useEffect(() => {
+        const setupSocket = async () => {
+          if (!doctor?._id) return;
+    
+          let token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("userAccessToken="))
+            ?.split("=")[1];
+    
+          if (!token) {
+            token = await getAccessToken();
+          }
+    
+          const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
+            transports: ["websocket"],
+            reconnection: true,
+            auth: { token },
+          });
+    
+          socketRef.current = socket;
+    
+          socket.on("connect", () => {
+            console.log(`Socket connected for user ${doctor._id}`);
+            socket.emit("join", doctor._id);
+          });
+    
+          socket.on("connect_error", async (err) => {
+            console.error("Socket connection error:", err.message);
+            if (err.message.includes("Invalid or expired token")) {
+              try {
+                const newToken = await getAccessToken();
+                socket.auth = { token: newToken };
+                socket.connect();
+              } catch {
+                message.error("Failed to reconnect. Please log in again.");
+              }
+            } else {
+              message.error("Failed to connect to notification server: " + err.message);
+            }
+          });
+    
+          socket.on("error", ({ message }) => {
+            console.error("Socket error:", message);
+            message.error(message);
+          });
+    
+          return () => {
+            socket.disconnect();
+          };
+        };
+    
+        setupSocket();
+        return () => {
+          socketRef.current?.disconnect();
+        };
+      }, [doctor?._id]);
+
 
   const fetchAppointments = async (page: number) => {
     setLoading(true);
@@ -75,33 +167,69 @@ const DoctorAppointments = () => {
     setCurrentPage(1); // Reset to first page when filters change
   };
 
-  const handleCancel = async (appointmentId: string) => {
-    try {
-      setLoading(true);
-      // Uncomment and implement cancelAppointment API when available
-      // const response = await cancelAppointment(appointmentId);
-      // if (response.status) {
-      //   message.success(response.message);
-      //   setAppointments((prev) =>
-      //     prev.map((appt) =>
-      //       appt._id === appointmentId
-      //         ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "failed" }
-      //         : appt
-      //     )
-      //   );
-      // } else {
-      //   message.error(response.message);
-      // }
-    } catch (error) {
-      console.error("Error cancelling appointment:", error);
-      setErrorMessage(
-        (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) ||
-          "Failed to cancel appointment. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+ const handleCancel = async (appointmentId: string) => {
+     try {
+       setIsCanceling(true);
+       setErrorMessage("");
+       const response = await cancelAppointment(appointmentId);
+       if (response.status) {
+         message.success(response.message);
+ 
+         let doctorName: string = "";
+         let userId: string = "";
+         let date: string = "";
+ 
+         const targetAppointment = appointments.find((appt) => appt._id === appointmentId);
+         if (targetAppointment) {
+           doctorName = targetAppointment.doctorName || "Patient";
+           userId = targetAppointment.userId || "";
+           date = targetAppointment.date || "";
+         } else {
+           console.warn("Appointment not found in state.");
+         }
+ 
+         setAppointments((prev) =>
+           prev.map((appt) =>
+             appt._id === appointmentId
+               ? { ...appt, appointmentStatus: "cancelled", paymentStatus: "refunded" }
+               : appt
+           )
+         );
+ 
+         if (userId) {
+           const notification: Notification = {
+             userId: userId,
+             message: `Your appointment with Dr.${doctorName} on ${new Date(date).toLocaleDateString("en-US", {
+               weekday: "short",
+               year: "numeric",
+               month: "short",
+               day: "numeric",
+             })} has been cancelled due to unforeseen circumstances. Please reschedule at the next available slot.`,
+             type: "appointment",
+             isRead: false,
+             link: "/user/appointments",
+             mention: `Dr.${doctorName}`,
+             createdAt: new Date().toISOString(),
+           };
+ 
+           socketRef.current?.emit("sendNotification", notification);
+         } else {
+           console.warn("Missing doctorId for notification.");
+         }
+       } else {
+         message.error(response.message);
+       }
+     } catch (error: any) {
+       console.error("Error cancelling appointment:", error);
+       setErrorMessage(
+         error.response?.data?.message || "Failed to cancel appointment. Please try again."
+       );
+     } finally {
+       setIsCanceling(false);
+     }
+   };
+
+
 
   const handleJoin = (appointmentId: string, appointment: IAppointment) => {
     navigate(`/doctor/video-call/${appointmentId}`, { state: { appointment } });
@@ -189,9 +317,9 @@ const DoctorAppointments = () => {
               cancelText="No"
             >
               <button
-                disabled={loading || record.appointmentStatus !== "booked"}
+                disabled={isCanceling || record.appointmentStatus !== "booked"}
                 className={`px-4 py-1 rounded-lg text-white font-medium transition-colors ${
-                  loading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+                  isCanceling ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
                 }`}
               >
                 Cancel

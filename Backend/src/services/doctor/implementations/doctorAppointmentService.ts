@@ -4,13 +4,19 @@ import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import { IAppointment } from "../../../dto/appointmentDTO";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
+import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 
 @injectable()
 export default class DoctorAppointmentService implements IDoctorAppointmentService {
 
     constructor(
+
       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
-      @inject ("IUserRepository") private _userRepository : IUserRepository
+      @inject ("IUserRepository") private _userRepository : IUserRepository,
+      @inject("IAnalyticsRepository")private _analyticsRepository: IAnalyticsRepository,
+      @inject("ITransactionRepository") private _transactionRepository: ITransactionRepository
+
     ){   }
 
 async getDoctorAppointments(
@@ -58,7 +64,59 @@ async getDoctorAppointments(
       );
 
     return {appointments:updatedAppointments,totalPages};
-  }
+  };
+
+
+
+    async cancelAppointment(
+      appointmentId: string
+    ): Promise<{
+      status: boolean;
+      message: string;
+    }> {
+      console.log("appointment id is ", appointmentId);
+      const response = await this._appointmentsRepository.update(appointmentId, {
+        appointmentStatus: "cancelled",
+        paymentStatus: "refunded",
+      });
+      if (response) {
+        const updateWalet = await this._userRepository.update(response.userId, {
+          $inc: { walletBalance: response.fee },
+        });
+        const updateAnalytics =
+          await this._analyticsRepository.uptadeOneWithUpsert(
+            { dataSet: "1" },
+            { $inc: { totalRevenue: -response.fee } }
+          );
+        const transaction = await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: response.fee,
+          paymentFor: "refund",
+          userId: response.userId,
+          doctorId:response.doctorId
+        }); 
+  
+        if (updateWalet) {
+          return {
+            status: true,
+            message: `your appointment with ${updateWalet.fullName} has been cancelled `,
+          };
+        } else {
+          return {
+            message:
+              "Your appointment cancletation failed, please try again later",
+            status: false,
+          };
+        }
+      }
+      // Ensure a return value for all code paths
+      return {
+        status: false,
+        message: "Appointment cancellation failed, appointment not found.",
+      };
+    }
 
 
 }
