@@ -4,6 +4,7 @@ import IMessageService from "../../services/common/interfaces/IMessageService";
 import { verifyAccessToken } from "../../utils/jwt";
 import IAppointmentsRepository from "../../repositories/interfaces/IAppointmentsRepository";
 import INotificationRepository from "../../repositories/interfaces/INotificationRepository";
+import appointmentModel from "../../models/appointmentModel";
 
 interface Notification {
   date: Date;
@@ -148,10 +149,18 @@ export const setupSocket = (io: Server, container: Container) => {
           return socket.emit("error", { message: "Appointment not found." });
         }
 
+        if(appointment.appointmentStatus !== "booked") {
+          console.error(`Appointment ${appointmentId} is not in booked status.`);
+          return socket.emit("error", { message: `Appointment is ${appointment.appointmentStatus}.` });
+        }
+
+
         if (userId !== appointment.doctorId.toString() && userId !== appointment.userId.toString()) {
           console.error(`Unauthorized access attempt to appointment ${appointmentId} by user ${userId}.`);
           return socket.emit("error", { message: "Not authorized for this appointment." });
         }
+
+
 
         // const now = new Date();
         // const startTime = new Date(appointment.start);

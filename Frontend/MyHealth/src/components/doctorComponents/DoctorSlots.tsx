@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaTrash, FaEdit, FaSave, FaTimes, FaCalendarAlt, FaClock, FaRupeeSign, FaPlus, FaCheckCircle, FaTimesCircle, FaBan } from "react-icons/fa";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useSelector } from "react-redux";
-import { message } from "antd";
+import { message, Popconfirm } from "antd";
+import { io, Socket } from "socket.io-client";
 
 import {
   getSessions,
@@ -17,6 +18,7 @@ import {
   makeSlotsAvailable,
   cancelAppointment,
 } from "../../api/doctor/doctorApi";
+import axios from "axios";
 
 interface Session {
   _id?: string;
@@ -45,6 +47,16 @@ interface AppointmentSlot {
   appointmentId?: string;
 }
 
+interface Notification {
+  userId: string;
+  message: string;
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  isRead: boolean;
+  link?: string;
+  mention?: string;
+  createdAt: string;
+}
+
 interface DaySessionSlots {
   session: Session;
   slots: AppointmentSlot[];
@@ -69,7 +81,7 @@ const defaultSession: Session = {
 };
 
 const DoctorSlots = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+ const doctor = useSelector((state: any) => state.doctor.doctor);
   const doctorId = doctor._id;
   const [sessions, setSessions] = useState<Session[]>([]);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
@@ -81,7 +93,81 @@ const DoctorSlots = () => {
   const [unavailableSlotIds, setUnavailableSlotIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
+  const socketRef = useRef<Socket | null>(null);
 
+
+     const getAccessToken = async () => {
+        try {
+          const response = await axios.post(
+            "http://localhost:3000/api/doctor/refreshToken",
+            {},
+            { withCredentials: true }
+          );
+          return response.data.accessToken;
+        } catch (error) {
+          console.error("Failed to fetch access token:", error);
+          message.error("Session expired. Please log in again.");
+          throw error;
+        }
+      };
+
+        useEffect(() => {
+              const setupSocket = async () => {
+                if (!doctor?._id) return;
+          
+                let token = document.cookie
+                  .split("; ")
+                  .find((row) => row.startsWith("userAccessToken="))
+                  ?.split("=")[1];
+          
+                if (!token) {
+                  token = await getAccessToken();
+                }
+          
+                const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
+                  transports: ["websocket"],
+                  reconnection: true,
+                  auth: { token },
+                });
+          
+                socketRef.current = socket;
+          
+                socket.on("connect", () => {
+                  console.log(`Socket connected for user ${doctor._id}`);
+                  socket.emit("join", doctor._id);
+                });
+          
+                socket.on("connect_error", async (err) => {
+                  console.error("Socket connection error:", err.message);
+                  if (err.message.includes("Invalid or expired token")) {
+                    try {
+                      const newToken = await getAccessToken();
+                      socket.auth = { token: newToken };
+                      socket.connect();
+                    } catch {
+                      message.error("Failed to reconnect. Please log in again.");
+                    }
+                  } else {
+                    message.error("Failed to connect to notification server: " + err.message);
+                  }
+                });
+          
+                socket.on("error", ({ message }) => {
+                  console.error("Socket error:", message);
+                  message.error(message);
+                });
+          
+                return () => {
+                  socket.disconnect();
+                };
+              };
+          
+              setupSocket();
+              return () => {
+                socketRef.current?.disconnect();
+              };
+            }, [doctor?._id]);
+  
   // Fetch sessions only once on mount or when doctorId changes
   useEffect(() => {
     if (!doctorId) return;
@@ -271,6 +357,23 @@ const DoctorSlots = () => {
   const saveEdit = async () => {
     if (!editingSession || !editingSession._id) return;
 
+    const original = sessions.find((s) => s._id === editingSession._id);
+    if (!original) return;
+
+    const hasChanges =
+      original.dayOfWeek !== editingSession.dayOfWeek ||
+      original.startTime !== editingSession.startTime ||
+      original.endTime !== editingSession.endTime ||
+      original.duration !== editingSession.duration ||
+      original.fee !== editingSession.fee;
+
+    if (!hasChanges) {
+      message.info("No changes made");
+      setEditingSession(null);
+      setValidationError("");
+      return;
+    }
+
     const error = validateSession(editingSession);
     if (error) {
       setValidationError(error);
@@ -278,11 +381,39 @@ const DoctorSlots = () => {
     }
 
     try {
-      const updated = await updateSession(editingSession._id, editingSession);
-      // setSessions(sessions.map((s) => (s._id === updated._id ? updated : s)));
+      const response = await updateSession(editingSession._id, editingSession);
+      const updatedSession = response.updatedSession ;
+      const cancelledAppoitments = response.cancelledAppoitments ;
+      console.log("cancelld appointments are.....",cancelledAppoitments);
+
+      setSessions(sessions.map((s) => (s._id === updatedSession._id ? updatedSession : s)));
       setEditingSession(null);
       setValidationError("");
       message.success("Session updated successfully");
+
+      if (cancelledAppoitments.length) {
+        cancelledAppoitments.forEach((item: { appointmentId: string; userId: string; doctorName: string; date: string; start: Date; end: Date; }) => {
+          const notification: Notification = {
+            userId: item.userId,
+            message: `Your appointment with Dr.${item.doctorName} on ${new Date(item.date).toLocaleDateString("en-US", {
+              weekday: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })} has been cancelled due to session update. Please reschedule at the next available slot.`,
+            type: "appointment",
+            isRead: false,
+            link: "/user/appointments",
+            mention: `Dr.${item.doctorName}`,
+            createdAt: new Date().toISOString(),
+          };
+          socketRef.current?.emit("sendNotification", notification);
+        });
+      }
+
+      // Refresh data
+      fetchSessions();
+      fetchDateData();
     } catch (error) {
       console.error("Error updating session:", error);
       message.error("Failed to update session");
@@ -291,10 +422,32 @@ const DoctorSlots = () => {
 
   // Delete session
   const handleDeleteSession = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this session?")) return;
+   
 
     try {
-      await deleteSession(id);
+      const deleting = await deleteSession(id);
+      if(deleting.length){
+
+        deleting.forEach((item:{ appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; })=>{
+          const notification: Notification = {
+                       userId: item.userId,
+                       message: `Your appointment with Dr.${item.doctorName} on ${new Date(item.date).toLocaleDateString("en-US", {
+                         weekday: "short",
+                         year: "numeric",
+                         month: "short",
+                         day: "numeric",
+                       })} has been cancelled due to unforeseen circumstances. Please reschedule at the next available slot.`,
+                       type: "appointment",
+                       isRead: false,
+                       link: "/user/appointments",
+                       mention: `Dr.${item.doctorName}`,
+                       createdAt: new Date().toISOString(),
+                     };
+           socketRef.current?.emit("sendNotification", notification);
+
+        })
+      }
+      
       setSessions(sessions.filter((s) => s._id !== id));
       message.success("Session deleted successfully");
     } catch (error) {
@@ -646,13 +799,23 @@ const DoctorSlots = () => {
                             >
                               <FaEdit />
                             </button>
+
+
+                          <Popconfirm
+                            title="Remove Session"
+                            description="Are you sure you want to delete this session? All booked appointments in this session will be canceled."
+                            onConfirm={() =>  handleDeleteSession(session._id!)}
+                            okText="Yes"
+                            cancelText="No"
+                                        >
                             <button
-                              onClick={() => handleDeleteSession(session._id!)}
                               className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
                               title="Delete Session"
                             >
                               <FaTrash />
                             </button>
+
+                          </Popconfirm>
                           </div>
                         </>
                       )}

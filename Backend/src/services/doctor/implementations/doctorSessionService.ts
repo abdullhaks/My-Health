@@ -73,18 +73,30 @@ async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment
 }
 
 
-async deleteSession (sessionId:string):Promise<void>{
+async deleteSession (sessionId:string):Promise<any>{
     try{
         console.log("sessionId is :", sessionId);
 
-
-        let existingAppointment = await this._appointmentRepository.findOne({sessionId: sessionId,
+        let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
+        let existingAppointment = await this._appointmentRepository.findAll({sessionId: sessionId,
             start:{$gte:new Date()}});
  
             console.log("existing appointment is :", existingAppointment);
             if(existingAppointment){
                 console.log("existing appointment found, deleting it");
-                await this._appointmentRepository.deleteAll({sessionId: sessionId});
+                await this._appointmentRepository.updateMany({sessionId: sessionId,start:{$gte:new Date()}},{$set:{appointmentStatus:"cancelled"}});
+                existingAppointment.forEach((appointment: IAppointment) => {
+                    cancelledAppoitments.push({
+                        appointmentId: (appointment._id as string).toString(),
+                        userId: appointment.userId,
+                        doctorName:appointment.doctorName,
+                        date: appointment.date,
+                        start: appointment.start,
+                        end: appointment.end
+                    });
+                }
+            )
+            
             }
 
 
@@ -92,12 +104,56 @@ async deleteSession (sessionId:string):Promise<void>{
 
 
 
-        return;
+        return cancelledAppoitments;
     }catch(error){
         console.error("Error in delete session", error);
         throw new Error("Failed to delete consultation session");
     }   
 
 };
+
+
+
+
+async updateSession(sessionId: string, editingSession: any): Promise<any> {
+    try {
+        console.log("sessionId and editing session is :", sessionId, editingSession);
+        const updatedSession = await this._sessionRepository.update(sessionId, editingSession);
+        if (!updatedSession) {
+            throw new Error("Session not found or could not be updated");
+        };
+
+        let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
+        let existingAppointment = await this._appointmentRepository.findAll({sessionId: sessionId,
+            start:{$gte:new Date()}});
+
+            if(existingAppointment){
+                console.log("existing appointment found, deleting it");
+                await this._appointmentRepository.updateMany({sessionId: sessionId,start:{$gte:new Date()}},{$set:{appointmentStatus:"cancelled"}});
+                existingAppointment.forEach((appointment: IAppointment) => {
+                    cancelledAppoitments.push({
+                        appointmentId: (appointment._id as string).toString(),
+                        userId: appointment.userId,
+                        doctorName:appointment.doctorName,
+                        date: appointment.date,
+                        start: appointment.start,
+                        end: appointment.end
+                    });
+                }
+            )
+            
+            }
+
+        console.log("cancelled appointments are :", cancelledAppoitments);
+       
+        return {updatedSession,cancelledAppoitments};
+
+       
+    } catch (error) {
+        console.error("Error in updateSession:", error);
+        throw new Error("Failed to update consultation session");
+    }
+
+}
 
 }

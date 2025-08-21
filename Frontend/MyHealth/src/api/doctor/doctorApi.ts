@@ -566,6 +566,11 @@ export const addSession = async (sessionToAdd:any )=>{
 export const updateSession = async ( sessionId:string, editingSession:any)=>{
   try{
     console.log("data id",sessionId, editingSession);
+    const response = await doctorInstance.patch(ROUTES.doctor.session, {
+      sessionId,
+      editingSession
+    });
+    return response.data;
 
   }catch(error){
     console.log("Error in get doctor booked slots",error);

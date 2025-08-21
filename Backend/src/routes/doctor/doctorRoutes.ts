@@ -127,6 +127,8 @@ doctorRoutes.post("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> s
 
 doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) );
 
+doctorRoutes.patch("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.updateSession(req,res) );
+
 doctorRoutes.delete("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.deleteSession(req,res) );
 
 

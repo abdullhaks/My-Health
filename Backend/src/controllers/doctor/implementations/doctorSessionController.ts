@@ -74,6 +74,30 @@ async  deleteSession (req:Request,res:Response):Promise<void>{
          res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"delete session failed"});
     }
 
+};
+
+async updateSession(req: Request, res: Response): Promise<void> {
+  try {
+    const { sessionId, editingSession } = req.body;
+
+    console.log("sessionId and editingSession are:", sessionId, editingSession);
+    
+    if (!sessionId || !editingSession) {
+      res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid request data" });
+      return;
+    }
+
+    const response = await this._doctorSessionService.updateSession(sessionId, editingSession);
+
+    res.status(HttpStatusCode.OK).json(response);
+
+  } catch (error) {
+    console.error("Error in updateSession:", error);
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Update session failed" });
+  }
 }
+
+
+
 
 }

@@ -68,6 +68,17 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
     }
   }
   
+
+  async updateMany(filter: FilterQuery<T>, data: UpdateQuery<T>): Promise<import("mongodb").UpdateResult> {
+    try {
+      return await this._model.updateMany(filter, data).exec();
+    } catch (error) {   
+      console.log("Error updating documents:", error);
+      return { acknowledged: false, modifiedCount: 0, matchedCount: 0, upsertedCount: 0, upsertedId: null };
+    }
+    }
+
+
   async delete(id: string): Promise<T | null> {
     try {
       return await this._model.findByIdAndDelete(id).exec();

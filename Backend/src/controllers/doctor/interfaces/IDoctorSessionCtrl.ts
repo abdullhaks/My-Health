@@ -5,6 +5,6 @@ addSessions (req:Request,res:Response):Promise<void>
 getSessions (req:Request,res:Response):Promise<void>
 getBookedSlots (req:Request,res:Response):Promise<void>
 deleteSession (req:Request,res:Response):Promise<void>
-
+updateSession (req:Request,res:Response):Promise<void>
 
 }

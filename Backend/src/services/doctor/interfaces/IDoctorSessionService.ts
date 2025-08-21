@@ -7,5 +7,6 @@ export default interface IDoctorSessionService {
     getSessions (doctorId:string):Promise<ISession[]>
     getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment[]>;
     deleteSession (sessionId:string):Promise<void>
+    updateSession (sessionId:string, editingSession:any):Promise<ISession>;
     
 }
