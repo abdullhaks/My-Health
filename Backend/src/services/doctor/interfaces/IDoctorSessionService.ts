@@ -8,5 +8,9 @@ export default interface IDoctorSessionService {
     getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment[]>;
     deleteSession (sessionId:string):Promise<void>
     updateSession (sessionId:string, editingSession:any):Promise<ISession>;
+    makeDayUnavailable(doctorId:string,day:Date):Promise<any>
+    getUnavailableDays(doctorId:string):Promise<any>
+
+
     
 }

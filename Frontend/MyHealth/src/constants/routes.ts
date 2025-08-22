@@ -80,6 +80,8 @@ export const ROUTES = {
     bookedSlots: "/doctor/bookedSlots",
     getPayouts:"/doctor/getPayouts",
     cancelAppointment: "/doctor/cancelAppointment",
+    unAvailableDays: "/doctor/unAvailableDays",
+    makeDayAvailable: "/doctor/makeDayAvailable",
 
 
   },

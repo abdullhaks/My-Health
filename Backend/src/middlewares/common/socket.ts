@@ -37,14 +37,16 @@ export const setupSocket = (io: Server, container: Container) => {
     const token = socket.handshake.auth.token;
     if (!token) {
       console.error("Authentication error: No token provided.");
-      return next(new Error("Authentication error: No token provided."));
+      // return next(new Error("Authentication error: No token provided."));
+      return next();
     }
 
     try {
       const decoded = await verifyAccessToken(token);
       if (!decoded || !decoded.id || !decoded.role) {
         console.error("Authentication error: Invalid token payload.");
-        return next(new Error("Authentication error: Invalid token."));
+        // return next(new Error("Authentication error: Invalid token."));
+        return next();
       }
 
       (socket as AuthenticatedSocket).data = {
@@ -55,7 +57,8 @@ export const setupSocket = (io: Server, container: Container) => {
       next();
     } catch (err) {
       console.error("Token verification failed:", err);
-      return next(new Error("Authentication error: Invalid or expired token."));
+      // return next(new Error("Authentication error: Invalid or expired token."));
+      return next();
     }
   });
 
@@ -292,11 +295,8 @@ export const setupSocket = (io: Server, container: Container) => {
 
     socket.on("error", (err) => {
       console.error(`Socket error for ${userId}:`, err);
-      socket.emit("error", { message: "Socket connection error." });
+      // socket.emit("error", { message: "Socket connection error." });
     });
-
-
-
 
 
 

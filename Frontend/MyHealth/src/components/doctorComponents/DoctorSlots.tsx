@@ -1,5 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { FaTrash, FaEdit, FaSave, FaTimes, FaCalendarAlt, FaClock, FaRupeeSign, FaPlus, FaCheckCircle, FaTimesCircle, FaBan } from "react-icons/fa";
+import {
+  FaTrash,
+  FaEdit,
+  FaSave,
+  FaTimes,
+  FaCalendarAlt,
+  FaClock,
+  FaRupeeSign,
+  FaPlus,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaBan,
+} from "react-icons/fa";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { useSelector } from "react-redux";
@@ -11,12 +23,15 @@ import {
   addSession,
   updateSession,
   deleteSession,
-  
   getBookedSlots,
-  getUnavailableSlots,
-  makeSlotsUnavailable,
-  makeSlotsAvailable,
-  cancelAppointment,
+  // getUnavailableSlots,
+  makeSessionUnavailable,
+  makeSessionAvailable,
+  makeDayUnavailable,
+  getUnavailableDays,
+
+  // makeDayAvailable,
+  // cancelAppointment,
 } from "../../api/doctor/doctorApi";
 import axios from "axios";
 
@@ -42,7 +57,14 @@ interface AppointmentSlot {
   end: Date;
   duration: number;
   fee: number;
-  status: "available" | "unavailable" | "pending" | "confirmed" | "completed" | "cancelled" | "booked";
+  status:
+    | "available"
+    | "unavailable"
+    | "pending"
+    | "confirmed"
+    | "completed"
+    | "cancelled"
+    | "booked";
   sessionId: string;
   appointmentId?: string;
 }
@@ -50,7 +72,14 @@ interface AppointmentSlot {
 interface Notification {
   userId: string;
   message: string;
-  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
+  type:
+    | "appointment"
+    | "payment"
+    | "blog"
+    | "add"
+    | "newConnection"
+    | "common"
+    | "reportAnalysis";
   isRead: boolean;
   link?: string;
   mention?: string;
@@ -81,7 +110,7 @@ const defaultSession: Session = {
 };
 
 const DoctorSlots = () => {
- const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: any) => state.doctor.doctor);
   const doctorId = doctor._id;
   const [sessions, setSessions] = useState<Session[]>([]);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
@@ -89,90 +118,103 @@ const DoctorSlots = () => {
   const [newSession, setNewSession] = useState<Session>(defaultSession);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [daySessionSlots, setDaySessionSlots] = useState<DaySessionSlots[]>([]);
-  const [bookedAppointments, setBookedAppointments] = useState<Appointment[]>([]);
+  const [bookedAppointments, setBookedAppointments] = useState<Appointment[]>(
+    []
+  );
   const [unavailableSlotIds, setUnavailableSlotIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
   const socketRef = useRef<Socket | null>(null);
+  const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
 
+  const getAccessToken = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/doctor/refreshToken",
+        {},
+        { withCredentials: true }
+      );
+      return response.data.accessToken;
+    } catch (error) {
+      console.error("Failed to fetch access token:", error);
+      message.error("Session expired. Please log in again.");
+      throw error;
+    }
+  };
 
-     const getAccessToken = async () => {
-        try {
-          const response = await axios.post(
-            "http://localhost:3000/api/doctor/refreshToken",
-            {},
-            { withCredentials: true }
-          );
-          return response.data.accessToken;
-        } catch (error) {
-          console.error("Failed to fetch access token:", error);
-          message.error("Session expired. Please log in again.");
-          throw error;
+  useEffect(() => {
+    const setupSocket = async () => {
+      if (!doctor?._id) return;
+
+      let token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("userAccessToken="))
+        ?.split("=")[1];
+
+      if (!token) {
+        token = await getAccessToken();
+      }
+      const socket = io(
+        import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000",
+        {
+          transports: ["websocket"],
+          reconnection: true,
+          auth: { token },
         }
-      };
+      );
+      socketRef.current = socket;
+      socket.on("connect", () => {
+        console.log(`Socket connected for user ${doctor._id}`);
+        socket.emit("join", doctor._id);
+      });
 
-        useEffect(() => {
-              const setupSocket = async () => {
-                if (!doctor?._id) return;
-          
-                let token = document.cookie
-                  .split("; ")
-                  .find((row) => row.startsWith("userAccessToken="))
-                  ?.split("=")[1];
-          
-                if (!token) {
-                  token = await getAccessToken();
-                }
-          
-                const socket = io(import.meta.env.VITE_REACT_APP_SOCKET_URL || "http://localhost:3000", {
-                  transports: ["websocket"],
-                  reconnection: true,
-                  auth: { token },
-                });
-          
-                socketRef.current = socket;
-          
-                socket.on("connect", () => {
-                  console.log(`Socket connected for user ${doctor._id}`);
-                  socket.emit("join", doctor._id);
-                });
-          
-                socket.on("connect_error", async (err) => {
-                  console.error("Socket connection error:", err.message);
-                  if (err.message.includes("Invalid or expired token")) {
-                    try {
-                      const newToken = await getAccessToken();
-                      socket.auth = { token: newToken };
-                      socket.connect();
-                    } catch {
-                      message.error("Failed to reconnect. Please log in again.");
-                    }
-                  } else {
-                    message.error("Failed to connect to notification server: " + err.message);
-                  }
-                });
-          
-                socket.on("error", ({ message }) => {
-                  console.error("Socket error:", message);
-                  message.error(message);
-                });
-          
-                return () => {
-                  socket.disconnect();
-                };
-              };
-          
-              setupSocket();
-              return () => {
-                socketRef.current?.disconnect();
-              };
-            }, [doctor?._id]);
-  
+      socket.on("connect_error", async (err) => {
+        console.error("Socket connection error:", err.message);
+        if (err.message.includes("Invalid or expired token")) {
+          try {
+            const newToken = await getAccessToken();
+            socket.auth = { token: newToken };
+            socket.connect();
+          } catch {
+            message.error("Failed to reconnect. Please log in again.");
+          }
+        } else {
+          message.error(
+            "Failed to connect to notification server: " + err.message
+          );
+        }
+      });
+
+      socket.on("error", ({ message }) => {
+        console.error("Socket error:", message);
+        message.error(message);
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    };
+
+    setupSocket();
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, [doctor?._id]);
+
   // Fetch sessions only once on mount or when doctorId changes
   useEffect(() => {
-    if (!doctorId) return;
-    fetchSessions();
+    const fetchData = async () => {
+      if (!doctorId) return;
+      fetchSessions();
+      const unAvailableDays = await getUnavailableDays(doctorId);
+      console.log("unAvailableDays are/......",unAvailableDays);
+      console.log("selectedDate is/......",selectedDate);
+
+      setUnAvailableDays(unAvailableDays);
+    };
+    fetchData();
   }, [doctorId]);
+
 
   const fetchSessions = async () => {
     try {
@@ -201,12 +243,12 @@ const DoctorSlots = () => {
       const dd = String(selectedDate.getDate()).padStart(2, "0");
       const localDate = `${yyyy}-${mm}-${dd}`;
 
-      const [bookedResponse, unavailableResponse] = await Promise.all([
-        getBookedSlots(doctorId, localDate),
-        getUnavailableSlots(doctorId, localDate),
-      ]);
+      // const [bookedResponse, unavailableResponse] = await Promise.all([
+      //   getBookedSlots(doctorId, localDate),
+      //   getUnavailableSlots(doctorId, localDate),
+      // ]);
 
-      setBookedAppointments(bookedResponse || []);
+      // setBookedAppointments(bookedResponse || []);
       // setUnavailableSlotIds(unavailableResponse || []);
     } catch (error) {
       console.error("Error fetching date data:", error);
@@ -225,7 +267,9 @@ const DoctorSlots = () => {
       const generated: DaySessionSlots[] = [];
 
       daySessions.forEach((session) => {
-        const [startHours, startMinutes] = session.startTime.split(":").map(Number);
+        const [startHours, startMinutes] = session.startTime
+          .split(":")
+          .map(Number);
         const [endHours, endMinutes] = session.endTime.split(":").map(Number);
 
         const slotStart = new Date(selectedDate);
@@ -239,14 +283,18 @@ const DoctorSlots = () => {
 
         while (currentSlotStart < slotEnd) {
           const currentSlotEnd = new Date(currentSlotStart);
-          currentSlotEnd.setMinutes(currentSlotEnd.getMinutes() + session.duration);
+          currentSlotEnd.setMinutes(
+            currentSlotEnd.getMinutes() + session.duration
+          );
 
           if (currentSlotEnd > slotEnd) break;
 
           const slotId = currentSlotStart.getTime().toString();
 
           // Determine status
-          const appointment = bookedAppointments.find((app) => app.slotId === slotId);
+          const appointment = bookedAppointments.find(
+            (app) => app.slotId === slotId
+          );
           let status: AppointmentSlot["status"] = "available";
           let appointmentId: string | undefined;
 
@@ -303,7 +351,9 @@ const DoctorSlots = () => {
       const otherStart = parseTimeToMinutes(other.startTime);
       const otherEnd = parseTimeToMinutes(other.endTime);
       if (!(endMin <= otherStart || startMin >= otherEnd)) {
-        return `This session overlaps with another on ${weekdays.find((d) => d.value === sess.dayOfWeek)?.name}.`;
+        return `This session overlaps with another on ${
+          weekdays.find((d) => d.value === sess.dayOfWeek)?.name
+        }.`;
       }
     }
 
@@ -342,7 +392,11 @@ const DoctorSlots = () => {
     if (editingSession) {
       setEditingSession({
         ...editingSession,
-        [field]: typeof value === "string" && ["duration", "fee", "dayOfWeek"].includes(field) ? Number(value) : value,
+        [field]:
+          typeof value === "string" &&
+          ["duration", "fee", "dayOfWeek"].includes(field)
+            ? Number(value)
+            : value,
       });
     }
   };
@@ -382,33 +436,46 @@ const DoctorSlots = () => {
 
     try {
       const response = await updateSession(editingSession._id, editingSession);
-      const updatedSession = response.updatedSession ;
-      const cancelledAppoitments = response.cancelledAppoitments ;
-      console.log("cancelld appointments are.....",cancelledAppoitments);
+      const updatedSession = response.updatedSession;
+      const cancelledAppoitments = response.cancelledAppoitments;
+      console.log("cancelld appointments are.....", cancelledAppoitments);
 
-      setSessions(sessions.map((s) => (s._id === updatedSession._id ? updatedSession : s)));
+      setSessions(
+        sessions.map((s) => (s._id === updatedSession._id ? updatedSession : s))
+      );
       setEditingSession(null);
       setValidationError("");
       message.success("Session updated successfully");
 
       if (cancelledAppoitments.length) {
-        cancelledAppoitments.forEach((item: { appointmentId: string; userId: string; doctorName: string; date: string; start: Date; end: Date; }) => {
-          const notification: Notification = {
-            userId: item.userId,
-            message: `Your appointment with Dr.${item.doctorName} on ${new Date(item.date).toLocaleDateString("en-US", {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })} has been cancelled due to session update. Please reschedule at the next available slot.`,
-            type: "appointment",
-            isRead: false,
-            link: "/user/appointments",
-            mention: `Dr.${item.doctorName}`,
-            createdAt: new Date().toISOString(),
-          };
-          socketRef.current?.emit("sendNotification", notification);
-        });
+        cancelledAppoitments.forEach(
+          (item: {
+            appointmentId: string;
+            userId: string;
+            doctorName: string;
+            date: string;
+            start: Date;
+            end: Date;
+          }) => {
+            const notification: Notification = {
+              userId: item.userId,
+              message: `Your appointment with Dr.${
+                item.doctorName
+              } on ${new Date(item.date).toLocaleDateString("en-US", {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })} has been cancelled due to session update. Please reschedule at the next available slot.`,
+              type: "appointment",
+              isRead: false,
+              link: "/user/appointments",
+              mention: `Dr.${item.doctorName}`,
+              createdAt: new Date().toISOString(),
+            };
+            socketRef.current?.emit("sendNotification", notification);
+          }
+        );
       }
 
       // Refresh data
@@ -422,32 +489,39 @@ const DoctorSlots = () => {
 
   // Delete session
   const handleDeleteSession = async (id: string) => {
-   
-
     try {
       const deleting = await deleteSession(id);
-      if(deleting.length){
-
-        deleting.forEach((item:{ appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; })=>{
-          const notification: Notification = {
-                       userId: item.userId,
-                       message: `Your appointment with Dr.${item.doctorName} on ${new Date(item.date).toLocaleDateString("en-US", {
-                         weekday: "short",
-                         year: "numeric",
-                         month: "short",
-                         day: "numeric",
-                       })} has been cancelled due to unforeseen circumstances. Please reschedule at the next available slot.`,
-                       type: "appointment",
-                       isRead: false,
-                       link: "/user/appointments",
-                       mention: `Dr.${item.doctorName}`,
-                       createdAt: new Date().toISOString(),
-                     };
-           socketRef.current?.emit("sendNotification", notification);
-
-        })
+      if (deleting.length) {
+        deleting.forEach(
+          (item: {
+            appointmentId: string;
+            userId: string;
+            doctorName: string;
+            date: string;
+            start: Date;
+            end: Date;
+          }) => {
+            const notification: Notification = {
+              userId: item.userId,
+              message: `Your appointment with Dr.${
+                item.doctorName
+              } on ${new Date(item.date).toLocaleDateString("en-US", {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })} has been cancelled due to unforeseen circumstances. Please reschedule at the next available slot.`,
+              type: "appointment",
+              isRead: false,
+              link: "/user/appointments",
+              mention: `Dr.${item.doctorName}`,
+              createdAt: new Date().toISOString(),
+            };
+            socketRef.current?.emit("sendNotification", notification);
+          }
+        );
       }
-      
+
       setSessions(sessions.filter((s) => s._id !== id));
       message.success("Session deleted successfully");
     } catch (error) {
@@ -457,70 +531,73 @@ const DoctorSlots = () => {
   };
 
   // Handle slot action
-  const handleSlotAction = async (slot: AppointmentSlot, action: "unavailable" | "available" | "cancel") => {
-    const slotId = slot.id;
-    const localDate = selectedDate.toISOString().split("T")[0];
+  // const handleSlotAction = async (slot: AppointmentSlot, action: "unavailable" | "available" | "cancel") => {
+  //   const slotId = slot.id;
+  //   const localDate = selectedDate.toISOString().split("T")[0];
 
-    try {
-      if (action === "unavailable") {
-        await makeSlotsUnavailable(doctorId, localDate, [slotId]);
-        message.success("Slot made unavailable");
-      } else if (action === "available") {
-        await makeSlotsAvailable(doctorId, localDate, [slotId]);
-        message.success("Slot made available");
-      } else if (action === "cancel") {
-        if (!slot.appointmentId || !window.confirm("Are you sure you want to cancel this appointment?")) return;
-        await cancelAppointment(slot.appointmentId);
-        message.success("Appointment cancelled");
-      }
-      await fetchDateData();
-    } catch (error) {
-      console.error("Error performing action:", error);
-      message.error("Failed to perform action");
-    }
-  };
+  //   try {
+  //     if (action === "unavailable") {
+  //       await makeSlotsUnavailable(doctorId, localDate, [slotId]);
+  //       message.success("Slot made unavailable");
+  //     } else if (action === "available") {
+  //       await makeSlotsAvailable(doctorId, localDate, [slotId]);
+  //       message.success("Slot made available");
+  //     } else if (action === "cancel") {
+  //       if (!slot.appointmentId || !window.confirm("Are you sure you want to cancel this appointment?")) return;
+  //       await cancelAppointment(slot.appointmentId);
+  //       message.success("Appointment cancelled");
+  //     }
+  //     await fetchDateData();
+  //   } catch (error) {
+  //     console.error("Error performing action:", error);
+  //     message.error("Failed to perform action");
+  //   }
+  // };
 
   // Handle session unavailable/available
-  const handleSessionAction = async (sessionSlots: DaySessionSlots, action: "unavailable" | "available") => {
-    const relevantSlots = sessionSlots.slots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
-    const slotIds = relevantSlots.map((s) => s.id);
-    if (slotIds.length === 0) return;
+  // const handleSessionAction = async (sessionSlots: DaySessionSlots, action: "unavailable" | "available") => {
+  //   const relevantSlots = sessionSlots.slots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
+  //   const slotIds = relevantSlots.map((s) => s.id);
+  //   if (slotIds.length === 0) return;
 
-    const localDate = selectedDate.toISOString().split("T")[0];
+  //   const localDate = selectedDate.toISOString().split("T")[0];
 
-    try {
-      if (action === "unavailable") {
-        await makeSlotsUnavailable(doctorId, localDate, slotIds);
-        message.success("Session made unavailable for this date");
-      } else {
-        await makeSlotsAvailable(doctorId, localDate, slotIds);
-        message.success("Session made available for this date");
-      }
-      await fetchDateData();
-    } catch (error) {
-      console.error("Error performing session action:", error);
-      message.error("Failed to perform session action");
-    }
-  };
+  //   try {
+  //     if (action === "unavailable") {
+  //       await makeSlotsUnavailable(doctorId, localDate, slotIds);
+  //       message.success("Session made unavailable for this date");
+  //     } else {
+  //       await makeSlotsAvailable(doctorId, localDate, slotIds);
+  //       message.success("Session made available for this date");
+  //     }
+  //     await fetchDateData();
+  //   } catch (error) {
+  //     console.error("Error performing session action:", error);
+  //     message.error("Failed to perform session action");
+  //   }
+  // };
 
   // Handle day unavailable/available
-  const handleDayAction = async (action: "unavailable" | "available") => {
-    const allSlots = daySessionSlots.flatMap((ss) => ss.slots);
-    const relevantSlots = allSlots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
-    const slotIds = relevantSlots.map((s) => s.id);
-    if (slotIds.length === 0) return;
+  const handleDayAction = async (
+    action: "unavailable" | "available",
+    date: Date
+  ) => {
+    // const allSlots = daySessionSlots.flatMap((ss) => ss.slots);
+    // const relevantSlots = allSlots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
+    // const slotIds = relevantSlots.map((s) => s.id);
+    // if (slotIds.length === 0) return;
 
-    const localDate = selectedDate.toISOString().split("T")[0];
+    // const localDate = selectedDate.toISOString().split("T")[0];
 
     try {
       if (action === "unavailable") {
-        await makeSlotsUnavailable(doctorId, localDate, slotIds);
+        await makeDayUnavailable(doctorId, date);
         message.success("Day made unavailable");
       } else {
-        await makeSlotsAvailable(doctorId, localDate, slotIds);
+        // await makeDayAvailable(doctorId, localDate, slotIds);
         message.success("Day made available");
       }
-      await fetchDateData();
+      // await fetchDateData();
     } catch (error) {
       console.error("Error performing day action:", error);
       message.error("Failed to perform day action");
@@ -536,12 +613,18 @@ const DoctorSlots = () => {
   };
 
   const formatSlotTime12Hour = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true });
+    return date.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   // Format status safely
   const formatStatus = (status: AppointmentSlot["status"]) => {
-    return status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
+    return status
+      ? status.charAt(0).toUpperCase() + status.slice(1)
+      : "Unknown";
   };
 
   const isPastSlot = (start: Date) => start < new Date();
@@ -554,7 +637,9 @@ const DoctorSlots = () => {
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Doctor Slot Management
           </h1>
-          <p className="text-gray-600">Manage your consultation sessions and appointments</p>
+          <p className="text-gray-600">
+            Manage your consultation sessions and appointments
+          </p>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -563,8 +648,12 @@ const DoctorSlots = () => {
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-1">Weekly Sessions</h2>
-                  <p className="text-gray-600">Configure your consultation schedule</p>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                    Weekly Sessions
+                  </h2>
+                  <p className="text-gray-600">
+                    Configure your consultation schedule
+                  </p>
                 </div>
                 <button
                   onClick={() => {
@@ -592,10 +681,17 @@ const DoctorSlots = () => {
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Day
+                          </label>
                           <select
                             value={newSession.dayOfWeek}
-                            onChange={(e) => setNewSession({ ...newSession, dayOfWeek: Number(e.target.value) })}
+                            onChange={(e) =>
+                              setNewSession({
+                                ...newSession,
+                                dayOfWeek: Number(e.target.value),
+                              })
+                            }
                             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           >
                             {weekdays.map((day) => (
@@ -606,28 +702,49 @@ const DoctorSlots = () => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Start Time
+                          </label>
                           <input
                             type="time"
                             value={newSession.startTime}
-                            onChange={(e) => setNewSession({ ...newSession, startTime: e.target.value })}
+                            onChange={(e) =>
+                              setNewSession({
+                                ...newSession,
+                                startTime: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            End Time
+                          </label>
                           <input
                             type="time"
                             value={newSession.endTime}
-                            onChange={(e) => setNewSession({ ...newSession, endTime: e.target.value })}
+                            onChange={(e) =>
+                              setNewSession({
+                                ...newSession,
+                                endTime: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Duration (mins)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Duration (mins)
+                          </label>
                           <select
                             value={newSession.duration}
-                            onChange={(e) => setNewSession({ ...newSession, duration: Number(e.target.value) })}
+                            onChange={(e) =>
+                              setNewSession({
+                                ...newSession,
+                                duration: Number(e.target.value),
+                              })
+                            }
                             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           >
                             <option value={10}>10</option>
@@ -639,11 +756,18 @@ const DoctorSlots = () => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Fee (₹)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Fee (₹)
+                          </label>
                           <input
                             type="number"
                             value={newSession.fee}
-                            onChange={(e) => setNewSession({ ...newSession, fee: Number(e.target.value) })}
+                            onChange={(e) =>
+                              setNewSession({
+                                ...newSession,
+                                fee: Number(e.target.value),
+                              })
+                            }
                             className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           />
                         </div>
@@ -673,15 +797,24 @@ const DoctorSlots = () => {
                   )}
 
                   {sessions.map((session) => (
-                    <div key={session._id} className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100">
+                    <div
+                      key={session._id}
+                      className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+                    >
                       {editingSession?._id === session._id ? (
                         <>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Day
+                              </label>
                               <select
-                                value={editingSession ? editingSession.dayOfWeek : ""}
-                                onChange={(e) => handleEditChange("dayOfWeek", e.target.value)}
+                                value={
+                                  editingSession ? editingSession.dayOfWeek : ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange("dayOfWeek", e.target.value)
+                                }
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                               >
                                 {weekdays.map((day) => (
@@ -692,28 +825,46 @@ const DoctorSlots = () => {
                               </select>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Start Time
+                              </label>
                               <input
                                 type="time"
-                                value={editingSession?editingSession.startTime:""}
-                                onChange={(e) => handleEditChange("startTime", e.target.value)}
+                                value={
+                                  editingSession ? editingSession.startTime : ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange("startTime", e.target.value)
+                                }
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                End Time
+                              </label>
                               <input
                                 type="time"
-                                value={editingSession?editingSession.endTime:""}
-                                onChange={(e) => handleEditChange("endTime", e.target.value)}
+                                value={
+                                  editingSession ? editingSession.endTime : ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange("endTime", e.target.value)
+                                }
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Duration (mins)</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Duration (mins)
+                              </label>
                               <select
-                                value={editingSession?editingSession.duration:""}
-                                onChange={(e) => handleEditChange("duration", e.target.value)}
+                                value={
+                                  editingSession ? editingSession.duration : ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange("duration", e.target.value)
+                                }
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                               >
                                 <option value={10}>10</option>
@@ -725,11 +876,15 @@ const DoctorSlots = () => {
                               </select>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Fee (₹)</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Fee (₹)
+                              </label>
                               <input
                                 type="number"
-                                value={editingSession?editingSession.fee:""}
-                                onChange={(e) => handleEditChange("fee", e.target.value)}
+                                value={editingSession ? editingSession.fee : ""}
+                                onChange={(e) =>
+                                  handleEditChange("fee", e.target.value)
+                                }
                                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                               />
                             </div>
@@ -760,9 +915,15 @@ const DoctorSlots = () => {
                         <>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                             <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-500">Day</label>
+                              <label className="text-sm font-medium text-gray-500">
+                                Day
+                              </label>
                               <p className="text-gray-800 font-medium">
-                                {weekdays.find((d) => d.value === session.dayOfWeek)?.name}
+                                {
+                                  weekdays.find(
+                                    (d) => d.value === session.dayOfWeek
+                                  )?.name
+                                }
                               </p>
                             </div>
                             <div className="space-y-1">
@@ -770,25 +931,35 @@ const DoctorSlots = () => {
                                 <FaClock className="text-xs" />
                                 Start Time
                               </label>
-                              <p className="text-gray-800 font-medium">{formatTime12Hour(session.startTime)}</p>
+                              <p className="text-gray-800 font-medium">
+                                {formatTime12Hour(session.startTime)}
+                              </p>
                             </div>
                             <div className="space-y-1">
                               <label className="text-sm font-medium text-gray-500 flex items-center gap-1">
                                 <FaClock className="text-xs" />
                                 End Time
                               </label>
-                              <p className="text-gray-800 font-medium">{formatTime12Hour(session.endTime)}</p>
+                              <p className="text-gray-800 font-medium">
+                                {formatTime12Hour(session.endTime)}
+                              </p>
                             </div>
                             <div className="space-y-1">
-                              <label className="text-sm font-medium text-gray-500">Duration</label>
-                              <p className="text-gray-800 font-medium">{session.duration} mins</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Duration
+                              </label>
+                              <p className="text-gray-800 font-medium">
+                                {session.duration} mins
+                              </p>
                             </div>
                             <div className="space-y-1">
                               <label className="text-sm font-medium text-gray-500 flex items-center gap-1">
                                 <FaRupeeSign className="text-xs" />
                                 Fee
                               </label>
-                              <p className="text-gray-800 font-medium">₹{session.fee}</p>
+                              <p className="text-gray-800 font-medium">
+                                ₹{session.fee}
+                              </p>
                             </div>
                           </div>
                           <div className="flex justify-end gap-2">
@@ -800,22 +971,22 @@ const DoctorSlots = () => {
                               <FaEdit />
                             </button>
 
-
-                          <Popconfirm
-                            title="Remove Session"
-                            description="Are you sure you want to delete this session? All booked appointments in this session will be canceled."
-                            onConfirm={() =>  handleDeleteSession(session._id!)}
-                            okText="Yes"
-                            cancelText="No"
-                                        >
-                            <button
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
-                              title="Delete Session"
+                            <Popconfirm
+                              title="Remove Session"
+                              description="Are you sure you want to delete this session? All booked appointments in this session will be canceled."
+                              onConfirm={() =>
+                                handleDeleteSession(session._id!)
+                              }
+                              okText="Yes"
+                              cancelText="No"
                             >
-                              <FaTrash />
-                            </button>
-
-                          </Popconfirm>
+                              <button
+                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                                title="Delete Session"
+                              >
+                                <FaTrash />
+                              </button>
+                            </Popconfirm>
                           </div>
                         </>
                       )}
@@ -826,8 +997,12 @@ const DoctorSlots = () => {
                       <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                         <FaCalendarAlt className="text-3xl text-blue-600" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">No sessions configured</h3>
-                      <p className="text-gray-600">Add your first consultation session to get started</p>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        No sessions configured
+                      </h3>
+                      <p className="text-gray-600">
+                        Add your first consultation session to get started
+                      </p>
                     </div>
                   )}
                 </div>
@@ -873,20 +1048,25 @@ const DoctorSlots = () => {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleDayAction("unavailable")}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md text-sm"
-                  >
-                    <FaBan className="text-xs" />
-                    Block Day
-                  </button>
-                  {/* <button
-                    onClick={() => handleDayAction("available")}
+
+                    {unAvailableDays.includes(selectedDate.toISOString())?
+                    <button
+                    onClick={() => handleDayAction("available",selectedDate)}
                     className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-md text-sm"
                   >
                     <FaCheckCircle className="text-xs" />
                     Open Day
-                  </button> */}
+                  </button> :
+                  <button
+                    onClick={() => handleDayAction("unavailable", selectedDate)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md text-sm cursor-pointer"
+                  >
+                    <FaBan className="text-xs" />
+                    Block Day
+                  </button>
+                  
+                  }
+                  
                 </div>
               </div>
 
@@ -899,20 +1079,30 @@ const DoctorSlots = () => {
                   <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
                     <FaClock className="text-2xl text-gray-500" />
                   </div>
-                  <p className="text-gray-600">No slots available for this day</p>
+                  <p className="text-gray-600">
+                    No slots available for this day
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-6">
                   {daySessionSlots.map((ss, index) => (
-                    <div key={index} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-200">
+                    <div
+                      key={index}
+                      className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-200"
+                    >
                       <div className="flex flex-col gap-3 mb-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-gray-800">
-                            {weekdays.find((d) => d.value === ss.session.dayOfWeek)?.name} Session
+                            {
+                              weekdays.find(
+                                (d) => d.value === ss.session.dayOfWeek
+                              )?.name
+                            }{" "}
+                            Session
                           </h4>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleSessionAction(ss, "unavailable")}
+                              // onClick={() => handleSessionAction(ss, "unavailable")}
                               className="flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 text-xs font-medium"
                             >
                               <FaBan className="text-xs" />
@@ -930,12 +1120,12 @@ const DoctorSlots = () => {
                         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                           <span className="flex items-center gap-1">
                             <FaClock className="text-xs" />
-                            {formatTime12Hour(ss.session.startTime)} - {formatTime12Hour(ss.session.endTime)}
+                            {formatTime12Hour(ss.session.startTime)} -{" "}
+                            {formatTime12Hour(ss.session.endTime)}
                           </span>
                           <span>Duration: {ss.session.duration} mins</span>
                           <span className="flex items-center gap-1">
-                            <FaRupeeSign className="text-xs" />
-                            ₹{ss.session.fee}
+                            <FaRupeeSign className="text-xs" />₹{ss.session.fee}
                           </span>
                         </div>
                       </div>
@@ -954,13 +1144,16 @@ const DoctorSlots = () => {
                           switch (slot.status) {
                             case "available":
                               statusConfig = {
-                                bgClass: "bg-gradient-to-r from-green-50 to-emerald-50",
+                                bgClass:
+                                  "bg-gradient-to-r from-green-50 to-emerald-50",
                                 textClass: "text-green-800",
                                 borderClass: "border-green-200",
-                                icon: <FaCheckCircle className="text-green-600" />,
+                                icon: (
+                                  <FaCheckCircle className="text-green-600" />
+                                ),
                                 button: (
                                   <button
-                                    onClick={() => handleSlotAction(slot, "unavailable")}
+                                    // onClick={() => handleSlotAction(slot, "unavailable")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -972,13 +1165,14 @@ const DoctorSlots = () => {
                               break;
                             case "unavailable":
                               statusConfig = {
-                                bgClass: "bg-gradient-to-r from-gray-50 to-gray-100",
+                                bgClass:
+                                  "bg-gradient-to-r from-gray-50 to-gray-100",
                                 textClass: "text-gray-700",
                                 borderClass: "border-gray-300",
                                 icon: <FaBan className="text-gray-500" />,
                                 button: (
                                   <button
-                                    onClick={() => handleSlotAction(slot, "available")}
+                                    // onClick={() => handleSlotAction(slot, "available")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -992,13 +1186,16 @@ const DoctorSlots = () => {
                             case "pending":
                             case "confirmed":
                               statusConfig = {
-                                bgClass: "bg-gradient-to-r from-blue-50 to-indigo-50",
+                                bgClass:
+                                  "bg-gradient-to-r from-blue-50 to-indigo-50",
                                 textClass: "text-blue-800",
                                 borderClass: "border-blue-200",
-                                icon: <FaCalendarAlt className="text-blue-600" />,
+                                icon: (
+                                  <FaCalendarAlt className="text-blue-600" />
+                                ),
                                 button: (
                                   <button
-                                    onClick={() => handleSlotAction(slot, "cancel")}
+                                    // onClick={() => handleSlotAction(slot, "cancel")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -1010,19 +1207,25 @@ const DoctorSlots = () => {
                               break;
                             case "completed":
                               statusConfig = {
-                                bgClass: "bg-gradient-to-r from-purple-50 to-violet-50",
+                                bgClass:
+                                  "bg-gradient-to-r from-purple-50 to-violet-50",
                                 textClass: "text-purple-800",
                                 borderClass: "border-purple-200",
-                                icon: <FaCheckCircle className="text-purple-600" />,
+                                icon: (
+                                  <FaCheckCircle className="text-purple-600" />
+                                ),
                                 button: null,
                               };
                               break;
                             case "cancelled":
                               statusConfig = {
-                                bgClass: "bg-gradient-to-r from-red-50 to-pink-50",
+                                bgClass:
+                                  "bg-gradient-to-r from-red-50 to-pink-50",
                                 textClass: "text-red-800",
                                 borderClass: "border-red-200",
-                                icon: <FaTimesCircle className="text-red-600" />,
+                                icon: (
+                                  <FaTimesCircle className="text-red-600" />
+                                ),
                                 button: null,
                               };
                               break;
@@ -1039,14 +1242,19 @@ const DoctorSlots = () => {
                           return (
                             <div
                               key={slot.id}
-                              className={`border ${statusConfig.borderClass} ${statusConfig.bgClass} p-3 rounded-lg transition-all duration-200 hover:shadow-md ${slot.status === "cancelled" ? "opacity-75" : ""}`}
+                              className={`border ${statusConfig.borderClass} ${
+                                statusConfig.bgClass
+                              } p-3 rounded-lg transition-all duration-200 hover:shadow-md ${
+                                slot.status === "cancelled" ? "opacity-75" : ""
+                              }`}
                             >
                               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                                 <div className="flex items-center gap-3">
                                   {statusConfig.icon}
                                   <div>
                                     <div className="font-medium text-gray-800">
-                                      {formatSlotTime12Hour(slot.start)} - {formatSlotTime12Hour(slot.end)}
+                                      {formatSlotTime12Hour(slot.start)} -{" "}
+                                      {formatSlotTime12Hour(slot.end)}
                                     </div>
                                     <div className="text-xs text-gray-600 flex items-center gap-2 mt-1">
                                       <span>{slot.duration} mins</span>
@@ -1059,7 +1267,9 @@ const DoctorSlots = () => {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium bg-white/80 ${statusConfig.textClass} border ${statusConfig.borderClass}`}>
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium bg-white/80 ${statusConfig.textClass} border ${statusConfig.borderClass}`}
+                                  >
                                     {formatStatus(slot.status)}
                                   </span>
                                   {!isPast && statusConfig.button}

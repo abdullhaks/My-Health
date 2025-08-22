@@ -4,6 +4,7 @@ import IDoctorSessionService from "../interfaces/IDoctorSessionService";
 import ISessionRepository from "../../../repositories/interfaces/ISessionRepository";
 import {ISession} from "../../../dto/sessionDTO"
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
+import IUnAvailableDayRepository from "../../../repositories/interfaces/IUnAvailableDayRepository";
 import { IAppointment } from "../../../dto/appointmentDTO";
 
 
@@ -14,6 +15,7 @@ export default class DoctorSessionService implements IDoctorSessionService {
     constructor(
         @inject("ISessionRepository") private _sessionRepository : ISessionRepository,
         @inject("IAppointmentsRepository") private _appointmentRepository : IAppointmentsRepository,
+        @inject("IUnAvailableDayRepository") private _unAvailableDayRepository : IUnAvailableDayRepository,
         
 
     ){
@@ -154,6 +156,39 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
         throw new Error("Failed to update consultation session");
     }
 
+};
+
+
+async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
+    try{
+        console.log("doctorId and day is frim service....:", doctorId,day);
+
+        const response = await this._unAvailableDayRepository.create({doctorId,day})
+
+        return response;
+    }catch(error){
+        console.error("Error in makeDayUnavailable", error);
+        throw new Error("Failed to make day unavailable");
+    }
+};
+
+
+
+async getUnavailableDays(doctorId:string):Promise<any>{
+    try{
+        console.log("doctorId from service....:", doctorId);
+        let today = new Date();
+        let yesteday = new Date(today.setDate(today.getDate() - 1));
+
+        const response = await this._unAvailableDayRepository.findAll({doctorId:doctorId,day:{$gte:yesteday}})
+
+        let days = response.map(item => item.day)
+        console.log("unavailable days are....:", days);
+        return days;
+    }catch(error){
+        console.error("Error in makeDayUnavailable", error);
+        throw new Error("Failed to make day unavailable");
+    }
 }
 
 }

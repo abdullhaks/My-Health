@@ -16,6 +16,7 @@ import advertisementModel from "../models/advertisementModel";
 import notificationModel from "../models/notificationModel";
 import prescriptionModel from "../models/prescriptionModel";
 import payoutModel from "../models/payoutModel";
+import unAvailableDayModel from "../models/unAvailableDayModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/userAuthController";
@@ -227,6 +228,11 @@ import IOtpRepository from "../repositories/interfaces/IOtpRepository";
 import OtpRepository from "../repositories/implementations/otpRepository";
 
 
+import IUnAvailableDayRepository from "../repositories/interfaces/IUnAvailableDayRepository";
+import UnAvailableDayRepository from "../repositories/implementations/unAvailableDayRepository";
+
+
+
 //.................................................................................
 
 
@@ -248,7 +254,9 @@ container.bind("blogModel").toConstantValue(blogModel);
 container.bind("advertisementModel").toConstantValue(advertisementModel);
 container.bind("notificationModel").toConstantValue(notificationModel);
 container.bind("prescriptionModel").toConstantValue(prescriptionModel);
-container.bind("payoutModel").toConstantValue(payoutModel)
+container.bind("payoutModel").toConstantValue(payoutModel);
+container.bind("unAvailableDayModel").toConstantValue(unAvailableDayModel);
+
 
 //...................................................................
 
@@ -359,8 +367,8 @@ container.bind<IAdvertisementRepository>("IAdvertisementRepository").to(Advertis
 container.bind<INotificationRepository>("INotificationRepository").to(NotificationRepository);
 container.bind<IPrescriptionRepository>("IPrescriptionRepository").to(PrescriptionRepository);
 container.bind<IPayoutRepository>("IPayoutRepository").to(PayoutRepository);
-container.bind<IOtpRepository>("IOtpRepository").to(OtpRepository)
-
+container.bind<IOtpRepository>("IOtpRepository").to(OtpRepository);
+container.bind<IUnAvailableDayRepository>("IUnAvailableDayRepository").to(UnAvailableDayRepository);
 
 
 

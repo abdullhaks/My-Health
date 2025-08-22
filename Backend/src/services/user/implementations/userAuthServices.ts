@@ -332,7 +332,7 @@ export default class UserAuthService implements IUserAuthService {
 
       async refreshToken(refreshToken: string): Promise<IResponseDTO> {
     
-          console.log("Refresh token from service: ", refreshToken);
+          // console.log("Refresh token from service: ", refreshToken);
             if (!refreshToken) {
                throw new Error("refresh token not found" );
             }

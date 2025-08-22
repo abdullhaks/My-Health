@@ -500,10 +500,8 @@ export const getUser = async (userId:string) => {
 }
 
 
-
 export const getDashboardContent = async (doctorId: string) => {
   try {
-
     console.log(" doctor id ... is ...",doctorId);
     
     const response = await doctorInstance.get(ROUTES.doctor.dashboard,{
@@ -527,9 +525,7 @@ export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
       doctorId,
       payoutDetails
     });
-
     return response.data;
-
   }catch(err){
     console.log("Error in requesting payout");
     throw new Error ("requesting payment failed");
@@ -540,10 +536,8 @@ export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
 export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
   try{
     console.log("data id",doctorId, selectedDate);
-
     const response = await doctorInstance.get(ROUTES.doctor.bookedSlots, { params: { doctorId, selectedDate } });
     return response.data;
-
   }catch(error){
     console.log("Error in get doctor booked slots",error);
     throw error;
@@ -571,7 +565,6 @@ export const updateSession = async ( sessionId:string, editingSession:any)=>{
       editingSession
     });
     return response.data;
-
   }catch(error){
     console.log("Error in get doctor booked slots",error);
     throw error;
@@ -581,9 +574,6 @@ export const updateSession = async ( sessionId:string, editingSession:any)=>{
 export const deleteSession = async ( id:string)=>{
   try{
     console.log("data id",id);
-
-
-    
     const response = await doctorInstance.delete(ROUTES.doctor.session,{
       params:{sessionId:id}
     });
@@ -597,18 +587,17 @@ export const deleteSession = async ( id:string)=>{
 };
 
 
+
 export const getUnavailableSlots = async ( doctorId:string, localDate:string )=>{
   try{
     console.log("data id",doctorId,localDate);
-
   }catch(error){
     console.log("Error in get doctor booked slots",error);
     throw error;
   }
 };
 
-
-export const makeSlotsUnavailable = async (doctorId:string, localDate:any, slotId:any )=>{
+  export const makeSessionUnavailable = async (doctorId:string, localDate:any, slotId:any )=>{
   try{
     console.log("data id",doctorId, localDate, slotId);
 
@@ -619,10 +608,47 @@ export const makeSlotsUnavailable = async (doctorId:string, localDate:any, slotI
 };
 
 
-export const makeSlotsAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
+export const makeSessionAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
   try{
     console.log("data id",doctorId, localDate, slotId);
 
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+export const makeDayUnavailable = async (doctorId:string, date:Date)=>{
+  try{
+    console.log("makeDayUnavailable data is......",doctorId, date, );
+    const response = await doctorInstance.post(ROUTES.doctor.unAvailableDays,{
+      doctorId,
+      date
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+
+export const getUnavailableDays = async ( doctorId:string)=>{
+  try{
+    console.log("data id",doctorId);
+     const response = await doctorInstance.get(ROUTES.doctor.unAvailableDays,{
+      params:{doctorId}
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+export const makeDayAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
+  try{
+    console.log("data id",doctorId, localDate, slotId);
   }catch(error){
     console.log("Error in get doctor booked slots",error);
     throw error;

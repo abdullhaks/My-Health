@@ -174,6 +174,10 @@ doctorRoutes.get("/bookedSlots",verifyAccessTokenMidleware("doctor"),(req,res)=>
 
 doctorRoutes.get("/getPayouts",verifyAccessTokenMidleware("doctor"),(req,res)=>payoutCtrl.getPayouts(req,res));
 
+doctorRoutes.post("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.makeDayUnavailable(req,res));
+
+doctorRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
+
 
 
 export default doctorRoutes;
