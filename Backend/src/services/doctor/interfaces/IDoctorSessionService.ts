@@ -10,7 +10,7 @@ export default interface IDoctorSessionService {
     updateSession (sessionId:string, editingSession:any):Promise<ISession>;
     makeDayUnavailable(doctorId:string,day:Date):Promise<any>
     getUnavailableDays(doctorId:string):Promise<any>
-
-
+    unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>
+    getUnavailablSessions(doctorId:string):Promise<any>
     
 }

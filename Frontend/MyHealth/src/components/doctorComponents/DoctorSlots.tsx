@@ -26,7 +26,9 @@ import {
   getBookedSlots,
   // getUnavailableSlots,
   makeSessionUnavailable,
+  getUnavailableSessions,
   makeSessionAvailable,
+
   makeDayUnavailable,
   getUnavailableDays,
 
@@ -126,6 +128,7 @@ const DoctorSlots = () => {
   const [validationError, setValidationError] = useState<string>("");
   const socketRef = useRef<Socket | null>(null);
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
+  const [unAvailableSessions, setUnAvailableSessions] = useState<[]>([]);
 
   const getAccessToken = async () => {
     try {
@@ -207,10 +210,13 @@ const DoctorSlots = () => {
       if (!doctorId) return;
       fetchSessions();
       const unAvailableDays = await getUnavailableDays(doctorId);
+      const unAvailableSessions = await getUnavailableSessions(doctorId);
       console.log("unAvailableDays are/......",unAvailableDays);
+      console.log("unAvailableSessions are/......",unAvailableSessions);
       console.log("selectedDate is/......",selectedDate);
 
       setUnAvailableDays(unAvailableDays);
+      setUnAvailableSessions(unAvailableSessions);
     };
     fetchData();
   }, [doctorId]);
@@ -555,27 +561,27 @@ const DoctorSlots = () => {
   // };
 
   // Handle session unavailable/available
-  // const handleSessionAction = async (sessionSlots: DaySessionSlots, action: "unavailable" | "available") => {
-  //   const relevantSlots = sessionSlots.slots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
-  //   const slotIds = relevantSlots.map((s) => s.id);
-  //   if (slotIds.length === 0) return;
+  const handleSessionAction = async (sessionSlots: DaySessionSlots,date:Date, action: "unavailable" | "available") => {
+    // const relevantSlots = sessionSlots.slots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
+    // const slotIds = relevantSlots.map((s) => s.id);
+    // if (slotIds.length === 0) return;
 
-  //   const localDate = selectedDate.toISOString().split("T")[0];
+    // const localDate = selectedDate.toISOString().split("T")[0];
 
-  //   try {
-  //     if (action === "unavailable") {
-  //       await makeSlotsUnavailable(doctorId, localDate, slotIds);
-  //       message.success("Session made unavailable for this date");
-  //     } else {
-  //       await makeSlotsAvailable(doctorId, localDate, slotIds);
-  //       message.success("Session made available for this date");
-  //     }
-  //     await fetchDateData();
-  //   } catch (error) {
-  //     console.error("Error performing session action:", error);
-  //     message.error("Failed to perform session action");
-  //   }
-  // };
+    try {
+      if (action === "unavailable") {
+        await makeSessionUnavailable(doctorId,date,sessionSlots.session._id);
+        message.success("Session made unavailable for this date");
+      } else {
+        // await makeSlotsAvailable(doctorId, localDate, slotIds);
+        message.success("Session made available for this date");
+      }
+      await fetchDateData();
+    } catch (error) {
+      console.error("Error performing session action:", error);
+      message.error("Failed to perform session action");
+    }
+  };
 
   // Handle day unavailable/available
   const handleDayAction = async (
@@ -1093,16 +1099,16 @@ const DoctorSlots = () => {
                       <div className="flex flex-col gap-3 mb-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-gray-800">
-                            {
+                            {/* {
                               weekdays.find(
                                 (d) => d.value === ss.session.dayOfWeek
                               )?.name
-                            }{" "}
-                            Session
+                            }{" "} */}
+                            Session-{index+1}
                           </h4>
                           <div className="flex gap-2">
                             <button
-                              // onClick={() => handleSessionAction(ss, "unavailable")}
+                              onClick={() => handleSessionAction(ss,selectedDate, "unavailable")}
                               className="flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 text-xs font-medium"
                             >
                               <FaBan className="text-xs" />

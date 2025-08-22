@@ -5,6 +5,7 @@ import ISessionRepository from "../../../repositories/interfaces/ISessionReposit
 import {ISession} from "../../../dto/sessionDTO"
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IUnAvailableDayRepository from "../../../repositories/interfaces/IUnAvailableDayRepository";
+import IUnAvailableSessionRepository from "../../../repositories/interfaces/IUnAvailableSessionRepository";
 import { IAppointment } from "../../../dto/appointmentDTO";
 
 
@@ -16,7 +17,8 @@ export default class DoctorSessionService implements IDoctorSessionService {
         @inject("ISessionRepository") private _sessionRepository : ISessionRepository,
         @inject("IAppointmentsRepository") private _appointmentRepository : IAppointmentsRepository,
         @inject("IUnAvailableDayRepository") private _unAvailableDayRepository : IUnAvailableDayRepository,
-        
+        @inject("IUnAvailableSessionRepository") private _unAvailableSessionRepository : IUnAvailableSessionRepository,
+
 
     ){
 
@@ -189,6 +191,45 @@ async getUnavailableDays(doctorId:string):Promise<any>{
         console.error("Error in makeDayUnavailable", error);
         throw new Error("Failed to make day unavailable");
     }
+};
+
+
+async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
+    try{
+        console.log("doctorId, date and slotId from service....:", doctorId,day, sessionId);
+
+        const response = await this._unAvailableSessionRepository.create({doctorId,day,sessionId})
+
+        return response;
+    }catch(error){
+        console.error("Error in unAvailableSessions", error);
+        throw new Error("Failed to make session unavailable");
+    }
 }
+
+
+async getUnavailablSessions(doctorId:string):Promise<any>{
+    try{
+        console.log("doctorId and day from service....:", doctorId);
+        let today = new Date();
+        let yesteday = new Date(today.setDate(today.getDate() - 1));
+
+        const response = await this._unAvailableSessionRepository.findAll({doctorId:doctorId,day:{$gte:yesteday}})
+
+        let sessions = response.map(item => {item.day,item.sessionId})
+        console.log("unavailable sessions are....:", sessions);
+        return sessions;
+    }catch(error){
+        console.error("Error in getUnavailablSessions", error);
+        throw new Error("Failed to get unavailable sessions");
+    }
+}
+
+
+
+
+
+
+
 
 }

@@ -178,6 +178,11 @@ doctorRoutes.post("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,r
 
 doctorRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
 
+doctorRoutes.post("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.unAvailableSessions(req,res));
+
+doctorRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailablSessions(req,res));
+
+
 
 
 export default doctorRoutes;

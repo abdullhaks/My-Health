@@ -134,6 +134,45 @@ async getUnavailableDays (req:Request,res:Response):Promise<void>{
 }
 }
 
+async unAvailableSessions (req:Request,res:Response):Promise<void>{
+  try{
+    const {doctorId, date, sessionId} = req.body;
+    console.log("doctorId and day are:", doctorId, date, sessionId);
+    
+      if(doctorId && date && sessionId){
+      const response = await this._doctorSessionService.unAvailableSessions(doctorId,date,sessionId);
+       res.status(HttpStatusCode.OK).json(response);
+      //  res.status(HttpStatusCode.OK);
+      return;
+      }
+       res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+  }catch(error){
+      console.log("error in make session unavailable",error);
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"make session unavailable failed"});
+  } 
+
+}
+
+
+async getUnavailablSessions (req:Request,res:Response):Promise<void>{
+  try{
+    const {doctorId} = req.query;
+    console.log("doctorId is....:///////////", doctorId);
+    
+      if(doctorId){
+      const response = await this._doctorSessionService.getUnavailablSessions(doctorId.toString());
+       res.status(HttpStatusCode.OK).json(response);
+       return
+      //  res.status(HttpStatusCode.OK);
+      }
+       res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+  }catch(error){
+      console.log("error in fetching unavailable sessions ",error);
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"fetching unavailable sessions failed"})
+  }
+
+
+}
 
 
 

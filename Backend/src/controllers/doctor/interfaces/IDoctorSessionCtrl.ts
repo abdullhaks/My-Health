@@ -8,5 +8,7 @@ deleteSession (req:Request,res:Response):Promise<void>
 updateSession (req:Request,res:Response):Promise<void>
 makeDayUnavailable (req:Request,res:Response):Promise<void>
 getUnavailableDays (req:Request,res:Response):Promise<void>
+unAvailableSessions (req:Request,res:Response):Promise<void>
+getUnavailablSessions (req:Request,res:Response):Promise<void>
 
 }

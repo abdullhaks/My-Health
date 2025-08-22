@@ -17,6 +17,7 @@ import notificationModel from "../models/notificationModel";
 import prescriptionModel from "../models/prescriptionModel";
 import payoutModel from "../models/payoutModel";
 import unAvailableDayModel from "../models/unAvailableDayModel";
+import unAvailableSessionModel from "../models/unAvailableSessionModel";
 
 //controllers..................................................................
 import UserAuthController from "../controllers/user/implementations/userAuthController";
@@ -231,7 +232,8 @@ import OtpRepository from "../repositories/implementations/otpRepository";
 import IUnAvailableDayRepository from "../repositories/interfaces/IUnAvailableDayRepository";
 import UnAvailableDayRepository from "../repositories/implementations/unAvailableDayRepository";
 
-
+import IUnAvailableSessionRepository from "../repositories/interfaces/IUnAvailableSessionRepository";
+import UnAvailableSessionRepository from "../repositories/implementations/unAvailableSessionRepository";
 
 //.................................................................................
 
@@ -256,6 +258,8 @@ container.bind("notificationModel").toConstantValue(notificationModel);
 container.bind("prescriptionModel").toConstantValue(prescriptionModel);
 container.bind("payoutModel").toConstantValue(payoutModel);
 container.bind("unAvailableDayModel").toConstantValue(unAvailableDayModel);
+container.bind("unAvailableSessionModel").toConstantValue(unAvailableSessionModel);
+
 
 
 //...................................................................
@@ -369,6 +373,7 @@ container.bind<IPrescriptionRepository>("IPrescriptionRepository").to(Prescripti
 container.bind<IPayoutRepository>("IPayoutRepository").to(PayoutRepository);
 container.bind<IOtpRepository>("IOtpRepository").to(OtpRepository);
 container.bind<IUnAvailableDayRepository>("IUnAvailableDayRepository").to(UnAvailableDayRepository);
+container.bind<IUnAvailableSessionRepository>("IUnAvailableSessionRepository").to(UnAvailableSessionRepository)
 
 
 

@@ -81,8 +81,8 @@ export const ROUTES = {
     getPayouts:"/doctor/getPayouts",
     cancelAppointment: "/doctor/cancelAppointment",
     unAvailableDays: "/doctor/unAvailableDays",
-    makeDayAvailable: "/doctor/makeDayAvailable",
-
+    unAvailableSessions: "/doctor/unAvailableSessions",
+    
 
   },
 
