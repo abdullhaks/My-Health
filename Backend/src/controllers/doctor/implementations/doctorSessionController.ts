@@ -11,12 +11,12 @@ export default class DoctorSessionController implements IDoctorSessionCtrl {
     private _doctorSessionService: IDoctorSessionService
   ) {}
 
-  async addSessions(req: Request, res: Response): Promise<void> {
+  async addSession(req: Request, res: Response): Promise<void> {
     try {
-      const { sessionData } = req.body;
-      console.log("session data is ", sessionData);
+      const { sessionToAdd } = req.body;
+      console.log("session data is ", sessionToAdd);
 
-      const response = await this._doctorSessionService.addSessions(sessionData);
+      const response = await this._doctorSessionService.addSession(sessionToAdd);
 
        res.status(HttpStatusCode.CREATED).json(response);
     } catch (error) {
@@ -163,7 +163,7 @@ async getUnavailablSessions (req:Request,res:Response):Promise<void>{
       const response = await this._doctorSessionService.getUnavailablSessions(doctorId.toString());
        res.status(HttpStatusCode.OK).json(response);
        return
-      //  res.status(HttpStatusCode.OK);
+    
       }
        res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
   }catch(error){
@@ -173,6 +173,11 @@ async getUnavailablSessions (req:Request,res:Response):Promise<void>{
 
 
 }
+
+
+
+
+
 
 
 

@@ -548,11 +548,12 @@ export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
 export const addSession = async (sessionToAdd:any )=>{
   try{
     console.log("data id",sessionToAdd);
-    // const response = await axios.post('/api/doctor/sessions', session);
-//   return response.data;
-
+    const response = await doctorInstance.post(ROUTES.doctor.session, {
+      sessionToAdd
+    });
+    return response.data;
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.log("Error in adding new session",error);
     throw error;
   }
 };

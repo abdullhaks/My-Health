@@ -123,7 +123,7 @@ doctorRoutes.post(
 );
 
 
-doctorRoutes.post("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSessions(req,res));
+doctorRoutes.post("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSession(req,res));
 
 doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) );
 

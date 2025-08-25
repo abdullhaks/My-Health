@@ -23,17 +23,14 @@ import {
   addSession,
   updateSession,
   deleteSession,
+
   getBookedSlots,
-  // getUnavailableSlots,
   makeSessionUnavailable,
   getUnavailableSessions,
   makeSessionAvailable,
-
   makeDayUnavailable,
   getUnavailableDays,
-
-  // makeDayAvailable,
-  // cancelAppointment,
+  makeDayAvailable,
 } from "../../api/doctor/doctorApi";
 import axios from "axios";
 
@@ -119,16 +116,15 @@ const DoctorSlots = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [newSession, setNewSession] = useState<Session>(defaultSession);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [daySessionSlots, setDaySessionSlots] = useState<DaySessionSlots[]>([]);
-  const [bookedAppointments, setBookedAppointments] = useState<Appointment[]>(
-    []
-  );
+  const [availableDaySessionSlots, setAvailableDaySessionSlots] = useState<DaySessionSlots[]>([]);
+  const [unavailableDaySessions, setUnavailableDaySessions] = useState<Session[]>([]);
+  const [bookedAppointments, setBookedAppointments] = useState<Appointment[]>([]);
   const [unavailableSlotIds, setUnavailableSlotIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
   const socketRef = useRef<Socket | null>(null);
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
-  const [unAvailableSessions, setUnAvailableSessions] = useState<[]>([]);
+  const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
 
   const getAccessToken = async () => {
     try {
@@ -204,23 +200,21 @@ const DoctorSlots = () => {
     };
   }, [doctor?._id]);
 
-  // Fetch sessions only once on mount or when doctorId changes
   useEffect(() => {
     const fetchData = async () => {
       if (!doctorId) return;
       fetchSessions();
       const unAvailableDays = await getUnavailableDays(doctorId);
       const unAvailableSessions = await getUnavailableSessions(doctorId);
-      console.log("unAvailableDays are/......",unAvailableDays);
-      console.log("unAvailableSessions are/......",unAvailableSessions);
-      console.log("selectedDate is/......",selectedDate);
+      console.log("unAvailableDays are/......", unAvailableDays);
+      console.log("unAvailableSessions are/......", unAvailableSessions);
+      console.log("selectedDate is/......", selectedDate);
 
       setUnAvailableDays(unAvailableDays);
       setUnAvailableSessions(unAvailableSessions);
     };
     fetchData();
   }, [doctorId]);
-
 
   const fetchSessions = async () => {
     try {
@@ -235,7 +229,6 @@ const DoctorSlots = () => {
     }
   };
 
-  // Fetch booked and unavailable slots when selectedDate changes
   useEffect(() => {
     if (!doctorId || !selectedDate) return;
     fetchDateData();
@@ -248,14 +241,6 @@ const DoctorSlots = () => {
       const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const dd = String(selectedDate.getDate()).padStart(2, "0");
       const localDate = `${yyyy}-${mm}-${dd}`;
-
-      // const [bookedResponse, unavailableResponse] = await Promise.all([
-      //   getBookedSlots(doctorId, localDate),
-      //   getUnavailableSlots(doctorId, localDate),
-      // ]);
-
-      // setBookedAppointments(bookedResponse || []);
-      // setUnavailableSlotIds(unavailableResponse || []);
     } catch (error) {
       console.error("Error fetching date data:", error);
       message.error("Failed to load date data");
@@ -264,15 +249,35 @@ const DoctorSlots = () => {
     }
   };
 
-  // Generate slots when sessions, selectedDate, bookedAppointments, or unavailableSlotIds change
   useEffect(() => {
     const generateSlotsForDate = () => {
+      const localDateStr = selectedDate.toISOString().split("T")[0];
+      const isDayUnavailable = unAvailableDays.some(
+        (ud) => ud.split("T")[0] === localDateStr
+      );
+
+      if (isDayUnavailable) {
+        setAvailableDaySessionSlots([]);
+        setUnavailableDaySessions([]);
+        return;
+      }
+
       const dayOfWeek = selectedDate.getDay();
-      const daySessions = sessions.filter((s) => s.dayOfWeek === dayOfWeek);
+      const allDaySessions = sessions.filter((s) => s.dayOfWeek === dayOfWeek);
+      const unavailableIds = unAvailableSessions
+        .filter((us) => us.day.split("T")[0] === localDateStr)
+        .map((us) => us.sessionId);
+      const availableSessions = allDaySessions.filter(
+        (s) => !unavailableIds.includes(s._id)
+      );
+      const unavailableSessions = allDaySessions.filter((s) =>
+        unavailableIds.includes(s._id)
+      );
+      setUnavailableDaySessions(unavailableSessions);
 
       const generated: DaySessionSlots[] = [];
 
-      daySessions.forEach((session) => {
+      availableSessions.forEach((session) => {
         const [startHours, startMinutes] = session.startTime
           .split(":")
           .map(Number);
@@ -297,7 +302,6 @@ const DoctorSlots = () => {
 
           const slotId = currentSlotStart.getTime().toString();
 
-          // Determine status
           const appointment = bookedAppointments.find(
             (app) => app.slotId === slotId
           );
@@ -330,19 +334,17 @@ const DoctorSlots = () => {
         }
       });
 
-      setDaySessionSlots(generated);
+      setAvailableDaySessionSlots(generated);
     };
 
     generateSlotsForDate();
-  }, [sessions, selectedDate, bookedAppointments, unavailableSlotIds]);
+  }, [sessions, selectedDate, bookedAppointments, unavailableSlotIds, unAvailableDays, unAvailableSessions]);
 
-  // Helper to parse time to minutes
   const parseTimeToMinutes = (time: string): number => {
     const [h, m] = time.split(":").map(Number);
     return h * 60 + m;
   };
 
-  // Validate session
   const validateSession = (sess: Session): string => {
     const startMin = parseTimeToMinutes(sess.startTime);
     const endMin = parseTimeToMinutes(sess.endTime);
@@ -366,7 +368,6 @@ const DoctorSlots = () => {
     return "";
   };
 
-  // Handle add session
   const handleAddSession = async () => {
     const error = validateSession(newSession);
     if (error) {
@@ -377,8 +378,8 @@ const DoctorSlots = () => {
     try {
       const sessionToAdd = { ...newSession, doctorId };
       const added = await addSession(sessionToAdd);
-      // setSessions([...sessions, added]);
       setIsAdding(false);
+      setSessions([...sessions, added]);
       setNewSession(defaultSession);
       setValidationError("");
       message.success("Session added successfully");
@@ -388,12 +389,11 @@ const DoctorSlots = () => {
     }
   };
 
-  // Start editing
+
   const startEditing = (session: Session) => {
     setEditingSession({ ...session });
   };
 
-  // Handle edit change
   const handleEditChange = (field: keyof Session, value: string | number) => {
     if (editingSession) {
       setEditingSession({
@@ -407,13 +407,11 @@ const DoctorSlots = () => {
     }
   };
 
-  // Cancel edit
   const cancelEdit = () => {
     setEditingSession(null);
     setValidationError("");
   };
 
-  // Save edit
   const saveEdit = async () => {
     if (!editingSession || !editingSession._id) return;
 
@@ -443,8 +441,7 @@ const DoctorSlots = () => {
     try {
       const response = await updateSession(editingSession._id, editingSession);
       const updatedSession = response.updatedSession;
-      const cancelledAppoitments = response.cancelledAppoitments;
-      console.log("cancelld appointments are.....", cancelledAppoitments);
+      const cancelledAppointments = response.cancelledAppointments;
 
       setSessions(
         sessions.map((s) => (s._id === updatedSession._id ? updatedSession : s))
@@ -453,8 +450,8 @@ const DoctorSlots = () => {
       setValidationError("");
       message.success("Session updated successfully");
 
-      if (cancelledAppoitments.length) {
-        cancelledAppoitments.forEach(
+      if (cancelledAppointments.length) {
+        cancelledAppointments.forEach(
           (item: {
             appointmentId: string;
             userId: string;
@@ -484,7 +481,6 @@ const DoctorSlots = () => {
         );
       }
 
-      // Refresh data
       fetchSessions();
       fetchDateData();
     } catch (error) {
@@ -493,7 +489,6 @@ const DoctorSlots = () => {
     }
   };
 
-  // Delete session
   const handleDeleteSession = async (id: string) => {
     try {
       const deleting = await deleteSession(id);
@@ -536,46 +531,30 @@ const DoctorSlots = () => {
     }
   };
 
-  // Handle slot action
-  // const handleSlotAction = async (slot: AppointmentSlot, action: "unavailable" | "available" | "cancel") => {
-  //   const slotId = slot.id;
-  //   const localDate = selectedDate.toISOString().split("T")[0];
-
-  //   try {
-  //     if (action === "unavailable") {
-  //       await makeSlotsUnavailable(doctorId, localDate, [slotId]);
-  //       message.success("Slot made unavailable");
-  //     } else if (action === "available") {
-  //       await makeSlotsAvailable(doctorId, localDate, [slotId]);
-  //       message.success("Slot made available");
-  //     } else if (action === "cancel") {
-  //       if (!slot.appointmentId || !window.confirm("Are you sure you want to cancel this appointment?")) return;
-  //       await cancelAppointment(slot.appointmentId);
-  //       message.success("Appointment cancelled");
-  //     }
-  //     await fetchDateData();
-  //   } catch (error) {
-  //     console.error("Error performing action:", error);
-  //     message.error("Failed to perform action");
-  //   }
-  // };
-
-  // Handle session unavailable/available
-  const handleSessionAction = async (sessionSlots: DaySessionSlots,date:Date, action: "unavailable" | "available") => {
-    // const relevantSlots = sessionSlots.slots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
-    // const slotIds = relevantSlots.map((s) => s.id);
-    // if (slotIds.length === 0) return;
-
-    // const localDate = selectedDate.toISOString().split("T")[0];
-
+  const handleSessionAction = async (
+    sessionSlots: DaySessionSlots | Session,
+    date: Date,
+    action: "unavailable" | "available"
+  ) => {
+    const session = "session" in sessionSlots ? sessionSlots.session : sessionSlots;
     try {
+      let updatedUnavailableSessions;
       if (action === "unavailable") {
-        await makeSessionUnavailable(doctorId,date,sessionSlots.session._id);
+        updatedUnavailableSessions = await makeSessionUnavailable(
+          doctorId,
+          date,
+          session._id
+        );
         message.success("Session made unavailable for this date");
       } else {
-        // await makeSlotsAvailable(doctorId, localDate, slotIds);
+        // updatedUnavailableSessions = await makeSessionAvailable(
+        //   doctorId,
+        //   date,
+        //   session._id
+        // );
         message.success("Session made available for this date");
       }
+      // setUnAvailableSessions(updatedUnavailableSessions);
       await fetchDateData();
     } catch (error) {
       console.error("Error performing session action:", error);
@@ -583,34 +562,23 @@ const DoctorSlots = () => {
     }
   };
 
-  // Handle day unavailable/available
-  const handleDayAction = async (
-    action: "unavailable" | "available",
-    date: Date
-  ) => {
-    // const allSlots = daySessionSlots.flatMap((ss) => ss.slots);
-    // const relevantSlots = allSlots.filter((s) => (action === "unavailable" ? s.status === "available" : s.status === "unavailable"));
-    // const slotIds = relevantSlots.map((s) => s.id);
-    // if (slotIds.length === 0) return;
-
-    // const localDate = selectedDate.toISOString().split("T")[0];
-
+  const handleDayAction = async (action: "unavailable" | "available", date: Date) => {
     try {
       if (action === "unavailable") {
         await makeDayUnavailable(doctorId, date);
         message.success("Day made unavailable");
       } else {
-        // await makeDayAvailable(doctorId, localDate, slotIds);
+        // await makeDayAvailable(doctorId, date);
         message.success("Day made available");
       }
-      // await fetchDateData();
+      const updatedUnavailableDays = await getUnavailableDays(doctorId);
+      setUnAvailableDays(updatedUnavailableDays);
     } catch (error) {
       console.error("Error performing day action:", error);
       message.error("Failed to perform day action");
     }
   };
 
-  // Format time to 12-hour with AM/PM
   const formatTime12Hour = (time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
     const period = hours >= 12 ? "PM" : "AM";
@@ -626,7 +594,6 @@ const DoctorSlots = () => {
     });
   };
 
-  // Format status safely
   const formatStatus = (status: AppointmentSlot["status"]) => {
     return status
       ? status.charAt(0).toUpperCase() + status.slice(1)
@@ -635,10 +602,13 @@ const DoctorSlots = () => {
 
   const isPastSlot = (start: Date) => start < new Date();
 
+  const isDayUnavailable = unAvailableDays.some(
+    (ud) => ud.split("T")[0] === selectedDate.toISOString().split("T")[0]
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Doctor Slot Management
@@ -649,7 +619,6 @@ const DoctorSlots = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Sessions Management */}
           <div className="xl:col-span-2">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -976,13 +945,10 @@ const DoctorSlots = () => {
                             >
                               <FaEdit />
                             </button>
-
                             <Popconfirm
                               title="Remove Session"
                               description="Are you sure you want to delete this session? All booked appointments in this session will be canceled."
-                              onConfirm={() =>
-                                handleDeleteSession(session._id!)
-                              }
+                              onConfirm={() => handleDeleteSession(session._id!)}
                               okText="Yes"
                               cancelText="No"
                             >
@@ -1016,9 +982,7 @@ const DoctorSlots = () => {
             </div>
           </div>
 
-          {/* Calendar and Slots */}
           <div className="space-y-6">
-            {/* Calendar */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <FaCalendarAlt className="text-blue-600" />
@@ -1036,7 +1000,6 @@ const DoctorSlots = () => {
               />
             </div>
 
-            {/* Daily Slots */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
               <div className="flex flex-col gap-4 mb-6">
                 <div>
@@ -1054,25 +1017,23 @@ const DoctorSlots = () => {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-
-                    {unAvailableDays.includes(selectedDate.toISOString())?
+                  {isDayUnavailable ? (
                     <button
-                    onClick={() => handleDayAction("available",selectedDate)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-md text-sm"
-                  >
-                    <FaCheckCircle className="text-xs" />
-                    Open Day
-                  </button> :
-                  <button
-                    onClick={() => handleDayAction("unavailable", selectedDate)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md text-sm cursor-pointer"
-                  >
-                    <FaBan className="text-xs" />
-                    Block Day
-                  </button>
-                  
-                  }
-                  
+                      onClick={() => handleDayAction("available", selectedDate)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-md text-sm"
+                    >
+                      <FaCheckCircle className="text-xs" />
+                      Open Day
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleDayAction("unavailable", selectedDate)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md text-sm cursor-pointer"
+                    >
+                      <FaBan className="text-xs" />
+                      Block Day
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1080,18 +1041,27 @@ const DoctorSlots = () => {
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-3 border-purple-500 border-t-transparent"></div>
                 </div>
-              ) : daySessionSlots.length === 0 ? (
+              ) : isDayUnavailable ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                    <FaBan className="text-2xl text-gray-500" />
+                  </div>
+                  <p className="text-gray-600">
+                    This day is marked as unavailable. Click "Open Day" to make it available.
+                  </p>
+                </div>
+              ) : availableDaySessionSlots.length === 0 && unavailableDaySessions.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
                     <FaClock className="text-2xl text-gray-500" />
                   </div>
                   <p className="text-gray-600">
-                    No slots available for this day
+                    No sessions configured for this day
                   </p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {daySessionSlots.map((ss, index) => (
+                  {availableDaySessionSlots.map((ss, index) => (
                     <div
                       key={index}
                       className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-200"
@@ -1099,28 +1069,16 @@ const DoctorSlots = () => {
                       <div className="flex flex-col gap-3 mb-4">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-gray-800">
-                            {/* {
-                              weekdays.find(
-                                (d) => d.value === ss.session.dayOfWeek
-                              )?.name
-                            }{" "} */}
-                            Session-{index+1}
+                            Session-{index + 1}
                           </h4>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleSessionAction(ss,selectedDate, "unavailable")}
+                              onClick={() => handleSessionAction(ss, selectedDate, "unavailable")}
                               className="flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-all duration-200 text-xs font-medium"
                             >
                               <FaBan className="text-xs" />
                               Block Session
                             </button>
-                            {/* <button
-                              onClick={() => handleSessionAction(ss, "available")}
-                              className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all duration-200 text-xs font-medium"
-                            >
-                              <FaCheckCircle className="text-xs" />
-                              Open Session
-                            </button> */}
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-600">
@@ -1159,7 +1117,6 @@ const DoctorSlots = () => {
                                 ),
                                 button: (
                                   <button
-                                    // onClick={() => handleSlotAction(slot, "unavailable")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -1178,7 +1135,6 @@ const DoctorSlots = () => {
                                 icon: <FaBan className="text-gray-500" />,
                                 button: (
                                   <button
-                                    // onClick={() => handleSlotAction(slot, "available")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -1201,7 +1157,6 @@ const DoctorSlots = () => {
                                 ),
                                 button: (
                                   <button
-                                    // onClick={() => handleSlotAction(slot, "cancel")}
                                     disabled={isPast}
                                     className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -1287,6 +1242,53 @@ const DoctorSlots = () => {
                       </div>
                     </div>
                   ))}
+                  {unavailableDaySessions.length > 0 && (
+                    <div className="mt-6 border-t pt-6">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                        Unavailable Sessions
+                      </h4>
+                      <div className="space-y-4">
+                        {unavailableDaySessions.map((session, index) => (
+                          <div
+                            key={session._id}
+                            className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 border border-gray-200"
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h5 className="font-semibold text-gray-800">
+                                  Session {index + 1}
+                                </h5>
+                                <p className="text-sm text-red-600 font-medium">
+                                  Unavailable
+                                </p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleSessionAction(session, selectedDate, "available")
+                                }
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-md text-sm"
+                              >
+                                <FaCheckCircle className="text-xs" />
+                                Open Session
+                              </button>
+                            </div>
+                            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                              <span className="flex items-center gap-1">
+                                <FaClock className="text-xs" />
+                                {formatTime12Hour(session.startTime)} -{" "}
+                                {formatTime12Hour(session.endTime)}
+                              </span>
+                              <span>Duration: {session.duration} mins</span>
+                              <span className="flex items-center gap-1">
+                                <FaRupeeSign className="text-xs" />
+                                ₹{session.fee}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1298,3 +1300,4 @@ const DoctorSlots = () => {
 };
 
 export default DoctorSlots;
+

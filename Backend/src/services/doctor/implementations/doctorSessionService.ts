@@ -25,20 +25,24 @@ export default class DoctorSessionService implements IDoctorSessionService {
     };
 
 
-   async addSessions(sessionData: ISession[]): Promise<ISession[]> {
+   async addSession(sessionData: ISession): Promise<ISession> {
     console.log("session data from service ", sessionData);
     try {
 
-        await this._sessionRepository.deleteAll({doctorId:sessionData[0].doctorId.toString()})
-        const response = await Promise.all(
-            sessionData.map(async (data: any) => {
-                const result = await this._sessionRepository.create(data);
-                return result;
-            })
-        );
 
-        console.log("response from service is :", response);
-        return response;
+        const result = await this._sessionRepository.create(sessionData);
+        return result;
+
+        // await this._sessionRepository.deleteAll({doctorId:sessionData[0].doctorId.toString()})
+        // const response = await Promise.all(
+        //     sessionData.map(async (data: any) => {
+        //         const result = await this._sessionRepository.create(data);
+        //         return result;
+        //     })
+        // );
+
+        // console.log("response from service is :", response);
+        // return response;
     } catch (error) {
         console.error("Error in store sessions", error);
         throw new Error("Failed to store consultation sessions");
@@ -216,8 +220,15 @@ async getUnavailablSessions(doctorId:string):Promise<any>{
 
         const response = await this._unAvailableSessionRepository.findAll({doctorId:doctorId,day:{$gte:yesteday}})
 
-        let sessions = response.map(item => {item.day,item.sessionId})
-        console.log("unavailable sessions are....:", sessions);
+        let sessions = response.map((item)=> {
+            let sess: { day: Date; sessionId: string } = { day: item.day, sessionId: item.sessionId.toString() };
+            return sess;
+        });
+
+        sessions.forEach((element) => {
+            console.log(element);
+        });
+ 
         return sessions;
     }catch(error){
         console.error("Error in getUnavailablSessions", error);
