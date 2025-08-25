@@ -128,6 +128,41 @@ const DoctorSlots = () => {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
   const minDate = new Date();
 
+  const notify = async ( cancels:any) => {
+    if(!cancels.length){ return; }
+
+    cancels.forEach(
+          (item: {
+            appointmentId: string;
+            userId: string;
+            doctorName: string;
+            date: string;
+            start: Date;
+            end: Date;
+          }) => {
+            const notification: Notification = {
+              userId: item.userId,
+              message: `Your appointment with Dr.${
+                item.doctorName
+              } on ${new Date(item.date).toLocaleDateString("en-US", {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })} has been cancelled due to session update. Please reschedule at the next available slot.`,
+              type: "appointment",
+              isRead: false,
+              link: "/user/appointments",
+              mention: `Dr.${item.doctorName}`,
+              createdAt: new Date().toISOString(),
+            };
+            socketRef.current?.emit("sendNotification", notification);
+          }
+        );
+
+
+
+  }
 
 
   const getAccessToken = async () => {
@@ -459,38 +494,7 @@ const DoctorSlots = () => {
       setEditingSession(null);
       setValidationError("");
       message.success("Session updated successfully");
-
-      if (cancelledAppointments.length) {
-        cancelledAppointments.forEach(
-          (item: {
-            appointmentId: string;
-            userId: string;
-            doctorName: string;
-            date: string;
-            start: Date;
-            end: Date;
-          }) => {
-            const notification: Notification = {
-              userId: item.userId,
-              message: `Your appointment with Dr.${
-                item.doctorName
-              } on ${new Date(item.date).toLocaleDateString("en-US", {
-                weekday: "short",
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })} has been cancelled due to session update. Please reschedule at the next available slot.`,
-              type: "appointment",
-              isRead: false,
-              link: "/user/appointments",
-              mention: `Dr.${item.doctorName}`,
-              createdAt: new Date().toISOString(),
-            };
-            socketRef.current?.emit("sendNotification", notification);
-          }
-        );
-      }
-
+      notify(cancelledAppointments);
       fetchSessions();
       fetchDateData();
     } catch (error) {
@@ -502,36 +506,7 @@ const DoctorSlots = () => {
   const handleDeleteSession = async (id: string) => {
     try {
       const deleting = await deleteSession(id);
-      if (deleting.length) {
-        deleting.forEach(
-          (item: {
-            appointmentId: string;
-            userId: string;
-            doctorName: string;
-            date: string;
-            start: Date;
-            end: Date;
-          }) => {
-            const notification: Notification = {
-              userId: item.userId,
-              message: `Your appointment with Dr.${
-                item.doctorName
-              } on ${new Date(item.date).toLocaleDateString("en-US", {
-                weekday: "short",
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })} has been cancelled due to unforeseen circumstances. Please reschedule at the next available slot.`,
-              type: "appointment",
-              isRead: false,
-              link: "/user/appointments",
-              mention: `Dr.${item.doctorName}`,
-              createdAt: new Date().toISOString(),
-            };
-            socketRef.current?.emit("sendNotification", notification);
-          }
-        );
-      }
+      notify(deleting);
 
       setSessions(sessions.filter((s) => s._id !== id));
       message.success("Session deleted successfully");
@@ -555,6 +530,8 @@ const DoctorSlots = () => {
           date,
           session._id
         );
+
+        notify(updatedUnavailableSessions.cancelledAppoitments);
         message.success("Session made unavailable for this date");
       } else {
         // updatedUnavailableSessions = await makeSessionAvailable(
@@ -575,7 +552,8 @@ const DoctorSlots = () => {
   const handleDayAction = async (action: "unavailable" | "available", date: Date) => {
     try {
       if (action === "unavailable") {
-        await makeDayUnavailable(doctorId, date);
+        const updation = await makeDayUnavailable(doctorId, date);
+        notify(updation.cancelledAppoitments);
         message.success("Day made unavailable");
       } else {
         // await makeDayAvailable(doctorId, date);

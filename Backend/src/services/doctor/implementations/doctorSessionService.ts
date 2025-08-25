@@ -6,6 +6,8 @@ import {ISession} from "../../../dto/sessionDTO"
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IUnAvailableDayRepository from "../../../repositories/interfaces/IUnAvailableDayRepository";
 import IUnAvailableSessionRepository from "../../../repositories/interfaces/IUnAvailableSessionRepository";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 import { IAppointment } from "../../../dto/appointmentDTO";
 
 
@@ -18,7 +20,8 @@ export default class DoctorSessionService implements IDoctorSessionService {
         @inject("IAppointmentsRepository") private _appointmentRepository : IAppointmentsRepository,
         @inject("IUnAvailableDayRepository") private _unAvailableDayRepository : IUnAvailableDayRepository,
         @inject("IUnAvailableSessionRepository") private _unAvailableSessionRepository : IUnAvailableSessionRepository,
-
+        @inject("IUserRepository") private _userRepository : IUserRepository,
+        @inject("ITransactionRepository") private _transactionRepository : ITransactionRepository,
 
     ){
 
@@ -107,7 +110,24 @@ async deleteSession (sessionId:string):Promise<any>{
                 }
             )
             
-            }
+            };
+
+
+        await Promise.all(existingAppointment.map(async (appointment: any) => {
+        await this._userRepository.update(appointment.userId, {
+          $inc: { walletBalance: appointment.fee },
+        });
+        // Optionally update analytics here if needed
+        await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: appointment.fee,
+          paymentFor: "refund",
+          userId: appointment.userId,
+          doctorId: appointment.doctorId
+        });
+      }));
 
 
         await this._sessionRepository.delete(sessionId);
@@ -154,6 +174,24 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
             
             }
 
+            
+        await Promise.all(existingAppointment.map(async (appointment: any) => {
+        await this._userRepository.update(appointment.userId, {
+          $inc: { walletBalance: appointment.fee },
+        });
+        // Optionally update analytics here if needed
+        await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: appointment.fee,
+          paymentFor: "refund",
+          userId: appointment.userId,
+          doctorId: appointment.doctorId
+        });
+      }));
+            
+
         console.log("cancelled appointments are :", cancelledAppoitments);
        
         return {updatedSession,cancelledAppoitments};
@@ -169,11 +207,65 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
 
 async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
     try{
-        console.log("doctorId and day is frim service....:", doctorId,day);
+      console.log("doctorId and day is frim service....:", doctorId,day);
 
-        const response = await this._unAvailableDayRepository.create({doctorId,day})
+      let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
 
-        return response;
+      let dateOnly = new Date(day);
+      console.log("date only and day is :", dateOnly,day);
+      const yyyy = dateOnly.getFullYear();
+      const mm = String(dateOnly.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateOnly.getDate()).padStart(2, "0");
+      const localDate = `${yyyy}-${mm}-${dd}`;
+
+      const expiredAppointments = await this._appointmentRepository.findAll({
+        doctorId: doctorId,
+        appointmentStatus: "booked",
+        date:localDate 
+        });
+
+    // Then, update their status
+    if (expiredAppointments && expiredAppointments.length > 0) {
+      await this._appointmentRepository.updateMany(
+        { doctorId: doctorId, appointmentStatus: "booked", date:localDate  },
+        { appointmentStatus: "cancelled", paymentStatus: "refunded" }
+      );
+
+      await Promise.all(expiredAppointments.map(async (appointment: any) => {
+        await this._userRepository.update(appointment.userId, {
+          $inc: { walletBalance: appointment.fee },
+        });
+        // Optionally update analytics here if needed
+        await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: appointment.fee,
+          paymentFor: "refund",
+          userId: appointment.userId,
+          doctorId: appointment.doctorId
+        });
+
+        cancelledAppoitments.push({
+                        appointmentId: (appointment._id as string).toString(),
+                        userId: appointment.userId,
+                        doctorName:appointment.doctorName,
+                        date: appointment.date,
+                        start: appointment.start,
+                        end: appointment.end
+                    });
+      }));
+
+     
+
+
+    }
+    
+    const unavailableDay = await this._unAvailableDayRepository.create({doctorId,day});
+
+
+
+        return {unavailableDay,cancelledAppoitments};
     }catch(error){
         console.error("Error in makeDayUnavailable", error);
         throw new Error("Failed to make day unavailable");
@@ -202,11 +294,59 @@ async getUnavailableDays(doctorId:string):Promise<any>{
 
 async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
     try{
-        console.log("doctorId, date and slotId from service....:", doctorId,day, sessionId);
+      console.log("doctorId, date and slotId from service....:", doctorId,day, sessionId);
+      let dateOnly = new Date(day);
+      const yyyy = dateOnly.getFullYear();
+      const mm = String(dateOnly.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateOnly.getDate()).padStart(2, "0");
+      let localDate = `${yyyy}-${mm}-${dd}`;
 
-        const response = await this._unAvailableSessionRepository.create({doctorId,day,sessionId})
+      let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
 
-        return response;
+      const expiredAppointments = await this._appointmentRepository.findAll({
+        doctorId: doctorId,
+        appointmentStatus: "booked",
+        date:localDate,
+        sessionId:sessionId 
+        });
+
+        if (expiredAppointments && expiredAppointments.length > 0) {
+      await this._appointmentRepository.updateMany(
+        { doctorId: doctorId, appointmentStatus: "booked", date:localDate ,sessionId:sessionId  },
+        { appointmentStatus: "cancelled", paymentStatus: "refunded" }
+      );
+
+      await Promise.all(expiredAppointments.map(async (appointment: any) => {
+        await this._userRepository.update(appointment.userId, {
+          $inc: { walletBalance: appointment.fee },
+        });
+        // Optionally update analytics here if needed
+        await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: appointment.fee,
+          paymentFor: "refund",
+          userId: appointment.userId,
+          doctorId: appointment.doctorId
+        });
+
+        cancelledAppoitments.push({
+                        appointmentId: (appointment._id as string).toString(),
+                        userId: appointment.userId,
+                        doctorName:appointment.doctorName,
+                        date: appointment.date,
+                        start: appointment.start,
+                        end: appointment.end
+                    });
+      }));
+
+    }
+
+        const unAvailableSessions = await this._unAvailableSessionRepository.create({doctorId,day,sessionId});
+        return {unAvailableSessions,cancelledAppoitments};
+
+
     }catch(error){
         console.error("Error in unAvailableSessions", error);
         throw new Error("Failed to make session unavailable");
