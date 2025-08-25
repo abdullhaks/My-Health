@@ -83,6 +83,37 @@ export default class UserAppointmentService implements IUserAppointmentService {
       };
     }
 
+    // First, find expired appointments
+    const expiredAppointments = await this._appointmentsRepository.findAll({
+      userId: userId,
+      appointmentStatus: "booked",
+      end: { $lt: new Date() }
+    });
+
+    // Then, update their status
+    if (expiredAppointments && expiredAppointments.length > 0) {
+      await this._appointmentsRepository.updateMany(
+        { userId: userId, appointmentStatus: "booked", end: { $lt: new Date() } },
+        { appointmentStatus: "cancelled", paymentStatus: "refunded" }
+      );
+
+      await Promise.all(expiredAppointments.map(async (appointment: any) => {
+        await this._userRepository.update(appointment.userId, {
+          $inc: { walletBalance: appointment.fee },
+        });
+        // Optionally update analytics here if needed
+        await this._transactionRepository.create({
+          from: "admin",
+          to: "user",
+          method: "wallet",
+          amount: appointment.fee,
+          paymentFor: "refund",
+          userId: appointment.userId,
+          doctorId: appointment.doctorId
+        });
+      }));
+    }
+
     const {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
 
     const profile = new Map();
