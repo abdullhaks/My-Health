@@ -5,7 +5,7 @@ import { IAppointment } from "../../../dto/appointmentDTO";
 export default interface IDoctorSessionService {
     addSession (sessionData:any):Promise<ISession>
     getSessions (doctorId:string):Promise<ISession[]>
-    getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment[]>;
+    getBookedSlots (doctorId:string,formattedDate:string):Promise<string[]>;
     deleteSession (sessionId:string):Promise<void>
     updateSession (sessionId:string, editingSession:any):Promise<ISession>;
     makeDayUnavailable(doctorId:string,day:Date):Promise<any>

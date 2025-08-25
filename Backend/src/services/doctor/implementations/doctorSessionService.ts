@@ -63,16 +63,18 @@ async getSessions (doctorId:string):Promise<ISession[]>{
 }
 
 
-async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment[]>{
+async getBookedSlots (doctorId:string,formattedDate:string):Promise<string[]>{
 
     try{
 
         console.log("doctorId and formatted date is :" , doctorId,formattedDate);
 
-        const response = await this._appointmentRepository.findAll({doctorId:doctorId,date:formattedDate});
+        const response = await this._appointmentRepository.findAll({doctorId:doctorId,date:formattedDate,appointmentStatus:{ $in: ["booked", "completed"] },});
 
-        console.log("booked appointmets are:",response);
-        return response;
+        let slots = []
+        slots =  response.map((item) => item.slotId);
+        console.log("booked appointmets are......//:",slots);
+        return slots;
 
     }catch(error){
         console.error("Error in get sessions", error);

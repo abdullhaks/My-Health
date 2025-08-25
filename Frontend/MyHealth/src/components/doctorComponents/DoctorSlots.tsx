@@ -125,6 +125,10 @@ const DoctorSlots = () => {
   const socketRef = useRef<Socket | null>(null);
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
   const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
+  const minDate = new Date();
+
+
 
   const getAccessToken = async () => {
     try {
@@ -204,17 +208,27 @@ const DoctorSlots = () => {
     const fetchData = async () => {
       if (!doctorId) return;
       fetchSessions();
+
+      const formattedDate = selectedDate.toISOString();
+        console.log("formattedDate date is >>>>>>>",formattedDate);
+
+        const yyyy = selectedDate.getFullYear();
+        const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+        const dd = String(selectedDate.getDate()).padStart(2, "0");
+        const localDate = `${yyyy}-${mm}-${dd}`;
+
       const unAvailableDays = await getUnavailableDays(doctorId);
       const unAvailableSessions = await getUnavailableSessions(doctorId);
-      console.log("unAvailableDays are/......", unAvailableDays);
-      console.log("unAvailableSessions are/......", unAvailableSessions);
-      console.log("selectedDate is/......", selectedDate);
+      const BookedSlots:any = await getBookedSlots(doctorId, localDate);
+      console.log("BookedSlots are/......", BookedSlots);
+      setBookedSlots(BookedSlots);
 
       setUnAvailableDays(unAvailableDays);
       setUnAvailableSessions(unAvailableSessions);
+
     };
     fetchData();
-  }, [doctorId]);
+  }, [doctorId,selectedDate]);
 
   const fetchSessions = async () => {
     try {
@@ -302,15 +316,12 @@ const DoctorSlots = () => {
 
           const slotId = currentSlotStart.getTime().toString();
 
-          const appointment = bookedAppointments.find(
-            (app) => app.slotId === slotId
-          );
+          const appointment = bookedSlots.includes(slotId);
+
           let status: AppointmentSlot["status"] = "available";
-          let appointmentId: string | undefined;
 
           if (appointment) {
-            status = appointment.status as AppointmentSlot["status"];
-            appointmentId = appointment._id;
+            status = "booked";
           } else if (unavailableSlotIds.includes(slotId)) {
             status = "unavailable";
           }
@@ -323,7 +334,6 @@ const DoctorSlots = () => {
             fee: session.fee,
             status,
             sessionId: session._id || "",
-            appointmentId,
           });
 
           currentSlotStart = new Date(currentSlotEnd);
@@ -991,6 +1001,7 @@ const DoctorSlots = () => {
               <Calendar
                 onChange={(value) => value && setSelectedDate(value as Date)}
                 value={selectedDate}
+                minDate={minDate}
                 tileClassName={({ date }) =>
                   sessions.some((s) => s.dayOfWeek === date.getDay())
                     ? "bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 text-blue-800 font-medium"
@@ -1102,11 +1113,13 @@ const DoctorSlots = () => {
                             textClass: "",
                             borderClass: "",
                             icon: null as any,
-                            button: null as any,
+                            // button: null as any,
                           };
 
                           switch (slot.status) {
                             case "available":
+                            case "booked":
+
                               statusConfig = {
                                 bgClass:
                                   "bg-gradient-to-r from-green-50 to-emerald-50",
@@ -1115,15 +1128,15 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaCheckCircle className="text-green-600" />
                                 ),
-                                button: (
-                                  <button
-                                    disabled={isPast}
-                                    className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    <FaBan className="text-xs" />
-                                    Block
-                                  </button>
-                                ),
+                                // button: (
+                                //   <button
+                                //     disabled={isPast}
+                                //     className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                //   >
+                                //     <FaBan className="text-xs" />
+                                //     Block
+                                //   </button>
+                                // ),
                               };
                               break;
                             case "unavailable":
@@ -1133,39 +1146,39 @@ const DoctorSlots = () => {
                                 textClass: "text-gray-700",
                                 borderClass: "border-gray-300",
                                 icon: <FaBan className="text-gray-500" />,
-                                button: (
-                                  <button
-                                    disabled={isPast}
-                                    className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    <FaCheckCircle className="text-xs" />
-                                    Open
-                                  </button>
-                                ),
+                                // button: (
+                                //   <button
+                                //     disabled={isPast}
+                                //     className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                //   >
+                                //     <FaCheckCircle className="text-xs" />
+                                //     Open
+                                //   </button>
+                                // ),
                               };
                               break;
-                            case "booked":
-                            case "pending":
-                            case "confirmed":
-                              statusConfig = {
-                                bgClass:
-                                  "bg-gradient-to-r from-blue-50 to-indigo-50",
-                                textClass: "text-blue-800",
-                                borderClass: "border-blue-200",
-                                icon: (
-                                  <FaCalendarAlt className="text-blue-600" />
-                                ),
-                                button: (
-                                  <button
-                                    disabled={isPast}
-                                    className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    <FaTimesCircle className="text-xs" />
-                                    Cancel
-                                  </button>
-                                ),
-                              };
-                              break;
+                            // case "booked":
+                            // case "pending":
+                            // case "confirmed":
+                            //   statusConfig = {
+                            //     bgClass:
+                            //       "bg-gradient-to-r from-blue-50 to-indigo-50",
+                            //     textClass: "text-blue-800",
+                            //     borderClass: "border-blue-200",
+                            //     icon: (
+                            //       <FaCalendarAlt className="text-blue-600" />
+                            //     ),
+                            //     button: (
+                            //       <button
+                            //         disabled={isPast}
+                            //         className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            //       >
+                            //         <FaTimesCircle className="text-xs" />
+                            //         Cancel
+                            //       </button>
+                            //     ),
+                            //   };
+                            //   break;
                             case "completed":
                               statusConfig = {
                                 bgClass:
@@ -1175,7 +1188,7 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaCheckCircle className="text-purple-600" />
                                 ),
-                                button: null,
+                                // button: null,
                               };
                               break;
                             case "cancelled":
@@ -1187,7 +1200,7 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaTimesCircle className="text-red-600" />
                                 ),
-                                button: null,
+                                // button: null,
                               };
                               break;
                             default:
@@ -1196,7 +1209,7 @@ const DoctorSlots = () => {
                                 textClass: "text-gray-600",
                                 borderClass: "border-gray-200",
                                 icon: <FaBan className="text-gray-500" />,
-                                button: null,
+                                // button: null,
                               };
                           }
 
@@ -1233,7 +1246,9 @@ const DoctorSlots = () => {
                                   >
                                     {formatStatus(slot.status)}
                                   </span>
-                                  {!isPast && statusConfig.button}
+                                  {!isPast 
+                                  // && statusConfig.button
+                                  }
                                 </div>
                               </div>
                             </div>

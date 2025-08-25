@@ -535,7 +535,7 @@ export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
 
 export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
   try{
-    console.log("data id",doctorId, selectedDate);
+    console.log("data is",doctorId, selectedDate);
     const response = await doctorInstance.get(ROUTES.doctor.bookedSlots, { params: { doctorId, selectedDate } });
     return response.data;
   }catch(error){
