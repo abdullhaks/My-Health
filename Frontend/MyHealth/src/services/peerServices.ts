@@ -203,7 +203,7 @@ class PeerService {
    
 
     this.peer.close();
-    console.log("Peer connection closed."); // Added log
+    console.log("Peer connection closed."); 
   }
 }
 

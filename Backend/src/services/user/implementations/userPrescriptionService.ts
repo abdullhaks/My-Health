@@ -53,14 +53,9 @@ export default class UserPrescriptionService implements IUserPrescriptionService
         let prescription = await this._prescriptionRepository.findOne({userId:userId},{sort:{createdAt:-1}});
 
         console.log("prescription is ....",prescription);
-        if(prescription){
-           
-            return  prescription || null
+         return  prescription || null
 
-        }else{
-            throw new Error("fetching prescription failed")
-        }
-        
+      
     }
 
 

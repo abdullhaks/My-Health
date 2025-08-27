@@ -38,6 +38,7 @@ interface Prescription {
 };
 
 const VideoCall = ({ role }: VideoCallProps) => {
+  var role = role ;
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -73,7 +74,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const {appointment} = location.state;
   const [patient,setPatient] = useState<any>({});
   const navigate = useNavigate();
-
+  const [prescriptionSubmited , setPrescriptionSubmited] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -162,18 +163,42 @@ const VideoCall = ({ role }: VideoCallProps) => {
   };
 
   const endCall = () => {
-    if (socketRef.current) {
-      socketRef.current.emit("endCall", appointmentId,role);
+    if (!socketRef.current || !appointmentId) return;
+
+    socketRef.current.emit("leaveCall", { appointmentId, role,prescriptionSubmited });
+
+    // For user: immediately cleanup and navigate (backend will handle emit to doctor)
+    if (role === "user") {
+      navigate(`/${role}/appointments`, { replace: true });
     }
-    cleanup();
+    // For doctor: wait for backend confirmation via "callEnded" event before cleanup
+    if (role === "doctor") {
+      antAlert.info("Ending call, please wait...");
+    }
+
   };
+
 
   const cleanup = () => {
     if (socketRef.current) {
       socketRef.current.off("videoCall:newMessage");
+      socketRef.current.off("user:joined");
+      socketRef.current.off("incomming:call");
+      socketRef.current.off("call:accepted");
+      socketRef.current.off("peer:nego:needed");
+      socketRef.current.off("peer:nego:final");
+      socketRef.current.off("ice:candidate");
+      socketRef.current.off("startCall");
+      socketRef.current.off("callEnded");
+      socketRef.current.off("userLeft");
+      socketRef.current.off("doctorLeft");
+      socketRef.current.off("mute");
+      socketRef.current.off("leaveForced"); // New
+      socketRef.current.disconnect(); // Add this to ensure disconnect
     }
     
     peerRef.current?.close();
+    peerRef.current = null;
     setLocalStream(prev => {
       prev?.getTracks().forEach(track => track.stop());
       return null;
@@ -181,10 +206,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
     
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-    peerRef.current = null;
     setMessages([]);
-
-    // navigate("/appointments", { replace: true });
   };
 
   // Fetch prescriptions (mock implementation - replace with actual API call)
@@ -222,10 +244,14 @@ const VideoCall = ({ role }: VideoCallProps) => {
     try {
       // Replace with actual API call
       const response = await submitPrescription(newPrescriptionData)
-        
+      if(response){
+        setPrescriptions([...prescriptions, response]);
+        form.resetFields();
+        setPrescriptionSubmited(true);
+      }  else {
+        antAlert.error("Failed to add prescription. Please try again.");
+      }
       
-      setPrescriptions([...prescriptions, response]);
-      form.resetFields();
     } catch (error) {
       console.error('Error saving prescription:', error);
     }
@@ -345,14 +371,45 @@ const VideoCall = ({ role }: VideoCallProps) => {
             
             cleanup()
             navigate(`/${role}/appointments`, { replace: true });
-        });
-          socket.on("userLeft", () => {
-            setRemoteVideoStatus("Participant left");
-            cleanup();
           });
+
+        socket.on("userLeft", ({ userId }) => {
+            if (role === "doctor") {
+              setRemoteVideoStatus("Patient left, waiting to rejoin");
+              if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = null;
+              }
+              peerRef.current?.close();
+              peerRef.current = null;
+            } else {
+              cleanup();
+            }
+          });
+
+        socket.on("doctorLeft", () => {
+            if (role === "user") {
+              setRemoteVideoStatus("Doctor left, waiting...");
+              if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = null;
+              }
+              peerRef.current?.close();
+              peerRef.current = null;
+            }
+          });
+
+          socket.on("leaveForced", () => {
+
+            console.log("Leaving call without submitting prescription.")
+            antAlert.warning("Leaving call without submitting prescription.");
+            cleanup();
+            navigate(`/${role}/appointments`, { replace: true });
+          });
+
+
           socket.on("mute", ({ userId, type, muted }) => {
             console.log(`${userId} has ${muted ? "muted" : "unmuted"} ${type}`);
           });
+
         };
 
         setupSocketEvents();

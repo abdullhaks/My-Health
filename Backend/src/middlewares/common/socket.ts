@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Container } from "inversify";
 import IMessageService from "../../services/common/interfaces/IMessageService";
+import IUserPrescriptionService from "../../services/user/interfaces/IUserPrescriptionService";
 import { verifyAccessToken } from "../../utils/jwt";
 import IAppointmentsRepository from "../../repositories/interfaces/IAppointmentsRepository";
 import INotificationRepository from "../../repositories/interfaces/INotificationRepository";
@@ -30,6 +31,7 @@ const rooms = new Map<string, { users: Set<string> }>();
 
 export const setupSocket = (io: Server, container: Container) => {
   const messageService = container.get<IMessageService>("IMessageService");
+  const prescriptionService = container.get<IUserPrescriptionService>("IUserPrescriptionService");
   const appointmentsRepository = container.get<IAppointmentsRepository>("IAppointmentsRepository");
   const notificationRepository = container.get<INotificationRepository>("INotificationRepository");
 
@@ -257,37 +259,77 @@ export const setupSocket = (io: Server, container: Container) => {
       socket.to(appointmentId).emit("mute", { userId, type, muted });
     });
 
-    socket.on("endCall", async (appointmentId: string,role:string) => {
-      try {
-        if(role!="user"){
-     
-        await appointmentsRepository.update(appointmentId, {
-          callEndTime: new Date(),
-          appointmentStatus: "completed",
-        });
-        socket.to(appointmentId).emit("callEnded", { userId });
-        rooms.delete(appointmentId);
-        console.log(`Call ended for appointment ${appointmentId} by user ${userId}. Room cleaned up.`);
+   socket.on("leaveCall", async (data: { appointmentId: string; role: string ; prescriptionSubmited:boolean}) => {
+      const { appointmentId, role: callerRole,prescriptionSubmited } = data;
+      const { userId, role } = socket.data;
 
+      if (callerRole !== role) {
+        console.warn(`Role mismatch in leaveCall for ${userId}`);
+        return;
       }
-      } catch (err) {
-        console.error(`Error ending call for ${appointmentId} by ${userId}:`, err);
-        socket.emit("error", { message: "Failed to end call." });
-      
-    }
+
+      if (!rooms.has(appointmentId)) {
+        console.log(`No room found for ${appointmentId} in leaveCall`);
+        return;
+      }
+
+      const room = rooms.get(appointmentId)!;
+
+      if (!room.users.has(userId)) {
+        console.log(`User ${userId} not in room ${appointmentId}`);
+        return;
+      }
+
+      console.log(`${role} ${userId} requesting to leave ${appointmentId}`);
+
+      if (role === "doctor") {
+        try {
+
+          if (prescriptionSubmited) {
+            const updating = await appointmentsRepository.update(appointmentId, {
+              callEndTime: new Date(),
+              appointmentStatus: "completed",
+            });
+
+            console.log("appointment updated after call:",updating);
+            socket.emit("callEnded");
+            socket.to(appointmentId).emit("callEnded");
+            rooms.delete(appointmentId);
+            console.log(`Call completed for ${appointmentId} by doctor ${userId}`);
+          } else {
+            socket.to(appointmentId).emit("doctorLeft", { userId });
+            room.users.delete(userId);
+            socket.emit("leaveForced");
+            console.log(`Doctor ${userId} leaving ${appointmentId} without prescription`);
+          }
+        } catch (err) {
+          console.error(`Error processing doctor leave for ${appointmentId}:`, err);
+          socket.emit("error", { message: "Failed to process leave request." });
+        }
+      } else { // user
+        socket.to(appointmentId).emit("userLeft", { userId }); 
+        room.users.delete(userId);
+        console.log(`User ${userId} leaving ${appointmentId}`);
+      }
+
+      if (room.users.size === 0) {
+        rooms.delete(appointmentId);
+        console.log(`Room ${appointmentId} emptied and deleted`);
+      }
     });
+
 
     socket.on("disconnect", () => {
       console.log(`${role} disconnected: ${userId} (Socket ID: ${socket.id})`);
       rooms.forEach((room, appointmentId) => {
         if (room.users.has(userId)) {
           room.users.delete(userId);
+          const leaveEvent = role === "user" ? "userLeft" : "doctorLeft";
+          socket.to(appointmentId).emit(leaveEvent, { userId });
+          console.log(`Emitted ${leaveEvent} for ${userId} in ${appointmentId} due to disconnect`);
           if (room.users.size === 0) {
             rooms.delete(appointmentId);
             console.log(`Room ${appointmentId} is now empty and deleted.`);
-          } else {
-            socket.to(appointmentId).emit("userLeft", { userId });
-            console.log(`Notified room ${appointmentId} that user ${userId} has left.`);
           }
         }
       });
