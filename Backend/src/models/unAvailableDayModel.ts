@@ -8,7 +8,7 @@ const unAvailableDaySchema: Schema<IUnAvailableDayDocument> = new Schema(
       required: true,
     },
     day: {
-      type: Date,
+      type: String,
       required: true,
     },
     createdAt: {

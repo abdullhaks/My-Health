@@ -23,7 +23,6 @@ import {
   addSession,
   updateSession,
   deleteSession,
-
   getBookedSlots,
   makeSessionUnavailable,
   getUnavailableSessions,
@@ -56,14 +55,7 @@ interface AppointmentSlot {
   end: Date;
   duration: number;
   fee: number;
-  status:
-    | "available"
-    | "unavailable"
-    | "pending"
-    | "confirmed"
-    | "completed"
-    | "cancelled"
-    | "booked";
+  status: "available" | "unavailable" | "pending" | "confirmed" | "completed" | "cancelled" | "booked";
   sessionId: string;
   appointmentId?: string;
 }
@@ -71,14 +63,7 @@ interface AppointmentSlot {
 interface Notification {
   userId: string;
   message: string;
-  type:
-    | "appointment"
-    | "payment"
-    | "blog"
-    | "add"
-    | "newConnection"
-    | "common"
-    | "reportAnalysis";
+  type: "appointment" | "payment" | "blog" | "add" | "newConnection" | "common" | "reportAnalysis";
   isRead: boolean;
   link?: string;
   mention?: string;
@@ -118,52 +103,48 @@ const DoctorSlots = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableDaySessionSlots, setAvailableDaySessionSlots] = useState<DaySessionSlots[]>([]);
   const [unavailableDaySessions, setUnavailableDaySessions] = useState<Session[]>([]);
-  const [bookedAppointments, setBookedAppointments] = useState<Appointment[]>([]);
-  const [unavailableSlotIds, setUnavailableSlotIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
   const socketRef = useRef<Socket | null>(null);
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
   const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const minDate = new Date();
 
-  const notify = async ( cancels:any) => {
-    if(!cancels.length){ return; }
+  const notify = async (cancels: any) => {
+    if (!cancels.length) {
+      return;
+    }
 
     cancels.forEach(
-          (item: {
-            appointmentId: string;
-            userId: string;
-            doctorName: string;
-            date: string;
-            start: Date;
-            end: Date;
-          }) => {
-            const notification: Notification = {
-              userId: item.userId,
-              message: `Your appointment with Dr.${
-                item.doctorName
-              } on ${new Date(item.date).toLocaleDateString("en-US", {
-                weekday: "short",
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })} has been cancelled due to session update. Please reschedule at the next available slot.`,
-              type: "appointment",
-              isRead: false,
-              link: "/user/appointments",
-              mention: `Dr.${item.doctorName}`,
-              createdAt: new Date().toISOString(),
-            };
-            socketRef.current?.emit("sendNotification", notification);
-          }
-        );
-
-
-
-  }
-
+      (item: {
+        appointmentId: string;
+        userId: string;
+        doctorName: string;
+        date: string;
+        start: Date;
+        end: Date;
+      }) => {
+        const notification: Notification = {
+          userId: item.userId,
+          message: `Your appointment with Dr.${
+            item.doctorName
+          } on ${new Date(item.date).toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })} has been cancelled due to session update. Please reschedule at the next available slot.`,
+          type: "appointment",
+          isRead: false,
+          link: "/user/appointments",
+          mention: `Dr.${item.doctorName}`,
+          createdAt: new Date().toISOString(),
+        };
+        socketRef.current?.emit("sendNotification", notification);
+      }
+    );
+  };
 
   const getAccessToken = async () => {
     try {
@@ -244,26 +225,23 @@ const DoctorSlots = () => {
       if (!doctorId) return;
       fetchSessions();
 
-      const formattedDate = selectedDate.toISOString();
-        console.log("formattedDate date is >>>>>>>",formattedDate);
-
-        const yyyy = selectedDate.getFullYear();
-        const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
-        const dd = String(selectedDate.getDate()).padStart(2, "0");
-        const localDate = `${yyyy}-${mm}-${dd}`;
+      const yyyy = selectedDate.getFullYear();
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const dd = String(selectedDate.getDate()).padStart(2, "0");
+      const localDate = `${yyyy}-${mm}-${dd}`;
 
       const unAvailableDays = await getUnavailableDays(doctorId);
       const unAvailableSessions = await getUnavailableSessions(doctorId);
-      const BookedSlots:any = await getBookedSlots(doctorId, localDate);
+      const BookedSlots: any = await getBookedSlots(doctorId, localDate);
       console.log("BookedSlots are/......", BookedSlots);
+      console.log("unAvailableDays are/......", unAvailableDays);
       setBookedSlots(BookedSlots);
 
       setUnAvailableDays(unAvailableDays);
       setUnAvailableSessions(unAvailableSessions);
-
     };
     fetchData();
-  }, [doctorId,selectedDate]);
+  }, [doctorId, selectedDate]);
 
   const fetchSessions = async () => {
     try {
@@ -279,32 +257,15 @@ const DoctorSlots = () => {
   };
 
   useEffect(() => {
-    if (!doctorId || !selectedDate) return;
-    fetchDateData();
-  }, [doctorId, selectedDate]);
-
-  const fetchDateData = async () => {
-    try {
-      setIsLoading(true);
+    const generateSlotsForDate = () => {
       const yyyy = selectedDate.getFullYear();
       const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const dd = String(selectedDate.getDate()).padStart(2, "0");
-      const localDate = `${yyyy}-${mm}-${dd}`;
-    } catch (error) {
-      console.error("Error fetching date data:", error);
-      message.error("Failed to load date data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const localDateStr = `${yyyy}-${mm}-${dd}`;
 
-  useEffect(() => {
-    const generateSlotsForDate = () => {
-      const localDateStr = selectedDate.toISOString().split("T")[0];
-      const isDayUnavailable = unAvailableDays.some(
-        (ud) => ud.split("T")[0] === localDateStr
-      );
+      const isDayUnavailable = unAvailableDays.includes(localDateStr);
 
+      console.log("Generating slots for date:", localDateStr, "Day unavailable:", isDayUnavailable);
       if (isDayUnavailable) {
         setAvailableDaySessionSlots([]);
         setUnavailableDaySessions([]);
@@ -314,7 +275,14 @@ const DoctorSlots = () => {
       const dayOfWeek = selectedDate.getDay();
       const allDaySessions = sessions.filter((s) => s.dayOfWeek === dayOfWeek);
       const unavailableIds = unAvailableSessions
-        .filter((us) => us.day.split("T")[0] === localDateStr)
+        .filter((us) => {
+          // Assuming us.day is an ISO string; normalize to local date string for comparison
+          const usDate = new Date(us.day);
+          const usYyyy = usDate.getFullYear();
+          const usMm = String(usDate.getMonth() + 1).padStart(2, "0");
+          const usDd = String(usDate.getDate()).padStart(2, "0");
+          return `${usYyyy}-${usMm}-${usDd}` === localDateStr;
+        })
         .map((us) => us.sessionId);
       const availableSessions = allDaySessions.filter(
         (s) => !unavailableIds.includes(s._id)
@@ -351,14 +319,12 @@ const DoctorSlots = () => {
 
           const slotId = currentSlotStart.getTime().toString();
 
-          const appointment = bookedSlots.includes(slotId);
+          const isBooked = bookedSlots.includes(slotId);
 
           let status: AppointmentSlot["status"] = "available";
 
-          if (appointment) {
+          if (isBooked) {
             status = "booked";
-          } else if (unavailableSlotIds.includes(slotId)) {
-            status = "unavailable";
           }
 
           slots.push({
@@ -383,7 +349,7 @@ const DoctorSlots = () => {
     };
 
     generateSlotsForDate();
-  }, [sessions, selectedDate, bookedAppointments, unavailableSlotIds, unAvailableDays, unAvailableSessions]);
+  }, [sessions, selectedDate, bookedSlots, unAvailableDays, unAvailableSessions]);
 
   const parseTimeToMinutes = (time: string): number => {
     const [h, m] = time.split(":").map(Number);
@@ -433,7 +399,6 @@ const DoctorSlots = () => {
       message.error("Failed to add session");
     }
   };
-
 
   const startEditing = (session: Session) => {
     setEditingSession({ ...session });
@@ -496,7 +461,6 @@ const DoctorSlots = () => {
       message.success("Session updated successfully");
       notify(cancelledAppointments);
       fetchSessions();
-      fetchDateData();
     } catch (error) {
       console.error("Error updating session:", error);
       message.error("Failed to update session");
@@ -523,26 +487,24 @@ const DoctorSlots = () => {
   ) => {
     const session = "session" in sessionSlots ? sessionSlots.session : sessionSlots;
     try {
-      let updatedUnavailableSessions;
       if (action === "unavailable") {
-        updatedUnavailableSessions = await makeSessionUnavailable(
+        const updatedUnavailableSessions = await makeSessionUnavailable(
           doctorId,
           date,
           session._id
         );
-
         notify(updatedUnavailableSessions.cancelledAppoitments);
         message.success("Session made unavailable for this date");
       } else {
-        // updatedUnavailableSessions = await makeSessionAvailable(
-        //   doctorId,
-        //   date,
-        //   session._id
-        // );
+        await makeSessionAvailable(
+          doctorId,
+          date,
+          session._id
+        );
         message.success("Session made available for this date");
-      }
-      // setUnAvailableSessions(updatedUnavailableSessions);
-      await fetchDateData();
+      };
+      const getUpdatedUnAvailableSessions = await getUnavailableSessions(doctorId)
+      setUnAvailableSessions(getUpdatedUnAvailableSessions);
     } catch (error) {
       console.error("Error performing session action:", error);
       message.error("Failed to perform session action");
@@ -556,7 +518,7 @@ const DoctorSlots = () => {
         notify(updation.cancelledAppoitments);
         message.success("Day made unavailable");
       } else {
-        // await makeDayAvailable(doctorId, date);
+        await makeDayAvailable(doctorId, date);
         message.success("Day made available");
       }
       const updatedUnavailableDays = await getUnavailableDays(doctorId);
@@ -591,7 +553,12 @@ const DoctorSlots = () => {
   const isPastSlot = (start: Date) => start < new Date();
 
   const isDayUnavailable = unAvailableDays.some(
-    (ud) => ud.split("T")[0] === selectedDate.toISOString().split("T")[0]
+    (ud) => {
+      const yyyy = selectedDate.getFullYear();
+      const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const dd = String(selectedDate.getDate()).padStart(2, "0");
+      return ud === `${yyyy}-${mm}-${dd}`;
+    }
   );
 
   return (
@@ -977,7 +944,16 @@ const DoctorSlots = () => {
                 Appointment Calendar
               </h2>
               <Calendar
-                onChange={(value) => value && setSelectedDate(value as Date)}
+                onChange={(value) => {
+                  if (value) {
+                    const normalizedDate = new Date(
+                      (value as Date).getFullYear(),
+                      (value as Date).getMonth(),
+                      (value as Date).getDate()
+                    );
+                    setSelectedDate(normalizedDate);
+                  }
+                }}
                 value={selectedDate}
                 minDate={minDate}
                 tileClassName={({ date }) =>
@@ -1091,13 +1067,11 @@ const DoctorSlots = () => {
                             textClass: "",
                             borderClass: "",
                             icon: null as any,
-                            // button: null as any,
                           };
 
                           switch (slot.status) {
                             case "available":
                             case "booked":
-
                               statusConfig = {
                                 bgClass:
                                   "bg-gradient-to-r from-green-50 to-emerald-50",
@@ -1106,15 +1080,6 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaCheckCircle className="text-green-600" />
                                 ),
-                                // button: (
-                                //   <button
-                                //     disabled={isPast}
-                                //     className="flex items-center gap-1 px-2 py-1 bg-yellow-500 text-white rounded text-xs hover:bg-yellow-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                //   >
-                                //     <FaBan className="text-xs" />
-                                //     Block
-                                //   </button>
-                                // ),
                               };
                               break;
                             case "unavailable":
@@ -1124,39 +1089,8 @@ const DoctorSlots = () => {
                                 textClass: "text-gray-700",
                                 borderClass: "border-gray-300",
                                 icon: <FaBan className="text-gray-500" />,
-                                // button: (
-                                //   <button
-                                //     disabled={isPast}
-                                //     className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                //   >
-                                //     <FaCheckCircle className="text-xs" />
-                                //     Open
-                                //   </button>
-                                // ),
                               };
                               break;
-                            // case "booked":
-                            // case "pending":
-                            // case "confirmed":
-                            //   statusConfig = {
-                            //     bgClass:
-                            //       "bg-gradient-to-r from-blue-50 to-indigo-50",
-                            //     textClass: "text-blue-800",
-                            //     borderClass: "border-blue-200",
-                            //     icon: (
-                            //       <FaCalendarAlt className="text-blue-600" />
-                            //     ),
-                            //     button: (
-                            //       <button
-                            //         disabled={isPast}
-                            //         className="flex items-center gap-1 px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            //       >
-                            //         <FaTimesCircle className="text-xs" />
-                            //         Cancel
-                            //       </button>
-                            //     ),
-                            //   };
-                            //   break;
                             case "completed":
                               statusConfig = {
                                 bgClass:
@@ -1166,7 +1100,6 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaCheckCircle className="text-purple-600" />
                                 ),
-                                // button: null,
                               };
                               break;
                             case "cancelled":
@@ -1178,7 +1111,6 @@ const DoctorSlots = () => {
                                 icon: (
                                   <FaTimesCircle className="text-red-600" />
                                 ),
-                                // button: null,
                               };
                               break;
                             default:
@@ -1187,7 +1119,6 @@ const DoctorSlots = () => {
                                 textClass: "text-gray-600",
                                 borderClass: "border-gray-200",
                                 icon: <FaBan className="text-gray-500" />,
-                                // button: null,
                               };
                           }
 
@@ -1224,9 +1155,7 @@ const DoctorSlots = () => {
                                   >
                                     {formatStatus(slot.status)}
                                   </span>
-                                  {!isPast 
-                                  // && statusConfig.button
-                                  }
+                                  {!isPast}
                                 </div>
                               </div>
                             </div>
@@ -1293,4 +1222,3 @@ const DoctorSlots = () => {
 };
 
 export default DoctorSlots;
-

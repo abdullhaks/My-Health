@@ -628,12 +628,17 @@ export const getUnavailableSessions = async ( doctorId:string)=>{
 };
 
 
-export const makeSessionAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
+export const makeSessionAvailable = async ( doctorId:string, date:any, sessionId:any)=>{
   try{
-    console.log("data id",doctorId, localDate, slotId);
-
+        console.log("data id",doctorId, date, sessionId);
+    const response = await doctorInstance.delete(ROUTES.doctor.unAvailableSessions,{
+      params:{doctorId,
+      date,
+      sessionId}
+    });
+    return response.data;
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.log("Error in make session available",error);
     throw error;
   }
 };
@@ -666,11 +671,16 @@ export const getUnavailableDays = async ( doctorId:string)=>{
   }
 };
 
-export const makeDayAvailable = async ( doctorId:string, localDate:any, slotId:any)=>{
+export const makeDayAvailable = async ( doctorId:string, date:any, )=>{
   try{
-    console.log("data id",doctorId, localDate, slotId);
+    console.log("data id",doctorId, date);
+    const response = await doctorInstance.delete(ROUTES.doctor.unAvailableDays,{
+      params:{doctorId,
+      date}
+    });
+    return response.data;
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.log("Error in gmake day available",error);
     throw error;
   }
 };

@@ -260,8 +260,13 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
 
 
     }
+
+    const nDate = day.toString().split("T")[0];
+
+    console.log("nDate is",nDate);
+
     
-    const unavailableDay = await this._unAvailableDayRepository.create({doctorId,day});
+    const unavailableDay = await this._unAvailableDayRepository.create({doctorId:doctorId,day:nDate});
 
 
 
@@ -272,15 +277,35 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
     }
 };
 
-
+async makeDayAvailable(doctorId: string, day: Date): Promise<any> {
+    
+    console.log("day for available day.....", day);
+    // Convert to local date string "YYYY-MM-DD"
+    const dateObj = new Date(day);
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const dd = String(dateObj.getDate()).padStart(2, "0");
+    const nDate = `${yyyy}-${mm}-${dd}`;
+    console.log("nDate is", nDate);
+    const reponse = await this._unAvailableDayRepository.findOne({doctorId:doctorId, day:nDate});
+    if(reponse){
+        const result = await this._unAvailableDayRepository.delete(reponse._id.toString());
+        return result;
+    }
+    throw new Error("No unavailable day found to make available");
+}
 
 async getUnavailableDays(doctorId:string):Promise<any>{
     try{
         console.log("doctorId from service....:", doctorId);
         let today = new Date();
-        let yesteday = new Date(today.setDate(today.getDate() - 1));
+        let yesterday = new Date(today.setDate(today.getDate() - 1));
+        console.log("yesterday  is....:", yesterday);
 
-        const response = await this._unAvailableDayRepository.findAll({doctorId:doctorId,day:{$gte:yesteday}})
+        let yesStr  = yesterday.toISOString().split("T")[0];
+        console.log("yesStr  are....:", yesStr);
+
+        const response = await this._unAvailableDayRepository.findAll({doctorId:doctorId,day:{$gte:yesStr}})
 
         let days = response.map(item => item.day)
         console.log("unavailable days are....:", days);
@@ -290,6 +315,8 @@ async getUnavailableDays(doctorId:string):Promise<any>{
         throw new Error("Failed to make day unavailable");
     }
 };
+
+
 
 
 async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
@@ -343,7 +370,7 @@ async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
 
     }
 
-        const unAvailableSessions = await this._unAvailableSessionRepository.create({doctorId,day,sessionId});
+        const unAvailableSessions = await this._unAvailableSessionRepository.create({doctorId:doctorId,day:localDate,sessionId:sessionId});
         return {unAvailableSessions,cancelledAppoitments};
 
 
@@ -353,17 +380,44 @@ async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
     }
 }
 
+async makeSessionsAvailable(doctorId:string, day:Date, sessionId:string):Promise<any> {
 
+
+    console.log("day is ....  ",day);
+    let dateOnly = new Date(day);
+      const yyyy = dateOnly.getFullYear();
+      const mm = String(dateOnly.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateOnly.getDate()).padStart(2, "0");
+      let localDate = `${yyyy}-${mm}-${dd}`;
+
+    console.log("localDate for make session available is", localDate);
+
+    const reponse = await this._unAvailableSessionRepository.findOne({doctorId:doctorId, day:localDate,sessionId:sessionId});
+    console.log("session resp is ",reponse);
+    
+    if(reponse){
+        const result = await this._unAvailableSessionRepository.delete(reponse._id.toString());
+        return result;
+    }
+    throw new Error("No unavailable day found to make available");
+
+}
+ 
 async getUnavailablSessions(doctorId:string):Promise<any>{
     try{
         console.log("doctorId and day from service....:", doctorId);
         let today = new Date();
         let yesteday = new Date(today.setDate(today.getDate() - 1));
-
-        const response = await this._unAvailableSessionRepository.findAll({doctorId:doctorId,day:{$gte:yesteday}})
+        const dateObj = new Date(yesteday);
+        const yyyy = dateObj.getUTCFullYear();
+        const mm = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(dateObj.getUTCDate()).padStart(2, "0");
+        const nDate = `${yyyy}-${mm}-${dd}`;
+        
+        const response = await this._unAvailableSessionRepository.findAll({doctorId:doctorId,day:{$gte:nDate}})
 
         let sessions = response.map((item)=> {
-            let sess: { day: Date; sessionId: string } = { day: item.day, sessionId: item.sessionId.toString() };
+            let sess: { day: String; sessionId: string } = { day: item.day, sessionId: item.sessionId.toString() };
             return sess;
         });
 

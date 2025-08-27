@@ -176,9 +176,13 @@ doctorRoutes.get("/getPayouts",verifyAccessTokenMidleware("doctor"),(req,res)=>p
 
 doctorRoutes.post("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.makeDayUnavailable(req,res));
 
+doctorRoutes.delete("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.makeDayAvailable(req,res));
+
 doctorRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
 
 doctorRoutes.post("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.unAvailableSessions(req,res));
+
+doctorRoutes.delete("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.makeSessionsAvailable(req,res));
 
 doctorRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailablSessions(req,res));
 

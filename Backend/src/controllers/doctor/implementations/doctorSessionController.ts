@@ -114,7 +114,30 @@ async makeDayUnavailable (req:Request,res:Response):Promise<void>{
       console.log("error in make day unavailable",error);
        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"make day unavailable failed"});
   } 
+};
+
+
+
+async makeDayAvailable (req:Request,res:Response):Promise<void>{
+  try{
+    const {doctorId, date} = req.query;
+    console.log("doctorId and day are:", doctorId, date);
+    
+      if(doctorId && date){
+      const dateObj = new Date(date.toString());
+      const response = await this._doctorSessionService.makeDayAvailable(doctorId.toString(), dateObj);
+       res.status(HttpStatusCode.OK).json(response);
+      //  res.status(HttpStatusCode.OK);
+      return;
+      }
+       res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+  }catch(error){
+      console.log("error in make day available",error);
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"make day available failed"});
+  } 
 }
+
+
 
 async getUnavailableDays (req:Request,res:Response):Promise<void>{
   try{
@@ -153,6 +176,26 @@ async unAvailableSessions (req:Request,res:Response):Promise<void>{
 
 }
 
+
+
+async makeSessionsAvailable (req:Request,res:Response):Promise<void>{
+  try{
+     const {doctorId, date, sessionId} = req.query;
+    console.log("doctorId and day are:", doctorId, date, sessionId);
+    const dateObj = date ? new Date(date.toString()) : undefined;
+    console.log("dateObj is", dateObj);
+      if(doctorId && dateObj && sessionId){
+      const response = await this._doctorSessionService.makeSessionsAvailable(doctorId.toString(), dateObj, sessionId.toString());
+       res.status(HttpStatusCode.OK).json(response);
+      //  res.status(HttpStatusCode.OK);
+      return;
+      }
+       res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+  }catch(error){
+      console.log("error in make session available",error);
+       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"make session available failed"});
+  } 
+}
 
 async getUnavailablSessions (req:Request,res:Response):Promise<void>{
   try{
