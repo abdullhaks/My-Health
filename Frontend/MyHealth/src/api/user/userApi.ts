@@ -475,3 +475,17 @@ export const getUnavailableSessions = async ( doctorId:string)=>{
     throw error;
   }
 };
+
+
+export const getLatestPrescription = async ( userId:string)=>{
+  try{
+    console.log("data id",userId);
+     const response = await userInstance.get(ROUTES.user.latestPrescription,{
+      params:{userId}
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};

@@ -137,6 +137,7 @@ userRoutes.get("/getBlogs",verifyAccessTokenMidleware("user"),(req,res)=>blogCtr
 userRoutes.get("/dashboard",verifyAccessTokenMidleware("user"),(req,res)=> dashboardCtrl.getDashboardContent(req,res));
 
 userRoutes.get("/prescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getPrescription(req,res) );
+userRoutes.get("/latestPrescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getLatestPrescription(req,res) );
 
 userRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
 

@@ -1,8 +1,6 @@
-
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Eye, Calendar, Clock, User, ChevronLeft, ChevronRight,
-   Play, Pause, Volume2, VolumeX } from 'lucide-react';
-import { getDashboardContent } from '../../api/user/userApi';
+import { useEffect, useState, useRef } from 'react';
+import { Eye, Calendar, Clock, User, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Pill } from 'lucide-react';
+import { getDashboardContent, getLatestPrescription } from '../../api/user/userApi';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { message } from 'antd';
@@ -23,6 +21,24 @@ interface Advertisement {
   createdAt: string;
 }
 
+interface Prescription {
+  _id: string;
+  appointmentId: string;
+  userId: string;
+  doctorId: string;
+  medicalCondition: string;
+  medications: Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    instructions: string;
+    notes: string;
+  }>;
+  createdAt: string;
+  __v: number;
+}
+
 const UserDashboard = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
@@ -35,35 +51,37 @@ const UserDashboard = () => {
   const [isHovering, setIsHovering] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const navigate = useNavigate();
-  const user = useSelector((state:any)=>state.user.user);
+  const user = useSelector((state: any) => state.user.user);
   const [location, setLocation] = useState<any>(null);
   const [latitude, setLatitude] = useState<any>(null);
   const [longitude, setLongitude] = useState<any>(null);
+  const [latestPrescription, setLatestPrescription] = useState<Prescription | null>(null);
 
+  const fetchDashboardContent = async () => {
+    setLoading(true);
+    try {
+      const days = 30;
+      const userId = user._id;
+      const response = await getDashboardContent(days, userId, latitude, longitude);
+      const latestPres = await getLatestPrescription(userId);
+      console.log("latest pres is ...", latestPres);
+      setLatestPrescription(latestPres || null);
+      setBlogs(response.blogs || []);
+      setAdvertisements(response.advertisements || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load dashboard content. Please try again.');
+      console.error('Error fetching dashboard content:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchDashboardContent = async () => {
-  setLoading(true);
-  try {
-    const days = 30;
-    const userId = user._id;
-    const response = await getDashboardContent(days, userId, latitude, longitude);
-    setBlogs(response.blogs || []);
-    setAdvertisements(response.advertisements || []);
-    setError(null);
-  } catch (err) {
-    setError('Failed to load dashboard content. Please try again.');
-    console.error('Error fetching dashboard content:', err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
- useEffect(() => {
-  if (latitude && longitude) {
-    fetchDashboardContent();
-  }
-}, [latitude, longitude]);
+  useEffect(() => {
+    if (latitude && longitude) {
+      fetchDashboardContent();
+    }
+  }, [latitude, longitude]);
 
   // Initialize video refs
   useEffect(() => {
@@ -72,14 +90,12 @@ const fetchDashboardContent = async () => {
     }
   }, [advertisements]);
 
-  // Handle video playback with refined logic
+  // Handle video playback
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
       if (video) {
         video.muted = isMuted;
-        
         if (index === currentAdIndex) {
-          // Reset and play current video
           video.currentTime = 0;
           video.play()
             .then(() => setIsVideoPlaying(true))
@@ -88,28 +104,23 @@ const fetchDashboardContent = async () => {
               setIsVideoPlaying(false);
             });
         } else {
-          // Pause and reset other videos
           video.pause();
           video.currentTime = 0;
           if (index === currentAdIndex) setIsVideoPlaying(false);
         }
       }
     });
-  }, [currentAdIndex]);
+  }, [currentAdIndex, isMuted]);
 
   const goToPrevious = () => {
-    setIsPaused(true); // Pause auto-slide when manually navigating
-    setCurrentAdIndex((prev) =>
-      prev === 0 ? advertisements.length - 1 : prev - 1
-    );
-    // Resume auto-slide after 3 seconds
+    setIsPaused(true);
+    setCurrentAdIndex((prev) => (prev === 0 ? advertisements.length - 1 : prev - 1));
     setTimeout(() => setIsPaused(false), 3000);
   };
 
   const goToNext = () => {
-    setIsPaused(true); // Pause auto-slide when manually navigating
+    setIsPaused(true);
     setCurrentAdIndex((prev) => (prev + 1) % advertisements.length);
-    // Resume auto-slide after 3 seconds
     setTimeout(() => setIsPaused(false), 3000);
   };
 
@@ -131,7 +142,6 @@ const fetchDashboardContent = async () => {
   };
 
   const handleVideoEnd = () => {
-    // When video ends naturally, move to next slide
     if (advertisements.length > 1) {
       setCurrentAdIndex((prev) => (prev + 1) % advertisements.length);
     }
@@ -153,51 +163,46 @@ const fetchDashboardContent = async () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
-
-useEffect(() => {
+  useEffect(() => {
     if (!navigator.geolocation) {
-        message.error("locaiton accessign failed")
+      message.error("Location accessing failed");
       return;
     }
 
-    const successHandler = (position:any) => {
-
-       console.log("location is ...",position);
-
+    const successHandler = (position: any) => {
+      console.log("location is ...", position);
       setLocation({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
       });
-
-      setLatitude(position.coords.latitude)
-      setLongitude(position.coords.longitude)
-
-     
-   
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
     };
 
-    const errorHandler = (err:any) => {
-      message.error("locaiton accessign failed",err)
-      setLocation(null); 
+    const errorHandler = (err: any) => {
+      message.error("Location accessing failed", err);
+      setLocation(null);
       setLatitude(null);
       setLongitude(null);
-
     };
     navigator.geolocation.getCurrentPosition(successHandler, errorHandler);
-
   }, []);
 
-
-
+  // Determine greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-2 lg:p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        
         {/* Header */}
         <div className="text-center mb-3">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">
@@ -206,9 +211,38 @@ useEffect(() => {
           <p className="text-gray-600">Stay updated with the latest content and trends</p>
         </div>
 
+        {/* Welcome Message with Prescription Reminder */}
+        {latestPrescription && (
+          <div className="bg-white rounded-3xl shadow-xl p-6 mb-6 border border-blue-100">
+            <div className="flex items-center gap-4 flex-col sm:flex-row">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Pill className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {getGreeting()}, {user?.name || "User"}!
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Have you taken your {latestPrescription.medications[0]?.name || "medication"} (
+                  {latestPrescription.medications[0]?.dosage || "dosage"}) today as prescribed for your {latestPrescription.medicalCondition || "condition"}?
+                </p>
+                {latestPrescription.medications[0]?.instructions && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    <span className="font-medium">Instructions:</span> {latestPrescription.medications[0].instructions}
+                  </p>
+                )}
+                {latestPrescription.medications[0]?.notes && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    <span className="font-medium">Notes:</span> {latestPrescription.medications[0].notes}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Top Section: Advertisement and Calendar */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          
           {/* Advertisement Section */}
           <div className="xl:col-span-3">
             <div className="relative bg-white rounded-3xl shadow-xl overflow-hidden group">
@@ -248,8 +282,6 @@ useEffect(() => {
                     onMouseLeave={handleMouseLeave}
                     onLoadStart={() => setIsVideoPlaying(false)}
                   />
-                  
-                  {/* Overlay with title and controls */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent">
                     <div className="absolute bottom-6 left-6 right-6">
                       <h3 className="text-white text-2xl font-bold mb-2">
@@ -268,7 +300,6 @@ useEffect(() => {
                               <Play className="w-6 h-6 text-white ml-1" />
                             )}
                           </button>
-                          
                           <button
                             onClick={toggleMute}
                             className="flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all duration-200"
@@ -280,8 +311,6 @@ useEffect(() => {
                               <Volume2 className="w-6 h-6 text-white" />
                             )}
                           </button>
-
-                          {/* Auto-slide indicator */}
                           {advertisements.length > 1 && !isPaused && !isHovering && (
                             <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-2 rounded-full">
                               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -289,8 +318,6 @@ useEffect(() => {
                             </div>
                           )}
                         </div>
-                        
-                        {/* Dots indicator */}
                         {advertisements.length > 1 && (
                           <div className="flex gap-2">
                             {advertisements.map((_, index) => (
@@ -309,8 +336,6 @@ useEffect(() => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Navigation arrows */}
                   {advertisements.length > 1 && (
                     <>
                       <button
@@ -341,23 +366,21 @@ useEffect(() => {
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">Calendar</h2>
               </div>
-              
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-gray-800">
                     {new Date().getDate()}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {new Date().toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      year: 'numeric' 
+                    {new Date().toLocaleDateString('en-US', {
+                      month: 'long',
+                      year: 'numeric',
                     })}
                   </div>
                 </div>
-                
                 <div className="grid grid-cols-7 gap-1 text-xs">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day,indx) => (
-                    <div key={indx} className="text-center font-semibold text-gray-400 p-2">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
+                    <div key={idx} className="text-center font-semibold text-gray-400 p-2">
                       {day}
                     </div>
                   ))}
@@ -422,7 +445,6 @@ useEffect(() => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  
                   <div className="p-6">
                     <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                       <div className="flex items-center gap-1">
@@ -434,15 +456,12 @@ useEffect(() => {
                         <span>{formatDate(blog.createdAt)}</span>
                       </div>
                     </div>
-                    
                     <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
                       {blog.title}
                     </h3>
-                    
                     <p className="text-gray-600 text-sm line-clamp-3 mb-4 leading-relaxed">
                       {blog.content}
                     </p>
-                    
                     <div className="flex items-center justify-between">
                       <button className="flex items-center gap-2 text-blue-600 font-medium hover:text-blue-700 transition-colors">
                         <Eye className="w-4 h-4" />
@@ -464,7 +483,3 @@ useEffect(() => {
 };
 
 export default UserDashboard;
-
-function userSelector(arg0: (state: any) => any) {
-  throw new Error('Function not implemented.');
-}

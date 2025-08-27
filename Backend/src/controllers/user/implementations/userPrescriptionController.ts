@@ -47,6 +47,39 @@ export default class UserPrescriptionController implements IUserPrescriptionCtrl
     };
 
 
+    async getLatestPrescription(req: Request, res: Response):Promise<void> {
+
+        try{
+
+            const {userId} = req.query;
+            
+            if(userId){
+                 const response =await this._prescriptionService.getLatestPrescription(userId.toString());
+            if(!response){
+                res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+                return
+            }
+            res.status(HttpStatusCode.OK).json(response);
+            return
+
+            }
+            res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+            return
+
+        }catch(error){
+            console.log("error in get latest prescription",error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get latest prescription failed"});
+            return
+        }
+
+        
+        
+    };
+
+
+
+
+
 
     
 }
