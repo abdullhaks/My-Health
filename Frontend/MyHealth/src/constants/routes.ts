@@ -35,7 +35,9 @@ export const ROUTES = {
     notifications : "/user/notifications",
     getBlogs: "/user/getBlogs",
     dashboard: "/user/dashboard",
-    prescription: "/user/prescription"
+    prescription: "/user/prescription",
+    unAvailableDays: "/user/unAvailableDays",
+    unAvailableSessions: "/user/unAvailableSessions",
     
     
   },

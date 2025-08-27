@@ -138,5 +138,9 @@ userRoutes.get("/dashboard",verifyAccessTokenMidleware("user"),(req,res)=> dashb
 
 userRoutes.get("/prescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getPrescription(req,res) );
 
+userRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
+
+userRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getUnavailablSessions(req,res));
+
 
 export default userRoutes; 

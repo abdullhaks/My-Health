@@ -448,3 +448,30 @@ export const getPrescription = async (appointmentId:string)=>{
   }
   
 }
+
+
+export const getUnavailableDays = async ( doctorId:string)=>{
+  try{
+    console.log("data id",doctorId);
+     const response = await userInstance.get(ROUTES.user.unAvailableDays,{
+      params:{doctorId}
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};
+
+export const getUnavailableSessions = async ( doctorId:string)=>{
+  try{
+    console.log("data id",doctorId);
+     const response = await userInstance.get(ROUTES.user.unAvailableSessions,{
+      params:{doctorId}
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};

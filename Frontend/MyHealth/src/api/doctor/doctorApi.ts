@@ -622,7 +622,7 @@ export const getUnavailableSessions = async ( doctorId:string)=>{
     });
     return response.data;
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.log("Error in get unavailable sessions",error);
     throw error;
   }
 };
@@ -666,7 +666,7 @@ export const getUnavailableDays = async ( doctorId:string)=>{
     });
     return response.data;
   }catch(error){
-    console.log("Error in get doctor booked slots",error);
+    console.log("Error in get unavailable days",error);
     throw error;
   }
 };

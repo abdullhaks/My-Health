@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { getSessions, getBookedSlots } from "../../api/user/userApi"; // Import getBookedSlots
+import { getSessions, getBookedSlots, getUnavailableDays, getUnavailableSessions } from "../../api/user/userApi";
 
 interface Session {
   _id?: string;
@@ -36,6 +36,8 @@ const UserAppointmentSlots = () => {
   const [bookingStatus, setBookingStatus] = useState<"idle" | "booking" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
+  const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
+  const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
 
   const minDate = new Date();
   const maxDate = new Date();
@@ -65,33 +67,36 @@ const UserAppointmentSlots = () => {
     fetchSessions();
   }, [doctorId]);
 
-
-  // Fetch booked slots for the selected date
+  // Fetch booked slots, unavailable days, and sessions for the selected date
   useEffect(() => {
     if (!doctorId || !selectedDate) return;
 
     const fetchBookedSlots = async () => {
       try {
-
-        console.log("selected date is >>>>>>>",selectedDate);
+        console.log("selected date is >>>>>>>", selectedDate);
         setIsLoading(true);
         setErrorMessage("");
        
-        const formattedDate = selectedDate.toISOString();
-        console.log("formattedDate date is >>>>>>>",formattedDate);
-
         const yyyy = selectedDate.getFullYear();
         const mm = String(selectedDate.getMonth() + 1).padStart(2, "0");
         const dd = String(selectedDate.getDate()).padStart(2, "0");
         const localDate = `${yyyy}-${mm}-${dd}`;
         
-        const response = await getBookedSlots(doctorId, localDate);
-        // Assuming response is an array of booked slot IDs
-        setBookedSlots(response.map((slot: any) => slot.slotId) || []);
-        // console.log("Fetched booked slots:", response);
+        const [bookedResponse, unavailableDaysResponse, unavailableSessionsResponse] = await Promise.all([
+          getBookedSlots(doctorId, localDate),
+          getUnavailableDays(doctorId),
+          getUnavailableSessions(doctorId),
+        ]);
+        
+        console.log("unAvailableDays are/......", unavailableDaysResponse);
+        console.log("unAvailableSessions are/......", unavailableSessionsResponse);
+        setUnAvailableDays(unavailableDaysResponse || []);
+        setUnAvailableSessions(unavailableSessionsResponse || []);
+        setBookedSlots(bookedResponse.map((slot: any) => slot.slotId) || []);
+     
       } catch (error) {
-        console.error("Error fetching booked slots:", error);
-        setErrorMessage("Failed to load booked slots. Please try again.");
+        console.error("Error fetching data:", error);
+        setErrorMessage("Failed to load data. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -100,7 +105,7 @@ const UserAppointmentSlots = () => {
     fetchBookedSlots();
   }, [doctorId, selectedDate]);
 
-  // Generate slots and filter based on booked slots
+  // Generate slots and filter based on booked slots, unavailable days, and sessions
   useEffect(() => {
     console.log("Selected date is:", selectedDate);
 
@@ -112,12 +117,33 @@ const UserAppointmentSlots = () => {
     const generateSlotsForDate = (date: Date) => {
       const daySlots: AppointmentSlot[] = [];
       const dayOfWeek = date.getDay();
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      const formattedDate = `${yyyy}-${mm}-${dd}`;
+      
+      // Check if the selected date is unavailable
+      if (unAvailableDays.includes(formattedDate)) {
+        console.log("Date is unavailable:", formattedDate);
+        return daySlots;
+      }
+
       console.log("Generating slots for date:", date, "Day of week:", dayOfWeek);
 
       const daySessions = sessions.filter((s) => s.dayOfWeek === dayOfWeek);
       console.log("Day sessions:", daySessions);
 
       daySessions.forEach((session) => {
+        // Check if the session is unavailable for the selected date
+        const isSessionUnavailable = unAvailableSessions.some(
+          (unavailable) => unavailable.day === formattedDate && unavailable.sessionId === session._id
+        );
+
+        if (isSessionUnavailable) {
+          console.log(`Session ${session._id} is unavailable for date: ${formattedDate}`);
+          return;
+        }
+
         let shouldGenerateSlots = true;
 
         // Uncomment if rRule logic is needed
@@ -179,7 +205,7 @@ const UserAppointmentSlots = () => {
 
     const slots = generateSlotsForDate(selectedDate);
     setAppointmentSlots(slots);
-  }, [sessions, selectedDate, bookedSlots]); 
+  }, [sessions, selectedDate, bookedSlots, unAvailableDays, unAvailableSessions]);
 
   const handleBookSlot = (slot: AppointmentSlot) => {
     navigate("/user/appointment-confirmation", { state: { doctorId, slot } });
@@ -215,6 +241,13 @@ const UserAppointmentSlots = () => {
               value={selectedDate}
               minDate={minDate}
               maxDate={maxDate}
+              tileDisabled={({ date }) => {
+                const yyyy = date.getFullYear();
+                const mm = String(date.getMonth() + 1).padStart(2, "0");
+                const dd = String(date.getDate()).padStart(2, "0");
+                const formattedDate = `${yyyy}-${mm}-${dd}`;
+                return unAvailableDays.includes(formattedDate);
+              }}
               tileClassName={({ date }) =>
                 sessions.some((s) => s.dayOfWeek === date.getDay())
                   ? "bg-blue-100 hover:bg-blue-200"
