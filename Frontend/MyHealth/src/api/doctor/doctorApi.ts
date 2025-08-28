@@ -725,6 +725,79 @@ export const getPayouts = async (doctorId:string,page:number, limit:number,filte
     }
 };
 
+// doctorApi.ts
+
+export const getDoctorAppointmentsStats = async (doctorId: string, filter: "day" | "month" | "year") => {
+  console.log("doctorId and filter in stats api is", doctorId,filter);
+  try{
+
+    const response = await doctorInstance.get(ROUTES.doctor.appointmentStats,{
+      params:{doctorId, filter}
+    });
+    console.log("appointment stats response is ", response.data);
+    return response.data;
+
+  }catch(err){
+    console.log("error in get doctor appointment stats");
+    throw err
+  }
+  
+  // return [
+  //   { month: "Jan", appointments: 12 },
+  //   { month: "Feb", appointments: 18 },
+  //   { month: "Mar", appointments: 22 },
+  //   { month: "Apr", appointments: 9 },
+  // ];
+};
+
+export const getDoctorReportsStats = async (doctorId: string, filter: "day" | "month" | "year") => {
+   console.log("doctorId and filter in stats api is", doctorId,filter);
+  try{
+
+    const response = await doctorInstance.get(ROUTES.doctor.reportsStats,{
+      params:{doctorId, filter}
+    });
+    console.log("appointment stats response is ", response.data);
+    return response.data;
+
+  }catch(err){
+    console.log("error in get doctor appointment stats");
+    throw err
+  }
+  // return [
+  //   { month: "Jan", pending: 5, submitted: 12 },
+  //   { month: "Feb", pending: 3, submitted: 20 },
+  //   { month: "Mar", pending: 8, submitted: 15 },
+  // ];
+};
+
+export const getDoctorPayouts = async (doctorId: string) => {
+
+  console.log("doctorId in payouts api is", doctorId);
+  try{
+    const response = await doctorInstance.get(ROUTES.doctor.payoutsStats,{
+      params:{doctorId}
+    });
+    console.log("payouts response is ", response.data);
+    return response.data;
+
+  }catch(err){
+    console.log("error in get doctor payouts");
+    throw err
+  }
+
+  return [
+    { on: new Date().toISOString(), totalAmount: 5000, status: "paid", transactionId: "TXN12345" },
+    { on: new Date().toISOString(), totalAmount: 3000, status: "requested", transactionId: "" },
+  ];
+};
+
+export const getDoctorTransactions = async (doctorId: string) => {
+  return [
+    { date: new Date().toISOString(), amount: 1500, paymentFor: "appointment", method: "stripe" },
+    { date: new Date().toISOString(), amount: 2000, paymentFor: "analysis", method: "wallet" },
+  ];
+};
 
 
 

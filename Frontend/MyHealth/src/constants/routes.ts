@@ -86,7 +86,9 @@ export const ROUTES = {
     cancelAppointment: "/doctor/cancelAppointment",
     unAvailableDays: "/doctor/unAvailableDays",
     unAvailableSessions: "/doctor/unAvailableSessions",
-    
+    appointmentStats: "/doctor/appointmentStats",
+    reportsStats:"/doctor/ReportsStats",
+    payoutsStats:"/doctor/payoutsStats",
 
   },
 

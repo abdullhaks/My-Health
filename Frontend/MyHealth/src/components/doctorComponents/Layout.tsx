@@ -332,7 +332,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "Dashboard", path: "/doctor/dashboard", icon: <FaHome /> },
     { name: "Appointments", path: "/doctor/appointments", icon: <FaCalendarAlt /> },
     { name: "Report Analysis", path: "/doctor/report-analysis", icon: <BiSolidAnalyse />, premium: true },
-    { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
+    // { name: "Patients", path: "/doctor/patients", icon: <FaUserFriends /> },
     { name: "Consultation Slots", path: "/doctor/slots", icon: <FaCalendarCheck />, premium: true },
     { name: "Chat", path: "/doctor/chat", icon: <FaComments />, premium: true },
     { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },

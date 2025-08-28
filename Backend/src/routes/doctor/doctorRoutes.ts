@@ -186,6 +186,11 @@ doctorRoutes.delete("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),
 
 doctorRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("doctor"),(req,res)=>sessionCtrl.getUnavailablSessions(req,res));
 
+doctorRoutes.get("/appointmentStats",verifyAccessTokenMidleware("doctor"),(req,res)=>dashboardCtrl.appointmentStats(req,res));
+
+doctorRoutes.get("/reportsStats",verifyAccessTokenMidleware("doctor"),(req,res)=>dashboardCtrl.reportsStats(req,res));
+
+doctorRoutes.get("/payoutsStats",verifyAccessTokenMidleware("doctor"),(req,res)=>dashboardCtrl.payoutsStats(req,res));
 
 
 

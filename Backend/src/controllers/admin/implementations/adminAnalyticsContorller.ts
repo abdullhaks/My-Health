@@ -7,7 +7,7 @@ import {MESSAGES} from "../../../utils/messages"
 
 
 injectable();
-export default class AdminAnalyticsContorller implements IAdminAnalyticsController{
+export default class AdminAnalyticsContorller implements IAdminAnalyticsController{ 
 
     constructor(
         @inject("IAdminAnalyticsServices")

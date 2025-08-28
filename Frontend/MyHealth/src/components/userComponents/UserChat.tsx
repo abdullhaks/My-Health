@@ -465,6 +465,7 @@ const UserChat = () => {
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
       <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col">
+      
         {/* <div className="p-4 border-b border-gray-200">
           <input
             type="text"
