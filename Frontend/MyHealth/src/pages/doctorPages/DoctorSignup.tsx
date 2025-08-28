@@ -59,26 +59,29 @@ function DoctorSignup() {
 
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, files } = e.target;
+  const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      ) => {
+        const { name, value, type, files } = e.target as HTMLInputElement;
 
-    if (type === "file") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: files?.[0] || null,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+        if (type === "file") {
+          setFormData((prev) => ({
+            ...prev,
+            [name]: files?.[0] || null,
+          }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+          }));
+        }
 
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }));
-  };
+        setTouched((prev) => ({
+          ...prev,
+          [name]: true,
+        }));
+      };
+
 
  
 
@@ -236,38 +239,76 @@ function DoctorSignup() {
                 )}
 
                 {step === 2 && (
-                  <>
-                    
-                    <Input
-                      id="graduation"
-                      name="graduation"
-                      label="Graduation"
-                      value={formData.graduation}
-                      onChange={handleChange}
-                      placeholder="Enter graduation"
-                      required
-                      error={touched.graduation ? errors.graduation : ""}
-                    />
-                    <Input
-                      id="graduationCertificate"
-                      name="graduationCertificate"
-                      type="file"
-                      onChange={handleChange}
-                      required
-                    />
-                    <Input
-                      id="category"
-                      name="category"
-                      label="Category"
-                      value={formData.category}
-                      onChange={handleChange}
-                      placeholder="General,ortho..."
-                      required
-                      error={touched.category ? errors.category : ""}
-                    />
-                 
-                  </>
-                )}
+                      <>
+                        <Input
+                          id="graduation"
+                          name="graduation"
+                          label="Graduation"
+                          value={formData.graduation}
+                          onChange={handleChange}
+                          placeholder="Enter graduation"
+                          required
+                          error={touched.graduation ? errors.graduation : ""}
+                        />
+                        <Input
+                          id="graduationCertificate"
+                          name="graduationCertificate"
+                          type="file"
+                          onChange={handleChange}
+                          required
+                        />
+
+                        {/* Category Dropdown */}
+                        <div className="flex flex-col">
+                          <label htmlFor="category" className="mb-1 text-gray-700 font-medium">
+                            Category
+                          </label>
+                          <select
+                            id="category"
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="border rounded-lg p-2 focus:ring focus:ring-blue-300"
+                            required
+                          >
+                            <option value="">Select Category</option>
+                            <option value="General Physician">General Physician</option>
+                            <option value="Cardiologist">Cardiologist</option>
+                            <option value="Dermatologist">Dermatologist</option>
+                            <option value="Endocrinologist">Endocrinologist</option>
+                            <option value="Gastroenterologist">Gastroenterologist</option>
+                            <option value="Neurologist">Neurologist</option>
+                            <option value="Nephrologist">Nephrologist</option>
+                            <option value="Oncologist">Oncologist</option>
+                            <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                            <option value="Pediatrician">Pediatrician</option>
+                            <option value="Psychiatrist">Psychiatrist</option>
+                            <option value="Pulmonologist">Pulmonologist</option>
+                            <option value="Radiologist">Radiologist</option>
+                            <option value="Rheumatologist">Rheumatologist</option>
+                            <option value="Surgeon">Surgeon</option>
+                            <option value="Urologist">Urologist</option>
+                            <option value="ENT Specialist">ENT Specialist</option>
+                            <option value="Ophthalmologist">Ophthalmologist</option>
+                            <option value="Gynecologist">Gynecologist</option>
+                            <option value="Dentist">Dentist</option>
+                            <option value="Physiotherapist">Physiotherapist</option>
+                            <option value="Dietitian/Nutritionist">Dietitian/Nutritionist</option>
+                            <option value="Emergency Medicine">Emergency Medicine</option>
+                            <option value="Pathologist">Pathologist</option>
+                            <option value="Family Medicine">Family Medicine</option>
+                            <option value="Hematologist">Hematologist</option>
+                            <option value="Plastic Surgeon">Plastic Surgeon</option>
+                            <option value="Anesthesiologist">Anesthesiologist</option>
+                            <option value="Sports Medicine">Sports Medicine</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          {touched.category && errors.category && (
+                            <span className="text-red-500 text-sm">{errors.category}</span>
+                          )}
+                        </div>
+                      </>
+                    )}
 
                 {step === 3 && (
                   <>

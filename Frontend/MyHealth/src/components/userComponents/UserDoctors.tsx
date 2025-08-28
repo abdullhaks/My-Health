@@ -73,9 +73,36 @@ const Doctors = () => {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">All Categories</option>
-            <option value="Pediatric">Pediatric</option>
-            <option value="Cardiology">Cardiology</option>
-            <option value="Dermatology">Dermatology</option>
+            <option value="General Physician">General Physician</option>
+            <option value="Cardiologist">Cardiologist</option>
+            <option value="Dermatologist">Dermatologist</option>
+            <option value="Endocrinologist">Endocrinologist</option>
+            <option value="Gastroenterologist">Gastroenterologist</option>
+            <option value="Neurologist">Neurologist</option>
+            <option value="Nephrologist">Nephrologist</option>
+            <option value="Oncologist">Oncologist</option>
+            <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+            <option value="Pediatrician">Pediatrician</option>
+            <option value="Psychiatrist">Psychiatrist</option>
+            <option value="Pulmonologist">Pulmonologist</option>
+            <option value="Radiologist">Radiologist</option>
+            <option value="Rheumatologist">Rheumatologist</option>
+            <option value="Surgeon">Surgeon</option>
+            <option value="Urologist">Urologist</option>
+            <option value="ENT Specialist">ENT Specialist</option>
+            <option value="Ophthalmologist">Ophthalmologist</option>
+            <option value="Gynecologist">Gynecologist</option>
+            <option value="Dentist">Dentist</option>
+            <option value="Physiotherapist">Physiotherapist</option>
+            <option value="Dietitian/Nutritionist">Dietitian/Nutritionist</option>
+            <option value="Emergency Medicine">Emergency Medicine</option>
+            <option value="Pathologist">Pathologist</option>
+            <option value="Family Medicine">Family Medicine</option>
+            <option value="Hematologist">Hematologist</option>
+            <option value="Plastic Surgeon">Plastic Surgeon</option>
+            <option value="Anesthesiologist">Anesthesiologist</option>
+            <option value="Sports Medicine">Sports Medicine</option>
+            <option value="Other">Other</option>
           </select>
           <select
             className="w-full px-4 py-2 border rounded"
