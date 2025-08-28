@@ -39,7 +39,8 @@ export const ROUTES = {
     unAvailableDays: "/user/unAvailableDays",
     unAvailableSessions: "/user/unAvailableSessions",
     latestPrescription : "/user/latestPrescription",
-    
+    activeBooking:"/user/activeBooking",    
+
     
   },
 

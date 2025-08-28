@@ -143,5 +143,8 @@ userRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("user"),(req,res)=>
 
 userRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getUnavailablSessions(req,res));
 
+userRoutes.get("/activeBooking",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.activeBooking(req,res));
+
+
 
 export default userRoutes; 

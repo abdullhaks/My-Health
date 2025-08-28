@@ -4,11 +4,12 @@ import { FiSend, FiCheck, FiCheckCircle, FiX } from "react-icons/fi";
 import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getUserConversations, getUserMessages, directFileUpload } from "../../api/user/userApi";
+import { getUserConversations, getUserMessages, directFileUpload, checkActiveBooking } from "../../api/user/userApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
 import { useLocation, useNavigate } from "react-router-dom";
+import { AnyZodTuple } from "zod";
 
 interface Message {
   _id: string;
@@ -35,6 +36,7 @@ interface User {
 const UserChat = () => {
   const user = useSelector((state: any) => state.user.user);
   const userId = user?._id;
+  const [doctorId,setDoctorId] =  useState ('');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentChat, setCurrentChat] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,6 +54,7 @@ const UserChat = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const hasInitializedConversation = useRef(false);
+  const [activeAppointment,setActiveAppointment] = useState<boolean>(false);
 
   const getAccessToken = async () => {
     try {
@@ -68,9 +71,20 @@ const UserChat = () => {
     }
   };
 
+  const settingCurrentChat = (c:any)=> {
+    setCurrentChat(c);
+    console.log("curretn cahsljflsfljdsfjsklfj",c)
+    
+  // Find the member who is NOT the logged-in user
+  
+
+  setDoctorId(c.members[0].userId);
+
+  }
   useEffect(() => {
     const doctorId = location.state?.doctorId;
     if (doctorId && userId && !hasInitializedConversation.current) {
+      setDoctorId(doctorId)
       const initializeConversation = async () => {
         try {
           setLoading(true);
@@ -83,6 +97,7 @@ const UserChat = () => {
 
           if (existingConversation) {
             setCurrentChat(existingConversation);
+
           } else {
             const response = await axios.post(
               "http://localhost:3000/api/user/conversation",
@@ -184,6 +199,8 @@ const UserChat = () => {
   }, [userId]);
 
   useEffect(() => {
+      console.log("docotr id is .........",doctorId);
+      
     if (!currentChat || !socketRef.current) return;
 
     socketRef.current.emit("join", currentChat._id);
@@ -192,7 +209,9 @@ const UserChat = () => {
       setLoading(true);
       try {
         const res = await getUserMessages(currentChat._id);
+        const active = await checkActiveBooking(userId,doctorId);
         setMessages(res);
+        setActiveAppointment(active.status);
         socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
       } catch (err) {
         console.error("Failed to fetch messages:", err);
@@ -446,7 +465,7 @@ const UserChat = () => {
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-gray-100">
       <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
+        {/* <div className="p-4 border-b border-gray-200">
           <input
             type="text"
             placeholder="Search patients..."
@@ -475,7 +494,7 @@ const UserChat = () => {
               {loading ? "Starting..." : "Start Conversation"}
             </button>
           </div>
-        </div>
+        </div> */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-gray-500 text-sm">Loading conversations...</div>
@@ -490,7 +509,7 @@ const UserChat = () => {
                       className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors ${
                         currentChat?._id === c._id ? "bg-green-50" : ""
                       }`}
-                      onClick={() => setCurrentChat(c)}
+                      onClick={() => settingCurrentChat(c)}
                     >
                       <img
                         src={avatar}
@@ -613,6 +632,8 @@ const UserChat = () => {
               )}
             </div>
 
+
+              {activeAppointment?
             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
               <input
                 id="docMessageInput"
@@ -664,6 +685,12 @@ const UserChat = () => {
                 <FiSend />
               </button>
             </div>
+
+            :
+             <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
+              <p className="text-sm text-gray-500">You can send messages only for active appointments.</p>
+             </div>
+    }
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">

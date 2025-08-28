@@ -21,6 +21,9 @@ getUserAppointments(
 
 cancelAppointment(appointmentId:string):Promise<{status:boolean;message:string;updatedUser:Partial<IUser>}>,
 walletPayment(data:any):Promise<IAppointment>,
+activeBooking(userId:string,doctorId:string):Promise<{status:boolean}>
+
+
 
 };
 

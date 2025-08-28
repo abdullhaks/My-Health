@@ -123,6 +123,30 @@ async walletPayment(req:Request, res: Response) : Promise<void>{
 
 };
 
+
+async activeBooking(req:Request, res: Response) : Promise<void>{
+
+  try{
+  const {userId,doctorId} = req.query;
+  console.log("data is ctrl",userId,doctorId);
+  const response = await this._appointmentService.activeBooking(String(userId),String(doctorId));
+  res.status(HttpStatusCode.OK).json(response);
+
+
+  }catch(err){
+    console.error("Error in active booking:", err);
+    res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+
+  }
+
+
+
+
+
 };
 
 
+
+
+
+}

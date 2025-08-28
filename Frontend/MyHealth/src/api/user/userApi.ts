@@ -489,3 +489,17 @@ export const getLatestPrescription = async ( userId:string)=>{
     throw error;
   }
 };
+
+
+export const checkActiveBooking = async ( userId:string , doctorId:string)=>{
+  try{
+    console.log("data is",userId,doctorId);
+     const response = await userInstance.get(ROUTES.user.activeBooking,{
+      params:{userId,doctorId}
+    });
+    return response.data;
+  }catch(error){
+    console.log("Error in get doctor booked slots",error);
+    throw error;
+  }
+};

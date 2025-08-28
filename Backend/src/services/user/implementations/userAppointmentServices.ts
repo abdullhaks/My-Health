@@ -245,5 +245,36 @@ export default class UserAppointmentService implements IUserAppointmentService {
     console.log("Appointment created:", appointment);
 
     return appointment;
+  };
+
+
+
+async activeBooking(userId: string, doctorId: string): Promise<{ status: boolean; }> {
+  
+ 
+
+  const existingAppointment = await appointmentModel.findOne({
+    userId: userId,
+    doctorId: doctorId,
+    appointmentStatus: "booked",
+  });
+
+  if (existingAppointment) {
+    return { status: true };
+  } else {
+    return { status: false };
   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 };
