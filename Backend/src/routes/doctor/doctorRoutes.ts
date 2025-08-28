@@ -6,6 +6,7 @@ import IDoctorAppointmentCtrl from "../../controllers/doctor/interfaces/IDoctorA
 import IDoctorPlanCtrl from "../../controllers/doctor/interfaces/IDoctorPlanCtrl";
 import { upload, uploadToS3 } from "../../middlewares/common/uploadS3";
 import { verifyAccessTokenMidleware } from "../../middlewares/common/checkAccessToken";
+import { verifyIsPremiume } from "../../middlewares/common/checkIsPremiume";
 import IConversationCtrl from "../../controllers/common/interfaces/IConversationCtrl";
 import IMessageCtrl from "../../controllers/common/interfaces/IMessageCtrl";
 import ISessionCtrl from "../../controllers/doctor/interfaces/IDoctorSessionCtrl";
@@ -97,7 +98,7 @@ doctorRoutes.post("/verifySubscription", (req, res) =>
 
 
 doctorRoutes.post(
-  "/conversation",
+  "/conversation",verifyIsPremiume(),
   verifyAccessTokenMidleware("doctor"),
   (req, res) => conversationCtrl.createConversation(req, res)
 );
@@ -117,27 +118,27 @@ doctorRoutes.get(
 
 
 doctorRoutes.post(
-  "/message",
+  "/message",verifyIsPremiume(),
   verifyAccessTokenMidleware("doctor"),
   (req, res) => messageCtrl.sendMessage(req, res)
 );
 
 
-doctorRoutes.post("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSession(req,res));
+doctorRoutes.post("/session",verifyIsPremiume(),verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.addSession(req,res));
 
 doctorRoutes.get("/sessions",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.getSessions(req,res) );
 
-doctorRoutes.patch("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.updateSession(req,res) );
+doctorRoutes.patch("/session",verifyIsPremiume(),verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.updateSession(req,res) );
 
 doctorRoutes.delete("/session",verifyAccessTokenMidleware("doctor"),(req,res)=> sessionCtrl.deleteSession(req,res) );
 
 
-doctorRoutes.get("/getAppointments",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.getAppointments(req,res))
+doctorRoutes.get("/getAppointments",verifyIsPremiume(),verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.getAppointments(req,res))
 
 doctorRoutes.patch("/cancelAppointment",verifyAccessTokenMidleware("doctor"),(req,res)=>appointmentCtrl.cancelAppointment(req,res))
 
 
-doctorRoutes.get("/getAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>
+doctorRoutes.get("/getAnalysisReports",verifyIsPremiume(), verifyAccessTokenMidleware("doctor"), (req, res) =>
   ReportAnalysisCtrl.getReports(req, res)) 
 
 doctorRoutes.post("/submitAnalysisReports", verifyAccessTokenMidleware("doctor"), (req, res) =>

@@ -53,7 +53,7 @@ const appointmentSchema = new Schema<IAppointmentDocument>(
       enum: ["pending", "completed", "failed", "refunded"],
       default: "pending",
     },
-    stripeSessionId: {
+    transactionId: {
       type: String,
       required: false,
     },

@@ -11,6 +11,8 @@ export interface ITransactionDocument extends Document{
     amount:number
     paymentFor:string;
     transactionId?:string;
+    appointmentId?:string;
+    analysisId?:string;
     invoice?:string;
     userId?:string;
     doctorId?:string;

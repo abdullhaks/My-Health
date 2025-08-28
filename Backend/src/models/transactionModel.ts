@@ -8,10 +8,12 @@ const transactionSchema : Schema<ITransactionDocument> = new Schema ({
     method: { type: String,enum: ["stripe","wallet","bank"]},
     amount:{type:Number},
     paymentFor: { type: String,enum: ["subscription","appointment","analysis","refund","salary"]},
+    appointmentId: { type: String},
+    analysisId: { type: String},
     transactionId: { type: String},
-    invoice:{type:String},
     userId: { type: String},
     doctorId: { type: String},
+    invoice:{type:String},
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 

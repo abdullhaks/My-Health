@@ -110,7 +110,7 @@ export default class PaymentService implements IPaymentService {
               fee: parseInt(metadata.fee),
               slotId: metadata.slotId,
               sessionId:metadata.sessionId,
-              stripeSessionId: session.id,
+              transactionId: session.id,
               invoice:invoiceUrl || "",
               paymentType: "stripe",
               paymentStatus: "completed",
@@ -118,6 +118,13 @@ export default class PaymentService implements IPaymentService {
             };
 
             const updateAnalytics = await this._analyticsRepository.uptadeOneWithUpsert({dataSet:"1"},{ $inc: { totalRevenue: parseInt(metadata.fee)} });
+            
+            const appointment = await this._appointmentsRepository.create(
+              appointmentData
+            );
+            
+            
+            
             const transaction = await this._transactionRepository.create({
                       from:"user",
                       to:"admin",
@@ -127,12 +134,11 @@ export default class PaymentService implements IPaymentService {
                       transactionId:session.id,
                       invoice:invoiceUrl || "",
                       doctorId:metadata.doctorId.toString(),
+                      userId:metadata.userId.toString(),
 
             })
 
-          const appointment = await this._appointmentsRepository.create(
-              appointmentData
-            );
+          
             console.log("Appointment created:", appointment);
         }else if (metadata.type === "report_analysis") {
             console.log("Processing report analysis payment for user:", metadata);
@@ -167,6 +173,24 @@ export default class PaymentService implements IPaymentService {
               doctorCategory: metadata.doctorCategory,
               fee: metadata.fee ? parseInt(metadata.fee) : 0, 
             });
+
+            const transaction = await this._transactionRepository.create({
+                      from:"user",
+                      to:"admin",
+                      method:"stripe",
+                      amount:parseInt(metadata.fee),
+                      paymentFor:"analysis",
+                      transactionId:session.id,
+                      invoice:invoiceUrl || "",
+                      doctorId:metadata.doctorId.toString(),
+                      userId:metadata.userId.toString(),
+                      analysisId:metadata.analysisId || "",
+
+            })
+
+
+
+
           }
         break;
         case "doctor":
@@ -205,11 +229,14 @@ export default class PaymentService implements IPaymentService {
           };
 
           console.log("session data after webhook event ", session);
-          const subResp = await this._paymentRepository.create(
-            subscriptionData
-          );
-          console.log("subResp....is...", subResp);
+         
           if (subscriptionData.doctor) {
+
+             const subResp = await this._paymentRepository.create(
+                subscriptionData
+              );
+              console.log("subResp....is...", subResp);
+
             const docResp = await this._doctorRepository.update(
               subscriptionData.doctor.toString(),
               {
@@ -218,6 +245,20 @@ export default class PaymentService implements IPaymentService {
               }
             );
             console.log("docResp....is...", docResp);
+
+
+
+            const transaction = await this._transactionRepository.create({
+                      from:"doctor",
+                      to:"admin",
+                      method:"stripe",
+                      amount:parseInt((subscriptionData.amount?subscriptionData.amount/100:0).toString()),
+                      paymentFor:"subscription",
+                      transactionId:subscriptionData.sessionId,
+                      invoice:subscriptionData.stripeInvoiceUrl || "",
+                      doctorId:subscriptionData.doctor.toString(),
+
+            })
           } else {
             console.error("Doctor ID is undefined.");
             throw new Error("Invalid doctor ID.");

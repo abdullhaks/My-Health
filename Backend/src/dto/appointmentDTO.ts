@@ -11,7 +11,7 @@ export interface IAppointmentDocument extends  Document {
   duration: number;
   fee: number;
   appointmentStatus: "booked" | "cancelled" | "completed" | "pending";
-  stripeSessionId?: string;
+  transactionId?: string;
   userName: string;
   userEmail: string; 
   doctorName: string; 

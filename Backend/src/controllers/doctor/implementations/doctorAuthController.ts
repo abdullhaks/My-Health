@@ -24,6 +24,7 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
 
       if (!result) {
          res.status(HttpStatusCode.BAD_REQUEST).json({ msg: "Envalid credentials" });
+         return
       };
 
       res.cookie("doctorRefreshToken", result.refreshToken, {
@@ -39,6 +40,13 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    res.cookie("doctorEmail", result.doctor.email, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
 
        res.status(HttpStatusCode.OK).json({message:result.message,doctor:result.doctor});
     } catch (error) {

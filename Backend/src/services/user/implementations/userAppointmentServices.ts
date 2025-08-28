@@ -217,7 +217,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
     }
 
     // Generate a unique transactionId for wallet payment
-    const transactionId = `wallet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    let transactionId = `wallet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const userUpdate = await this._userRepository.update(data.userId, {
       $inc: { walletBalance: -data.fee },
@@ -241,6 +241,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
 
     data.doctorName = doctor?.fullName;
     data.doctorCategory = doctor?.category;
+    data.transactionId = transactionId;
     const appointment = await this._appointmentsRepository.create(data);
     console.log("Appointment created:", appointment);
 

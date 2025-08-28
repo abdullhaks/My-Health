@@ -11,7 +11,7 @@ export interface IAppointment {
   duration: number;
   fee: number;
   appointmentStatus: "booked" | "cancelled" | "completed" | "pending";
-  stripeSessionId?: string;
+  transactionId?: string;
   invoice?:string;
   userName: string;
   userEmail: string; 
