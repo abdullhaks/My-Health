@@ -10,6 +10,7 @@ import { RootState } from '../../redux/store/store';
 type Plan = {
   id: string;
   name?: string;
+  active: boolean;
   description?: string;
   default_price?: {
     id: string;
@@ -36,8 +37,13 @@ const DoctorSubscriptionPlans = () => {
   const fetchPlans = async () => {
     try {
       const response = await getSubscriptions();
-      setPlans(response.data);
+      if(response.data.length){
+      console.log("ksjfdsk jsoifjsdiofjjsjfoi lskfj----------------",response.data);
+      let existingPlans = response.data.filter((plan: Plan) => plan.active);
+      
+      setPlans(existingPlans);
       setLoading(false);
+      }
     } catch (error) {
       toast.error('Failed to fetch subscription plans');
       setLoading(false);
@@ -72,8 +78,13 @@ const DoctorSubscriptionPlans = () => {
       ) : plans.length === 0 ? (
         <p className="text-gray-600">No plans available</p>
       ) : (
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.map((plan, idx) => (
+          
+          {
+          
+          
+          plans.map((plan, idx) => (
             <div
               key={plan.id}
               className={`bg-white p-6 rounded-xl shadow-lg text-center relative ${

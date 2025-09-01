@@ -3,6 +3,21 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import IUserPrescriptionService from "../interfaces/IUserPrescriptionService";
 import {inject , injectable} from "inversify"
+import { IPrescription } from "../../../dto/prescriptionDto";
+
+interface prescriptionReponseDto{
+    prescription:IPrescription,
+    user:{
+        fullName?:string,
+        dob?:string
+    },
+    doctor:{
+        fullName?:string, 
+        graduation?:string, 
+        category?:string, 
+        registerNo?:string
+    }
+}
 
 @injectable()
 export default class UserPrescriptionService implements IUserPrescriptionService {
@@ -14,7 +29,7 @@ export default class UserPrescriptionService implements IUserPrescriptionService
     ){}
 
 
-    async getPrescription(appointmentId: string):Promise<any> {
+    async getPrescription(appointmentId: string):Promise<prescriptionReponseDto> {
         
         console.log("appointmentId is.....",appointmentId);
 
@@ -46,7 +61,7 @@ export default class UserPrescriptionService implements IUserPrescriptionService
     }
 
 
-    async getLatestPrescription(userId: string):Promise<any> {
+    async getLatestPrescription(userId: string):Promise<IPrescription | null> {
         
         console.log("userId is.....",userId);
 

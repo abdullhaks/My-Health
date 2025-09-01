@@ -3,9 +3,8 @@ import IUserDashboardService from "../interfaces/IUserDashboardService";
 import IBlogRepository from "../../../repositories/interfaces/IBlogRepository";
 import IAdvertisementRepository from "../../../repositories/interfaces/IAdvertisementRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
-import { IBlogDocument } from "../../../entities/blogEntities";
-import { IAdvertisementDocument } from "../../../entities/advertisementEntitites";
-
+import { IBlog } from "../../../dto/blogDto";
+import { IAdvertisement } from "../../../dto/advertisementDto";
 
 @injectable()
 export default class UserDashboardService implements IUserDashboardService {
@@ -18,8 +17,8 @@ export default class UserDashboardService implements IUserDashboardService {
 
 
     async getDashboardContent(days: number,userId:string,latitude:number,longitude:number): Promise<{
-    blogs: IBlogDocument[];
-    advertisements: IAdvertisementDocument[];
+    blogs: IBlog[];
+    advertisements: IAdvertisement[];
   }> {
 
     try {

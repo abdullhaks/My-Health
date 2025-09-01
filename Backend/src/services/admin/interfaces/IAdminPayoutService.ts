@@ -1,4 +1,4 @@
-
+import { IPayouts } from "../../../dto/payoutDto";
 interface filter {
   status?: string;
   startDate?: string;
@@ -7,7 +7,7 @@ interface filter {
 export default interface IAdminPayoutService {
 
     
-    getgetPayouts(pageNumber:number, limitNumber:number, filters:filter):Promise<any[]>,
-    updatePayout(id:string, data:any):Promise<any[]>,
+    getgetPayouts(pageNumber:number, limitNumber:number, filters:filter):Promise<IPayouts[]>,
+    updatePayout(id:string, data:any):Promise<IPayouts>,
 
 }

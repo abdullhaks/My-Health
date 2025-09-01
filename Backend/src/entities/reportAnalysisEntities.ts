@@ -10,6 +10,7 @@ doctorName: String
 doctorCategory: String,
 createdAt: Date;
 fee: Number 
+transactionId?: String
 analysisStatus: "pending" | "cancelled" | "submited";
 result: String
 }

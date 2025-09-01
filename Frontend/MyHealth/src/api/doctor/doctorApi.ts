@@ -725,6 +725,24 @@ export const getPayouts = async (doctorId:string,page:number, limit:number,filte
     }
 };
 
+
+export const getRevenues = async (doctorId:string,page:number, limit:number,filters:any)=>{
+    try{
+        const response = await doctorInstance.get(ROUTES.doctor.getRevenues,{
+      params: {
+        doctorId,
+        page,
+        limit,
+        ...filters,
+      }});
+        return response.data;
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err     
+    }
+};
+
+
 // doctorApi.ts
 
 export const getDoctorAppointmentsStats = async (doctorId: string, filter: "day" | "month" | "year") => {

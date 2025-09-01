@@ -40,6 +40,12 @@ export default class PaymentService implements IPaymentService {
       console.log("session is..................", session);
 
       const metadata = session.metadata;
+      var invoiceUrl: string | null | undefined 
+
+            const invoice = await stripe.invoices.retrieve(session.invoice as string);
+            if(invoice){
+            invoiceUrl = invoice.hosted_invoice_url
+            }
 
       if (!metadata) {
         console.error("Metadata is null or undefined.");
@@ -89,12 +95,7 @@ export default class PaymentService implements IPaymentService {
 
             var tempDate = new Date(metadata.start).toISOString().split("T")[0];
 
-            var invoiceUrl: string | null | undefined 
-
-            const invoice = await stripe.invoices.retrieve(session.invoice as string);
-            if(invoice){
-            invoiceUrl = invoice.hosted_invoice_url
-            }
+            
 
             const appointmentData: Partial<IAppointmentDocument> = {
               userId: metadata.userId,
@@ -172,6 +173,7 @@ export default class PaymentService implements IPaymentService {
               doctorName: metadata.doctorName,
               doctorCategory: metadata.doctorCategory,
               fee: metadata.fee ? parseInt(metadata.fee) : 0, 
+              transactionId:session.id,
             });
 
             const transaction = await this._transactionRepository.create({

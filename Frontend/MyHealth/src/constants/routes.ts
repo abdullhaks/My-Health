@@ -40,7 +40,7 @@ export const ROUTES = {
     unAvailableSessions: "/user/unAvailableSessions",
     latestPrescription : "/user/latestPrescription",
     activeBooking:"/user/activeBooking",    
-
+    getTransactions: "/user/getTransactions",
     
   },
 
@@ -89,6 +89,7 @@ export const ROUTES = {
     appointmentStats: "/doctor/appointmentStats",
     reportsStats:"/doctor/ReportsStats",
     payoutsStats:"/doctor/payoutsStats",
+    getRevenues:"/doctor/getRevenues",
 
   },
 

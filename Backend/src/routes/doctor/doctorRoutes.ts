@@ -19,6 +19,7 @@ import IDetailsCtrl from "../../controllers/common/interfaces/IDetailsCtrl";
 import IDoctorDashboardCtrl from "../../controllers/doctor/interfaces/IDoctorDashboardCtrl";
 import IDoctorPayoutCtrl from "../../controllers/doctor/interfaces/IDoctorPayoutCtrl";
 import INotificationCtrl from "../../controllers/common/interfaces/INotificationCtrl";
+import IDoctorTransactionController from "../../controllers/doctor/interfaces/IDoctorTransactionController";
 
 
 
@@ -39,7 +40,8 @@ const notificationCtrl = container.get<INotificationCtrl>("INotificationCtrl")
 const prescriptionsCtrl = container.get<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl")
 const detailsCtrl = container.get<IDetailsCtrl>("IDetailsCtrl");
 const dashboardCtrl = container.get<IDoctorDashboardCtrl>("IDoctorDashboardCtrl");
-const payoutCtrl = container.get<IDoctorPayoutCtrl>("IDoctorPayoutCtrl")
+const payoutCtrl = container.get<IDoctorPayoutCtrl>("IDoctorPayoutCtrl");
+const transactionCtrl = container.get<IDoctorTransactionController>("IDoctorTransactionController");
 
 
 
@@ -192,6 +194,9 @@ doctorRoutes.get("/appointmentStats",verifyAccessTokenMidleware("doctor"),(req,r
 doctorRoutes.get("/reportsStats",verifyAccessTokenMidleware("doctor"),(req,res)=>dashboardCtrl.reportsStats(req,res));
 
 doctorRoutes.get("/payoutsStats",verifyAccessTokenMidleware("doctor"),(req,res)=>dashboardCtrl.payoutsStats(req,res));
+
+doctorRoutes.get("/getRevenues",verifyAccessTokenMidleware("doctor"),(req,res)=>transactionCtrl.getRevenues(req,res));
+
 
 
 

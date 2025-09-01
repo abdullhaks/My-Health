@@ -36,6 +36,8 @@ import UserDashboardController from "../controllers/user/implementations/userDas
 import IUserDashboardCtrl from "../controllers/user/interfaces/IUserDashboardCtrl";
 import UserPrescriptionController from "../controllers/user/implementations/userPrescriptionController";
 import IUserPrescriptionCtrl from "../controllers/user/interfaces/IUserPrescriptionCtrl";
+import UserTransactionController from "../controllers/user/implementations/userTransactionController";
+import IUserTransactionController from "../controllers/user/interfaces/IUserTransactionController";
 
 
 import AdminAuthController from "../controllers/admin/implementations/adminAuthController";
@@ -78,6 +80,8 @@ import IDoctorDashboardCtrl from "../controllers/doctor/interfaces/IDoctorDashbo
 import DoctorDashboardController from "../controllers/doctor/implementations/doctorDashboardController";
 import IDoctorPayoutCtrl from "../controllers/doctor/interfaces/IDoctorPayoutCtrl";
 import DoctorPayoutController from "../controllers/doctor/implementations/doctorPayoutController";
+import IDoctorTransactionController from "../controllers/doctor/interfaces/IDoctorTransactionController";
+import DoctorTransactionController from "../controllers/doctor/implementations/doctorTransactionController";
 
 
 import PaymentController from "../controllers/common/implementations/paymentController"
@@ -113,6 +117,8 @@ import UserDashboardService from "../services/user/implementations/userDashboard
 import IUserDashboardService from "../services/user/interfaces/IUserDashboardService";
 import UserPrescriptionService from "../services/user/implementations/userPrescriptionService";
 import IUserPrescriptionService from "../services/user/interfaces/IUserPrescriptionService";
+import UserTransactionsService from "../services/user/implementations/userTransactionServices";
+import IUserTransactionsService from "../services/user/interfaces/IUserTransactionServices";
 
 
 import AdminAuthService from "../services/admin/implementations/adminAuthService";
@@ -152,7 +158,8 @@ import IDoctorDashboardService from "../services/doctor/interfaces/IDoctorDashbo
 import DoctorDashboardService from "../services/doctor/implementations/doctorDashboardService";
 import IDoctorPayoutService from "../services/doctor/interfaces/IDoctorPayoutService";
 import DoctorPayoutService from "../services/doctor/implementations/doctorPayoutService";
-
+import IDoctorTransactionsService from "../services/doctor/interfaces/IDoctorTransactionServices";
+import DoctorTransactionsService from "../services/doctor/implementations/doctorTransactionServices";
 
 
 import PaymentService from "../services/common/implementations/paymentService";
@@ -273,6 +280,7 @@ container.bind<IUserReportAnalysisCtrl>("IUserReportAnalysisCtrl").to(UserReport
 container.bind<IUserBlogCtrl>("IUserBlogCtrl").to(UserBlogController);
 container.bind<IUserDashboardCtrl>("IUserDashboardCtrl").to(UserDashboardController);
 container.bind<IUserPrescriptionCtrl>("IUserPrescriptionCtrl").to(UserPrescriptionController);
+container.bind<IUserTransactionController>("IUserTransactionController").to(UserTransactionController);
 
 
 container.bind<IAdminAuthCtrl>("IAdminAuthCtrl").to(AdminAuthController);
@@ -294,7 +302,8 @@ container.bind<IDoctorBlogCtrl>("IDoctorBlogCtrl").to(DoctorBlogController);
 container.bind<IDoctorAdvertisementCtrl>("IDoctorAdvertisementCtrl").to(DoctorAdvertisementController);
 container.bind<IDoctorPrescriptionCtrl>("IDoctorPrescriptionCtrl").to(DoctorPrescriptionController);
 container.bind<IDoctorDashboardCtrl>("IDoctorDashboardCtrl").to(DoctorDashboardController);
-container.bind<IDoctorPayoutCtrl>("IDoctorPayoutCtrl").to(DoctorPayoutController)
+container.bind<IDoctorPayoutCtrl>("IDoctorPayoutCtrl").to(DoctorPayoutController);
+container.bind<IDoctorTransactionController>("IDoctorTransactionController").to(DoctorTransactionController);
 
 
 container.bind<IPaymentCtrl>("IPaymentCtrl").to(PaymentController);
@@ -318,6 +327,7 @@ container.bind<IUserReportAnalysisService>("IUserReportAnalysisService").to(User
 container.bind<IUserBlogService>("IUserBlogService").to(UserBlogService);
 container.bind<IUserDashboardService>("IUserDashboardService").to(UserDashboardService);
 container.bind<IUserPrescriptionService>("IUserPrescriptionService").to(UserPrescriptionService);
+container.bind<IUserTransactionsService>("IUserTransactionsService").to(UserTransactionsService);
 
 
 container.bind<IAdminAuthService>("IAdminAuthService").to(AdminAuthService);
@@ -339,7 +349,7 @@ container.bind<IDoctorAdvertisementService>("IDoctorAdvertisementService").to(Do
 container.bind<IDoctorPrescriptionService>("IDoctorPrescriptionService").to(DoctorPrescriptionService);
 container.bind<IDoctorDashboardService>("IDoctorDashboardService").to(DoctorDashboardService);
 container.bind<IDoctorPayoutService>("IDoctorPayoutService").to(DoctorPayoutService);
-
+container.bind<IDoctorTransactionsService>("IDoctorTransactionsService").to(DoctorTransactionsService);
 
 
 

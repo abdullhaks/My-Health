@@ -40,7 +40,7 @@ export default class DoctorProfileService implements IDoctorProfileService {
 
 ){
 
-    }
+    } 
 
     async verifySubscription (sessionId:string): Promise<{message:string,doctor:Partial<IDoctor>}>{
 

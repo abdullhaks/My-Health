@@ -1,6 +1,13 @@
 import { inject,injectable } from "inversify";
 import IDoctorAdvertisementService from "../interfaces/IDoctorAdvertisementServices";
 import IAdvertisementRepository from "../../../repositories/interfaces/IAdvertisementRepository";
+import { IAdvertisement } from "../../../dto/advertisementDto";
+
+interface IGetAddsResponse {
+    adds: IAdvertisement[];
+    totalPages: number;
+}
+
 
 @injectable()
 export default class DoctorAdvertisementService implements IDoctorAdvertisementService {
@@ -10,7 +17,7 @@ export default class DoctorAdvertisementService implements IDoctorAdvertisementS
     ){};
 
 
-    async createAdvertisement(addData: any): Promise<any> {
+    async createAdvertisement(addData: any): Promise<IAdvertisement> {
 
         if(addData.tags.length){
             addData.tags= addData.tags.map((item:string)=>item.toLowerCase());
@@ -20,7 +27,7 @@ export default class DoctorAdvertisementService implements IDoctorAdvertisementS
 
     };
 
-    async getAdds(doctorId:string,pageNumber: number, limitNumber: number): Promise<any> {
+    async getAdds(doctorId:string,pageNumber: number, limitNumber: number): Promise<IGetAddsResponse> {
         
         const response = await this._advertisementRepository.getAdds(doctorId,pageNumber,limitNumber);
         console.log("blog response....",response)

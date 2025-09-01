@@ -503,3 +503,23 @@ export const checkActiveBooking = async ( userId:string , doctorId:string)=>{
     throw error;
   }
 };
+
+
+export const getTransactions = async (userId:string ,page:number, limit:number,filters:any)=>{
+    try{
+
+      const response = await userInstance.get(ROUTES.user.getTransactions,{
+      params: {
+        userId,
+        page,
+        limit,
+        ...filters,
+      }});
+        return response.data;
+
+    }catch(err){
+        console.log("error in get total analytics");
+        throw err
+        
+    }
+};

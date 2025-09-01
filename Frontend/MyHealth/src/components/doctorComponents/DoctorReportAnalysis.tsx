@@ -380,7 +380,7 @@ export function DoctorReportAnalysis() {
                       <Popconfirm
                           title="Submiting Report Analysis"
                           description="Are you sure to submit this Analysis Report?"
-                          onConfirm={() => {handleSubmitResult}}
+                          onConfirm={() => {handleSubmitResult()}}
                           okText="Yes"
                           cancelText="No" 
                           >

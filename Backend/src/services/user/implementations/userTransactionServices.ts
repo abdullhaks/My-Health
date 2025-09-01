@@ -1,8 +1,7 @@
 import { inject , injectable } from "inversify";
-import IAdminTransactionsService from "../interfaces/IAdminTransactionServices";
+import IUserTransactionsService from "../interfaces/IUserTransactionServices";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 import { ITransactions } from "../../../dto/transactionDto";
-import { FilterQuery } from "mongoose";
 
 
 interface filter {
@@ -14,7 +13,7 @@ interface filter {
 
 @injectable()
 
-export default class AdminTransactionsService implements IAdminTransactionsService {
+export default class UserTransactionsService implements IUserTransactionsService {
 
     constructor(
      
@@ -24,8 +23,8 @@ export default class AdminTransactionsService implements IAdminTransactionsServi
     
     }
 
-  async getTransactions(pageNumber: number, limitNumber: number, filters: filter = {}): Promise<ITransactions[]> {
-    const query: FilterQuery<ITransactions> = {};
+  async getTransactions(userId:string, pageNumber: number, limitNumber: number, filters: filter = {}): Promise<ITransactions[]> {
+    const query: any = {userId:userId};
 
     if (filters.method) {
       query.method = filters.method;

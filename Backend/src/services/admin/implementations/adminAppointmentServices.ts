@@ -2,6 +2,8 @@ import { inject , injectable } from "inversify";
 import IAdminAppointmentsService from "../interfaces/IAdminAppointmentServices";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import { IAppointment } from "../../../dto/appointmentDTO";
+import IUserRepository from "../../../repositories/interfaces/IUserRepository";
+import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 
 
  interface filter {
@@ -18,6 +20,8 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
     constructor(
      
       @inject("IAppointmentsRepository") private _appointmentsRepository:IAppointmentsRepository,
+      @inject("IUserRepository") private _userRepository: IUserRepository,
+      @inject("IDoctorRepository") private _doctorRepository: IDoctorRepository
       
     ){
     
@@ -32,7 +36,7 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
       query.appointmentStatus = filters.status;
     }
     if (filters.doctorCategory) {
-      query.doctorCategory = filters.doctorCategory;
+      // query.doctorCategory = filters.doctorCategory;
     }
     if (filters.startDate && filters.endDate) {
       query.date = {
@@ -42,6 +46,10 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
     }
 
     const appointments = await this._appointmentsRepository.getAllAppointmentsAdmin(pageNumber, limitNumber, query);
+    if(appointments.length){
+      
+    }
+    
     console.log("appointments from service...", appointments);
 
     return appointments;

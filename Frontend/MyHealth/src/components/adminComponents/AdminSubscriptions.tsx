@@ -4,11 +4,12 @@ import { getSubscriptions, createSubscription, updateSubscription, deActivateSub
 import { Popconfirm, Modal, Button } from 'antd';
 
 type Product = {
-  id: string;
+ id: string;
   name: string;
   active: boolean;
   description?: string;
   default_price?: {
+    id: string;
     unit_amount: number;
     currency: string;
     recurring?: {
@@ -56,8 +57,11 @@ const AdminSubscriptions = () => {
     try {
       setLoading(true);
       const response = await getSubscriptions();
-      setProducts(response.data || []);
+      if(response.data.length){
+      let existingPlans = response.data.filter((plan: Product) => plan.active);
+      setProducts(existingPlans|| []);
       setLoading(false);
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to fetch products');
       setLoading(false);
@@ -68,7 +72,7 @@ const AdminSubscriptions = () => {
     try {
       const response = await getSubscriptions();
       return response.data.some((product: Product) => 
-        product.name.toLowerCase() === name.toLowerCase() && 
+        product.active===true && product.name.toLowerCase() === name.toLowerCase() && 
         product.id !== productId
       );
     } catch (error) {

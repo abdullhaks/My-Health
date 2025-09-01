@@ -1,7 +1,7 @@
 
 
 import { useEffect, useState } from "react";
-import { getRevenues } from "../../api/doctor/doctorApi"; 
+import { getTransactions } from "../../api/user/userApi"; 
 import { Table, Select, DatePicker, Button, Pagination } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
@@ -9,15 +9,15 @@ import { useSelector } from "react-redux";
 
 interface Transaction {
   _id: string;
-  bankAccNo: string;
-  bankAccHolderName: string;
-  bankIfscCode: string;
-  totalAmount: number;
-  paid: number;
-  serviceAmount: number;
-  status: string;
+  from: string;
+  to: string;
+  method: string;
+  amount: number;
+  paymentFor: string;
   transactionId?: string;
-  invoiceLink?: string;
+  userId?: string;
+  doctorId?: string;
+  date: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,30 +25,29 @@ interface Transaction {
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const DoctorRevenue = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
-  const doctorId = doctor._id;
+const UserTransactions = () => {
+  const user = useSelector((state: any) => state.user.user);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(5);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    status: "Appointment",
-    // paymentFor: "",
+    method: "",
+    paymentFor: "",
     dateRange: null as [moment.Moment, moment.Moment] | null,
   });
 
   const fetchTransactions = async (page: number) => {
     setLoading(true);
     try {
-      const response = await getRevenues(doctorId,page, limit, {
-        status: filters.status,
-        // paymentFor: filters.paymentFor,
+      const response = await getTransactions(user._id,page, limit, {
+        method: filters.method,
+        paymentFor: filters.paymentFor,
         startDate: filters.dateRange ? filters.dateRange[0].toISOString() : undefined,
         endDate: filters.dateRange ? filters.dateRange[1].toISOString() : undefined,
       });
-      setTransactions(response.payouts);
+      setTransactions(response.transactions);
       setTotalPages(response.totalPages);
     } catch (err) {
       console.error("Error fetching transactions:", err);
@@ -68,27 +67,56 @@ const DoctorRevenue = () => {
 
   const columns = [
     {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-      render: (date: string) => moment(date).format("MMM DD, YYYY h:mm A"),
+      title: "From",
+      dataIndex: "from",
+      key: "from",
+      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
     },
-   
     {
-      title: "Payment For",
-      dataIndex: "paymentFor",
-      key: "paymentFor",
-      render: (text: string) => text,
+      title: "To",
+      dataIndex: "to",
+      key: "to",
+      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
     },
-    
+    {
+      title: "Method",
+      dataIndex: "method",
+      key: "method",
+      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
+    },
     {
       title: "Amount",
       dataIndex: "amount",
       key: "amount",
       render: (amount: number) => `Rs ${amount}`,
     },
-   
-
+    {
+      title: "Purpose",
+      dataIndex: "paymentFor",
+      key: "paymentFor",
+      render: (text: string) => text.charAt(0).toUpperCase() + text.slice(1),
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (date: string) => moment(date).format("MMM DD, YYYY h:mm A"),
+    },
+    {
+      title: "Transaction ID",
+      dataIndex: "transactionId",
+      key: "transactionId",
+      render:(text: string, record: any) => {
+    if (record.invoice) {
+      return (
+        <a href={record.invoice} target="_blank" rel="noopener noreferrer">
+          {text}
+        </a>
+      );
+    }
+    return text || "N/A";
+  },
+    },
   ];
 
   return (
@@ -100,17 +128,30 @@ const DoctorRevenue = () => {
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <Select
-            placeholder="Filter by Status"
+            placeholder="Filter by Method"
             style={{ width: 200 }}
-            value={filters.status}
-            onChange={(value) => handleFilterChange("status", value)}
+            onChange={(value) => handleFilterChange("method", value)}
             allowClear
           >
-            <Option value="Appointment">Appointment</Option>
-            <Option value="Analysis">Analysis</Option>
+            <Option value="stripe">Stripe</Option>
+            <Option value="wallet">Wallet</Option>
           </Select>
         </div>
-       
+        <div className="flex items-center gap-2">
+          <FilterOutlined className="text-gray-600" />
+          <Select
+            placeholder="Filter by Purpose"
+            style={{ width: 200 }}
+            onChange={(value) => handleFilterChange("paymentFor", value)}
+            allowClear
+          >
+           
+            <Option value="appointment">Appointment</Option>
+            <Option value="analysis">Analysis</Option>
+            <Option value="refund">Refund</Option>
+           
+          </Select>
+        </div>
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <RangePicker
@@ -157,4 +198,4 @@ const DoctorRevenue = () => {
   );
 };
 
-export default DoctorRevenue;
+export default UserTransactions;

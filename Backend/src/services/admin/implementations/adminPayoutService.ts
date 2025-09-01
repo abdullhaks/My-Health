@@ -3,7 +3,7 @@ import IAdminPayoutService from "../interfaces/IAdminPayoutService";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 import IPayoutRepository from "../../../repositories/interfaces/IPayoutRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
-
+import { IPayouts } from "../../../dto/payoutDto";
 
 interface filter {
   status?: string;
@@ -23,7 +23,7 @@ export default class AdminPayoutService implements IAdminPayoutService {
 
 
 
-     async getgetPayouts(pageNumber:number, limitNumber:number, filters:filter = {}): Promise<any[]> {
+     async getgetPayouts(pageNumber:number, limitNumber:number, filters:filter = {}): Promise<IPayouts[]> {
     const query: any = {};
 
     if (filters.status) {
@@ -46,7 +46,7 @@ export default class AdminPayoutService implements IAdminPayoutService {
 
 
 
-    async updatePayout(id:string, data:any): Promise<any> {
+    async updatePayout(id:string, data:any): Promise<IPayouts> {
    
 
     const resp = await this._payoutRepository.update(id,data);

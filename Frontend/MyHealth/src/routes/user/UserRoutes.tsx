@@ -29,12 +29,15 @@ import UserBlogs from "../../components/userComponents/userBlogs";
 import UserBlogDetails from "../../components/userComponents/UserBlog";
 import UserDoctorDetails from "../../components/userComponents/UserDoctorDetails";
 import UserPrescriptionDetails from "../../components/userComponents/UserPrescription";
+import UserTransactions from "../../components/userComponents/UserTransactions";
+import LandingPage from "../../pages/commonPages/landingPage";
 
 const UserRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
       <Route element={<PublicRoute />}>
+        <Route path="" element={<LandingPage />} />
         <Route path="/login" element={<UserLogin />} />
         <Route path="/signup" element={<UserSignup />} />
         <Route path="/forgetPassword" element={<UserForgetPassword />} />
@@ -47,7 +50,7 @@ const UserRoutes = () => {
       {/* Protected Routes */}
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<UserMain />}>
-          <Route path="" element={<Dashboard />} />
+          {/* <Route path="" element={<Dashboard />} /> */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<Profile />} />
           <Route path="doctors" element={<Doctors/>} />
@@ -65,6 +68,7 @@ const UserRoutes = () => {
           <Route path="blog" element={< UserBlogDetails/>} />
           <Route path="doctor-details/:doctorId" element={< UserDoctorDetails/>} />
           <Route path="prescription/:appointmentId" element={< UserPrescriptionDetails/>} />
+          <Route path="transactions" element={< UserTransactions/>} />
           
        
 

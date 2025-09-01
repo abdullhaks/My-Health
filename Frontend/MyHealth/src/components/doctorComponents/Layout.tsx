@@ -19,6 +19,7 @@ import axios from "axios";
 import { message } from "antd";
 import { getNotifications } from "../../api/doctor/doctorApi"; // Adjusted import for doctor-specific API
 import { FaMoneyBillTransfer } from "react-icons/fa6";
+import { MdAttachMoney } from "react-icons/md";
 
 interface Notification {
   _id:string;
@@ -337,7 +338,8 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
     { name: "Chat", path: "/doctor/chat", icon: <FaComments />, premium: true },
     { name: "My Blogs", path: "/doctor/blogs", icon: <FaBlog /> },
     { name: "My Adds", path: "/doctor/adds", icon: <GrAnnounce />,premium: true },
-    { name: "Payouts", path: "/doctor/payout", icon: <FaMoneyBillTransfer /> },
+    { name: "Revenue", path: "/doctor/revenue", icon: <FaMoneyBillTransfer /> },
+    { name: "Payouts", path: "/doctor/payout", icon: <MdAttachMoney /> },
     { name: "My Profile", path: "/doctor/profile", icon: <FaUser /> },
     
     

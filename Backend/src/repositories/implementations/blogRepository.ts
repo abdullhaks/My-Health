@@ -16,7 +16,7 @@ export default class BlogsRepository extends BaseRepository<IBlogDocument> imple
 
     }
 
-    async getBlogs(authorId:string,pageNumber: number,limitNumber: number): Promise<any> {
+    async getBlogs(authorId:string,pageNumber: number,limitNumber: number):  Promise<{ blogs: IBlogDocument[]; totalPages: number }>  {
         try {
             const query: any = {authorId:authorId};
 

@@ -54,7 +54,7 @@ async getBookedSlots (doctorId:string,formattedDate:string):Promise<IAppointment
 
 
 
-async getUnavailablSessions(doctorId:string):Promise<any>{
+async getUnavailablSessions(doctorId:string):Promise<{ day: String; sessionId: string }[]>{
     try{
         console.log("doctorId and day from service....:", doctorId);
         let today = new Date();
@@ -85,7 +85,7 @@ async getUnavailablSessions(doctorId:string):Promise<any>{
 
 
 
-async getUnavailableDays(doctorId:string):Promise<any>{
+async getUnavailableDays(doctorId:string):Promise<String[]>{
     try{
         console.log("doctorId from service....:", doctorId);
         let today = new Date();

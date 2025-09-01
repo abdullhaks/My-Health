@@ -1,7 +1,7 @@
 import { inject,injectable } from "inversify";
 import IDoctorBlogService from "../interfaces/IDoctorBlogServices";
 import IBlogRepository from "../../../repositories/interfaces/IBlogRepository";
-
+import { IBlog } from "../../../dto/blogDto";
 
 @injectable()
 export default class DoctorBlogService implements IDoctorBlogService {
@@ -10,20 +10,20 @@ export default class DoctorBlogService implements IDoctorBlogService {
         @inject("IBlogRepository")private _blogRepository:IBlogRepository
     ){};
 
-    async createBlog(blogData: any): Promise<any> {
+    async createBlog(blogData: any): Promise<IBlog> {
         const response = await this._blogRepository.create(blogData);
         return response;
         
     };
 
-    async getBLogs(authorId:string,pageNumber: number, limitNumber: number): Promise<any> {
+    async getBLogs(authorId:string,pageNumber: number, limitNumber: number): Promise<{ blogs: IBlog[]; totalPages: number }> {
         
         const response = await this._blogRepository.getBlogs(authorId,pageNumber,limitNumber);
         console.log("blog response....",response)
         return response;
     };
 
-    async updateBLog(blogId:string,blogData:object): Promise<any> {
+    async updateBLog(blogId:string,blogData:object): Promise<IBlog | null> {
         const response = await this._blogRepository.update(blogId,blogData);
         return response;
         

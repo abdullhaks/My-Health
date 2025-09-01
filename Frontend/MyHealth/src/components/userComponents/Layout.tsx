@@ -14,6 +14,7 @@ import { logoutUser as logout, getNotifications } from "../../api/user/userApi";
 import { io, Socket } from "socket.io-client";
 import axios from "axios";
 import { message } from "antd";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
 
 interface Notification {
   _id:string;
@@ -328,6 +329,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Chat", path: "/user/chat", icon: <FaComments /> },
     { name: "MyHealth-Ai", path: "/user/ai", icon: <FaPodcast /> },
     { name: "Blogs", path: "/user/blogs", icon: <FaBlog /> },
+    { name: "Transactions", path: "/user/transactions", icon: <FaMoneyBillTransfer /> },
     // { name: "Prescriptions", path: "/user/prescriptions", icon: <FaClipboardList /> },
     { name: "My Profile", path: "/user/profile", icon: <FaUserFriends /> },
   ];

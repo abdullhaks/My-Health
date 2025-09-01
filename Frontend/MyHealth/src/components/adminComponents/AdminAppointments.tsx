@@ -37,7 +37,7 @@ const AdminAppointments = () => {
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     status: "",
-    doctorCategory: "",
+ 
     dateRange: null as [moment.Moment, moment.Moment] | null,
   });
 
@@ -46,7 +46,6 @@ const AdminAppointments = () => {
     try {
       const response = await getAppointments(page, limit, {
         status: filters.status,
-        doctorCategory: filters.doctorCategory,
         startDate: filters.dateRange ? filters.dateRange[0].toISOString() : undefined,
         endDate: filters.dateRange ? filters.dateRange[1].toISOString() : undefined,
       });
@@ -153,6 +152,8 @@ const AdminAppointments = () => {
             <Option value="cancelled">Cancelled</Option>
           </Select>
         </div>
+
+        {/* Doctor Category Filter - Uncomment if needed 
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <Select
@@ -167,6 +168,8 @@ const AdminAppointments = () => {
             <Option value="DERMATOLOGY">Dermatology</Option>
           </Select>
         </div>
+        */}
+
         <div className="flex items-center gap-2">
           <FilterOutlined className="text-gray-600" />
           <RangePicker

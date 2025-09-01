@@ -32,6 +32,10 @@ const reportAnalysisSchema = new Schema<IReportAnalysisDocument>(
       type: Number,
       required: true,
     },
+    transactionId: {
+      type: String,
+      required: false,
+    },
     result:{
       type: String,
       default: "",

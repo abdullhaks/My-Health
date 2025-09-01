@@ -212,17 +212,17 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
       let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
 
       let dateOnly = new Date(day);
-      console.log("date only and day is :", dateOnly,day);
       const yyyy = dateOnly.getFullYear();
       const mm = String(dateOnly.getMonth() + 1).padStart(2, "0");
       const dd = String(dateOnly.getDate()).padStart(2, "0");
-      const localDate = `${yyyy}-${mm}-${dd}`;
+      let localDate = `${yyyy}-${mm}-${dd}`;
 
       const expiredAppointments = await this._appointmentRepository.findAll({
         doctorId: doctorId,
         appointmentStatus: "booked",
         date:localDate 
         });
+
 
     // Then, update their status
     if (expiredAppointments && expiredAppointments.length > 0) {
@@ -266,7 +266,7 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
     console.log("nDate is",nDate);
 
     
-    const unavailableDay = await this._unAvailableDayRepository.create({doctorId:doctorId,day:nDate});
+    const unavailableDay = await this._unAvailableDayRepository.create({doctorId:doctorId,day:localDate});
 
 
 

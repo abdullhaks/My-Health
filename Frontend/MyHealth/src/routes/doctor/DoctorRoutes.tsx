@@ -25,7 +25,8 @@ import DoctorBlogEditAndCreate from "../../components/doctorComponents/DoctorBlo
 import DoctorBlogDetails from "../../components/doctorComponents/DoctorBlog";
 import DoctorAdvertisementCreate from "../../components/doctorComponents/DoctorAdvertisementCreation";
 import DoctorAdds from "../../components/doctorComponents/DoctorAdvertisements";
-import DoctorTransactions from "../../components/doctorComponents/DoctorRevenue";
+import DoctorPayouts from "../../components/doctorComponents/DoctorPayouts";
+import DoctorRevenue from "../../components/doctorComponents/DoctorRevenue";
 
 // import Profile from "../../components/DoctorComponents/DoctorProfile";
 // import DoctorRcoveryPassword from "../../pages/DoctorPages/DoctorRcoveryPassword";
@@ -62,7 +63,9 @@ const DoctorRoutes = () => {
           <Route path="blog" element={< DoctorBlogDetails/>} />
           <Route path="adds" element={< DoctorAdds/>} />
           <Route path="advertisement-create" element={< DoctorAdvertisementCreate/>} />
-          <Route path="payout" element={< DoctorTransactions/>} />
+          <Route path="payout" element={< DoctorPayouts/>} />
+          <Route path="revenue" element={< DoctorRevenue/>} />
+          
           
 
         </Route>

@@ -21,7 +21,7 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
         }
     }
 
-  async findAll(filter: FilterQuery<T> = {},options: { sort?: Record<string, 1 | -1> ; limit?:number } = {}): Promise<T[] | []> {
+  async findAll(filter: FilterQuery<T> = {},options: { sort?: Record<string, 1 | -1> ; limit?:number; skip?:number } = {}): Promise<T[] | []> {
     try {
       let query = this._model.find(filter);
       if (options.sort) {
@@ -31,6 +31,10 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
       if (options.limit) {
                 query = query.limit(options.limit);
           };
+
+      if (options.skip) {
+            query = query.skip(options.skip); 
+      }
 
       return await query.exec() ;
     } catch (error) {
@@ -93,6 +97,18 @@ export default class BaseRepository<T extends Document> implements IBaseReposito
       return null;
     }
   };
+
+
+  async countDocuments(filter: FilterQuery<T>): Promise<number> {
+    try {
+      return await this._model.countDocuments(filter).exec();
+    } catch (error) {
+      console.error("Error counting documents:", error);
+      return 0;
+    }
+  }
+
+
 
   
 };

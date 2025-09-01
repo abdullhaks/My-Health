@@ -1,7 +1,7 @@
 import { inject,injectable } from "inversify";
 import IUserBlogService from "../interfaces/IUserBlogServices";
 import IBlogRepository from "../../../repositories/interfaces/IBlogRepository";
-
+import { IBlog } from "../../../dto/blogDto";
 
 @injectable()
 export default class UserBlogService implements IUserBlogService {
@@ -10,7 +10,7 @@ export default class UserBlogService implements IUserBlogService {
         @inject("IBlogRepository")private _blogRepository:IBlogRepository
     ){};
 
-    async getBlogs(search: string, pageNumber: number, limitNumber: number): Promise<{ blogs: any[]; totalPages: number }> {
+    async getBlogs(search: string, pageNumber: number, limitNumber: number): Promise<{ blogs: IBlog[]; totalPages: number }> {
     try {
       const response = await this._blogRepository.getBlogsWithSearch(search, pageNumber, limitNumber);
       if (!response) {

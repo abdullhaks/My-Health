@@ -10,9 +10,9 @@ interface filter {
 
 
 
-export default interface IAdminTransactionsService {
+export default interface IUserTransactionsService {
 
-getTransactions(pageNumber:number, limitNumber:number,filters: filter):Promise<ITransactions[]>,
+getTransactions(userId:string, pageNumber:number, limitNumber:number,filters: filter):Promise<ITransactions[]>,
 
 };
 

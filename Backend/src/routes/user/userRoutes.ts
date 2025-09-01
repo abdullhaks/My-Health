@@ -16,6 +16,7 @@ import INotificationCtrl from "../../controllers/common/interfaces/INotification
 import IUserBlogCtrl from "../../controllers/user/interfaces/IUserBlogCtrl";
 import IUserDashboardCtrl from "../../controllers/user/interfaces/IUserDashboardCtrl";
 import IUserPrescriptionCtrl from "../../controllers/user/interfaces/IUserPrescriptionCtrl";
+import IUserTransactionController from "../../controllers/user/interfaces/IUserTransactionController";
 import { resolve } from "path";
 
 const userRoutes = Router();
@@ -34,6 +35,7 @@ const notificationCtrl = container.get<INotificationCtrl>("INotificationCtrl");
 const blogCtrl = container.get<IUserBlogCtrl>("IUserBlogCtrl");
 const dashboardCtrl = container.get<IUserDashboardCtrl>("IUserDashboardCtrl");
 const prescriptionCtrl = container.get<IUserPrescriptionCtrl>("IUserPrescriptionCtrl");
+const transactionCtrl = container.get<IUserTransactionController>("IUserTransactionController");
 
 
 
@@ -145,6 +147,7 @@ userRoutes.get("/unAvailableSessions",verifyAccessTokenMidleware("user"),(req,re
 
 userRoutes.get("/activeBooking",verifyAccessTokenMidleware("user"),(req,res)=>appointmentCtrl.activeBooking(req,res));
 
+userRoutes.get("/getTransactions",verifyAccessTokenMidleware("user"),(req,res)=>transactionCtrl.getTransactions(req,res));
 
 
 export default userRoutes; 

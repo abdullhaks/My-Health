@@ -4,7 +4,7 @@ import { getDoctorAnalytics, getUserAnalytics, getTotalAnalytics, getTransaction
 import adminimg from "../../assets/doctorLogin.png";
 import { FaCalendarCheck, FaUsers } from "react-icons/fa";
 import { FaMoneyBillTransfer, FaMoneyBillTrendUp, FaUserDoctor } from "react-icons/fa6";
-import { Table, DatePicker, Button, Pagination, Tag } from "antd"; // Imported necessary antd components
+import { Table, DatePicker, Button, Pagination, Tag, message } from "antd"; // Imported necessary antd components
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import jsPDF from 'jspdf';
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
   // Handle PDF download
   const handleDownload = async () => {
     if (!filters.dateRange) {
-      alert("Please select a date range to download.");
+      message.warning("Please select a date range to download.");
       return;
     }
     try {
@@ -154,14 +154,14 @@ const AdminDashboard = () => {
 
       const doc = new jsPDF();
       autoTable(doc, {
-        head: [['Date','Method', 'Amount', 'Payment For', 'Transaction ID', ]],
+        head: [['Date','Method', 'Amount', 'Payment For', ]],
         body: allTransactions.map((t: any) => [
           dayjs(t.createdAt).format("MMM DD, YYYY h:mm A"),
           
           t.method,
           `Rs ${t.amount}`,
           t.paymentFor,
-          t.transactionId || 'N/A',
+          // t.transactionId || 'N/A',
          
         ]),
       });

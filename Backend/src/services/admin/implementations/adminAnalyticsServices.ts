@@ -5,7 +5,7 @@ import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepositor
 import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
 import {MESSAGES} from "../../../utils/messages"
-
+import { IAnalytics } from "../../../dto/analyticsDto";
 
 injectable();
 export default class AdminAnalyticsServices implements IAdminAnalyticsServices {
@@ -272,7 +272,7 @@ async getDoctorAnalytics(filter: string): Promise<{ name: string; value: number 
 };
 
 
-async getTotalAnalytics ():Promise<any>{
+async getTotalAnalytics ():Promise<IAnalytics>{
 
 try{
 

@@ -3,6 +3,10 @@ import IAdvertisementRepository from "../interfaces/IAdvertisementRepository";
 import { IAdvertisementDocument } from "../../entities/advertisementEntitites";
 import { inject,injectable } from "inversify";
 
+interface IGetAddsResponse {
+    adds: IAdvertisementDocument[];
+    totalPages: number;
+}
 
 @injectable()
 export default class AdvertisementRepository extends BaseRepository<IAdvertisementDocument> implements IAdvertisementRepository{
@@ -13,7 +17,7 @@ export default class AdvertisementRepository extends BaseRepository<IAdvertiseme
         super(_advertisementModel)
     };
 
-    async getAdds(doctorId:string,pageNumber: number,limitNumber: number): Promise<any> {
+    async getAdds(doctorId:string,pageNumber: number,limitNumber: number): Promise<IGetAddsResponse> {
         try {
             const query: any = {authorId:doctorId};
 

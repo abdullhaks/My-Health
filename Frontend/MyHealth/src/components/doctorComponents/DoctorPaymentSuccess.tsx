@@ -3,13 +3,14 @@ import {  useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { verifySubscription } from '../../api/doctor/doctorApi';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateDoctor } from '../../redux/slices/doctorSlices';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const dispatch = useDispatch();
+  const doctor = useSelector((state: any) => state.doctor.doctor);
 
   console.log("session id is.......",sessionId);
   
@@ -17,20 +18,20 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
 
   const handleVerifyPayment = async () => {
-    if (!sessionId) return toast.error('Missing session ID');
+    // if (!sessionId) return toast.error('Missing session ID');
     try {
-      setVerifying(true);
-      const response = await verifySubscription(sessionId);
+      // setVerifying(true);
+      // const response = await verifySubscription(sessionId);
 
-      if(!response){
-        toast.error('Subscription verification failed.');
-        return
-      };
+      // if(!response){
+      //   toast.error('Subscription verification failed.');
+      //   return
+      // };
       
-      console.log("respnse of subscription verification...",response.doctor._doc);
+      // console.log("respnse of subscription verification...",response.doctor._doc);
 
-      dispatch(updateDoctor(response.doctor._doc));
-      toast.success('Payment verified successfully!');
+      dispatch(updateDoctor({...doctor, premiumMembership: true }));
+      toast.success('Explore MyHealth premium features!');
       navigate('/doctor/dashboard');
     } catch (error) {
       toast.error('Subscription verification failed.');
