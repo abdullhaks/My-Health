@@ -14,10 +14,10 @@ export class UserMapper {
       ? { type: "Point", text: u.location.text, coordinates: u.location.coordinates }
       : { type: "Point", text: "", coordinates: [0, 0] },
     gender: u.gender,
-    dob: u.dob.toString(),
+    dob: u.dob?.toString(),
     isBlocked: u.isBlocked,
     isVerified: u.isVerified,
-    bmi: u.bmi,
+    bmi: u?.bmi,
     medicalTags: u.medicalTags,
     latestHealthSummary: u.latestHealthSummary,
     walletBalance: u.walletBalance,

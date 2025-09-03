@@ -12,22 +12,22 @@ interface IParsed {
 }
 
   interface ICertificates {
-    graduationCertificate: {
-      buffer: Buffer;
-      originalname: string;
-      mimetype: string;
-    };
     registrationCertificate: {
-      buffer: Buffer;
-      originalname: string;
-      mimetype: string;
-    };
-    verificationId: {
-      buffer: Buffer;
-      originalname: string;
-      mimetype: string;
-    };
-  }
+        buffer: Buffer<ArrayBufferLike>;
+        originalname: string;
+        mimetype: string;
+    } | undefined;
+    graduationCertificate: {
+        buffer: Buffer<ArrayBufferLike>;
+        originalname: string;
+        mimetype: string;
+    } | undefined;
+     verificationId: {
+        buffer: Buffer<ArrayBufferLike>;
+        originalname: string;
+        mimetype: string;
+    } | undefined;
+}
 
 export default interface IDoctorAuthService {
 

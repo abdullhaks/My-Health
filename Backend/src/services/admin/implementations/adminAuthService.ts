@@ -5,7 +5,7 @@ import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
 import { generateRandomPassword } from "../../../utils/helpers";
 import nodemailer from "nodemailer";
-import RecoveryPasswordModel from "../../../models/recoveryPasswordModel";
+import RecoveryPasswordModel from "../../../models/recoveryPassword";
 import dotenv from 'dotenv';
 dotenv.config();
 import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from "../../../utils/jwt";

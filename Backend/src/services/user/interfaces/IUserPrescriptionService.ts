@@ -17,5 +17,6 @@ export default interface IUserPrescriptionService {
 
     getPrescription(appointmentId:string):Promise<prescriptionReponseDto>
     getLatestPrescription(userId:string):Promise<IPrescription | null>
+    getLatestDoctorPrescription(userId:string,doctorId:string):Promise<IPrescription | null>
     
 }

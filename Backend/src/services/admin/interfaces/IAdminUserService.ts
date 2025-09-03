@@ -1,10 +1,10 @@
-import {IUser} from '../../../dto/userDTO'
+import {IUser, IUserDocument} from '../../../dto/userDTO'
 
 
 export default interface IAdminUserService {
 
-    getUsers(page:number,search:string | undefined,limit:number):Promise<IUser[]>
-    block(id:string):Promise<IUser>
-    unblock(id:string):Promise<IUser>
+    getUsers(page:number,search:string | undefined,limit:number):Promise<{users:IUserDocument[],totalPages:number}>
+    block(id:string):Promise<IUserDocument| null>
+    unblock(id:string):Promise<IUserDocument| null>
 
 }

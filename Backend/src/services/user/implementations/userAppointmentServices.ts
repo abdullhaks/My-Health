@@ -6,10 +6,10 @@ import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
 import { IUser } from "../../../dto/userDTO";
 import {IDoctor} from "../../../dto/doctorDTO";
-import appointmentModel from "../../../models/appointmentModel";
+import appointmentModel from "../../../models/appointment";
 
 @injectable()
 export default class UserAppointmentService implements IUserAppointmentService {
@@ -32,7 +32,10 @@ export default class UserAppointmentService implements IUserAppointmentService {
     sort: string,
     page: number,
     limit: number
-  ): Promise<{ doctors: IDoctor[] }> {
+  ): Promise<{doctors:IDoctor[] | null ,
+              total:number,
+              page:number,
+              totalPages:number}> {
     const response = await this._doctorRepository.fetchingDoctors(
       search,
       location,
@@ -42,7 +45,7 @@ export default class UserAppointmentService implements IUserAppointmentService {
       limit
     );
 
-    if (response.doctors.length > 0) {
+    if (response.doctors && response.doctors.length > 0) {
       const result = await Promise.all(
         response.doctors.map(async (doctor: IDoctor) => {
           const { password, ...userWithoutPassword } = doctor.toObject();
@@ -54,22 +57,26 @@ export default class UserAppointmentService implements IUserAppointmentService {
           return userWithoutPassword;
         })
       );
-
+    
       console.log("doctors list from backend.......", result);
 
      
       response.doctors = result;
-      return response;
+
     }
-    return { doctors: [] };
+
+      return response;
+   
   }
+
+
 
   async getUserAppointments(
     userId: string,
     page: number,
     limit: number,
     filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
-  ): Promise<{ appointments: IAppointment[]; totalPages: number }> {
+  ): Promise<{ appointments: IAppointmentDTO[]|null; totalPages: number }> {
     console.log("userid from service...", userId);
 
     const query: any = { userId };
@@ -114,8 +121,10 @@ export default class UserAppointmentService implements IUserAppointmentService {
       }));
     }
 
-    const {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
+    let {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
 
+
+    if(appointments){
     const profile = new Map();
   const updatedAppointments = await Promise.all(
     appointments.map(async (item: any) => {
@@ -138,11 +147,18 @@ export default class UserAppointmentService implements IUserAppointmentService {
     })
   );
 
-    return {appointments:updatedAppointments,totalPages};
+  if(updatedAppointments){
+    appointments = updatedAppointments
+  }
+
+    };
+
+
+    return {appointments,totalPages};
   }
  
   async cancelAppointment(
-    appointmentId: string
+    appointmentId: string 
   ): Promise<{
     status: boolean;
     message: string;

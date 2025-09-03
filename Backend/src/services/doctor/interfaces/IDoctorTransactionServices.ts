@@ -1,17 +1,10 @@
-
-
-interface filter {
-  method?: string;
-  paymentFor?: string;
-  startDate?: string;
-  endDate?: string;
-}
+import { Payout,filter } from "../../../dto/transactionDto"; 
 
 
 
 export default interface IDoctorTransactionsService {
 
-getRevenues(doctorId: string, pageNumber: number, limitNumber: number, filters: filter ): Promise<{ payouts: any[]; totalPages: number }> 
+getRevenues(doctorId: string, pageNumber: number, limitNumber: number, filters: filter ): Promise<{ payouts: Payout[]; totalPages: number }> 
 
 };
 

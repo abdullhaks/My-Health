@@ -1,6 +1,7 @@
 import IUserAuthService from "../interfaces/IUserAuthServices";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
+import IOtpRepository from "../../../repositories/interfaces/IOtpRepository";
 import { IUser } from "../../../dto/userDTO";
 import { IUserResponse } from "../../../dto/userDTO";
 import { inject, injectable } from "inversify";
@@ -8,8 +9,8 @@ import bcrypt from "bcryptjs";
 import generateOtp from "../../../utils/helpers";
 import { generateRandomPassword } from "../../../utils/helpers";
 import nodemailer from "nodemailer";
-import OtpModel from "../../../models/otpModel";
-import RecoveryPasswordModel from "../../../models/recoveryPasswordModel";
+import OtpModel from "../../../models/otp";
+import RecoveryPasswordModel from "../../../models/recoveryPassword";
 import { generateOtpMail } from "../../../utils/generateOtpMail";
 import dotenv from 'dotenv';
 dotenv.config();
@@ -17,7 +18,6 @@ import { generateAccessToken,generateRefreshToken , verifyRefreshToken } from ".
 import { generateRecoveryPasswordMail } from "../../../utils/generateRecoveyPassword";
 import { IResponseDTO } from "../../../dto/commonDTO";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
-
 import { UserMapper } from "../../../mappers/user.mapper";
 import { AuthResponseDTO } from "../../../dto/userDTO";
 import { UserLoginRequestDTO } from "../../../dto/userDTO";
@@ -39,6 +39,8 @@ export default class UserAuthService implements IUserAuthService {
     constructor(
       @inject("IUserRepository") private _userRepository:IUserRepository,
       @inject("IAnalyticsRepository") private _analyticsRepository:IAnalyticsRepository,
+      @inject("IOtpRepository") private _otpRepository:IOtpRepository,
+
   
   ){
 
@@ -188,7 +190,8 @@ export default class UserAuthService implements IUserAuthService {
     };
 
     async verifyOtp(email:string, otp:string):Promise<Partial<IUserResponse>>{
-        const otpRecord = await this._userRepository.findLatestOtpByEmail(email);
+        const otpRecord = await this._otpRepository.findLatestOtpByEmail(email);
+
         console.log("OTP record: ", otpRecord);
 
         if (!otpRecord) {

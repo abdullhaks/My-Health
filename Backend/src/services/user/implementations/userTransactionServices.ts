@@ -11,6 +11,7 @@ interface filter {
   endDate?: string;
 }
 
+
 @injectable()
 
 export default class UserTransactionsService implements IUserTransactionsService {

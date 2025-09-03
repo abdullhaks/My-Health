@@ -2,7 +2,7 @@ import { inject , injectable } from "inversify";
 import IDoctorAppointmentService from "../interfaces/IDoctorAppointmentService";
 import { getSignedImageURL } from "../../../middlewares/common/uploadS3";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IAnalyticsRepository from "../../../repositories/interfaces/IAnalyticsRepository";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
@@ -24,7 +24,7 @@ async getDoctorAppointments(
     page: number,
     limit: number,
     filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
-  ): Promise<{ appointments: IAppointment[]; totalPages: number }> {
+  ): Promise<{appointments:IAppointmentDTO[] | null,totalPages:number}> {
     console.log("Doctor ID from service...", doctorId);
 
     const query: any = { doctorId };
@@ -69,9 +69,10 @@ async getDoctorAppointments(
       }));
     }
 
-    const {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
+    let {appointments,totalPages} = await this._appointmentsRepository.getAllAppointments(page, limit, query);
     console.log("Appointments from service...", appointments);
 
+    if(appointments){
       const profile = new Map();
       const updatedAppointments = await Promise.all(
         appointments.map(async (item: any) => {
@@ -94,7 +95,13 @@ async getDoctorAppointments(
         })
       );
 
-    return {appointments:updatedAppointments,totalPages};
+      if(updatedAppointments){
+        appointments=updatedAppointments
+      }
+
+    }
+
+    return {appointments,totalPages};
   };
 
 

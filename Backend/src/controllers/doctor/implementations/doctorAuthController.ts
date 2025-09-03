@@ -5,7 +5,18 @@ import IDoctorAuthService from "../../../services/doctor/interfaces/IDoctorAuthS
 import {HttpStatusCode} from "../../../utils/enum"
 
 
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
 
+type MulterFiles = {
+  [fieldname: string]: MulterFile[];
+};
 
 @injectable()
 export default class DoctorAuthController implements IDoctorAuthCtrl {
@@ -56,36 +67,34 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   };
 
 
-  async doctorSignup(req: Request,res: Response,): Promise<void> {
+  async doctorSignup(req: Request, res: Response): Promise<void> {
     try {
+      const { fullName, email, password, graduation, category, registerNo } = req.body;
 
-      const { fullName, email, password, graduation, category, registerNo, } = req.body;
-  
-  
-      // Important: Parse nested fields manually
-      // const parsedLocation = JSON.parse(location);
-      const parsedSpecializations = [];
-  
+      const parsedSpecializations: {
+        title: string;
+        certificate?: MulterFile;
+      }[] = [];
+
       let i = 0;
       while (req.body[`specializations[${i}][title]`]) {
         parsedSpecializations.push({
           title: req.body[`specializations[${i}][title]`],
-          certificate:(req.files as unknown as { [key: string]: any[] })?.[`specializations[${i}][certificate]`]?.[0],
+          certificate: (req.files as MulterFiles)?.[`specializations[${i}][certificate]`]?.[0],
         });
         i++;
       }
-  
-      
-  
-      const doctor = {fullName, email, password, graduation, category, registerNo,
-      }
 
-      
-      const registrationCertificateFile = (req.files as unknown as { [key: string]: any[] })?.registrationCertificate?.[0];
-      const graduationCertificateFile = (req.files as unknown as { [key: string]: any[] })?.graduationCertificate?.[0];
-      const verificationIdFile = (req.files as unknown as { [key: string]: any[] })?.verificationId?.[0];
+      const doctor = { fullName, email, password, graduation, category, registerNo };
 
-      const certificates:any = {
+      const registrationCertificateFile =
+        (req.files as MulterFiles)?.registrationCertificate?.[0];
+      const graduationCertificateFile =
+        (req.files as MulterFiles)?.graduationCertificate?.[0];
+      const verificationIdFile =
+        (req.files as MulterFiles)?.verificationId?.[0];
+
+      const certificates = {
         registrationCertificate: registrationCertificateFile
           ? {
               buffer: registrationCertificateFile.buffer,
@@ -109,19 +118,29 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
           : undefined,
       };
 
-      console.log("file are", certificates.registrationCertificate, certificates.graduationCertificate, certificates.verificationId);
-      // Now you have everything properly parsed.
-      // Save to DB or upload to S3 as needed
-      const response = await this._doctorAuthService.signup(doctor, certificates, parsedSpecializations);
+      console.log(
+        "files are",
+        certificates.registrationCertificate,
+        certificates.graduationCertificate,
+        certificates.verificationId
+      );
 
-       res.status(HttpStatusCode.CREATED).json({ message: "Doctor signed up successfully!" });
+      const response = await this._doctorAuthService.signup(
+        doctor,
+        certificates,
+        parsedSpecializations
+      );
 
-      
+      res
+        .status(HttpStatusCode.CREATED)
+        .json({ message: "Doctor signed up successfully!" });
     } catch (error) {
       console.log(error);
-       res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+      res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ msg: "internal server error" });
     }
-  };
+  }
 
 
   async verifyOtp(req: Request, res: Response): Promise<void> {
@@ -148,11 +167,11 @@ export default class DoctorAuthController implements IDoctorAuthCtrl {
   
         const result = await this._doctorAuthService.resentOtp(email);
          res.status(HttpStatusCode.OK).json(result);
-      } catch (error: any) {
+      } catch (error) {
         console.error(error);
          res
           .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
-          .json({ msg: error.message || "Internal server error" });
+          .json({ msg: "Internal server error" });
       }
     };
 

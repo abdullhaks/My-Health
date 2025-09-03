@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface IAppointmentDocument extends  Document {
+  _id:Types.ObjectId;
   userId: string;
   doctorId: string;
   slotId: string;
@@ -25,4 +26,29 @@ export interface IAppointmentDocument extends  Document {
   updatedAt: Date;
 }
 
-export interface IAppointment extends IAppointmentDocument {}
+export interface IAppointment extends IAppointmentDocument {};
+
+
+// src/dto/appointmentDTO.ts
+export interface IAppointmentDTO {
+  _id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  doctorId: string;
+  doctorName: string;
+  doctorCategory?: string;
+  date: string;
+  start: Date;
+  end: Date;
+  duration: number;
+  fee: number;
+  transactionId?: string;
+  paymentStatus: "pending" | "completed" | "failed" | "refunded";
+  paymentType: "stripe" | "wallet";
+  appointmentStatus: "booked" | "cancelled" | "completed" | "pending";
+  callStartTime?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  slotId: string;
+}

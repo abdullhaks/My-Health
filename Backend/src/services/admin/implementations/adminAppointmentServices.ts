@@ -1,7 +1,7 @@
 import { inject , injectable } from "inversify";
 import IAdminAppointmentsService from "../interfaces/IAdminAppointmentServices";
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 
@@ -29,7 +29,7 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
 
  
 
- async getAppointments(pageNumber: number, limitNumber: number, filters: filter = {}): Promise<IAppointment[]> {
+ async getAppointments(pageNumber: number, limitNumber: number, filters: filter = {}): Promise<{appointments:IAppointmentDTO[] | null,totalPages:number | null}> {
     const query: any = {};
 
     if (filters.status) {
@@ -46,9 +46,6 @@ export default class AdminAppointmentService implements IAdminAppointmentsServic
     }
 
     const appointments = await this._appointmentsRepository.getAllAppointmentsAdmin(pageNumber, limitNumber, query);
-    if(appointments.length){
-      
-    }
     
     console.log("appointments from service...", appointments);
 

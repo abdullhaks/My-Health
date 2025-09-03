@@ -1,36 +1,38 @@
 // src/routes/UserRoutes.tsx
 import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy } from 'react';
 import PrivateRoute from "./UserPrivateRoute";
 import PublicRoute from "./UserPublicRoute";
 
-import UserLogin from "../../pages/userPages/UserLogin";
-import UserSignup from "../../pages/userPages/UserSignup";
-import UserForgetPassword from "../../pages/userPages/UserForgetPassword";
-import UserOtpVerification from "../../pages/userPages/UserOtpVerification";
-import UserResetPassword from "../../pages/userPages/UserResetPassword";
-import UserMain from "../../pages/userPages/UserMain";
-import Dashboard from "../../components/userComponents/UserDashboard";
-import Profile from "../../components/userComponents/UserProfile";
-import UserRcoveryPassword from "../../pages/userPages/UserRcoveryPassword";
-import GoogleSuccess from "../../sharedComponents/GoogleSuccess";
-import Doctors from "../../components/userComponents/UserDoctors";
-import UserChat from "../../components/userComponents/UserChat";
-import UserAppointmentSlots from "../../components/userComponents/UserAppointmentSlots";
-import UserAppointmentConfirmation from "../../components/userComponents/UserAppointmentConfirm";
-import UserPaymentSuccess from "../../components/userComponents/UserPaymentSuccess";
-import UserPaymentCancelled from "../../components/userComponents/UserPaymentCancelled";
-import UserAppointments from "../../components/userComponents/UserAppointments";
-import UserVideoCall from "../../components/userComponents/UserVideoCall";
-import AiHealthStatusGenerator from "../../components/userComponents/AiHealthStatus";
-import UserHealthReportAnalysis from "../../components/userComponents/UserHealthReportAnalysis";
-import VideoCall from "../../sharedComponents/VideoCall";
-import { UserReportAnalysis } from "../../components/userComponents/UserReportAnalysis";
-import UserBlogs from "../../components/userComponents/userBlogs";
-import UserBlogDetails from "../../components/userComponents/UserBlog";
-import UserDoctorDetails from "../../components/userComponents/UserDoctorDetails";
-import UserPrescriptionDetails from "../../components/userComponents/UserPrescription";
-import UserTransactions from "../../components/userComponents/UserTransactions";
-import LandingPage from "../../pages/commonPages/landingPage";
+const UserLogin = lazy(() => import ("../../pages/userPages/UserLogin"))
+const UserSignup = lazy(() => import ("../../pages/userPages/UserSignup"));
+const UserForgetPassword = lazy(() => import ( "../../pages/userPages/UserForgetPassword"));
+const UserOtpVerification = lazy(() => import ( "../../pages/userPages/UserOtpVerification"));
+const UserResetPassword = lazy(() => import ( "../../pages/userPages/UserResetPassword"));
+const UserMain = lazy(() => import ( "../../pages/userPages/UserMain"));
+const Dashboard = lazy(() => import ( "../../components/userComponents/UserDashboard"));
+const Profile = lazy(() => import ( "../../components/userComponents/UserProfile"));
+const UserRcoveryPassword = lazy(() => import ( "../../pages/userPages/UserRcoveryPassword"));
+const GoogleSuccess = lazy(() => import ( "../../sharedComponents/GoogleSuccess"));
+const Doctors = lazy(() => import ( "../../components/userComponents/UserDoctors"));
+const UserChat = lazy(() => import ( "../../components/userComponents/UserChat"));
+const UserAppointmentSlots = lazy(() => import ( "../../components/userComponents/UserAppointmentSlots"));
+const UserAppointmentConfirmation = lazy(() => import ( "../../components/userComponents/UserAppointmentConfirm"));
+const UserPaymentSuccess = lazy(() => import ( "../../components/userComponents/UserPaymentSuccess"));
+const UserPaymentCancelled = lazy(() => import ( "../../components/userComponents/UserPaymentCancelled"));
+const UserAppointments = lazy(() => import ( "../../components/userComponents/UserAppointments"));
+const UserVideoCall = lazy(() => import ( "../../components/userComponents/UserVideoCall"));
+const AiHealthStatusGenerator = lazy(() => import ( "../../components/userComponents/AiHealthStatus"));
+const UserHealthReportAnalysis = lazy(() => import ( "../../components/userComponents/UserHealthReportAnalysis"));
+const VideoCall = lazy(() => import ( "../../sharedComponents/VideoCall"));
+const UserReportAnalysis  = lazy(() => import ( "../../components/userComponents/UserReportAnalysis"));
+const UserBlogs = lazy(() => import ( "../../components/userComponents/userBlogs"));
+const UserBlogDetails = lazy(() => import ( "../../components/userComponents/UserBlog"));
+const UserDoctorDetails = lazy(() => import ( "../../components/userComponents/UserDoctorDetails"));
+const UserPrescriptionDetails = lazy(() => import ( "../../components/userComponents/UserPrescription"));
+const UserTransactions = lazy(() => import ( "../../components/userComponents/UserTransactions"));
+const LandingPage = lazy(() => import ( "../../pages/commonPages/landingPage"));
+
 
 const UserRoutes = () => {
   return (

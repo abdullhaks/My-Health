@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../../utils/jwt";
-import userModel from "../../models/userModel";
+import userModel from "../../models/user";
 import { HttpStatusCode } from "../../utils/enum";
 
 export function verifyAccessTokenMidleware(role: "user" | "admin" | "doctor") {

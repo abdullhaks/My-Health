@@ -1,4 +1,4 @@
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
 
 export default interface IDoctorAppointmentService {
 getDoctorAppointments(
@@ -6,7 +6,7 @@ getDoctorAppointments(
     page: number,
     limit: number,
     filters: { appointmentStatus?: string; startDate?: string; endDate?: string }
-  ): Promise<{ appointments: IAppointment[]; totalPages: number }> 
+  ): Promise<{appointments:IAppointmentDTO[] | null,totalPages:number}> 
 
 
 

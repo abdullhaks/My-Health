@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatusCode } from "../../utils/enum";
-import doctorModel from "../../models/doctorModel";
+import doctorModel from "../../models/doctor";
 
 export function verifyIsPremiume() {
   return async (req: Request, res: Response, next: NextFunction): Promise<void | any> => {

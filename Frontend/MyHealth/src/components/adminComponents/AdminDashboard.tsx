@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { getDoctorAnalytics, getUserAnalytics, getTotalAnalytics, getTransactions } from "../../api/admin/adminApi"; // Added getTransactions
 import adminimg from "../../assets/doctorLogin.png";
 import { FaCalendarCheck, FaUsers } from "react-icons/fa";

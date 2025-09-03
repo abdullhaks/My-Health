@@ -35,6 +35,8 @@ export default class DoctorDashboardService implements IDoctorDashboardService {
             }
         }, { sort: { date: 1 } });
 
+        console.log("upcomings are....",upcomingAppointmentsCount)
+
          const dateAppointmentCountMap = new Map<string, number>();
 
          if(upcomingAppointmentsCount?.length){

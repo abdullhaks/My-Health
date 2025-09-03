@@ -57,6 +57,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
       try {
         const response = await getNotifications(user._id, limit, notificationSet);
 
+        if(response.notifications.length){
         console.log("noti respionse are",response);
         setNotifications((prev) => {
             const existingIds = new Set(prev.map((n) => n._id));
@@ -74,6 +75,9 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
 
         const unreadCount = response.notifications.filter((n: any) => !n.isRead).length;
         setNotificationCount(unreadCount);
+        } else {
+        setNotificationCount(0);
+        }
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
         message.error("Failed to load notifications.");
@@ -134,7 +138,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
             message.error("Failed to reconnect. Please log in again.");
           }
         } else {
-          message.error("Failed to connect to notification server: " + err.message);
+          // message.error("Failed to connect to notification server: " + err.message);
         }
       });
 
@@ -209,7 +213,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
   const handleLogout = () => {
     dispatch(logoutUser());
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const toggleSidebar = () => {

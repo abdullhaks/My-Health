@@ -2,14 +2,17 @@
 import { inject,injectable } from "inversify";
 import IDoctorSessionService from "../interfaces/IDoctorSessionService";
 import ISessionRepository from "../../../repositories/interfaces/ISessionRepository";
-import {ISession} from "../../../dto/sessionDTO"
+import {ISession, ISessionDocument} from "../../../dto/sessionDTO"
 import IAppointmentsRepository from "../../../repositories/interfaces/IAppointmentsRepository";
 import IUnAvailableDayRepository from "../../../repositories/interfaces/IUnAvailableDayRepository";
 import IUnAvailableSessionRepository from "../../../repositories/interfaces/IUnAvailableSessionRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import ITransactionRepository from "../../../repositories/interfaces/ITransactionRepository";
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
+import { IUnAvailableDayDocument } from "../../../entities/unAvailableDayEntities";
+import { IUnAvailableSessionDocument } from "../../../entities/unAvailableSessionEntities";
 
+interface cancelledSessions  { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }
 
 
 @injectable()
@@ -36,16 +39,6 @@ export default class DoctorSessionService implements IDoctorSessionService {
         const result = await this._sessionRepository.create(sessionData);
         return result;
 
-        // await this._sessionRepository.deleteAll({doctorId:sessionData[0].doctorId.toString()})
-        // const response = await Promise.all(
-        //     sessionData.map(async (data: any) => {
-        //         const result = await this._sessionRepository.create(data);
-        //         return result;
-        //     })
-        // );
-
-        // console.log("response from service is :", response);
-        // return response;
     } catch (error) {
         console.error("Error in store sessions", error);
         throw new Error("Failed to store consultation sessions");
@@ -86,7 +79,7 @@ async getBookedSlots (doctorId:string,formattedDate:string):Promise<string[]>{
 }
 
 
-async deleteSession (sessionId:string):Promise<any>{
+async deleteSession (sessionId:string):Promise<Partial<IAppointmentDTO>[]|null>{
     try{
         console.log("sessionId is :", sessionId);
 
@@ -100,7 +93,7 @@ async deleteSession (sessionId:string):Promise<any>{
                 await this._appointmentRepository.updateMany({sessionId: sessionId,start:{$gte:new Date()}},{$set:{appointmentStatus:"cancelled"}});
                 existingAppointment.forEach((appointment: IAppointment) => {
                     cancelledAppoitments.push({
-                        appointmentId: (appointment._id as string).toString(),
+                        appointmentId: (appointment._id as unknown as string).toString(),
                         userId: appointment.userId,
                         doctorName:appointment.doctorName,
                         date: appointment.date,
@@ -113,7 +106,7 @@ async deleteSession (sessionId:string):Promise<any>{
             };
 
 
-        await Promise.all(existingAppointment.map(async (appointment: any) => {
+        await Promise.all(existingAppointment.map(async (appointment) => {
         await this._userRepository.update(appointment.userId, {
           $inc: { walletBalance: appointment.fee },
         });
@@ -145,7 +138,7 @@ async deleteSession (sessionId:string):Promise<any>{
 
 
 
-async updateSession(sessionId: string, editingSession: any): Promise<any> {
+async updateSession(sessionId: string, editingSession: Partial<ISession>): Promise<{updatedSession:ISessionDocument|null,cancelledAppoitments:cancelledSessions[]|[]}> {
     try {
         console.log("sessionId and editing session is :", sessionId, editingSession);
         const updatedSession = await this._sessionRepository.update(sessionId, editingSession);
@@ -153,7 +146,7 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
             throw new Error("Session not found or could not be updated");
         };
 
-        let cancelledAppoitments: { appointmentId: string; userId: string;doctorName:string; date: string; start: Date; end: Date; }[] = []
+        let cancelledAppoitments: cancelledSessions[] = []
         let existingAppointment = await this._appointmentRepository.findAll({sessionId: sessionId,
             start:{$gte:new Date()}});
 
@@ -162,7 +155,7 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
                 await this._appointmentRepository.updateMany({sessionId: sessionId,start:{$gte:new Date()}},{$set:{appointmentStatus:"cancelled"}});
                 existingAppointment.forEach((appointment: IAppointment) => {
                     cancelledAppoitments.push({
-                        appointmentId: (appointment._id as string).toString(),
+                        appointmentId: (appointment._id as unknown as string).toString(),
                         userId: appointment.userId,
                         doctorName:appointment.doctorName,
                         date: appointment.date,
@@ -175,7 +168,7 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
             }
 
             
-        await Promise.all(existingAppointment.map(async (appointment: any) => {
+        await Promise.all(existingAppointment.map(async (appointment) => {
         await this._userRepository.update(appointment.userId, {
           $inc: { walletBalance: appointment.fee },
         });
@@ -205,7 +198,7 @@ async updateSession(sessionId: string, editingSession: any): Promise<any> {
 };
 
 
-async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
+async makeDayUnavailable(doctorId:string,day:Date):Promise<{unavailableDay:IUnAvailableDayDocument|null,cancelledAppoitments:cancelledSessions[]|[]}>{
     try{
       console.log("doctorId and day is frim service....:", doctorId,day);
 
@@ -231,7 +224,7 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
         { appointmentStatus: "cancelled", paymentStatus: "refunded" }
       );
 
-      await Promise.all(expiredAppointments.map(async (appointment: any) => {
+      await Promise.all(expiredAppointments.map(async (appointment) => {
         await this._userRepository.update(appointment.userId, {
           $inc: { walletBalance: appointment.fee },
         });
@@ -247,7 +240,7 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
         });
 
         cancelledAppoitments.push({
-                        appointmentId: (appointment._id as string).toString(),
+                        appointmentId: (appointment._id as unknown as string).toString(),
                         userId: appointment.userId,
                         doctorName:appointment.doctorName,
                         date: appointment.date,
@@ -277,7 +270,7 @@ async makeDayUnavailable(doctorId:string,day:Date):Promise<any>{
     }
 };
 
-async makeDayAvailable(doctorId: string, day: Date): Promise<any> {
+async makeDayAvailable(doctorId: string, day: Date): Promise<IUnAvailableDayDocument|null> {
     
     console.log("day for available day.....", day);
     // Convert to local date string "YYYY-MM-DD"
@@ -295,7 +288,7 @@ async makeDayAvailable(doctorId: string, day: Date): Promise<any> {
     throw new Error("No unavailable day found to make available");
 }
 
-async getUnavailableDays(doctorId:string):Promise<any>{
+async getUnavailableDays(doctorId:string):Promise<String[]|null>{
     try{
         console.log("doctorId from service....:", doctorId);
         let today = new Date();
@@ -319,7 +312,7 @@ async getUnavailableDays(doctorId:string):Promise<any>{
 
 
 
-async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
+async unAvailableSessions(doctorId:string,day:Date, sessionId:string):Promise<{unAvailableSessions:IUnAvailableSessionDocument|null,cancelledAppoitments:cancelledSessions[]|null}>{
     try{
       console.log("doctorId, date and slotId from service....:", doctorId,day, sessionId);
       let dateOnly = new Date(day);
@@ -343,7 +336,7 @@ async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
         { appointmentStatus: "cancelled", paymentStatus: "refunded" }
       );
 
-      await Promise.all(expiredAppointments.map(async (appointment: any) => {
+      await Promise.all(expiredAppointments.map(async (appointment) => {
         await this._userRepository.update(appointment.userId, {
           $inc: { walletBalance: appointment.fee },
         });
@@ -359,7 +352,7 @@ async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
         });
 
         cancelledAppoitments.push({
-                        appointmentId: (appointment._id as string).toString(),
+                        appointmentId: (appointment._id as unknown as string).toString(),
                         userId: appointment.userId,
                         doctorName:appointment.doctorName,
                         date: appointment.date,
@@ -380,7 +373,7 @@ async unAvailableSessions(doctorId:string,day:Date, sessionId:any):Promise<any>{
     }
 }
 
-async makeSessionsAvailable(doctorId:string, day:Date, sessionId:string):Promise<any> {
+async makeSessionsAvailable(doctorId:string, day:Date, sessionId:string):Promise<IUnAvailableSessionDocument | null> {
 
 
     console.log("day is ....  ",day);
@@ -403,7 +396,7 @@ async makeSessionsAvailable(doctorId:string, day:Date, sessionId:string):Promise
 
 }
  
-async getUnavailablSessions(doctorId:string):Promise<any>{
+async getUnavailablSessions(doctorId:string):Promise<{ day: String; sessionId: string }[] | [] |null>{
     try{
         console.log("doctorId and day from service....:", doctorId);
         let today = new Date();

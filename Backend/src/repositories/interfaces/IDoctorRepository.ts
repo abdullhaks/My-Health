@@ -1,5 +1,7 @@
 import BaseRepository from "../implementations/baseRepository";
 import { IDoctorDocument } from "../../entities/doctorEntities";
+import { IDoctor } from "../../dto/doctorDTO";
+import { PipelineStage } from "mongoose";
 
 
 export default interface IDoctorRepository extends BaseRepository<IDoctorDocument>{
@@ -11,18 +13,20 @@ export default interface IDoctorRepository extends BaseRepository<IDoctorDocumen
   sort: string,
   page: number,
   limit: number
-): Promise<any> 
+): Promise<{doctors:IDoctor[] | null ,
+            total:number,
+            page:number,
+            totalPages:number}> 
 
-    findByEmail(email:string):Promise<IDoctorDocument>;
-    // findLatestOtpByEmail(email: string): Promise<any>;
-    verifyDoctor(email:string):Promise<IDoctorDocument>;
-    aggregate(pipeline: ({ $match: { createdAt: { $gte: Date; $lte: Date; }; }; } | { $group: { _id: { [x: string]: string; }; count: { $sum: number; }; }; } | { $sort: { _id: number; }; } | { $project: { name: string; value: string;}; })[]): unknown;
-    getDoctors(page: number, search: string | undefined, limit: number,onlyPremium:boolean): Promise<any>
-    getDoctor(id:string):Promise<any>
-    verifyDoctorByAdmin(id:string):Promise<any>
-    declineDoctor(id:string,reason:string):Promise<any>
-    blockDoctor(id:string):Promise<any>
-    unblockDoctor(id:string):Promise<any>
+    findByEmail(email:string):Promise<IDoctor | null>;
+    verifyDoctor(email:string):Promise<IDoctor | null>;
+    aggregate<T=IDoctorDocument>(pipeline:PipelineStage[]): Promise<T[]>;
+    getDoctors(page: number, search: string | undefined, limit: number,onlyPremium:boolean): Promise<{doctors:IDoctor[]|null,totalPages:number}>
+    getDoctor(id:string):Promise<IDoctor | null>
+    verifyDoctorByAdmin(id:string):Promise<IDoctor | null>
+    declineDoctor(id:string,reason:string):Promise<IDoctor | null>
+    blockDoctor(id:string):Promise<IDoctor | null>
+    unblockDoctor(id:string):Promise<IDoctor | null>
 
 
   }

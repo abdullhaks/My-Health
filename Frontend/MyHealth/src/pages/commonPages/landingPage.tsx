@@ -875,7 +875,7 @@ const LandingPage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-24 relative overflow-hidden">
+      {/* <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50 to-gray-50">
           <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -968,7 +968,7 @@ const LandingPage = () => {
             ))}
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* Contact Section */}
       <section id="contact" className="py-24 relative overflow-hidden">

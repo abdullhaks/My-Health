@@ -5,7 +5,7 @@ import IUserPrescriptionService from "../../services/user/interfaces/IUserPrescr
 import { verifyAccessToken } from "../../utils/jwt";
 import IAppointmentsRepository from "../../repositories/interfaces/IAppointmentsRepository";
 import INotificationRepository from "../../repositories/interfaces/INotificationRepository";
-import appointmentModel from "../../models/appointmentModel";
+import appointmentModel from "../../models/appointment";
 
 interface Notification {
   date: Date;

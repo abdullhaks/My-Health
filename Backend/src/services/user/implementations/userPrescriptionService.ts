@@ -74,7 +74,17 @@ export default class UserPrescriptionService implements IUserPrescriptionService
     }
 
 
+ async getLatestDoctorPrescription(userId: string,doctorId:string):Promise<IPrescription | null> {
+        
+        console.log("userId is.....",userId);
 
+        let prescription = await this._prescriptionRepository.findOne({userId:userId,doctorId:doctorId},{sort:{createdAt:-1}});
+
+        console.log("prescription is ....",prescription);
+         return  prescription || null
+
+      
+    }
 
     
 }

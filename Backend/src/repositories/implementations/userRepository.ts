@@ -1,22 +1,25 @@
 import { injectable , inject } from "inversify";
-import userModel from "../../models/userModel";
-import OtpModel from "../../models/otpModel";
+import userModel from "../../models/user";
+import OtpModel from "../../models/otp";
 import { IUserDocument } from "../../entities/userEntities";
 import BaseRepository from "./baseRepository";
 import IUserRepository from "../interfaces/IUserRepository";
+import { FilterQuery, Model } from "mongoose";
+import { PipelineStage } from "mongoose";
+
+
 
 @injectable()
 
 export default class UserRepository extends BaseRepository<IUserDocument> implements IUserRepository{
 
     constructor(
-        @inject("userModel") private _userModel: any,
-        @inject("otpModel") private _otpModel: any 
+        @inject("userModel") private _userModel: Model<IUserDocument>,
     ) {
         super(_userModel);
     }
 
-    async findByEmail ( email:string):Promise<IUserDocument>{
+    async findByEmail ( email:string):Promise<IUserDocument | null>{
         try{
 
             const user =await this._userModel.findOne({email:email});
@@ -29,9 +32,9 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
     };
 
 
-     async getUsers(page: number, search: string | undefined, limit: number): Promise<any> {
+     async getUsers(page: number, search: string | undefined, limit: number): Promise<{users:IUserDocument[],totalPages:number}> {
         try {
-            const query: any = {};
+            const query: FilterQuery<IUserDocument> = {};
             if (search) {
                 query.$or = [
                     { fullName: { $regex: search, $options: "i" } },
@@ -52,7 +55,7 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
     };
 
 
-    async blockUser(id:string):Promise<any>{
+    async blockUser(id:string):Promise<IUserDocument | null>{
         try{
             const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:true}, { new: true });
             console.log("resp form repo....",resp);
@@ -64,7 +67,7 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
     };
 
 
-    async unblockUser(id:string):Promise<any>{
+    async unblockUser(id:string):Promise<IUserDocument | null>{
         try{
             const resp =await this._userModel.findByIdAndUpdate(id, {isBlocked:false}, { new: true });
             console.log("resp form repo....",resp);
@@ -89,25 +92,9 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
             throw new Error("Error in saving user data ");
         }
     }
-
-
-    async findLatestOtpByEmail(email: string): Promise<any> {
-        try {
-            const otpRecord = await this._otpModel.findOne({ email }).sort({ createdAt: -1 });
-
-            if (!otpRecord) {
-                throw new Error("No OTP found for the given email");
-            };
-            console.log("Latest OTP record: ", otpRecord);
-            return otpRecord;
-        } catch (error) {
-            console.error("Error fetching latest OTP:", error);
-            throw new Error("Failed to fetch latest OTP for the given email");
-        }
-    }
     
 
-    async verifyUser(email: string): Promise<any> {
+    async verifyUser(email: string): Promise<IUserDocument | null> {
         try {
             const result = await this._userModel.findOneAndUpdate(
                 { email },
@@ -128,7 +115,7 @@ export default class UserRepository extends BaseRepository<IUserDocument> implem
         }
     }
     
-    async aggregate(pipeline: any[]): Promise<any> {
+    async aggregate<T = IUserDocument>(pipeline: PipelineStage[]): Promise<T[]> {
     try {
         const resp = await this._userModel.aggregate(pipeline);
         console.log("pipe line is .....",pipeline)

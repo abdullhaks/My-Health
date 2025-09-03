@@ -47,7 +47,7 @@ export default class AdvertisementRepository extends BaseRepository<IAdvertiseme
 
       let advertisements = []
 
-      let locationBased = await this.getAdsNearLocation(latitude,longitude,30);
+      let locationBased = await this.getAdsNearLocation(latitude,longitude,20);
 
       console.log("locaitoin based adds are....",locationBased);
 
@@ -75,7 +75,7 @@ export default class AdvertisementRepository extends BaseRepository<IAdvertiseme
       }else{
         let latestAdd = await this._advertisementModel
         .find({ createdAt: { $gte: startDate } })
-        .limit(5) // Limit to 5 ads for carousel
+        .limit(2) // Limit to 5 ads for carousel
         .lean();
 
         advertisements = [...advertisements,...latestAdd]

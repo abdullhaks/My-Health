@@ -2,20 +2,22 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./AdminPrivateRoute";
 import PublicRoute from "./AdminPublicRoute";
+import { lazy } from 'react';
 
-import AdminLogin from "../../pages/adminPages/AdminLogin";
-import AdminForgetPassword from "../../pages/adminPages/AdminForgetPassword";
-import AdminRcoveryPassword from "../../pages/adminPages/AdminRecoveryPassword";
-// import AdminResetPassword from "../../pages/adminPages/";
-import AdminMain from "../../pages/adminPages/AdminMain";
-import AdminDashboard from "../../components/adminComponents/AdminDashboard";
-import AdminUsers from "../../components/adminComponents/AdminUsers";
-import AdminDoctors from "../../components/adminComponents/AdminDoctors";
-import AdminDoctorDetails from "../../components/adminComponents/AdminDoctorDetails";
-import AdminSubscriptions from "../../components/adminComponents/AdminSubscriptions";
-import AdminAppointments from "../../components/adminComponents/AdminAppointments";
-import AdminTransactions from "../../components/adminComponents/AdminTransactions";
-import AdminPayouts from "../../components/adminComponents/AdminPayouts";
+
+const AdminLogin = lazy(() => import ( "../../pages/adminPages/AdminLogin"));
+const AdminForgetPassword = lazy(() => import ( "../../pages/adminPages/AdminForgetPassword"));
+const AdminRcoveryPassword = lazy(() => import ( "../../pages/adminPages/AdminRecoveryPassword"));
+// const AdminResetPassword = lazy(() => import ( "../../pages/adminPages/"));
+const AdminMain = lazy(() => import ( "../../pages/adminPages/AdminMain"));
+const AdminDashboard = lazy(() => import ( "../../components/adminComponents/AdminDashboard"));
+const AdminUsers = lazy(() => import ( "../../components/adminComponents/AdminUsers"));
+const AdminDoctors = lazy(() => import ( "../../components/adminComponents/AdminDoctors"));
+const AdminDoctorDetails = lazy(() => import ( "../../components/adminComponents/AdminDoctorDetails"));
+const AdminSubscriptions = lazy(() => import ( "../../components/adminComponents/AdminSubscriptions"));
+const AdminAppointments = lazy(() => import ( "../../components/adminComponents/AdminAppointments"));
+const AdminTransactions = lazy(() => import ( "../../components/adminComponents/AdminTransactions"));
+const AdminPayouts = lazy(() => import ( "../../components/adminComponents/AdminPayouts"));
 
 const UserRoutes = () => {
   return (

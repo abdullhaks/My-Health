@@ -5,7 +5,7 @@ import { HttpStatusCode } from '../../utils/enum';
 interface CustomError extends Error {
   statusCode?: number;
   code?: string;
-  details?: any;
+  details?: string;
 }
 
 

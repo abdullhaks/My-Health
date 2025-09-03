@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import IAdminUserService from "../interfaces/IAdminUserService";
 import IAdminRepository from "../../../repositories/interfaces/IAdminRepository";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
-import {IUser} from '../../../dto/userDTO'
+import {IUser, IUserDocument} from '../../../dto/userDTO'
 
 
 @injectable()
@@ -15,14 +15,14 @@ export default class AdminUserService implements IAdminUserService {
 ){
 
     }
-    async getUsers(page:number,search:string | undefined,limit:number): Promise<IUser[]> {
+    async getUsers(page:number,search:string | undefined,limit:number): Promise<{users:IUserDocument[],totalPages:number}> {
 
         const response =await this._userRepository.getUsers(page,search,limit)
         return response
 
     };
 
-    async block(id:string):Promise<IUser>{
+    async block(id:string):Promise<IUserDocument| null>{
             
             console.log("id from block....",id);
             const response = await this._userRepository.blockUser(id)
@@ -33,7 +33,7 @@ export default class AdminUserService implements IAdminUserService {
 
     };
 
-    async unblock(id:string):Promise<IUser>{
+    async unblock(id:string):Promise<IUserDocument| null>{
             
         console.log("id from block....",id);
         const response = await this._userRepository.unblockUser(id)

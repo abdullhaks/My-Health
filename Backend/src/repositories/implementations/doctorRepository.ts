@@ -1,17 +1,20 @@
 import { injectable , inject } from "inversify";
-import doctorModel from "../../models/doctorModel";
-import OtpModel from "../../models/otpModel";
+import doctorModel from "../../models/doctor";
+import OtpModel from "../../models/otp";
 import { IDoctorDocument } from "../../entities/doctorEntities";
 import BaseRepository from "./baseRepository";
 import IDoctorRepository from "../interfaces/IDoctorRepository";
+import { FilterQuery, Model } from "mongoose";
+import { IDoctor } from "../../dto/doctorDTO";
+import { PipelineStage } from "mongoose";
+
 
 @injectable()
 
 export default class DoctorRepository extends BaseRepository<IDoctorDocument> implements IDoctorRepository{
 
     constructor(
-        @inject("doctorModel") private _doctorModel: any,
-        @inject("otpModel") private _otpModel: any 
+        @inject("doctorModel") private _doctorModel: Model<IDoctorDocument>,
       
     ) {
         super(_doctorModel);
@@ -24,9 +27,12 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
         sort: string,
         page: number,
         limit: number
-        ): Promise<any> {
+        ): Promise<{doctors:IDoctor[],
+            total:number,
+            page:number,
+            totalPages:number}> {
         try {
-            const query: any = {
+            const query: FilterQuery<IDoctorDocument> = {
             isBlocked: false,
             isVerified: true,
             adminVerified:1,
@@ -42,7 +48,10 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
             query.category = { $regex: category, $options: "i" };
             }
 
-            let sortOption: any = {};
+           let sortOption: Partial<{
+                experience: 1 | -1;
+                fullName: 1 | -1;
+                }> = {};
             if (sort === "experience") {
             sortOption.experience = -1;
             } else if (sort === "alphabet") {
@@ -69,9 +78,9 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
         };
 
 
-        async getDoctors(page: number, search: string | undefined, limit: number,onlyPremium:boolean): Promise<any> {
+        async getDoctors(page: number, search: string | undefined, limit: number,onlyPremium:boolean): Promise<{doctors:IDoctor[]|null,totalPages:number}> {
         try {
-            const query: any = {};
+            const query: FilterQuery<IDoctorDocument> = {};
 
             if (search) {
                 query.$or = [
@@ -103,7 +112,7 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
         }
     };
 
-     async getDoctor(id:string):Promise<any>{
+     async getDoctor(id:string):Promise<IDoctor | null>{
 
         try{
 
@@ -118,10 +127,10 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
 
 
     
-    async verifyDoctorByAdmin(id:string):Promise<any>{
+    async verifyDoctorByAdmin(id:string):Promise<IDoctor | null>{
         try{
 
-            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:1});
+            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:1}, { new: true });
             console.log("doctor verifying....",resp);
             
             return resp;
@@ -133,10 +142,10 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
     };
 
 
-    async declineDoctor(id:string,reason:string):Promise<any>{
+    async declineDoctor(id:string,reason:string):Promise<IDoctor | null>{
         try{
 
-            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:3,rejectionReason:reason});
+            const resp = await this._doctorModel.findByIdAndUpdate(id,{adminVerified:3,rejectionReason:reason}, { new: true });
             console.log("doctor declining....",resp);
             
             return resp;
@@ -148,7 +157,7 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
     };
 
 
-    async blockDoctor(id:string):Promise<any>{
+    async blockDoctor(id:string):Promise<IDoctor | null>{
         try{
             const resp =await this._doctorModel.findByIdAndUpdate(id, {isBlocked:true}, { new: true });
             console.log("resp form repo....",resp);
@@ -162,7 +171,7 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
     };
 
 
-    async unblockDoctor(id:string):Promise<any>{
+    async unblockDoctor(id:string):Promise<IDoctor | null>{
         try{
             const resp =await this._doctorModel.findByIdAndUpdate(id, {isBlocked:false}, { new: true });
             console.log("resp form repo....",resp);
@@ -175,7 +184,7 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
     };
 
     
-    async findByEmail ( email:string):Promise<IDoctorDocument>{
+    async findByEmail ( email:string):Promise<IDoctorDocument | null>{
             try{
     
                 const doctor =await this._doctorModel.findOne({email:email});
@@ -188,58 +197,38 @@ export default class DoctorRepository extends BaseRepository<IDoctorDocument> im
         };
 
 
-
+    async verifyDoctor(email: string): Promise<IDoctor | null> {
+        try {
+            const result = await this._doctorModel.findOneAndUpdate(
+                { email },
+                { $set: { isVerified: true } },
+                { new: true } // returns updated document
+            );
     
-    
-        // async findLatestOtpByEmail(email: string): Promise<any> {
-        //     try {
-        //         const otpRecord = await this._otpModel.findOne({ email }).sort({ createdAt: -1 });
-    
-        //         if (!otpRecord) {
-        //             throw new Error("No OTP found for the given email");
-        //         };
-        //         console.log("Latest OTP record: ", otpRecord);
-        //         return otpRecord;
-        //     } catch (error) {
-        //         console.error("Error fetching latest OTP:", error);
-        //         throw new Error("Failed to fetch latest OTP for the given email");
-        //     }
-        // }
-        
-    
-        async verifyDoctor(email: string): Promise<any> {
-            try {
-                const result = await this._doctorModel.findOneAndUpdate(
-                    { email },
-                    { $set: { isVerified: true } },
-                    { new: true } // returns updated document
-                );
-        
-                if (!result) {
-                    throw new Error("doctor not found for verification.");
-                }
-        
-                console.log("doctor verified successfully:", result);
-                return result;
-                
-            } catch (error) {
-                console.error("Error verifying doctor:", error);
-                throw new Error("Failed to verify doctor with this email.");
+            if (!result) {
+                throw new Error("doctor not found for verification.");
             }
-        };
+    
+            console.log("doctor verified successfully:", result);
+            return result;
+            
+        } catch (error) {
+            console.error("Error verifying doctor:", error);
+            throw new Error("Failed to verify doctor with this email.");
+        }
+    };
 
 
-         async aggregate(pipeline: any[]): Promise<any> {
-            try {
-                const resp = await this._doctorModel.aggregate(pipeline);
-                console.log("pipe line is .....",pipeline)
-                console.log("resp is .....",resp)
+    async aggregate<T=IDoctorDocument>(pipeline: PipelineStage[]): Promise<T[]> {
+        try {
+            const resp = await this._doctorModel.aggregate(pipeline);
+            console.log("pipeline is .....", pipeline);
+            console.log("resp is .....", resp);
             return resp;
-
-            } catch (error) {
+        } catch (error) {
             console.error("Error in aggregate:", error);
             throw new Error("Failed to perform aggregation");
-            }
+        }
         }
         
 

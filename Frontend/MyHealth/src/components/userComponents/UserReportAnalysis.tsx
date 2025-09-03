@@ -18,7 +18,7 @@ type Report = {
   analysisStatus: string;
 };
 
-export function UserReportAnalysis() {
+const UserReportAnalysis = ()=> {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -368,3 +368,5 @@ export function UserReportAnalysis() {
     </div>
   );
 }
+
+export default UserReportAnalysis;

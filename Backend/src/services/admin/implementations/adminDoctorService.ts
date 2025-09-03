@@ -31,7 +31,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     search: string | undefined,
     limit: number
     ,onlyPremium:boolean
-  ): Promise<IDoctor[]> {
+  ): Promise<{doctors:IDoctor[]|null,totalPages:number}> {
     const response = await this._doctorRepository.getDoctors(
       page,
       search,
@@ -92,7 +92,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
 
 
 
-  async block(id: string): Promise<IDoctor> {
+  async block(id: string): Promise<IDoctor| null> {
     console.log("id from block....", id);
     const response = await this._doctorRepository.blockDoctor(id);
 
@@ -101,7 +101,7 @@ export default class AdminDoctorService implements IAdminDoctorService {
     return response;
   }
 
-  async unblock(id: string): Promise<IDoctor> {
+  async unblock(id: string): Promise<IDoctor| null> {
     console.log("id from block....", id);
     const response = await this._doctorRepository.unblockDoctor(id);
 

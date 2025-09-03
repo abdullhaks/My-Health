@@ -15,6 +15,12 @@ import IPaymentCtrl from './src/controllers/common/interfaces/IPaymentCtrl';
 import container from './src/config/inversify';
 import { errorHandler } from './src/middlewares/common/errorMiddleware';
 
+interface CustomError extends Error {
+  statusCode?: number;
+  code?: string;
+  details?: string;
+}
+
 
 const paymentCtrl = container.get<IPaymentCtrl>("IPaymentCtrl")
 
@@ -65,7 +71,7 @@ app.use("/api/doctor",doctorRoutes);
 
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: CustomError, req: express.Request, res: express.Response, next: express.NextFunction) => {
     errorHandler(err, req, res, next);
 });
 

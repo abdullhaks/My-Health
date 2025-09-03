@@ -4,7 +4,7 @@ import { getSubscriptions, createSubscription, updateSubscription, deActivateSub
 import { Popconfirm, Modal, Button } from 'antd';
 
 type Product = {
- id: string;
+  id: string;
   name: string;
   active: boolean;
   description?: string;
@@ -57,13 +57,11 @@ const AdminSubscriptions = () => {
     try {
       setLoading(true);
       const response = await getSubscriptions();
-      if(response.data.length){
-      let existingPlans = response.data.filter((plan: Product) => plan.active);
-      setProducts(existingPlans|| []);
-      setLoading(false);
-      }
+      const existingPlans = response.data.filter((plan: Product) => plan.active);
+      setProducts(existingPlans || []);
     } catch (error: any) {
       toast.error(error.message || 'Failed to fetch products');
+    } finally {
       setLoading(false);
     }
   };
@@ -71,9 +69,11 @@ const AdminSubscriptions = () => {
   const checkProductNameExists = async (name: string, productId: string | null): Promise<boolean> => {
     try {
       const response = await getSubscriptions();
-      return response.data.some((product: Product) => 
-        product.active===true && product.name.toLowerCase() === name.toLowerCase() && 
-        product.id !== productId
+      return response.data.some(
+        (product: Product) =>
+          product.active &&
+          product.name.toLowerCase() === name.toLowerCase() &&
+          product.id !== productId
       );
     } catch (error) {
       console.error('Error checking product name:', error);
@@ -81,9 +81,33 @@ const AdminSubscriptions = () => {
     }
   };
 
+  const checkProductPriceExists = async (
+    price: number,
+    currency: string,
+    interval: string,
+    productId: string | null
+  ): Promise<boolean> => {
+    try {
+      const response = await getSubscriptions();
+      return response.data.some(
+        (product: Product) =>
+          product.active &&
+          product.default_price &&
+          product.default_price.unit_amount === price * 100 && 
+          product.default_price.currency === currency &&
+          product.default_price.recurring?.interval === interval &&
+          product.id !== productId
+      );
+    } catch (error) {
+      console.error('Error checking product price:', error);
+      return false;
+    }
+  };
+
   const validateForm = async (): Promise<boolean> => {
     const newErrors: ValidationErrors = {};
 
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Product name is required';
     } else if (formData.name.length < 3) {
@@ -93,14 +117,16 @@ const AdminSubscriptions = () => {
     } else {
       const nameExists = await checkProductNameExists(formData.name.trim(), formData.productId);
       if (nameExists) {
-        newErrors.name = 'Product name already exists';
+        newErrors.name = 'A plan with this name already exists';
       }
     }
 
+    // Description validation
     if (formData.description && formData.description.length > 500) {
       newErrors.description = 'Description cannot exceed 500 characters';
     }
 
+    // Price validation
     const price = parseFloat(formData.price);
     if (!formData.price) {
       newErrors.price = 'Price is required';
@@ -110,6 +136,18 @@ const AdminSubscriptions = () => {
       newErrors.price = 'Price must be at least ₹1';
     } else if (price > 100000) {
       newErrors.price = 'Price cannot exceed ₹100,000';
+    } else if (!/^\d+(\.\d{1,2})?$/.test(formData.price)) {
+      newErrors.price = 'Price must have up to 2 decimal places';
+    } else {
+      const priceExists = await checkProductPriceExists(
+        price,
+        formData.currency,
+        formData.interval,
+        formData.productId
+      );
+      if (priceExists) {
+        newErrors.price = `A ${formData.interval}ly plan with price ${getCurrencySymbol(formData.currency)}${price.toFixed(2)} already exists`;
+      }
     }
 
     setErrors(newErrors);
@@ -119,9 +157,8 @@ const AdminSubscriptions = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
     if (errors[name as keyof ValidationErrors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -135,7 +172,7 @@ const AdminSubscriptions = () => {
       const payload = {
         name: formData.name.trim(),
         description: formData.description.trim(),
-        price: parseFloat(formData.price) * 100,
+        price: parseFloat(formData.price) * 100, // Convert to cents
         currency: formData.currency,
         interval: formData.interval,
         ...(isEditing && formData.productId ? { id: formData.productId } : {}),
@@ -143,17 +180,17 @@ const AdminSubscriptions = () => {
 
       if (isEditing) {
         await updateSubscription(payload);
-        toast.success('Product updated successfully');
+        toast.success('Plan updated successfully');
       } else {
         await createSubscription(payload);
-        toast.success('Product created successfully');
+        toast.success('Plan created successfully');
       }
 
       resetForm();
       setIsModalOpen(false);
       fetchProducts();
     } catch (error: any) {
-      toast.error(error.message || (isEditing ? 'Failed to update product' : 'Failed to create product'));
+      toast.error(error.message || (isEditing ? 'Failed to update plan' : 'Failed to create plan'));
     } finally {
       setSubmitting(false);
     }
@@ -176,11 +213,11 @@ const AdminSubscriptions = () => {
     try {
       setDeleting(productId);
       await deActivateSubscription(productId);
-      toast.success('Product deactivated successfully');
+      toast.success('Plan deactivated successfully');
       fetchProducts();
       setDeleteConfirm(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to deactivate product');
+      toast.error(error.message || 'Failed to deactivate plan');
     } finally {
       setDeleting(null);
     }
@@ -190,11 +227,11 @@ const AdminSubscriptions = () => {
     try {
       setDeleting(productId);
       await ActivateSubscription(productId);
-      toast.success('Product activated successfully');
+      toast.success('Plan activated successfully');
       fetchProducts();
       setDeleteConfirm(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to activate product');
+      toast.error(error.message || 'Failed to activate plan');
     } finally {
       setDeleting(null);
     }
@@ -236,14 +273,14 @@ const AdminSubscriptions = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Subscription Management
           </h1>
-          <p className="text-slate-600">Create and manage your subscription products with ease</p>
+          <p className="text-slate-600">Create and manage your subscription plans with ease</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-600">Total Products</p>
+                <p className="text-sm font-medium text-slate-600">Total plans</p>
                 <p className="text-3xl font-bold text-slate-900">{products.length}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
@@ -299,7 +336,7 @@ const AdminSubscriptions = () => {
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            Create New Product
+            Create New Plan
           </Button>
         </div>
 
@@ -311,16 +348,11 @@ const AdminSubscriptions = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
-              {isEditing ? 'Edit Product' : 'Create New Product'}
+              {isEditing ? 'Edit Plan' : 'Create New Plan'}
             </div>
           }
           open={isModalOpen}
           onCancel={() => {
-            if (isEditing && (formData.name || formData.description || formData.price)) {
-              // if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
-              //   return;
-              // }
-            }
             resetForm();
             setIsModalOpen(false);
           }}
@@ -330,7 +362,7 @@ const AdminSubscriptions = () => {
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">Product Name</label>
+                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">Plan Name</label>
                 <input
                   id="name"
                   name="name"
@@ -341,7 +373,7 @@ const AdminSubscriptions = () => {
                   className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ${
                     errors.name ? 'border-red-500 bg-red-50' : 'border-slate-300 hover:border-slate-400'
                   }`}
-                  placeholder="Enter product name"
+                  placeholder="Enter plan name"
                   aria-describedby={errors.name ? 'name-error' : undefined}
                 />
                 {errors.name && (
@@ -430,7 +462,7 @@ const AdminSubscriptions = () => {
                 className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-none ${
                   errors.description ? 'border-red-500 bg-red-50' : 'border-slate-300 hover:border-slate-400'
                 }`}
-                placeholder="Enter product description (optional)"
+                placeholder="Enter plan description (optional)"
                 aria-describedby={errors.description ? 'description-error' : undefined}
               />
               {errors.description && (
@@ -453,15 +485,10 @@ const AdminSubscriptions = () => {
                   submitting ? 'opacity-50 cursor-not-allowed' : 'hover:from-indigo-700 hover:to-purple-700'
                 }`}
               >
-                {submitting ? 'Processing...' : isEditing ? 'Update Product' : 'Create Product'}
+                {submitting ? 'Processing...' : isEditing ? 'Update Plan' : 'Create Plan'}
               </Button>
               <Button
                 onClick={() => {
-                  // if (isEditing && (formData.name || formData.description || formData.price)) {
-                  //   if (!window.confirm('Are you sure you want to cancel editing? Changes will be lost.')) {
-                  //     return;
-                  //   }
-                  // }
                   resetForm();
                   setIsModalOpen(false);
                 }}
@@ -484,14 +511,14 @@ const AdminSubscriptions = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              Your Products
+              Your Plans
             </h2>
           </div>
           
           {loading ? (
             <div className="p-12 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-              <p className="mt-4 text-slate-600">Loading products...</p>
+              <p className="mt-4 text-slate-600">Loading plans...</p>
             </div>
           ) : products.length === 0 ? (
             <div className="p-12 text-center">
@@ -500,8 +527,8 @@ const AdminSubscriptions = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <p className="text-slate-600 text-lg">No products found</p>
-              <p className="text-slate-500 text-sm mt-1">Create your first subscription product to get started</p>
+              <p className="text-slate-600 text-lg">No plans found</p>
+              <p className="text-slate-500 text-sm mt-1">Create your first subscription plan to get started</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
@@ -543,15 +570,15 @@ const AdminSubscriptions = () => {
                       disabled={product.active === false}
                       onClick={() => handleEdit(product)}
                       className="flex-1 px-4 py-2 bg-indigo-100 text-indigo-700 font-medium rounded-lg hover:bg-indigo-200 transition-all duration-300 disabled:opacity-20"
-                      aria-label={`Edit product ${product.name || 'Unnamed Product'}`}
+                      aria-label={`Edit plan ${product.name || 'Unnamed Product'}`}
                     >
                       Edit
                     </button>
 
                     {product.active ? (
                       <Popconfirm
-                        title="Manage user"
-                        description="Are you sure to de-activate this plan?"
+                        title="Manage Plan"
+                        description="Are you sure you want to deactivate this plan?"
                         onConfirm={() => handleDeActivate(product.id)}
                         okText="Yes"
                         cancelText="No"
@@ -560,15 +587,15 @@ const AdminSubscriptions = () => {
                           className={`flex-1 px-4 py-2 bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-300 ${
                             deleting === product.id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-200'
                           }`}
-                          aria-label={`Deactivate product ${product.name || 'Unnamed Product'}`}
+                          aria-label={`Deactivate plan ${product.name || 'Unnamed Product'}`}
                         >
                           {deleting === product.id ? 'Deactivating...' : 'Deactivate'}
                         </button>
                       </Popconfirm>
                     ) : (
                       <Popconfirm
-                        title="Manage user"
-                        description="Are you sure to activate this plan?"
+                        title="Manage Plan"
+                        description="Are you sure you want to activate this plan?"
                         onConfirm={() => handleActivate(product.id)}
                         okText="Yes"
                         cancelText="No"
@@ -577,7 +604,7 @@ const AdminSubscriptions = () => {
                           className={`flex-1 px-4 py-2 bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-300 ${
                             deleting === product.id ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-200'
                           }`}
-                          aria-label={`Activate product ${product.name || 'Unnamed Product'}`}
+                          aria-label={`Activate plan ${product.name || 'Unnamed Product'}`}
                         >
                           {deleting === product.id ? 'Activating...' : 'Activate'}
                         </button>

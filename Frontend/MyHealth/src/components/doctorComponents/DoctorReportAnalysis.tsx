@@ -17,7 +17,7 @@ type Report = {
   analysisStatus: string;
 };
 
-export function DoctorReportAnalysis() {
+const DoctorReportAnalysis = ()=> {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [resultText, setResultText] = useState("");
@@ -416,4 +416,6 @@ export function DoctorReportAnalysis() {
       </div>
     </div>
   );
-}
+};
+
+export default DoctorReportAnalysis

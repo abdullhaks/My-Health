@@ -140,6 +140,8 @@ userRoutes.get("/dashboard",verifyAccessTokenMidleware("user"),(req,res)=> dashb
 
 userRoutes.get("/prescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getPrescription(req,res) );
 userRoutes.get("/latestPrescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getLatestPrescription(req,res) );
+userRoutes.get("/latestDoctorPrescription",verifyAccessTokenMidleware("user"),(req,res)=> prescriptionCtrl.getLatestDoctorPrescription(req,res) );
+
 
 userRoutes.get("/unAvailableDays",verifyAccessTokenMidleware("user"),(req,res)=>sessionCtrl.getUnavailableDays(req,res));
 

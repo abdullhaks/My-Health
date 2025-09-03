@@ -23,6 +23,10 @@ const prescriptionSchema = new Schema<IPrescriptionDocument>({
         type:[Object],
         required:true
     },
+    medicationPeriod:{
+        type:Number,
+        default:3
+    },
     notes:{
         type:String,
         required:false

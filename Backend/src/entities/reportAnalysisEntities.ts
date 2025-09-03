@@ -9,8 +9,9 @@ files:Array<String>
 doctorName: String
 doctorCategory: String,
 createdAt: Date;
-fee: Number 
-transactionId?: String
+fee: number 
+transactionId?: string
 analysisStatus: "pending" | "cancelled" | "submited";
-result: String
+result: String;
+updatedAt:Date;
 }

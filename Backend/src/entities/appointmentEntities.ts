@@ -1,6 +1,7 @@
 import { Document, Types } from "mongoose";
 
 export interface IAppointment {
+  
   userId: string;
   doctorId: string;
   slotId: string;
@@ -26,4 +27,7 @@ export interface IAppointment {
   updatedAt: Date;
 }
 
-export interface IAppointmentDocument extends IAppointment, Document {}
+export interface IAppointmentDocument extends IAppointment, Document {
+    _id:Types.ObjectId;
+
+}

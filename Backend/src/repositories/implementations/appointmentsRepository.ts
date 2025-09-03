@@ -2,13 +2,17 @@ import { injectable, inject } from "inversify";
 import { IAppointmentDocument } from "../../entities/appointmentEntities";
 import BaseRepository from "./baseRepository";
 import IAppointmentsRepository from "../interfaces/IAppointmentsRepository";
+import { Model } from "mongoose";
+import { FilterQuery } from "mongoose";
+import { IAppointment } from "../../dto/appointmentDTO";
+import { IAppointmentDTO } from "../../dto/appointmentDTO";
 
 @injectable()
 export default class AppointmentsRepository
   extends BaseRepository<IAppointmentDocument>
   implements IAppointmentsRepository
 {
-  constructor(@inject("appointmentModel") private _appointmentModel: any) {
+  constructor(@inject("appointmentModel") private _appointmentModel: Model<IAppointmentDocument>) {
     super(_appointmentModel);
   }
 
@@ -16,9 +20,9 @@ export default class AppointmentsRepository
     userId: string,
     page: number,
     limit: number
-  ): Promise<any> {
+  ): Promise<{appointments:IAppointment[] | null,totalPages:number | null}> {
     try {
-      const query: any = { userId: userId };
+      const query: FilterQuery<IAppointment> = { userId: userId };
 
       const skip = (page - 1) * limit;
 
@@ -38,9 +42,9 @@ export default class AppointmentsRepository
     }
   }
 
-  async getAppointments(page: number, limit: number): Promise<any> {
+  async getAppointments(page: number, limit: number): Promise<{appointments:IAppointment[] | null,totalPages:number | null}> {
     try {
-      const query: any = {};
+      const query: FilterQuery<IAppointment>  = {};
 
       const skip = (page - 1) * limit;
 
@@ -63,8 +67,8 @@ export default class AppointmentsRepository
   async getAllAppointments(
     page: number,
     limit: number,
-    query: any = {}
-  ): Promise<any> {
+    query: FilterQuery<IAppointment>  = {}
+  ): Promise<{appointments:IAppointmentDTO[] ,totalPages:number}> {
     try {
       const skip = (page - 1) * limit;
       const appointments = await this._appointmentModel
@@ -80,7 +84,7 @@ export default class AppointmentsRepository
       const totalPages = Math.ceil(total / limit);
 
       return {
-        appointments: appointments.map((appointment: any) => ({
+        appointments: appointments.map((appointment) => ({
           _id: appointment._id.toString(),
           userId: appointment.userId.toString(),
           userName: appointment.userName,
@@ -100,6 +104,7 @@ export default class AppointmentsRepository
           createdAt: appointment.createdAt,
           updatedAt: appointment.updatedAt,
           slotId: appointment.slotId,
+
         })),
         totalPages,
       };
@@ -113,8 +118,8 @@ export default class AppointmentsRepository
    async getAllAppointmentsAdmin(
     page: number,
     limit: number,
-    query: any = {}
-  ): Promise<any> {
+    query: FilterQuery<IAppointment> = {}
+  ): Promise<{appointments:IAppointmentDTO[] | null,totalPages:number | null}> {
     try {
       const skip = (page - 1) * limit;
       const appointments = await this._appointmentModel
@@ -130,7 +135,7 @@ export default class AppointmentsRepository
       const totalPages = Math.ceil(total / limit);
 
       return {
-        appointments: appointments.map((appointment: any) => ({
+        appointments: appointments.map((appointment) => ({
           _id: appointment._id.toString(),
           userId: appointment.userId.toString(),
           userName: appointment.userName,

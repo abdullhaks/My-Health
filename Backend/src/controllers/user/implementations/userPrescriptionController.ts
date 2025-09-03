@@ -55,10 +55,10 @@ export default class UserPrescriptionController implements IUserPrescriptionCtrl
             
             if(userId){
                  const response =await this._prescriptionService.getLatestPrescription(userId.toString());
-            if(!response){
-                res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
-                return
-            }
+            // if(!response){
+            //     res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+            //     return
+            // }
             res.status(HttpStatusCode.OK).json(response);
             return
 
@@ -78,6 +78,34 @@ export default class UserPrescriptionController implements IUserPrescriptionCtrl
 
 
 
+       async getLatestDoctorPrescription(req: Request, res: Response):Promise<void> {
+
+        try{
+
+            const {userId,doctorId} = req.query;
+            
+            if(userId&&doctorId){
+                 const response =await this._prescriptionService.getLatestDoctorPrescription(userId.toString(),doctorId?.toString());
+            // if(!response){
+            //     res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+            //     return
+            // }
+            res.status(HttpStatusCode.OK).json(response);
+            return
+
+            }
+            res.status(HttpStatusCode.BAD_REQUEST).json({message:"bad request"});
+            return
+
+        }catch(error){
+            console.log("error in get latest prescription",error);
+            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({message:"get latest prescription failed"});
+            return
+        }
+
+        
+        
+    };
 
 
 

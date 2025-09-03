@@ -1,4 +1,4 @@
-import { IAppointment } from "../../../dto/appointmentDTO";
+import { IAppointment, IAppointmentDTO } from "../../../dto/appointmentDTO";
 
 
  interface filter {
@@ -11,7 +11,7 @@ import { IAppointment } from "../../../dto/appointmentDTO";
 
 export default interface IAdminAppointmentsService {
 
-getAppointments(pageNumber:number, limitNumber:number,filters: filter):Promise<IAppointment[]>,
+getAppointments(pageNumber:number, limitNumber:number,filters: filter):Promise<{appointments:IAppointmentDTO[] | null,totalPages:number | null}>,
 
 };
 

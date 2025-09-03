@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Eye, Calendar, Clock, User, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Pill } from 'lucide-react';
+import { Eye, Calendar, Clock, User, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX, Pill, FileText, ArrowRight, Calendar as CalendarIcon, Stethoscope } from 'lucide-react';
 import { getDashboardContent, getLatestPrescription } from '../../api/user/userApi';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -35,6 +35,8 @@ interface Prescription {
     instructions: string;
     notes: string;
   }>;
+  medicationPeriod: number;
+  notes: string;
   createdAt: string;
   __v: number;
 }
@@ -159,12 +161,24 @@ const UserDashboard = () => {
     navigate('/user/blog', { state: { blog } });
   };
 
+  const handleGetPrescription = (appointmentId: string) => {
+    navigate(`/user/prescription/${appointmentId}`);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
+  };
+
+  const getDaysAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
   useEffect(() => {
@@ -189,7 +203,11 @@ const UserDashboard = () => {
       setLatitude(null);
       setLongitude(null);
     };
-    navigator.geolocation.getCurrentPosition(successHandler, errorHandler);
+    navigator.geolocation.getCurrentPosition(successHandler, errorHandler, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    });
   }, []);
 
   // Determine greeting based on time of day
@@ -212,34 +230,38 @@ const UserDashboard = () => {
         </div>
 
         {/* Welcome Message with Prescription Reminder */}
-        {latestPrescription && (
-          <div className="bg-white rounded-3xl shadow-xl p-6 mb-6 border border-blue-100">
-            <div className="flex items-center gap-4 flex-col sm:flex-row">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Pill className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {getGreeting()}, {user?.name || "User"}!
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Have you taken your {latestPrescription.medications[0]?.name || "medication"} (
-                  {latestPrescription.medications[0]?.dosage || "dosage"}) today as prescribed for your {latestPrescription.medicalCondition || "condition"}?
-                </p>
-                {latestPrescription.medications[0]?.instructions && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    <span className="font-medium">Instructions:</span> {latestPrescription.medications[0].instructions}
+        <div className="bg-white rounded-3xl shadow-xl p-6 mb-6 border border-blue-100">
+          <div className="flex items-center gap-4 flex-col sm:flex-row">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Pill className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {getGreeting()}, {user?.name || "User"}!
+              </h2>
+
+              {latestPrescription && (
+                <>
+                  <p className="text-gray-600 mt-1">
+                    Have you taken your {latestPrescription.medications[0]?.name || "medication"} (
+                    {latestPrescription.medications[0]?.dosage || "dosage"}) today as prescribed for your {latestPrescription.medicalCondition || "condition"}?.
+                    {latestPrescription.notes&& ` do you ${latestPrescription.notes}`}
                   </p>
-                )}
-                {latestPrescription.medications[0]?.notes && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    <span className="font-medium">Notes:</span> {latestPrescription.medications[0].notes}
-                  </p>
-                )}
-              </div>
+                  {latestPrescription?.medications[0]?.instructions && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium">Instructions:</span> {latestPrescription.medications[0].instructions}
+                    </p>
+                  )}
+                  {latestPrescription?.medications[0]?.notes && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium">Notes:</span> {latestPrescription.medications[0].notes}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Top Section: Advertisement and Calendar */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -401,6 +423,101 @@ const UserDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Latest Prescription Section */}
+        {latestPrescription && (
+          <div className="bg-white rounded-3xl shadow-xl p-8 border border-green-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800">Latest Prescription</h2>
+                <p className="text-gray-500">Your most recent medical prescription</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Main Info */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Stethoscope className="w-6 h-6 text-green-600" />
+                    <h3 className="text-xl font-bold text-gray-800">Medical Condition</h3>
+                  </div>
+                  <p className="text-lg text-gray-700 font-medium">{latestPrescription.medicalCondition}</p>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Pill className="w-6 h-6 text-blue-600" />
+                    <h3 className="text-xl font-bold text-gray-800">Primary Medication</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-lg font-semibold text-gray-800">
+                        {latestPrescription.medications[0]?.name}
+                      </span>
+                      <span className="ml-2 text-blue-600 font-medium">
+                        {latestPrescription.medications[0]?.dosage}
+                      </span>
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">Frequency:</span> {latestPrescription.medications[0]?.frequency}
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">Duration:</span> {latestPrescription.medications[0]?.duration}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Additional Info */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                  <div className="flex items-center gap-3 mb-4">
+                    <CalendarIcon className="w-6 h-6 text-amber-600" />
+                    <h3 className="text-xl font-bold text-gray-800">Prescription Details</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Prescribed:</span>
+                      <span className="font-medium text-gray-800">{formatDate(latestPrescription.createdAt)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Days Ago:</span>
+                      <span className="font-medium text-gray-800">{getDaysAgo(latestPrescription.createdAt)} days</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Medications:</span>
+                      <span className="font-medium text-gray-800">{latestPrescription.medications.length}</span>
+                    </div>
+                    {/* <div className="flex justify-between">
+                      <span className="text-gray-600">Treatment Period:</span>
+                      <span className="font-medium text-gray-800">{latestPrescription.medicationPeriod} months</span>
+                    </div> */}
+                  </div>
+                </div>
+
+                {latestPrescription.notes && (
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-2xl p-6 border border-purple-100">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">Doctor's Notes</h3>
+                    <p className="text-gray-700 leading-relaxed">{latestPrescription.notes}</p>
+                  </div>
+                )}
+
+                <button
+                  onClick={()=>handleGetPrescription(latestPrescription.appointmentId)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl cursor-pointer"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>View Full Prescription Details</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Blogs Section */}
         <div className="bg-white rounded-3xl shadow-xl p-8">

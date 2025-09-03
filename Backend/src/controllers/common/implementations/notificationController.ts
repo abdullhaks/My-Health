@@ -28,6 +28,7 @@ export default class NotificationController implements INotificationCtrl{
 
         const {id,limit,notificationSet} = req.query;
 
+        console.log("noti id is....",id,limit,notificationSet);
         if(!id || !limit|| !notificationSet){
            res.status(HttpStatusCode.BAD_REQUEST).json({ message: "fetching notification failed" });
                    return; 

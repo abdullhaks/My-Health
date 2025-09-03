@@ -6,7 +6,7 @@ import { HttpStatusCode } from "../../../utils/enum";
 
 //..................temp
 import axios from "axios";
-import User from "../../../models/userModel"; 
+import User from "../../../models/user"; 
 import { generateAccessToken, generateRefreshToken } from "../../../utils/jwt";
 import { UserLoginRequestDTO } from "../../../dto/userDTO";
 

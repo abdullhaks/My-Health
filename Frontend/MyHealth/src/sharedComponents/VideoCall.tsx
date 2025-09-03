@@ -33,6 +33,7 @@ interface Prescription {
     duration: string;
     instructions?: string;
   }[];
+  medicationPeriod:number;
   notes?: string;
   createdAt?: Date;
 };
@@ -61,6 +62,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
     doctorId: "",
     medicalCondition:"",
     medications: [],
+    medicationPeriod:3,
     notes: "",
     createdAt: new Date()
   });
@@ -237,17 +239,20 @@ const VideoCall = ({ role }: VideoCallProps) => {
       doctorId: appointment.doctorId || "",
       medicalCondition:values.medicalCondition || "",
       medications: values.medications || [],
+      medicationPeriod:values.medicationPeriod || 3,
       notes: values.notes,
       createdAt: new Date()
     };
 
     try {
-      // Replace with actual API call
+      
       const response = await submitPrescription(newPrescriptionData)
       if(response){
         setPrescriptions([...prescriptions, response]);
         form.resetFields();
         setPrescriptionSubmited(true);
+        antAlert.success("prescription submited")
+        setShowPrescription(false);
       }  else {
         antAlert.error("Failed to add prescription. Please try again.");
       }
@@ -675,6 +680,44 @@ const VideoCall = ({ role }: VideoCallProps) => {
                 >
                   <Input.TextArea rows={2} placeholder="Describe the medical condition..." />
                 </Form.Item>
+
+                <Form.Item
+                  name="medicationPeriod"
+                  label="Medication Period"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please enter the medication period',
+                    },
+                    {
+                      validator: (_, value) => {
+                        if (!value) {
+                          return Promise.reject(); // Handled by required rule
+                        }
+                        const numValue = parseFloat(value);
+                        if (isNaN(numValue)) {
+                          return Promise.reject('Medication period must be a number');
+                        }
+                        if (numValue <= 0) {
+                          return Promise.reject('Medication period must be greater than 0');
+                        }
+                        if (numValue >= 8) {
+                          return Promise.reject('Medication period must be less than 8');
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                >
+                  <Input
+                    type="number"
+                    min={1}
+                    max={7}
+                    step={1} 
+                    placeholder="Enter medication period (1-7)"
+                  />
+                </Form.Item>
+
                 <Form.List name="medications">
                   {(fields, { add, remove }) => (
                     <>
@@ -835,6 +878,12 @@ const VideoCall = ({ role }: VideoCallProps) => {
                               <div className="mb-3">
                                 <Tag color="blue" className="mb-2">Medical Condition</Tag>
                                 <p className="text-gray-700 text-sm">{prescription.medicalCondition}</p>
+                              </div>
+                            )}
+                            {prescription.medicationPeriod && (
+                              <div className="mb-3">
+                                <Tag color="red" className="mb-2">Medication Period</Tag>
+                                <p className="text-gray-700 text-sm">{prescription.medicationPeriod}Days</p>
                               </div>
                             )}
                             

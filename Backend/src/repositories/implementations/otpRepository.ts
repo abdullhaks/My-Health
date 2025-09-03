@@ -1,5 +1,5 @@
 import { injectable , inject } from "inversify";
-import { IOtpDocument } from "../../models/otpModel"; 
+import { IOtpDocument } from "../../models/otp"; 
 import BaseRepository from "./baseRepository";
 import IOtpRepository from "../interfaces/IOtpRepository";
 

@@ -4,7 +4,7 @@ import { FiSend, FiCheck, FiCheckCircle, FiX } from "react-icons/fi";
 import { IoDocumentAttachOutline } from "react-icons/io5";
 import { io, Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
-import { getUserConversations, getUserMessages, directFileUpload, checkActiveBooking } from "../../api/user/userApi";
+import { getUserConversations, getUserMessages, directFileUpload, checkActiveBooking, getLatestDoctorPrescription } from "../../api/user/userApi";
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
@@ -71,16 +71,20 @@ const UserChat = () => {
     }
   };
 
-  const settingCurrentChat = (c:any)=> {
-    setCurrentChat(c);
-    console.log("curretn cahsljflsfljdsfjsklfj",c)
-    
-  // Find the member who is NOT the logged-in user
-  
-
-  setDoctorId(c.members[0].userId);
-
+  const settingCurrentChat = (c: any) => {
+  setCurrentChat(c);
+  // Find the member who is NOT the logged-in user (assumed to be the doctor)
+  const doctor = c.members.find((m: any) => m._id !== userId);
+  if (doctor) {
+    setDoctorId(doctor._id || doctor.userId); // Use _id or userId based on API structure
+  } else {
+    console.error("Doctor not found in conversation members");
+    setDoctorId("");
+    setActiveAppointment(false); // Disable messaging if no valid doctor
   }
+};
+
+
   useEffect(() => {
     const doctorId = location.state?.doctorId;
     if (doctorId && userId && !hasInitializedConversation.current) {
@@ -198,35 +202,45 @@ const UserChat = () => {
     }
   }, [userId]);
 
-  useEffect(() => {
-      console.log("docotr id is .........",doctorId);
+useEffect(() => {
+  if (!currentChat || !socketRef.current || !doctorId) return;
+
+  socketRef.current.emit("join", currentChat._id);
+
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const res = await getUserMessages(currentChat._id);
+      const active = await checkActiveBooking(userId, doctorId);
+      const latestPres = await getLatestDoctorPrescription(userId, doctorId);
       
-    if (!currentChat || !socketRef.current) return;
-
-    socketRef.current.emit("join", currentChat._id);
-
-    const fetchMessages = async () => {
-      setLoading(true);
-      try {
-        const res = await getUserMessages(currentChat._id);
-        const active = await checkActiveBooking(userId,doctorId);
-        setMessages(res);
-        setActiveAppointment(active.status);
-        socketRef.current?.emit("markSeen", { conversationId: currentChat._id });
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
-        message.error("Failed to fetch messages. Please try again.");
-      } finally {
-        setLoading(false);
+      let medicationPeriod = null;
+      if (latestPres && typeof latestPres.medicationPeriod === 'number' && latestPres.medicationPeriod > 0) {
+        const dy = new Date(latestPres.createdAt);
+        dy.setDate(dy.getDate() + latestPres.medicationPeriod);
+        medicationPeriod = dy;
       }
-    };
 
-    fetchMessages();
+      setMessages(res);
+      // Explicitly set activeAppointment based on conditions
+      setActiveAppointment(
+        (medicationPeriod && medicationPeriod > new Date()) || active?.status || false
+      );
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+      message.error("Failed to fetch messages. Please try again.");
+      setActiveAppointment(false); // Set to false on error to prevent accidental enabling
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => {
-      socketRef.current?.emit("leave", currentChat._id);
-    };
-  }, [currentChat]);
+  fetchMessages();
+
+  return () => {
+    socketRef.current?.emit("leave", currentChat._id);
+  };
+}, [currentChat, userId, doctorId]);
 
   useEffect(() => {
     if (!currentChat || !socketRef.current) return;
@@ -689,13 +703,13 @@ const UserChat = () => {
 
             :
              <div className="bg-white border-t border-gray-200 p-4 flex items-center space-x-3 sticky bottom-0 z-5">
-              <p className="text-sm text-gray-500">You can send messages only for active appointments.</p>
+              <p className="text-sm text-gray-500">You can send messages only for active appointments or if you are in medication period.</p>
              </div>
     }
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
-            Select or start a conversation to begin chatting
+            select a conversation or start a new one by searchin a doctor 
           </div>
         )}
       </div>

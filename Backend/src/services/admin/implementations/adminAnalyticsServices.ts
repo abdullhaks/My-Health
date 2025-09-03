@@ -115,7 +115,7 @@ async getUserAnalytics(filter: string): Promise<{ name: string; value: number }[
       { $project: projectStage },
     ];
 
-    const rawData = await this._userRepository.aggregate(pipeline) as { name: string; value: number }[];
+    const rawData = await this._userRepository.aggregate<{ name: string; value: number }>(pipeline);
 
     // Format results
     switch (filter) {
@@ -241,7 +241,9 @@ async getDoctorAnalytics(filter: string): Promise<{ name: string; value: number 
       { $project: projectStage },
     ];
 
-    const rawData = await this._doctorRepository.aggregate(pipeline) as { name: string; value: number }[];
+    const rawData = await this._doctorRepository.aggregate <{ name: string; value: number }>(pipeline);
+
+
 
     // Format results
     switch (filter) {

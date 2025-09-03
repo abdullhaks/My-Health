@@ -6,7 +6,7 @@ export interface TokenResponseDto {
 export interface IResponseDTO{
     success?: boolean;
     message?: string;
-    data?: any;
+    data?: unknown;
     subscription?: string;
     accessToken?:string;
   };

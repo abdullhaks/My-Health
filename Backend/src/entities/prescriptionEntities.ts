@@ -15,6 +15,7 @@ export default interface IPrescriptionDocument extends Document {
     duration: string;
     instructions?: string;
   }[];
+  medicationPeriod:number;
   notes?: string;
   createdAt?: Date;
 };
