@@ -8,6 +8,7 @@ import DoctorPayoutModal from "./DoctorPayoutModal";
 import { updateProfileImage, updateDoctorProfile, changePassword, payoutRequest } from "../../api/doctor/doctorApi";
 import { updateDoctor } from "../../redux/slices/doctorSlices";
 import { message } from "antd";
+import { payoutDetails } from "../../interfaces/payout";
 
 const DoctorProfile = () => {
   const doctor = useSelector((state: any) => state.doctor.doctor);
@@ -100,7 +101,11 @@ const DoctorProfile = () => {
     }
   };
 
-  const handlePasswordChange = async (passwordData: any) => {
+  const handlePasswordChange = async (passwordData:{
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) => {
     try {
       const response = await changePassword(passwordData, doctor._id);
       if (!response) {
@@ -114,7 +119,7 @@ const DoctorProfile = () => {
   };
 
 
-   const handlePayoutRequest = async (payoutDetails: any) => {
+   const handlePayoutRequest = async (payoutDetails: payoutDetails) => {
     try {
       const response = await payoutRequest(payoutDetails, doctor._id);
       if (!response) {

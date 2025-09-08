@@ -42,27 +42,24 @@ export default class DoctorProfileService implements IDoctorProfileService {
 
     } 
 
-    async verifySubscription (sessionId:string): Promise<{message:string,doctor:Partial<IDoctor>}>{
+    async verifySubscription (sessionId:string,doctorId:string): Promise<{message:string,doctor:Partial<IDoctor>}>{
 
         console.log("session id from verifySubscription",sessionId);
 
         const verification = await this._paymentRepository.findOne({sessionId:sessionId});
-        if(!verification){
+        const doc = await this._doctorRepository.findOne({_id:doctorId});
+
+        console.log("verifiacaton and doct is ....",verification,doc);
+
+        if(!verification || !doc || doc?.premiumMembership===false){
             throw new Error("subscription verification failed");
         };
 
-        const doctor = await this._doctorRepository.findOne({_id:verification.doctor});
+          doc.profile = await getSignedImageURL(doc.profile)
+    
+        const { password, ...doctorWithoutPassword } = doc;
 
-        if (!doctor) {
-            throw new Error("Doctor not found in subcription verification");
-        }
-
-        if(doctor){
-          doctor.profile = await getSignedImageURL(doctor.profile)
-        }
-        const { password, ...doctorWithoutPassword } = doctor;
-
-        return {
+        return { 
           message: "subscription verification success",
           doctor: doctorWithoutPassword,
         };

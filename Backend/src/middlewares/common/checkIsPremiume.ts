@@ -1,16 +1,15 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction ,RequestHandler} from "express";
 import { HttpStatusCode } from "../../utils/enum";
 import doctorModel from "../../models/doctor";
 
-export function verifyIsPremiume() {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void | any> => {
+export function verifyIsPremiume():RequestHandler {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { doctorEmail } = req.cookies;
 
       if (!doctorEmail) {
-        return res
-          .status(HttpStatusCode.UNAUTHORIZED)
-          .json({ msg: "Credentials missing" });
+         res .status(HttpStatusCode.UNAUTHORIZED).json({ msg: "Credentials missing" });
+         return
       }
 
       const doctor = await doctorModel.findOne({ email: doctorEmail });
@@ -24,10 +23,10 @@ export function verifyIsPremiume() {
         res.clearCookie("doctorRefreshToken");
         res.clearCookie("doctorEmail");
 
-        return res.status(HttpStatusCode.FORBIDDEN).json({
-          success: false,
+         res.status(HttpStatusCode.FORBIDDEN).json({success: false,
           error: { message: "You are not a premium member. Logged out." },
         });
+        return
       }
 
       next();
@@ -38,9 +37,10 @@ export function verifyIsPremiume() {
       res.clearCookie("doctorRefreshToken");
       res.clearCookie("doctorEmail");
 
-      return res
-        .status(HttpStatusCode.FORBIDDEN)
+       res.status(HttpStatusCode.FORBIDDEN)
         .json({ msg: "Credentials mismatch. Logged out." });
+
+        return
     }
   };
 }

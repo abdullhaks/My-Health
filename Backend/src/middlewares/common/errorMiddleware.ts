@@ -69,7 +69,7 @@ export const createError = (
   statusCode: number,
   message: string,
   code?: string,
-  details?: any
+  details?: string
 ): CustomError => {
   const error: CustomError = new Error(message);
   error.statusCode = statusCode;

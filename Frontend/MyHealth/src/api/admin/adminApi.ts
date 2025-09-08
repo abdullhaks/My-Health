@@ -2,8 +2,12 @@
 // import {message} from "antd";
 import { ROUTES } from "../../constants/routes";
 import { adminInstance } from "../../services/axiosFactory";
+import { subscriptionFormData } from "../../interfaces/subscription";
+import { transactionsFilter } from "../../interfaces/transaction";
+import { payoutFilter } from "../../interfaces/payout";
+import { payoutUpdateDto } from "../../interfaces/payout";
 
-export const loginAdmin = async (adminData: any) => {
+export const loginAdmin = async (adminData: {email:string,password:string}) => {
     try {
         const response = await adminInstance.post(ROUTES.admin.login, adminData);
         return response.data;
@@ -37,7 +41,7 @@ export const recoveryPassword = async (email: string) => {
     }
 };
 
-export const verifyRecoveryPassword = async (adminData: any) => {
+export const verifyRecoveryPassword = async (adminData: {email:string,password:string}) => {
     try {
         const response = await adminInstance.post(ROUTES.admin.login, adminData);
         return response.data;
@@ -211,7 +215,7 @@ export const getSubscriptions = async() => {
 };
 
 
-export const createSubscription = async(payload:any) => {
+export const createSubscription = async(payload:subscriptionFormData) => {
   try{
     const response = await adminInstance.post(ROUTES.admin.createSubscription,payload);
     console.log("response data is ....",response.data)
@@ -223,7 +227,7 @@ export const createSubscription = async(payload:any) => {
 };
 
 
-export const updateSubscription = async(payload:any) => {
+export const updateSubscription = async(payload:subscriptionFormData) => {
   try{
     const response = await adminInstance.put(ROUTES.admin.updateSubscription,payload);
     console.log("response data is ....",response.data)
@@ -296,7 +300,7 @@ export const getTotalAnalytics = async ()=>{
     }
 }
 
-export const getTransactions = async (page:number, limit:number,filters:any)=>{
+export const getTransactions = async (page:number, limit:number,filters:transactionsFilter)=>{
     try{
 
         const response = await adminInstance.get(ROUTES.admin.getTransactions,{
@@ -314,7 +318,7 @@ export const getTransactions = async (page:number, limit:number,filters:any)=>{
     }
 };
 
-export const getPayouts = async (page:number, limit:number,filters:any)=>{
+export const getPayouts = async (page:number, limit:number,filters:payoutFilter)=>{
     try{
 
         const response = await adminInstance.get(ROUTES.admin.payouts,{
@@ -334,7 +338,7 @@ export const getPayouts = async (page:number, limit:number,filters:any)=>{
 
 
 
-export const updatePayout = async (id:string, updateData:any)=>{
+export const updatePayout = async (id:string, updateData:payoutUpdateDto)=>{
     try{
 
         const response = await adminInstance.post(ROUTES.admin.payouts,{

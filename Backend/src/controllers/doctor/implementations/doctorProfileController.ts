@@ -62,12 +62,12 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
 
       async verifyingSubscription(req: Request, res: Response): Promise<void>{
 
-        const {sessionId} = req.body;
+        const {sessionId,doctorId} = req.body;
         console.log("sessoin id is ...",sessionId);
 
         try{
 
-          const response = await this._doctorProfileService.verifySubscription(sessionId)
+          const response = await this._doctorProfileService.verifySubscription(sessionId,doctorId)
 
            res.status(HttpStatusCode.OK).json(response);
 

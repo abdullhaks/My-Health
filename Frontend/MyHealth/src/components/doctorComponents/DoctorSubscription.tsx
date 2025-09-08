@@ -63,6 +63,7 @@ const DoctorSubscriptionPlans = () => {
       });
       const stripe = await stripePromise;
       if (stripe && data.url) {
+        console.log("stripe is opening......");
         window.location.href = data.url;
       }
     } catch (error) {

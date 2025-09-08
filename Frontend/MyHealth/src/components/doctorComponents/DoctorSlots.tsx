@@ -32,16 +32,8 @@ import {
   makeDayAvailable,
 } from "../../api/doctor/doctorApi";
 import axios from "axios";
+import {sessionData as Session}  from "../../interfaces/session"
 
-interface Session {
-  _id?: string;
-  doctorId?: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  fee: number;
-}
 
 interface Appointment {
   _id: string;
@@ -491,7 +483,7 @@ const DoctorSlots = () => {
         const updatedUnavailableSessions = await makeSessionUnavailable(
           doctorId,
           date,
-          session._id
+          session._id || ""
         );
         notify(updatedUnavailableSessions.cancelledAppoitments);
         message.success("Session made unavailable for this date");
@@ -499,7 +491,7 @@ const DoctorSlots = () => {
         await makeSessionAvailable(
           doctorId,
           date,
-          session._id
+          session._id || ''
         );
         message.success("Session made available for this date");
       };

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./DoctorPrivateRoute";
 import PublicRoute from "./DoctorPublicRoute";
 import { lazy } from 'react';
+import DoctorPaymentCancelled from "../../components/doctorComponents/DoctorPaymentCancelled";
 
 const DoctorLogin = lazy(() => import ( "../../pages/doctorPages/DoctorLogin"));
 const DoctorSignup = lazy(() => import ( "../../pages/doctorPages/DoctorSignup"));
@@ -52,6 +53,7 @@ const DoctorRoutes = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile" element={<DoctorProfile />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
+          <Route path="payment-cancelled" element={<DoctorPaymentCancelled />} />
           <Route path="slots" element={<DoctorSlots />} />
           <Route path="chat" element={<DoctorChat />} />
           <Route path="appointments" element={<DoctorAppointments />} />  

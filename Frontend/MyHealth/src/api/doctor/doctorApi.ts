@@ -1,8 +1,16 @@
 import { message } from "antd";
 import { ROUTES } from "../../constants/routes";
 import { doctorInstance } from "../../services/axiosFactory";
+import { metadataDto } from "../../interfaces/subscription";
+import { doctorhCangePasswordDto,doctorProfileUpdate } from "../../interfaces/doctor";
+import { blogCreate } from "../../interfaces/blog";
+import { advertisement } from "../../interfaces/advertisement";
+import { prescriptionData } from "../../interfaces/prescription";
+import { payoutDetails } from "../../interfaces/payout";
+import { sessionData } from "../../interfaces/session";
+import { payoutFilter } from "../../interfaces/payout";
 
-export const signupDoctor = async (doctorData: any) => {
+export const signupDoctor = async (doctorData: FormData) => {
   try {
     for (const [key, value] of doctorData.entries()) {
       console.log(`api side...${key}:`, value);
@@ -33,7 +41,7 @@ export const getMe = async () => {
   }
 };
 
-export const loginDoctor = async (doctorData: any) => {
+export const loginDoctor = async (doctorData: {email:string,password:string}) => {
   try {
     const response = await doctorInstance.post(ROUTES.doctor.login, doctorData);
     console.log("Login response:", response.data);
@@ -44,7 +52,7 @@ export const loginDoctor = async (doctorData: any) => {
   }
 };
 
-export const verifyDoctorOtp = async (otpData: any) => {
+export const verifyDoctorOtp = async (otpData: { email:string, otp: string }) => {
   try {
     console.log("OTP data:", otpData);
     const response = await doctorInstance.post(
@@ -64,9 +72,9 @@ export const resendDoctorOtp = async (email: string) => {
       params: { email },
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error resending OTP:", error);
-    throw error.response?.data?.msg || "Something went wrong";
+    throw error || "Something went wrong";
   }
 };
 
@@ -93,7 +101,7 @@ export const logoutDoctor = async () => {
   }
 };
 
-export const handlePayment = async (priceId: any, metadata: any) => {
+export const handlePayment = async (priceId: string, metadata: metadataDto) => {
   try {
     const response = await doctorInstance.post(
       ROUTES.doctor.stripe.createCheckoutSession,
@@ -107,11 +115,11 @@ export const handlePayment = async (priceId: any, metadata: any) => {
   }
 };
 
-export const verifySubscription = async (sessionId: string) => {
+export const verifySubscription = async (sessionId: string,doctorId:string) => {
   try {
     const response = await doctorInstance.post(
       ROUTES.doctor.verifySubscription,
-      { sessionId }
+      { sessionId,doctorId }
     );
 
     return response.data;
@@ -121,7 +129,7 @@ export const verifySubscription = async (sessionId: string) => {
   }
 };
 
-export const changePassword = async (data: any, userId: string) => {
+export const changePassword = async (data: doctorhCangePasswordDto, userId: string) => {
   console.log("new password....", data, userId);
 
   try {
@@ -140,7 +148,7 @@ export const changePassword = async (data: any, userId: string) => {
   }
 };
 
-export const updateDoctorProfile = async (userData: any, userId: string) => {
+export const updateDoctorProfile = async (userData: doctorProfileUpdate, userId: string) => {
   try {
     console.log("User data for update:", userData);
 
@@ -156,7 +164,7 @@ export const updateDoctorProfile = async (userData: any, userId: string) => {
   }
 };
 
-export const updateProfileImage = async (formData: any, userId: string) => {
+export const updateProfileImage = async (formData: FormData, userId: string) => {
   try {
     console.log("doctor dp changin api is working......");
     const response = await doctorInstance.patch(
@@ -216,23 +224,9 @@ export const sendDoctorMessage = async (messageData: {
       messageData
     );
     return response.data;
-  } catch (error: any) {
-    console.error("Error sending message:", error);
-    console.log("Error response:", error.response?.data);
-    throw error;
-  }
-};
-
-export const setSessions = async (sessionData: any) => {
-  try {
-    console.log("session data is ", sessionData);
-
-    const response = await doctorInstance.post(ROUTES.doctor.sessions, {
-      sessionData,
-    });
-    return response.data;
   } catch (error) {
-    console.error("Error in set sessions", error);
+    console.error("Error sending message:", error);
+    console.log("Error response:", error);
     throw error;
   }
 };
@@ -302,7 +296,7 @@ export const submitAnalysisReports = async (
   }
 };
 
-export const directFileUpload = async (formData: any) => {
+export const directFileUpload = async (formData: FormData) => {
   try {
     for (const [key, value] of formData.entries()) {
       console.log(`api side...${key}:`, value);
@@ -378,7 +372,7 @@ export const getBlogs = async (
   }
 };
 
-export const createBlog = async (blogData: any) => {
+export const createBlog = async (blogData: blogCreate) => {
   try {
     const response = await doctorInstance.post(ROUTES.doctor.blog, blogData);
 
@@ -389,7 +383,7 @@ export const createBlog = async (blogData: any) => {
   }
 };
 
-export const updateBlog = async (blogId: string, blogData: any) => {
+export const updateBlog = async (blogId: string, blogData: blogCreate) => {
   try {
     console.log("blogdate from frndend...", blogData);
 
@@ -404,7 +398,7 @@ export const updateBlog = async (blogId: string, blogData: any) => {
   }
 };
 
-export const deleteBlog = async (blogId: any) => {
+export const deleteBlog = async (blogId: string) => {
   try {
     console.log("deleteBlog from frndend...", blogId);
 
@@ -416,7 +410,7 @@ export const deleteBlog = async (blogId: any) => {
   }
 };
 
-export const createAdvertisement = async (AddData: any) => {
+export const createAdvertisement = async (AddData: advertisement) => {
   try {
     console.log("deleteBlog from frndend...", AddData);
 
@@ -431,7 +425,7 @@ export const createAdvertisement = async (AddData: any) => {
   }
 };
 
-export const getAdds = async (doctorId: any, page: number, limit: number) => {
+export const getAdds = async (doctorId: string, page: number, limit: number) => {
   try {
     console.log("deleteBlog from frndend...", doctorId);
 
@@ -470,7 +464,7 @@ export const getPrescriptions = async (userId: string) => {
 };
 
 
-export const submitPrescription = async (prescriptionData:any) => {
+export const submitPrescription = async (prescriptionData:prescriptionData) => {
   try{
 
     console.log("prescriptionData is............",prescriptionData);
@@ -516,7 +510,7 @@ export const getDashboardContent = async (doctorId: string) => {
 };
 
 
-export const payoutRequest = async (payoutDetails:any,doctorId:string) =>{
+export const payoutRequest = async (payoutDetails:payoutDetails,doctorId:string) =>{
   try{
     console.log("payoutDetails is",payoutDetails);
     console.log("doctorId is",doctorId);
@@ -545,7 +539,7 @@ export const getBookedSlots = async (doctorId:string, selectedDate:string)=>{
 };
 
 
-export const addSession = async (sessionToAdd:any )=>{
+export const addSession = async (sessionToAdd:sessionData )=>{
   try{
     console.log("data id",sessionToAdd);
     const response = await doctorInstance.post(ROUTES.doctor.session, {
@@ -558,7 +552,7 @@ export const addSession = async (sessionToAdd:any )=>{
   }
 };
 
-export const updateSession = async ( sessionId:string, editingSession:any)=>{
+export const updateSession = async ( sessionId:string, editingSession:sessionData)=>{
   try{
     console.log("data id",sessionId, editingSession);
     const response = await doctorInstance.patch(ROUTES.doctor.session, {
@@ -598,7 +592,7 @@ export const getUnavailableSlots = async ( doctorId:string, localDate:string )=>
   }
 };
 
-  export const makeSessionUnavailable = async (doctorId:string, date:any, sessionId:any )=>{
+  export const makeSessionUnavailable = async (doctorId:string, date:Date, sessionId:string )=>{
   try{
     console.log("data id",doctorId, date, sessionId);
     const response = await doctorInstance.post(ROUTES.doctor.unAvailableSessions,{
@@ -628,7 +622,7 @@ export const getUnavailableSessions = async ( doctorId:string)=>{
 };
 
 
-export const makeSessionAvailable = async ( doctorId:string, date:any, sessionId:any)=>{
+export const makeSessionAvailable = async ( doctorId:string, date:Date, sessionId:string)=>{
   try{
         console.log("data id",doctorId, date, sessionId);
     const response = await doctorInstance.delete(ROUTES.doctor.unAvailableSessions,{
@@ -671,7 +665,7 @@ export const getUnavailableDays = async ( doctorId:string)=>{
   }
 };
 
-export const makeDayAvailable = async ( doctorId:string, date:any, )=>{
+export const makeDayAvailable = async ( doctorId:string, date:Date, )=>{
   try{
     console.log("data id",doctorId, date);
     const response = await doctorInstance.delete(ROUTES.doctor.unAvailableDays,{
@@ -706,7 +700,7 @@ export const cancelAppointment = async (appointmentId:string) => {
 
 
 
-export const getPayouts = async (doctorId:string,page:number, limit:number,filters:any)=>{
+export const getPayouts = async (doctorId:string,page:number, limit:number,filters:payoutFilter)=>{
     try{
 
         const response = await doctorInstance.get(ROUTES.doctor.getPayouts,{
@@ -726,7 +720,7 @@ export const getPayouts = async (doctorId:string,page:number, limit:number,filte
 };
 
 
-export const getRevenues = async (doctorId:string,page:number, limit:number,filters:any)=>{
+export const getRevenues = async (doctorId:string,page:number, limit:number,filters:payoutFilter)=>{
     try{
         const response = await doctorInstance.get(ROUTES.doctor.getRevenues,{
       params: {
@@ -743,8 +737,6 @@ export const getRevenues = async (doctorId:string,page:number, limit:number,filt
 };
 
 
-// doctorApi.ts
-
 export const getDoctorAppointmentsStats = async (doctorId: string, filter: "day" | "month" | "year") => {
   console.log("doctorId and filter in stats api is", doctorId,filter);
   try{
@@ -760,12 +752,6 @@ export const getDoctorAppointmentsStats = async (doctorId: string, filter: "day"
     throw err
   }
   
-  // return [
-  //   { month: "Jan", appointments: 12 },
-  //   { month: "Feb", appointments: 18 },
-  //   { month: "Mar", appointments: 22 },
-  //   { month: "Apr", appointments: 9 },
-  // ];
 };
 
 export const getDoctorReportsStats = async (doctorId: string, filter: "day" | "month" | "year") => {
@@ -782,11 +768,7 @@ export const getDoctorReportsStats = async (doctorId: string, filter: "day" | "m
     console.log("error in get doctor appointment stats");
     throw err
   }
-  // return [
-  //   { month: "Jan", pending: 5, submitted: 12 },
-  //   { month: "Feb", pending: 3, submitted: 20 },
-  //   { month: "Mar", pending: 8, submitted: 15 },
-  // ];
+
 };
 
 export const getDoctorPayouts = async (doctorId: string) => {
@@ -804,20 +786,33 @@ export const getDoctorPayouts = async (doctorId: string) => {
     throw err
   }
 
-  return [
-    { on: new Date().toISOString(), totalAmount: 5000, status: "paid", transactionId: "TXN12345" },
-    { on: new Date().toISOString(), totalAmount: 3000, status: "requested", transactionId: "" },
-  ];
-};
-
-export const getDoctorTransactions = async (doctorId: string) => {
-  return [
-    { date: new Date().toISOString(), amount: 1500, paymentFor: "appointment", method: "stripe" },
-    { date: new Date().toISOString(), amount: 2000, paymentFor: "analysis", method: "wallet" },
-  ];
+ 
 };
 
 
+
+
+
+// export const setSessions = async (sessionData) => {
+//   try {
+//     console.log("session data is ", sessionData);
+
+//     const response = await doctorInstance.post(ROUTES.doctor.sessions, {
+//       sessionData,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error in set sessions", error);
+//     throw error;
+//   }
+// };
+
+// export const getDoctorTransactions = async (doctorId: string) => {
+//   return [
+//     { date: new Date().toISOString(), amount: 1500, paymentFor: "appointment", method: "stripe" },
+//     { date: new Date().toISOString(), amount: 2000, paymentFor: "analysis", method: "wallet" },
+//   ];
+// };
 
 
 // Note: Add these new API functions to ../../api/doctor/doctorApi.ts
