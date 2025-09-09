@@ -2,7 +2,7 @@ import { message } from "antd";
 import { ROUTES } from "../../constants/routes";
 import { doctorInstance } from "../../services/axiosFactory";
 import { metadataDto } from "../../interfaces/subscription";
-import { doctorhCangePasswordDto,doctorProfileUpdate } from "../../interfaces/doctor";
+import { doctorhCangePasswordDto,doctorProfileUpdate, UpdateProfileResponse } from "../../interfaces/doctor";
 import { blogCreate } from "../../interfaces/blog";
 import { advertisement } from "../../interfaces/advertisement";
 import { prescriptionData } from "../../interfaces/prescription";
@@ -148,11 +148,9 @@ export const changePassword = async (data: doctorhCangePasswordDto, userId: stri
   }
 };
 
-export const updateDoctorProfile = async (userData: doctorProfileUpdate, userId: string) => {
+export const updateDoctorProfile = async (userData: doctorProfileUpdate, userId: string): Promise<UpdateProfileResponse> => {
   try {
-    console.log("User data for update:", userData);
-
-    const response = await doctorInstance.patch(
+    const response = await doctorInstance.patch<UpdateProfileResponse>(
       ROUTES.doctor.updateProfile(userId),
       userData,
       {}

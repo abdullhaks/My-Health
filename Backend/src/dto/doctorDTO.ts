@@ -105,3 +105,19 @@ export interface IDoctorDocument extends Document{
 }
 
 export interface IDoctor extends IDoctorDocument{}; 
+
+export interface doctorProfileUpdate {
+  fullName: string;
+  phone?: string;
+  location?: ILocation | string;
+  dob?: string;
+  gender?: string;
+  graduation?: string;
+  category?: string;
+  registerNo?: string;
+  experience?: number;
+  specializations?: ISpecializations[];
+  bankAccNo?: string;
+  bankAccHolderName?: string;
+  bankIfscCode?: string;
+}

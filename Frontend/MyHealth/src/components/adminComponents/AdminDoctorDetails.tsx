@@ -4,6 +4,7 @@ import { FaCheckCircle, FaTimesCircle, FaLock, FaUnlock } from "react-icons/fa";
 import { doctorDetails, verifyDoctor, declineDoctor } from "../../api/admin/adminApi";
 import { Popconfirm, Input } from "antd";
 import toast from "react-hot-toast";
+import { ILocation } from "../../interfaces/doctor";
 
 interface DoctorDetails {
   _id: string;
@@ -19,7 +20,7 @@ interface DoctorDetails {
   registrationCertificate: string;
   verificationId: string;
   walletBalance: number;
-  location?: any;
+  location?: ILocation;
   specializations?: string[];
 }
 
@@ -27,7 +28,7 @@ const AdminDoctorDetails = () => {
   const { id } = useParams();
   const [doctor, setDoctor] = useState<DoctorDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [rejectReason, setRejectReason] = useState(""); // State for rejection reason
+  const [rejectReason, setRejectReason] = useState(""); 
 
   const handleVerify = async (id: string) => {
     try {

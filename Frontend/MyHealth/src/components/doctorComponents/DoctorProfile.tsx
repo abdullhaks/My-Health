@@ -8,20 +8,16 @@ import DoctorPayoutModal from "./DoctorPayoutModal";
 import { updateProfileImage, updateDoctorProfile, changePassword, payoutRequest } from "../../api/doctor/doctorApi";
 import { updateDoctor } from "../../redux/slices/doctorSlices";
 import { message } from "antd";
-import { payoutDetails } from "../../interfaces/payout";
+import { payoutDetails, IDoctorData, doctorProfileUpdate, IDoctor } from "../../interfaces/doctor";
 
 const DoctorProfile = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
-                    
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const dispatch = useDispatch();
 
-  const {profile , ...rest}= doctor;
-
-  const [profileData, setProfileData] = useState(rest);
+  const [profileData, setProfileData] = useState<IDoctor>(doctor);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
@@ -38,16 +34,13 @@ const DoctorProfile = () => {
     }
   };
 
-  const handlePayout = async ()=>{
-
-    if(doctor.walletBalance < 1){
-      message.warning("you haven't sufficient balance to payout!");
+  const handlePayout = async () => {
+    if (doctor.walletBalance < 1) {
+      message.warning("You haven't sufficient balance to payout!");
       return;
     }
-
-    setIsPayoutModalOpen(true)
-    
-  }
+    setIsPayoutModalOpen(true);
+  };
 
   const handleSaveImage = async () => {
     if (!selectedImage) return;
@@ -57,10 +50,7 @@ const DoctorProfile = () => {
       formData.append("profile", selectedImage);
 
       const response = await updateProfileImage(formData, doctor._id);
-
-      console.log("updated doctor is :",response);
-
-      const updatedDoctor = response.updatedDoctor;
+      const updatedDoctor: IDoctor = response.updatedDoctor;
       dispatch(updateDoctor(updatedDoctor));
       setProfileData(updatedDoctor);
       toast.success("Profile image updated!");
@@ -73,26 +63,19 @@ const DoctorProfile = () => {
     }
   };
 
-
   const handleCopyReferID = () => {
     navigator.clipboard.writeText(`www.myhealth.com/id:${profileData._id}`);
     toast.success("Refer ID copied!");
   };
 
   const handleCopyMHID = () => {
-    navigator.clipboard.writeText("MH-DR-" + profileData._id.slice(0, 6).toUpperCase());
+    navigator.clipboard.writeText(`MH-DR-${profileData._id.slice(0, 6).toUpperCase()}`);
     toast.success("MH ID copied!");
   };
 
-  const handleProfileUpdate = async (updatedData: any) => {
+  const handleProfileUpdate = async (updatedData: doctorProfileUpdate) => {
     try {
-
-      console.log("updated data is ",updatedData);
-
-      const response = await updateDoctorProfile(updatedData,doctor._id);
-
-      console.log("response is ",response);
-      
+      const response = await updateDoctorProfile(updatedData, doctor._id);
       dispatch(updateDoctor(response.updatedDoctor));
       setProfileData(response.updatedDoctor);
       toast.success("Profile updated successfully!");
@@ -101,11 +84,11 @@ const DoctorProfile = () => {
     }
   };
 
-  const handlePasswordChange = async (passwordData:{
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}) => {
+  const handlePasswordChange = async (passwordData: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
     try {
       const response = await changePassword(passwordData, doctor._id);
       if (!response) {
@@ -118,28 +101,19 @@ const DoctorProfile = () => {
     }
   };
 
-
-   const handlePayoutRequest = async (payoutDetails: payoutDetails) => {
+  const handlePayoutRequest = async (payoutDetails: payoutDetails) => {
     try {
       const response = await payoutRequest(payoutDetails, doctor._id);
       if (!response) {
-        toast.error("Requestin payout failed");
+        toast.error("Requesting payout failed");
         return;
-      };
-
-      console.log("reponse is ",response);
-
+      }
       dispatch(updateDoctor(response.data.updatedDoctor));
-      // setProfileData(response.updatedDoctor);
-      
       toast.success("Payout requested");
     } catch {
-      toast.error("Requestin payout failed");
+      toast.error("Requesting payout failed");
     }
-
-    };
-
-
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -149,7 +123,7 @@ const DoctorProfile = () => {
             <img
               src={
                 previewImage ||
-                profileData.profile ||
+                doctor.profile ||
                 "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"
               }
               className="w-full h-full object-cover rounded-full border-4 border-blue-200"
@@ -165,7 +139,7 @@ const DoctorProfile = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <h2 className="text-2xl font-bold text-gray-800">Dr. {profileData.fullName}</h2>
               {profileData.premiumMembership && (
-                <span className="rounded-full bg-yellow-100 text-yellow-700 text-sm px-3 py-1  font-medium mt-2 md:mt-0">
+                <span className="rounded-full bg-yellow-100 text-yellow-700 text-sm px-3 py-1 font-medium mt-2 md:mt-0">
                   Premium Doctor ⭐
                 </span>
               )}
@@ -235,36 +209,57 @@ const DoctorProfile = () => {
             <p>{profileData.gender || "Not provided"}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Specialization</p>
-            <p>{profileData.specialization || "Not provided"}</p>
+            <p className="text-sm text-gray-500">Location</p>
+            <p>{profileData.location?.text || "Not provided"}</p>
+          </div>
+          {/* <div>
+            <p className="text-sm text-gray-500">Specializations</p>
+            <p>
+              {profileData.specializations?.length
+                ? profileData.specializations.map(spec => spec.title).join(", ")
+                : "Not provided"}
+            </p>
+          </div> */}
+          <div>
+            <p className="text-sm text-gray-500">Category</p>
+            <p>{profileData.category || "Not provided"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Graduation</p>
+            <p>{profileData.graduation || "Not provided"}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Experience</p>
-            <p>{profileData.experience || "Not provided"} years</p>
+            <p>{profileData.experience ? `${profileData.experience} years` : "Not provided"}</p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Medical Reg. No</p>
             <p>{profileData.registerNo || "Not provided"}</p>
           </div>
-        </div>
-
-
-         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 border-t">
           <div>
             <p className="text-sm text-gray-500">Bank Account No</p>
             <p>{profileData.bankAccNo || "Not provided"}</p>
           </div>
-          
           <div>
             <p className="text-sm text-gray-500">Account Holder Name</p>
             <p>{profileData.bankAccHolderName || "Not provided"}</p>
           </div>
-
           <div>
             <p className="text-sm text-gray-500">IFSC Code</p>
             <p>{profileData.bankIfscCode || "Not provided"}</p>
           </div>
-          
+          <div>
+            <p className="text-sm text-gray-500">Verification Status</p>
+            <p>{profileData.isVerified ? "Verified" : "Not Verified"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Admin Verification</p>
+            <p>{profileData.adminVerified ? "Approved" : "Pending"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Report Analysis Fees</p>
+            <p>₹{profileData.reportAnalysisFees || 50}</p>
+          </div>
         </div>
 
         <div className="p-6 border-t flex justify-between items-center">
@@ -272,7 +267,7 @@ const DoctorProfile = () => {
             <p className="text-sm">Change Password</p>
             <button
               onClick={() => setIsChangePasswordModalOpen(true)}
-              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm  cursor-pointer hover:bg-blue-700 hover:text-white"
+              className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm cursor-pointer hover:bg-blue-700 hover:text-white"
             >
               Change
             </button>
@@ -281,7 +276,7 @@ const DoctorProfile = () => {
             <p className="text-sm">Earnings</p>
             <p className="text-gray-700 font-semibold">{profileData.walletBalance || 0} ₹</p>
             <button
-              onClick={() => handlePayout()}
+              onClick={handlePayout}
               className="text-blue-500 border border-blue-500 px-3 py-1 rounded text-sm cursor-pointer hover:bg-blue-700 hover:text-white"
             >
               Payout
@@ -290,45 +285,50 @@ const DoctorProfile = () => {
         </div>
       </div>
 
-      {/* Edit Profile Modal */}
       <EditDoctorProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleProfileUpdate}
         initialData={{
           fullName: doctor.fullName,
-          location: doctor.location.text,
-          dob: doctor.dob,
-          phone: doctor.phone,
-          gender: doctor.gender,
-          specialization: doctor.specialization,
-          experience: doctor.experience,
-          bankAccNo: doctor.bankAccNo,
-          bankAccHolderName: doctor.bankAccHolderName,
-          bankIfscCode: doctor.bankIfscCode,
+          location: doctor.location ?? null,
+          dob: doctor.dob || "",
+          phone: doctor.phone || "",
+          gender: doctor.gender || "",
+          graduation: doctor.graduation || "",
+          category: doctor.category || "",
+          registerNo: doctor.registerNo || "",
+          experience: doctor.experience || null,
+          specializations: doctor.specializations || [],
+          bankAccNo: doctor.bankAccNo || "",
+          bankAccHolderName: doctor.bankAccHolderName || "",
+          bankIfscCode: doctor.bankIfscCode || "",
         }}
       />
 
-      {/* Change Password Modal */}
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setIsChangePasswordModalOpen(false)}
         onSave={handlePasswordChange}
       />
 
-      {/* payout modal */}
-
       <DoctorPayoutModal
-      isOpen={isPayoutModalOpen}
-      onClose={()=> setIsPayoutModalOpen(false)}
-      onSave = {handlePayoutRequest}
-      initialData={{
-        bankAccNo: doctor.bankAccNo,
-        bankAccHolderName: doctor.bankAccHolderName,
-        bankIfscCode: doctor.bankIfscCode
-      }}
+        isOpen={isPayoutModalOpen}
+        onClose={() => setIsPayoutModalOpen(false)}
+        onSave={(bankDetails) => {
+          // Convert BankDetails to payoutDetails type
+          handlePayoutRequest({
+            bankAccNo: bankDetails.bankAccNo,
+            bankAccHolderName: bankDetails.bankAccHolderName,
+            bankIfscCode: bankDetails.bankIfscCode,
+          });
+        }}
+        initialData={{
+          bankAccNo: doctor.bankAccNo ?? "",
+          bankAccHolderName: doctor.bankAccHolderName ?? "",
+          bankIfscCode: doctor.bankIfscCode ?? "",
+        }}
       />
-      
     </div>
   );
 };

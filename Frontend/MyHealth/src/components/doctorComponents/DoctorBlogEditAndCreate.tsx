@@ -8,12 +8,14 @@ import {
   updateBlog 
 } from '../../api/doctor/doctorApi';
 import { message } from 'antd';
+import { IDoctorData } from '../../interfaces/doctor';
+import { ApiError } from '../../interfaces/error';
 
 const DoctorBlogEditAndCreate = () => {
   const location = useLocation();
   const { blog } = location.state || { blog: null };
   const navigate = useNavigate();
-  const Doctor = useSelector((state: any) => state.doctor.doctor);
+  const Doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
 
   const [formData, setFormData] = useState({
     title: blog?.title || '',
@@ -118,7 +120,7 @@ const DoctorBlogEditAndCreate = () => {
     return Object.keys(newErrors).length === 0;
   }, [formData, thumbnailFile, img1File, img2File, img3File]);
 
-  const handleInputChange = useCallback((field: string, value: any) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -170,7 +172,7 @@ const DoctorBlogEditAndCreate = () => {
     const previewUrl = URL.createObjectURL(file);
 
     // Update state based on type
-    const updates: any = {};
+    const updates: {newthumbnail?:string;newimg1?:string;newimg2?:string;newimg3?:string} = {};
     if (type === 'thumbnail') {
       setThumbnailFile(file);
       updates.newthumbnail = previewUrl;
@@ -301,9 +303,9 @@ const DoctorBlogEditAndCreate = () => {
       
       hideLoading();
       navigate('/doctor/blogs');
-    } catch (err: any) {
+    } catch (err) {
       hideLoading();
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to save blog. Please try again.';
+      const errorMessage = (err as ApiError)?.response?.data?.message ?? 'Failed to save blog. Please try again.';
       setErrors({ form: errorMessage });
       message.error(errorMessage);
     } finally {
@@ -312,7 +314,7 @@ const DoctorBlogEditAndCreate = () => {
   }, [formData, thumbnailFile, img1File, img2File, img3File, blog, navigate, validateForm, Doctor]);
 
   const onCancel = useCallback(() => {
-    // Clean up any object URLs
+
     [formData.newthumbnail, formData.newimg1, formData.newimg2, formData.newimg3].forEach(url => {
       if (url && url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
@@ -544,7 +546,7 @@ const DoctorBlogEditAndCreate = () => {
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <label className=" text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
               <FaTag className="text-blue-500" />
               Tags <span className="text-red-500">*</span>
               <span className="text-gray-500 font-normal">({formData.tags.length}/10)</span>

@@ -4,6 +4,7 @@ import { inject, injectable } from "inversify";
 import IDoctorProfileService from "../../../services/doctor/interfaces/IDoctorProfileSevices";
 import stripe, { makePayment } from "../../../middlewares/common/stripe"
 import { HttpStatusCode } from "../../../utils/enum"
+import { doctorProfileUpdate } from "../../../dto/doctorDTO";
 
 
 
@@ -105,30 +106,29 @@ export default class DoctorProfileController implements IDoctorProfileCtrl {
     };
 
 
-       async updateProfile(req: Request, res: Response): Promise<void> {
-        try {
-           console.log("user data is ",req.body);
-           console.log("user id is ",req.params.id);
+      async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userData: doctorProfileUpdate = req.body;
+      const userId = req.params.id;
 
-            const userData = req.body;
-
-            if(userData.dob){
-            const dobStr = new Date(userData.dob).toLocaleDateString();
-
-            const [month, day, year] = dobStr.split("/");
-            userData.dob = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-            }
-           
-
-            const userId = req.params.id;
-            const result = await this._doctorProfileService.updateProfile(userId,userData);
-
-             res.status(HttpStatusCode.OK).json(result);
-        }catch (error) {
-            console.log(error);
-            res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ msg: "internal server error" });
+      if (userData.dob) {
+        const dob = new Date(userData.dob);
+        if (isNaN(dob.getTime())) {
+          res.status(HttpStatusCode.BAD_REQUEST).json({ message: "Invalid date of birth" });
+          return;
         }
+        const year = dob.getFullYear();
+        const month = String(dob.getMonth() + 1).padStart(2, "0");
+        const day = String(dob.getDate()).padStart(2, "0");
+        userData.dob = `${year}-${month}-${day}`;
+      }
 
-    };
+      const result = await this._doctorProfileService.updateProfile(userId, userData);
+      res.status(HttpStatusCode.OK).json(result);
+    } catch (error) {
+      console.error("Error in updateProfile:", error);
+      res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    }
+  }
 
 }

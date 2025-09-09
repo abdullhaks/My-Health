@@ -5,12 +5,21 @@ export interface ILocation {
 };
 
 export interface advertisement {
-    
-        title:string,
-        videoUrl: string,
-        location:ILocation
-        author: string,
-        authorId:string
-        tags: [],
+        _id?: string;
+        title:string;
+        videoUrl: string;
+        location:ILocation;
+        author: string;
+        authorId:string;
+        tags: [];
+        pack?:string;
+        fee?: number ;
+        views?:number;
+        clicks?:number;
+        expDate?:Date;
+        createdAt?: string | Date | undefined;
+
+
       
 }
+

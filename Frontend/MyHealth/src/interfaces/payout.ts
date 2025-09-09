@@ -15,8 +15,8 @@ export interface payoutUpdateDto {
 
 export interface payoutDetails {
          
-    bankAccNo:string,
-    bankAccHolderName:string,
-    bankIfscCode: string
+    bankAccNo?:string,
+    bankAccHolderName?:string,
+    bankIfscCode?: string
 
 }

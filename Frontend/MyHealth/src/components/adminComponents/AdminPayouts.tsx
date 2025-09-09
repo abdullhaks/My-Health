@@ -81,7 +81,7 @@ const AdminPayouts = () => {
     setVisible(true);
   };
 
-  const onFinishPay = async (values: any) => {
+  const onFinishPay = async (values: { paid:number; transactionId: string; invoiceLink: string; on: { toISOString: () => string; }; }) => {
     if (!selected) return;
     try {
       const updateData = {

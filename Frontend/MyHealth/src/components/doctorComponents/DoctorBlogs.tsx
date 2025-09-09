@@ -5,12 +5,14 @@ import { getBlogs,
   //  deleteBlog 
   } from '../../api/doctor/doctorApi';
 import { useSelector } from 'react-redux';
+import { blogCreate } from '../../interfaces/blog';
+import { IDoctorData } from '../../interfaces/doctor';
 
 // Blog Card Component
 const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
-  blog: any;
-  onView: (blog: any) => void;
-  onEdit: (blog: any) => void;
+  blog: blogCreate;
+  onView: (blog: blogCreate) => void;
+  onEdit: (blog: blogCreate) => void;
   onDelete: (blogId: string) => void;
 }) => (
   <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
@@ -34,11 +36,11 @@ const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
       </div>
       <div className="flex justify-between items-center pt-2">
         <div className="flex items-center gap-4 text-gray-500 text-sm">
-          <span className="flex items-center gap-1">
+          {/* <span className="flex items-center gap-1">
             <FaHeart className="text-red-400" aria-label="Likes" />
-            {blog.likes}
-          </span>
-          <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
+            {blog.likes||''}
+          </span> */}
+          <span>{new Date(blog.createdAt||"").toLocaleDateString()}</span>
         </div>
         <div className="flex gap-2">
           <button
@@ -56,7 +58,7 @@ const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
             <FaEdit />
           </button>
           <button
-            onClick={() => onDelete(blog._id)}
+            onClick={() => onDelete(blog._id||"")}
             className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors cursor-pointer"
             aria-label={`Delete ${blog.title}`}
           >
@@ -70,8 +72,8 @@ const BlogCard = memo(({ blog, onView, onEdit, onDelete }: {
 
 const DoctorBlogs = () => {
 
-  const Doctor = useSelector((state: any) => state.doctor.doctor);
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const Doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
+  const [blogs, setBlogs] = useState<blogCreate[]>([]);
   const [selectedBlog,setSelectedBlog] = useState(null)
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -99,11 +101,11 @@ const DoctorBlogs = () => {
     fetchBlogs();
   }, [fetchBlogs]);
 
-  const handleViewBlog = useCallback((blog: any) => {
+  const handleViewBlog = useCallback((blog: blogCreate) => {
     navigate('/doctor/blog', { state: { blog } });
   }, [navigate]);
 
-  const handleEditBlog = useCallback((blog: any) => {
+  const handleEditBlog = useCallback((blog: blogCreate) => {
     navigate('/doctor/blog-create-edit', { state: { blog } });
   }, [navigate]);
 

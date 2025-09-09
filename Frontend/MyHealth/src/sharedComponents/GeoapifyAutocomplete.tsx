@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 interface ILocation {
   type: "Point";
-  coordinates:[number,number];
-  text:string;
+  coordinates: [number, number];
+  text: string;
 }
 
 interface IGeoapifySuggestion {
@@ -25,23 +25,26 @@ interface GeoapifyCustomAutocompleteProps {
   onCoordinatesChange?: (lat: number, lon: number) => void;
 }
 
-
 const GeoapifyAutocomplete = ({
   value,
   onChange,
   setError,
   className,
+  onCoordinatesChange,
 }: GeoapifyCustomAutocompleteProps) => {
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<IGeoapifySuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [inputValue, setInputValue] = useState(value); // Local state for input value
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const geoapifyApiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
   const fetchSuggestions = async (text: string) => {
     if (!text.trim()) {
       setSuggestions([]);
+      setShowDropdown(false);
       return;
     }
 
@@ -64,6 +67,7 @@ const GeoapifyAutocomplete = ({
     } catch (error) {
       console.error("Geoapify error:", error);
       setSuggestions([]);
+      if (setError) setError("Failed to fetch location suggestions");
     } finally {
       setLoading(false);
     }
@@ -71,6 +75,7 @@ const GeoapifyAutocomplete = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
+    setInputValue(val);
     onChange({
       type: "Point",
       coordinates: [NaN, NaN],
@@ -101,21 +106,30 @@ const GeoapifyAutocomplete = ({
       text: place,
     };
 
+    setInputValue(place); // Update local input value
     onChange(selectedLocation);
+    if (onCoordinatesChange) onCoordinatesChange(suggestion.lat, suggestion.lon);
     setSuggestions([]);
     setShowDropdown(false);
+    if (inputRef.current) inputRef.current.focus(); // Retain focus on input
   };
+
+  // Sync inputValue with prop value when it changes externally
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
   return (
     <div className="relative">
       <input
+        ref={inputRef}
         type="text"
-        value={value}
+        value={inputValue}
         onChange={handleInputChange}
         onFocus={() => {
           if (suggestions.length > 0) setShowDropdown(true);
         }}
-        onBlur={() => setTimeout(() => setShowDropdown(false), 100)}
+        onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Increased delay
         placeholder="Enter city in India..."
         className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 ${className}`}
       />
@@ -133,7 +147,7 @@ const GeoapifyAutocomplete = ({
             return (
               <li
                 key={idx}
-                onClick={() => handleSelectSuggestion(suggestion)}
+                onMouseDown={() => handleSelectSuggestion(suggestion)} // Use onMouseDown instead of onClick
                 className="px-4 py-2 cursor-pointer hover:bg-gray-100"
               >
                 {place}
@@ -148,6 +162,5 @@ const GeoapifyAutocomplete = ({
     </div>
   );
 };
-
 
 export default GeoapifyAutocomplete;

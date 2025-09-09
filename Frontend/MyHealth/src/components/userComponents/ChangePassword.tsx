@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import { z } from "zod";
 import PasswordInput from '../../sharedComponents/PasswordInput'; 
+import { PasswordData } from "../../interfaces/user";
 
 // Schema for change password validation
 const changePasswordSchema = z.object({
@@ -28,11 +29,7 @@ interface ChangePasswordModalProps {
   onSave: (passwordData: PasswordData) => void;
 }
 
-interface PasswordData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
+
 
 type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 

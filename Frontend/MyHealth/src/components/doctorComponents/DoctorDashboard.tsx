@@ -5,9 +5,11 @@ import { getDashboardContent, getDoctorAppointmentsStats, getDoctorReportsStats,
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {  BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { IDoctorData } from "../../interfaces/doctor";
+import { number, string } from "zod";
 
 const DoctorDashboard = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
 
   // Dashboard data
   const [dashboardData, setDashboardData] = useState<{
@@ -18,9 +20,9 @@ const DoctorDashboard = () => {
   } | null>(null);
 
   // Graph & tables data
-  const [appointmentsStats, setAppointmentsStats] = useState<any[]>([]);
-  const [reportsStats, setReportsStats] = useState<any[]>([]);
-  const [payouts, setPayouts] = useState<any[]>([]);
+  const [appointmentsStats, setAppointmentsStats] = useState<{ day: string; appointments: number }[] >([]);
+  const [reportsStats, setReportsStats] = useState<{ day: string; pending: number; submitted: number }[] >([]);
+  const [payouts, setPayouts] = useState<{ on:string,totalAmount: number,status: string,transactionId: string}[]>([]);
   const [filter, setFilter] = useState<"day" | "month" | "year">("day");
 
   useEffect(() => {

@@ -6,12 +6,14 @@ import {
   //  deleteAdd 
   } from '../../api/doctor/doctorApi';
 import { useSelector } from 'react-redux';
+import { advertisement } from '../../interfaces/advertisement';
+import { IUserData } from '../../interfaces/user';
 
 // Blog Card Component
 const AddCard = memo(({ add, onView, onEdit, onDelete }: {
-  add: any;
-  onView: (add: any) => void;
-  onEdit: (add: any) => void;
+  add: advertisement;
+  onView: (add: advertisement) => void;
+  onEdit: (add: advertisement) => void;
   onDelete: (addId: string) => void;
 }) => (
   <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
@@ -39,7 +41,7 @@ const AddCard = memo(({ add, onView, onEdit, onDelete }: {
             <FaEye className="text-red-400" aria-label="Likes" />
             {add.views}
           </span>
-          <span>{new Date(add.createdAt).toLocaleDateString()}</span>
+          <span>{add.createdAt ? new Date(add.createdAt).toLocaleDateString() : 'N/A'}</span>
         </div>
         <div className="flex gap-2">
           {/* <button
@@ -57,7 +59,7 @@ const AddCard = memo(({ add, onView, onEdit, onDelete }: {
             <FaEdit />
           </button>
           <button
-            onClick={() => onDelete(add._id)}
+            onClick={() => onDelete(add._id || '')}
             className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
             aria-label={`Delete ${add.title}`}
           >
@@ -71,8 +73,8 @@ const AddCard = memo(({ add, onView, onEdit, onDelete }: {
 
 const DoctorAdds = () => {
 
-  const Doctor = useSelector((state: any) => state.doctor.doctor);
-  const [adds, setAdds] = useState<any[]>([]);
+  const Doctor = useSelector((state: IUserData) => state.doctor.doctor);
+  const [adds, setAdds] = useState<advertisement[]>([]);
   const [selectedAdd,setSelectedAdd] = useState(null)
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -100,11 +102,11 @@ const DoctorAdds = () => {
     fetchAdds();
   }, [fetchAdds]);
 
-  const handleViewAdd = useCallback((add: any) => {
+  const handleViewAdd = useCallback((add: advertisement) => {
     navigate('/doctor/add', { state: { add } });
   }, [navigate]);
 
-  const handleEditAdd = useCallback((add: any) => {
+  const handleEditAdd = useCallback((add: advertisement) => {
     navigate('/doctor/advertisement-create', { state: { add } });
   }, [navigate]);
 

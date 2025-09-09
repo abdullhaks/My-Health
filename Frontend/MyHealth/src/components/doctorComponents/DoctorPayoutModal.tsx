@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 
 interface BankDetails {
-    bankAccNo:string,
-    bankAccHolderName:string,
-    bankIfscCode: string
+    bankAccNo?:string,
+    bankAccHolderName?:string,
+    bankIfscCode?: string
 }
 
 

@@ -14,6 +14,7 @@ interface Transaction {
   amount: number;
   paymentFor: string;
   transactionId?: string;
+  invoice?:string;
   userId?: string;
   doctorId?: string;
   date: string;
@@ -104,7 +105,7 @@ const AdminTransactions = () => {
       title: "Transaction ID",
       dataIndex: "transactionId",
       key: "transactionId",
-      render:(text: string, record: any) => {
+      render:(text: string, record:Transaction) => {
     if (record.invoice) {
       return (
         <a href={record.invoice} target="_blank" rel="noopener noreferrer">

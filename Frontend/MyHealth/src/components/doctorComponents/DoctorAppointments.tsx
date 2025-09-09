@@ -7,6 +7,8 @@ import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { io, Socket } from "socket.io-client";
 import axios from "axios";
+import { IDoctorData } from "../../interfaces/doctor";
+import { ApiError } from "../../interfaces/error";
 
 interface IAppointment {
   _id: string;
@@ -57,7 +59,7 @@ const DoctorAppointments = () => {
     appointmentStatus: "booked",
     dateRange: null as [moment.Moment, moment.Moment] | null,
   });
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const navigate = useNavigate();
   const socketRef = useRef<Socket | null>(null);
 
@@ -149,10 +151,8 @@ const DoctorAppointments = () => {
       setTotalPages(response.totalPages || 1);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      setErrorMessage(
-        (typeof error === "object" && error !== null && "response" in error && (error as any).response?.data?.message) ||
-          "Failed to load appointments. Please try again."
-      );
+      const errorMessage = (error as ApiError)?.response?.data?.message ?? "Failed fetching appointments. Please try again.";
+  setErrorMessage(typeof errorMessage === "string" ? errorMessage : "Failed fetching appointments. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -219,11 +219,10 @@ const DoctorAppointments = () => {
        } else {
          message.error(response.message);
        }
-     } catch (error: any) {
+     } catch (error) {
        console.error("Error cancelling appointment:", error);
-       setErrorMessage(
-         error.response?.data?.message || "Failed to cancel appointment. Please try again."
-       );
+       const errorMessage = (error as ApiError)?.response?.data?.message ?? "Failed to cancel appointment. Please try again.";
+  setErrorMessage(typeof errorMessage === "string" ? errorMessage : "Failed to cancel appointment. Please try again.");
      } finally {
        setIsCanceling(false);
      }
@@ -269,7 +268,7 @@ const DoctorAppointments = () => {
     {
       title: "Date & Time",
       key: "dateTime",
-      render: (_: any, record: IAppointment) =>
+      render: (_: IAppointment, record: IAppointment) =>
         `${moment(record.start).format("MMM DD, YYYY h:mm A")} - ${moment(record.end).format("h:mm A")}`,
     },
     {
@@ -293,7 +292,7 @@ const DoctorAppointments = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: IAppointment) => (
+      render: (_: IAppointment, record: IAppointment) => (
         <div className="flex gap-2">
           {record.appointmentStatus === "booked" && (
             <button

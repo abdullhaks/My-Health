@@ -9,6 +9,7 @@ import {
 } from '../../api/doctor/doctorApi';
 import { message } from 'antd';
 import GeoapifyAutocomplete from '../../sharedComponents/GeoapifyAutocomplete'; // Adjust path as needed
+import { IDoctorData } from '../../interfaces/doctor';
 
 interface ILocation {
   type: "Point";
@@ -21,7 +22,7 @@ const DoctorAdvertisementCreate = () => {
   const location = useLocation();
   const { add } = location.state || { advertisement: null };
   const navigate = useNavigate();
-  const Doctor = useSelector((state: any) => state.doctor.doctor);
+  const Doctor = useSelector((state:IDoctorData) => state.doctor.doctor);
 
   const [formData, setFormData] = useState({
     title: add?.title || '',
@@ -101,7 +102,7 @@ const DoctorAdvertisementCreate = () => {
     return Object.keys(newErrors).length === 0;
   }, [formData, videoFile]);
 
-  const handleInputChange = useCallback((field: string, value: any) => {
+  const handleInputChange = useCallback((field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -236,9 +237,10 @@ const DoctorAdvertisementCreate = () => {
       
       hideLoading();
       navigate('/doctor/advertisements');
-    } catch (err: any) {
+    } catch (err) {
       hideLoading();
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to save advertisement. Please try again.';
+      const errorMessage = typeof err === 'object' && err !== null && 'message' in err
+      ? (err as { message?: string }).message || 'Failed to save advertisement. Please try again.':'Failed to save advertisement. Please try again.'
       setErrors({ form: errorMessage });
       message.error(errorMessage);
     } finally {
@@ -247,7 +249,7 @@ const DoctorAdvertisementCreate = () => {
   }, [formData, videoFile, add, navigate, validateForm, Doctor]);
 
   const onCancel = useCallback(() => {
-    // Clean up any object URLs
+
     if (formData.newVideo && formData.newVideo.startsWith('blob:')) {
       URL.revokeObjectURL(formData.newVideo);
     }

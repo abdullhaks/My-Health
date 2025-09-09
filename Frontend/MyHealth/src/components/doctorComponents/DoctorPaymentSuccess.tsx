@@ -7,12 +7,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateDoctor } from '../../redux/slices/doctorSlices';
 import { verifySubscription } from '../../api/doctor/doctorApi';
 import Loader from '../../sharedComponents/Loaders';
+import { IDoctorData } from '../../interfaces/doctor';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const dispatch = useDispatch();
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const [verifying, setVerifying] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

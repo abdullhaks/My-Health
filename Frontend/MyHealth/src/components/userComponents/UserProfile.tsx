@@ -10,6 +10,8 @@ import { changePassword } from "../../api/user/userApi";
 import { updateProfileImage } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/userSlices";
+import { PasswordData } from "../../interfaces/user";
+import { userProfileData } from "../../interfaces/user";
 
 
 const UserProfile = () => {
@@ -89,7 +91,7 @@ const UserProfile = () => {
   // };
 
   // Function to handle profile update
-  const handleProfileUpdate = async(updatedData:any) => {
+  const handleProfileUpdate = async(updatedData:userProfileData) => {
 
     console.log("data for update....",updatedData)
     const response = await updateProfile(updatedData,user._id);
@@ -106,7 +108,7 @@ const UserProfile = () => {
   };
 
   // Function to handle password change
-  const handlePasswordChange = async (passwordData:any) => {
+  const handlePasswordChange = async (passwordData:PasswordData) => {
    
     try{
     console.log("Password change requested:", passwordData);

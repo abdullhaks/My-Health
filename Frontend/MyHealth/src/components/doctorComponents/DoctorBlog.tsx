@@ -1,4 +1,5 @@
 import { Heart, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
+import { JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const DoctorBlogDetails = () => {
@@ -13,9 +14,9 @@ const { blog } = location.state || { blog: null };
   const images = [blog.img1, blog.img2, blog.img3].filter(img => img);
   
   const renderContentWithImages = () => {
-    const elements:any = [];
+    const elements:JSX.Element[] = [];
     
-    contentParagraphs.forEach((paragraph:string, index:any) => {
+    contentParagraphs.forEach((paragraph:string, index:number) => {
       // Add paragraph
       elements.push(
         <p key={`p-${index}`} className="text-gray-800 leading-8 text-lg mb-6 font-serif">
@@ -134,7 +135,7 @@ const { blog } = location.state || { blog: null };
         {/* Tags Section */}
         <div className="mt-12 pt-8 border-t border-gray-100">
           <div className="flex flex-wrap gap-3 mb-8">
-            {blog.tags.map((tag:any, index:any) => (
+            {blog.tags.map((tag:string, index:number) => (
               <span
                 key={index}
                 className="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-full cursor-pointer transition-all duration-200 hover:scale-105 font-medium"

@@ -83,8 +83,9 @@ const AdminLayout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Revenue", path: "/admin/transactions", icon: <FaMoneyBillTransfer /> },
   ];
 
-  const renderMenuItems = (items: any) => {
-    return items.map((item: any, index: number) => {
+  interface IMenuItem {name:string,path:string,icon:React.ReactNode};
+  const renderMenuItems = (items: IMenuItem[]) => {
+    return items.map((item: IMenuItem, index: number) => {
       const isActive = location.pathname === item.path;
       return (
         <Link

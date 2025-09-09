@@ -8,6 +8,8 @@ import { directFileUpload, getDoctorConversations, getDoctorMessages } from "../
 import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
+import { IDoctorData } from "../../interfaces/doctor";
+import { ApiError } from "../../interfaces/error";
 
 interface Message {
   _id: string;
@@ -34,7 +36,7 @@ interface Conversation {
 }
 
 const DoctorChat = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const doctorId = doctor?._id;
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentChat, setCurrentChat] = useState<Conversation | null>(null);
@@ -247,7 +249,12 @@ const DoctorChat = () => {
   const handleSendMessage = async () => {
     if (!currentChat || (!newMessage.trim() && !docMessage)) return;
 
-    let messageData: any;
+    let messageData: {senderId: string,
+          conversationId: string,
+          type:string,
+          content: string,
+          fileName?: string,};
+
     let tempMessage: Message;
 
     try {
@@ -306,9 +313,9 @@ const DoctorChat = () => {
       }
 
       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Message send failed:", error);
-      message.error(error.response?.data?.message || "Failed to send message");
+      message.error((error as ApiError).response?.data?.message || "Failed to send message");
       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
     }
   };

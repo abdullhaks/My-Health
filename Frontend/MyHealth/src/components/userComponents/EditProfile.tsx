@@ -1,24 +1,9 @@
 import { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import GeoapifyAutocomplete from "../../sharedComponents/GeoapifyAutocomplete";
+import { userProfileData as ProfileData } from "../../interfaces/user";
 
 
-interface ILocation {
-  type: "Point";
-  coordinates: [number, number];
-  text: string;
-}
-
-interface ProfileData {
-  fullName: string;
-  medicalTags:string,
-  location: ILocation;
-  dob: string;
-  phone: string;
-  gender: string;
-  locationText?: string;
- 
-}
 
 interface EditProfileModalProps {
   isOpen: boolean;

@@ -59,8 +59,12 @@ const AdminSubscriptions = () => {
       const response = await getSubscriptions();
       const existingPlans = response.data.filter((plan: Product) => plan.active);
       setProducts(existingPlans || []);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to fetch products');
+    } catch (error) {
+      toast.error(
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message || 'Failed to fetch products'
+          : 'Failed to fetch products'
+      );
     } finally {
       setLoading(false);
     }
@@ -189,8 +193,12 @@ const AdminSubscriptions = () => {
       resetForm();
       setIsModalOpen(false);
       fetchProducts();
-    } catch (error: any) {
-      toast.error(error.message || (isEditing ? 'Failed to update plan' : 'Failed to create plan'));
+    } catch (error) {
+      toast.error(
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message || (isEditing ? 'Failed to update plan' : 'Failed to create plan')
+          : (isEditing ? 'Failed to update plan' : 'Failed to create plan')
+      );
     } finally {
       setSubmitting(false);
     }
@@ -216,8 +224,12 @@ const AdminSubscriptions = () => {
       toast.success('Plan deactivated successfully');
       fetchProducts();
       setDeleteConfirm(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to deactivate plan');
+    } catch (error) {
+      toast.error(
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message || 'Failed to deactivate plan'
+          : 'Failed to deactivate plan'
+      );
     } finally {
       setDeleting(null);
     }
@@ -230,8 +242,12 @@ const AdminSubscriptions = () => {
       toast.success('Plan activated successfully');
       fetchProducts();
       setDeleteConfirm(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to activate plan');
+    } catch (error) {
+      toast.error(
+        typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message?: string }).message || 'Failed to activate plan'
+          : 'Failed to activate plan'
+      );
     } finally {
       setDeleting(null);
     }

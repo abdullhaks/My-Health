@@ -1,6 +1,6 @@
 
 export interface blogCreate {
-    
+      _id?:string,
       title:string,
       content: string,
       author: string,
@@ -9,6 +9,9 @@ export interface blogCreate {
       img1: string,
       img2: string,
       img3: string,
-      tags: []
+      tags: [],
+      createdAt?: Date
+      updatedAt?: Date
     
 }
+

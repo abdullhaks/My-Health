@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from "react";
-import {LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { getDoctorAnalytics, getUserAnalytics, getTotalAnalytics, getTransactions } from "../../api/admin/adminApi"; // Added getTransactions
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { getDoctorAnalytics, getUserAnalytics, getTotalAnalytics, getTransactions } from "../../api/admin/adminApi";
 import adminimg from "../../assets/doctorLogin.png";
 import { FaCalendarCheck, FaUsers } from "react-icons/fa";
 import { FaMoneyBillTransfer, FaMoneyBillTrendUp, FaUserDoctor } from "react-icons/fa6";
-import { Table, DatePicker, Button, Pagination, Tag, message } from "antd"; // Imported necessary antd components
+import { Table, DatePicker, Button, Pagination, Tag, message } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; // Import the plugin
-
-// Extend jsPDF with autoTable
-(jsPDF as any).autoTable = autoTable;
+import autoTable from 'jspdf-autotable';
 
 interface SummaryCardProps {
   title: string;
   value: string;
   trend: string;
   trendColor: string;
-  icon?: any;
-};
+  icon?: React.ReactNode;
+}
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendColor, icon }) => (
   <div className="bg-white rounded-2xl p-6 shadow-lg flex flex-col gap-3 transition-transform transform hover:scale-105">
@@ -34,17 +31,51 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, trend, trendCol
   </div>
 );
 
-const AdminDashboard = () => {
-  interface AnalyticsItem {
-    name: string;
-    value: number;
-  }
+interface AnalyticsItem {
+  name: string;
+  value: number;
+}
 
+interface CombinedAnalyticsItem {
+  name: string;
+  users: number;
+  doctors: number;
+}
+
+interface TotalAnalytics {
+  totalConsultations: number;
+  totalDoctors: number;
+  totalPaid: number;
+  totalRevenue: number;
+  totalUsers: number;
+}
+
+interface Transaction {
+  _id: string;
+  createdAt: string;
+  method: string;
+  amount: number;
+  paymentFor: string;
+  // transactionId?: string;
+  // userId?: string;
+  // doctorId?: string;
+}
+
+interface TransactionsResponse {
+  transactions: Transaction[];
+  totalPages: number;
+}
+
+interface Filters {
+  dateRange: [Dayjs, Dayjs] | null;
+}
+
+const AdminDashboard = () => {
   const [userData, setUserData] = useState<AnalyticsItem[]>([]);
   const [doctorData, setDoctorData] = useState<AnalyticsItem[]>([]);
-  const [combinedData, setCombinedData] = useState<{ name: string; users: number; doctors: number }[]>([]);
-  const [analyticsFilter, setAnalyticsFilter] = useState("day"); // Combined filter
-  const [totaldata, setTotalData] = useState({
+  const [combinedData, setCombinedData] = useState<CombinedAnalyticsItem[]>([]);
+  const [analyticsFilter, setAnalyticsFilter] = useState("day");
+  const [totaldata, setTotalData] = useState<TotalAnalytics>({
     totalConsultations: 0,
     totalDoctors: 0,
     totalPaid: 0,
@@ -52,20 +83,19 @@ const AdminDashboard = () => {
     totalUsers: 0,
   });
 
-  // Transactions states
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(2);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    dateRange: null as [Dayjs, Dayjs] | null,
+  const [filters, setFilters] = useState<Filters>({
+    dateRange: null,
   });
 
   useEffect(() => {
     const fetchTotalAnalytics = async () => {
       try {
-        const response = await getTotalAnalytics();
+        const response: TotalAnalytics = await getTotalAnalytics();
         setTotalData(response);
       } catch (error) {
         console.error("Failed to fetch total analytics:", error);
@@ -77,7 +107,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchUserAnalytics = async () => {
       try {
-        const response = await getUserAnalytics(analyticsFilter);
+        const response: AnalyticsItem[] = await getUserAnalytics(analyticsFilter);
         setUserData(response);
       } catch (error) {
         console.error("Failed to fetch user analytics:", error);
@@ -89,7 +119,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchDoctorAnalytics = async () => {
       try {
-        const response = await getDoctorAnalytics(analyticsFilter);
+        const response: AnalyticsItem[] = await getDoctorAnalytics(analyticsFilter);
         setDoctorData(response);
       } catch (error) {
         console.error("Failed to fetch doctor analytics:", error);
@@ -98,10 +128,9 @@ const AdminDashboard = () => {
     fetchDoctorAnalytics();
   }, [analyticsFilter]);
 
-  // Combine user and doctor data for the graph
   useEffect(() => {
     if (userData.length > 0 && doctorData.length > 0 && userData.length === doctorData.length) {
-      const combined = userData.map((u, i) => ({
+      const combined: CombinedAnalyticsItem[] = userData.map((u, i) => ({
         name: u.name,
         users: u.value,
         doctors: doctorData[i].value,
@@ -112,11 +141,10 @@ const AdminDashboard = () => {
     }
   }, [userData, doctorData]);
 
-  // Fetch transactions
   const fetchTransactions = async (page: number) => {
     setLoading(true);
     try {
-      const response = await getTransactions(page, limit, {
+      const response: TransactionsResponse = await getTransactions(page, limit, {
         startDate: filters.dateRange ? filters.dateRange[0].toISOString() : undefined,
         endDate: filters.dateRange ? filters.dateRange[1].toISOString() : undefined,
       });
@@ -133,20 +161,18 @@ const AdminDashboard = () => {
     fetchTransactions(currentPage);
   }, [currentPage, filters]);
 
-  const handleFilterChange = (key: string, value: [Dayjs, Dayjs] | null) => {
+  const handleFilterChange = (key: keyof Filters, value: [Dayjs, Dayjs] | null) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
-  // Handle PDF download
   const handleDownload = async () => {
     if (!filters.dateRange) {
       message.warning("Please select a date range to download.");
       return;
     }
     try {
-      // Fetch all transactions with high limit for download
-      const response = await getTransactions(1, 10000, {
+      const response: TransactionsResponse = await getTransactions(1, 10000, {
         startDate: filters.dateRange[0].toISOString(),
         endDate: filters.dateRange[1].toISOString(),
       });
@@ -154,15 +180,12 @@ const AdminDashboard = () => {
 
       const doc = new jsPDF();
       autoTable(doc, {
-        head: [['Date','Method', 'Amount', 'Payment For', ]],
-        body: allTransactions.map((t: any) => [
+        head: [['Date', 'Method', 'Amount', 'Payment For']],
+        body: allTransactions.map((t: Transaction) => [
           dayjs(t.createdAt).format("MMM DD, YYYY h:mm A"),
-          
           t.method,
           `Rs ${t.amount}`,
           t.paymentFor,
-          // t.transactionId || 'N/A',
-         
         ]),
       });
       doc.save(`admin_revenue_${dayjs().format('YYYYMMDD')}.pdf`);
@@ -171,7 +194,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Transaction table columns
   const columns = [
     {
       title: "Date",
@@ -179,11 +201,6 @@ const AdminDashboard = () => {
       key: "createdAt",
       render: (date: string) => dayjs(date).format("MMM DD, YYYY h:mm A"),
     },
-    // {
-    //   title: "From",
-    //   dataIndex: "from",
-    //   key: "from",
-    // },
     {
       title: "Method",
       dataIndex: "method",
@@ -201,21 +218,6 @@ const AdminDashboard = () => {
       key: "paymentFor",
       render: (text: string) => <Tag color="blue">{text.toUpperCase()}</Tag>,
     },
-    // {
-    //   title: "Transaction ID",
-    //   dataIndex: "transactionId",
-    //   key: "transactionId",
-    // },
-    // {
-    //   title: "User ID",
-    //   dataIndex: "userId",
-    //   key: "userId",
-    // },
-    // {
-    //   title: "Doctor ID",
-    //   dataIndex: "doctorId",
-    //   key: "doctorId",
-    // },
   ];
 
   return (
@@ -279,8 +281,6 @@ const AdminDashboard = () => {
       {/* Transaction Listing */}
       <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg">
         <h3 className="text-xl font-semibold text-gray-800 mb-6">Admin Revenue Transactions</h3>
-        
-        {/* Filters */}
         <div className="mb-6 flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <FilterOutlined className="text-gray-600" />
@@ -309,8 +309,6 @@ const AdminDashboard = () => {
             Download PDF
           </Button>
         </div>
-
-        {/* Table */}
         <Table
           dataSource={transactions}
           columns={columns}
@@ -318,8 +316,6 @@ const AdminDashboard = () => {
           loading={loading}
           pagination={false}
         />
-
-        {/* Pagination */}
         <div className="mt-6 flex justify-end">
           <Pagination
             current={currentPage}

@@ -2,7 +2,7 @@ import IDoctorProfileService from "../interfaces/IDoctorProfileSevices";
 import IUserRepository from "../../../repositories/interfaces/IUserRepository";
 import IDoctorRepository from "../../../repositories/interfaces/IDoctorRepository";
 import { IUser } from "../../../dto/userDTO";
-import {IDoctor} from "../../../dto/doctorDTO"
+import {doctorProfileUpdate, IDoctor} from "../../../dto/doctorDTO"
 import { inject, injectable } from "inversify";
 import bcrypt from "bcryptjs";
 import generateOtp from "../../../utils/helpers";
@@ -90,36 +90,25 @@ export default class DoctorProfileService implements IDoctorProfileService {
     };
 
 
- async updateProfile(userId:string,userData: Partial<IDoctor> ): Promise<{message:string,updatedDoctor:Partial<IDoctor>}> {
-        
-        console.log("user data is ",userData);
-        console.log("user id from service ",userId);
-
-        try {
-            const updatedUser = await this._doctorRepository.update(userId.toString(), userData);
-            console.log("Updated user: ", updatedUser);
-
-            if(!updatedUser){
-              throw new Error ("profile update failed")
-            }
-                const { password, ...userWithoutPassword } = updatedUser.toObject();
-      
-                if(userWithoutPassword.profile){
-                  userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile)
-                }
-            return {
-            message: "updated successful",
-            updatedDoctor: userWithoutPassword,
-            };
-           
-            
-
-            
-        } catch (error) {
-            console.error("Error updating user profile:", error);
-            throw new Error("Failed to update user profile");
-        }
-    };
+async updateProfile(userId: string, userData: doctorProfileUpdate): Promise<{ message: string; updatedDoctor: IDoctor }> {
+    try {
+      const updatedUser = await this._doctorRepository.update(userId, userData);
+      if (!updatedUser) {
+        throw new Error("Profile update failed");
+      }
+      const { password, ...userWithoutPassword } = updatedUser.toObject();
+      if (userWithoutPassword.profile) {
+        userWithoutPassword.profile = await getSignedImageURL(userWithoutPassword.profile);
+      }
+      return {
+        message: "Updated successfully",
+        updatedDoctor: userWithoutPassword,
+      };
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      throw new Error("Failed to update user profile");
+    }
+  }
 
 
 }

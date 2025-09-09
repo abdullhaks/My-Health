@@ -1,10 +1,13 @@
 import { message } from "antd";
 import { ROUTES } from "../../constants/routes";
 import { userInstance } from "../../services/axiosFactory";
+import { PasswordData, recoveryPasswordData, userLoginData, userProfileData, userResetPasswordData, userSignupData } from "../../interfaces/user";
+import { createOneTimePaymentMetaData, walletPaymentData } from "../../interfaces/stripe";
+import { transactionsFilter } from "../../interfaces/transaction";
 
 
 
-export const signupUser = async (userData: any) => {
+export const signupUser = async (userData: userSignupData) => {
   try {
     const response = await userInstance.post(ROUTES.user.signup, userData);
     message.success("Signup successful!");
@@ -42,7 +45,7 @@ export const getDoctor = async (doctorId:string)=>{
   
 }
 
-export const loginUser = async (userData: any) => {
+export const loginUser = async (userData: userLoginData) => {
   try {
     const response = await userInstance.post(ROUTES.user.login, userData);
     console.log("Login response:", response.data);
@@ -53,7 +56,7 @@ export const loginUser = async (userData: any) => {
   }
 };
 
-export const verifyOtp = async (otpData: any) => {
+export const verifyOtp = async (otpData: { email:string, otp:string }) => {
   try {
     console.log("OTP data:", otpData);
     const response = await userInstance.post(ROUTES.user.verifyOtp, otpData);
@@ -70,9 +73,9 @@ export const resentOtp = async (email: string) => {
       params: { email },
     });
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error resending OTP:", error);
-    throw error.response?.data?.msg || "Something went wrong";
+    throw error || "Something went wrong";
   }
 };
 
@@ -100,7 +103,7 @@ export const recoveryPassword = async (email: string) => {
   }
 };
 
-export const verifyRecoveryPassword = async (userData: any) => {
+export const verifyRecoveryPassword = async (userData: recoveryPasswordData) => {
   try {
     console.log("User data:", userData);
     const response = await userInstance.post(ROUTES.user.verifyRecoveryPassword, userData);
@@ -112,7 +115,7 @@ export const verifyRecoveryPassword = async (userData: any) => {
   }
 };
 
-export const resetPassword = async (email: string, formData: any) => {
+export const resetPassword = async (email: string, formData: userResetPasswordData) => {
   try {
     const response = await userInstance.patch(ROUTES.user.resetPassword(email), {
       formData,
@@ -128,7 +131,7 @@ export const resetPassword = async (email: string, formData: any) => {
 };
 
 
-export const changePassword = async (data:any ,userId:string)=>{
+export const changePassword = async (data:PasswordData ,userId:string)=>{
   console.log("new password....",data,userId);
 
   try{
@@ -158,7 +161,7 @@ export const refreshToken = async () => {
   }
 };
 
-export const updateProfile = async (userData: any,userId:string) => {
+export const updateProfile = async (userData: userProfileData,userId:string) => {
   try {
 
     console.log("User data for update:", userData);
@@ -174,7 +177,7 @@ export const updateProfile = async (userData: any,userId:string) => {
   }
 };
 
-export const updateProfileImage = async(formData:any, userId:string) =>{
+export const updateProfileImage = async(formData:FormData, userId:string) =>{
 
   // for (const [key, value] of formData.entries()) {
   //   console.log(`api side...${key}:`, value,userId);
@@ -200,7 +203,8 @@ export const logoutUser = async () => {
 };
 
 
-export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, page, limit }: any) => {
+export const fetchingDoctors = async ({ searchTerm, location, category, sortBy, page, limit }:
+  { searchTerm:string, location:string, category:string, sortBy:string, page:number, limit:number }) => {
   try {
     const response = await userInstance.get(ROUTES.user.doctors, {
       params: {
@@ -257,7 +261,7 @@ export const getSessions = async (doctorId:string)=>{
 };
 
 
-export const createOneTimePayment = async (amount: number, metadata: any) => {
+export const createOneTimePayment = async (amount: number, metadata: createOneTimePaymentMetaData) => {
   try {
 
     console.log("metadata in api is :",metadata);
@@ -307,7 +311,7 @@ export const cancelAppointment = async (appointmentId:string) => {
 };
 
 
-export const directFileUpload = async (formData:any) => {
+export const directFileUpload = async (formData:FormData) => {
   try {
 
      for (const [key, value] of formData.entries()) {
@@ -357,7 +361,7 @@ export const cancelAnalysisReports = async (analysisId:string,userId:string,fee:
 };
 
 
-export const walletPayment = async (data:any)=>{
+export const walletPayment = async (data:walletPaymentData)=>{
   try{
     console.log("data is,................",data);
 
@@ -518,7 +522,7 @@ export const checkActiveBooking = async ( userId:string , doctorId:string)=>{
 };
 
 
-export const getTransactions = async (userId:string ,page:number, limit:number,filters:any)=>{
+export const getTransactions = async (userId:string ,page:number, limit:number,filters:transactionsFilter)=>{
     try{
 
       const response = await userInstance.get(ROUTES.user.getTransactions,{
