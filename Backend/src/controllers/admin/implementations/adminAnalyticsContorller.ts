@@ -29,7 +29,6 @@ export default class AdminAnalyticsContorller implements IAdminAnalyticsControll
     }
   }
 
-
     async getDoctorAnalytics(req: Request, res: Response): Promise<void> {
     try {
       const filter = req.params.filter;
