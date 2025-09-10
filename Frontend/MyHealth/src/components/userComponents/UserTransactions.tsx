@@ -6,6 +6,7 @@ import { Table, Select, DatePicker, Button, Pagination } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { IUserData } from "../../interfaces/user";
 
 interface Transaction {
   _id: string;
@@ -17,6 +18,7 @@ interface Transaction {
   transactionId?: string;
   userId?: string;
   doctorId?: string;
+  invoice?:string;
   date: string;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +28,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const UserTransactions = () => {
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -106,7 +108,7 @@ const UserTransactions = () => {
       title: "Transaction ID",
       dataIndex: "transactionId",
       key: "transactionId",
-      render:(text: string, record: any) => {
+      render:(text: string, record: Transaction) => {
     if (record.invoice) {
       return (
         <a href={record.invoice} target="_blank" rel="noopener noreferrer">

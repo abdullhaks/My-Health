@@ -1,5 +1,5 @@
 import Input from "../../sharedComponents/Input";
-import adminLoginImg from "../../assets/adminLogin.png"; 
+import adminLoginImg from "../../assets/adminLogin.png";
 import applogoWhite from "../../assets/applogoWhite.png";
 import Button from "../../sharedComponents/Button";
 import { FcGoogle } from "react-icons/fc";
@@ -7,27 +7,46 @@ import PasswordInput from "../../sharedComponents/PasswordInput";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { loginAdmin } from "../../api/admin/adminApi"; 
+import { loginAdmin } from "../../api/admin/adminApi";
 import { useDispatch } from "react-redux";
-import { loginAdmin as login, logoutAdmin } from "../../redux/slices/adminSlices"; 
+import { loginAdmin as login, logoutAdmin } from "../../redux/slices/adminSlices";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AxiosError } from "axios"; // Import AxiosError
+import { ApiError } from "../../interfaces/error";
 
+// Define the validation schema
 const adminLoginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
+// Define interfaces for form data and errors
+interface FormData {
+  email: string;
+  password: string;
+}
+
+interface FormErrors {
+  email: string;
+  password: string;
+}
+
+// Define interface for API error response
+interface ApiErrorResponse {
+  msg?: string;
+}
+
 function AdminLogin() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     email: "",
     password: "",
   });
@@ -42,9 +61,9 @@ function AdminLogin() {
   useEffect(() => {
     const result = adminLoginSchema.safeParse(formData);
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = { email: "", password: "" };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        errors[err.path[0] as keyof FormErrors] = err.message;
       });
       setErrors(errors);
       setIsFormValid(false);
@@ -64,33 +83,39 @@ function AdminLogin() {
     e.preventDefault();
     const result = adminLoginSchema.safeParse(formData);
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = { email: "", password: "" };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        errors[err.path[0] as keyof FormErrors] = err.message;
       });
       setErrors(errors);
       return;
     }
 
     try {
-
       console.log("Form data before login:", formData);
       const response = await loginAdmin(formData);
       console.log("Admin login success:", response);
 
       dispatch(logoutAdmin());
-      dispatch(login({
-          admin: response.admin
+      dispatch(
+        login({
+          admin: response.admin,
         })
       );
 
       toast.success("Logged in as Admin");
       navigate("/admin/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login failed:", error);
-      toast.error(error.response?.data?.msg || "Invalid credentials!");
+      toast.error((error as ApiError).response?.data?.msg || "Invalid credentials!");
 
-      if (error.response && error.response.status === 401) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        (error as ApiError).response &&
+        (error as ApiError).response?.data?.status === 401
+      ) {
         setErrors({ ...errors, password: "Invalid email or password" });
       } else {
         setErrors({ ...errors, email: " " });
@@ -139,7 +164,10 @@ function AdminLogin() {
                   error={touched.password ? errors.password : ""}
                 />
 
-                <span onClick={() => navigate("/admin/forgetPassword")} className="text-blue-600 hover:underline cursor-pointer">
+                <span
+                  onClick={() => navigate("/admin/forgetPassword")}
+                  className="text-blue-600 hover:underline cursor-pointer"
+                >
                   Forgot password?
                 </span>
 
@@ -158,8 +186,6 @@ function AdminLogin() {
                   className="bg-white text-gray-700 border border-gray-300 hover:bg-gray-200"
                 />
               </form>
-
-             
             </div>
           </div>
         </div>

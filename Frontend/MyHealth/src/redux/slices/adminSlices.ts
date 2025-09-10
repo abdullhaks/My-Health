@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IAdminData } from '../../interfaces/admin';
 
 interface AuthState {
-    admin: any;
+    admin: IAdminData | null ;
   }
   
   const initialState: AuthState = {
@@ -13,17 +14,19 @@ interface AuthState {
     name: 'admin',
     initialState,
     reducers: {
-      loginAdmin: (state, action: PayloadAction<{ admin: any;}>) => {
+      loginAdmin: (state, action: PayloadAction<{ admin: IAdminData;}>) => {
         state.admin = action.payload.admin;
       },
       logoutAdmin: (state) => {
         state.admin = null;
       },
-      updateAdmin(state, action: PayloadAction<any>) {
+      updateAdmin(state, action: PayloadAction<Partial<IAdminData>>) {
+      if (state.admin) {
         state.admin = { ...state.admin, ...action.payload };
-      },
-    },
-  });
+            }
+          }
+      }
+    });
   
   export const { loginAdmin, logoutAdmin, updateAdmin } = adminSlice.actions;
 

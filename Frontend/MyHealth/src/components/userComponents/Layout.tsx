@@ -15,6 +15,7 @@ import { io, Socket } from "socket.io-client";
 import axios from "axios";
 import { message } from "antd";
 import { FaMoneyBillTransfer } from "react-icons/fa6";
+import { IUserData } from "../../interfaces/user";
 
 interface Notification {
   _id:string;
@@ -48,7 +49,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
   const limit = 10;
   const [notificationSet, setNotificationSet] = useState(1);
 
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
 
 
 
@@ -62,7 +63,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
         setNotifications((prev) => {
             const existingIds = new Set(prev.map((n) => n._id));
             const newNotifications = response.notifications
-              .map((n: any) => ({
+              .map((n: Notification) => ({
                 ...n,
                 date: new Date(n.createdAt),
                 createdAt: new Date(n.createdAt),
@@ -73,7 +74,7 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
             );
           });
 
-        const unreadCount = response.notifications.filter((n: any) => !n.isRead).length;
+        const unreadCount = response.notifications.filter((n: Notification) => !n.isRead).length;
         setNotificationCount(unreadCount);
         } else {
         setNotificationCount(0);
@@ -344,8 +345,8 @@ const Layout: React.FC<NavbarProps> = ({ children }) => {
     { name: "Settings", path: "/user/settings", icon: <FaCog /> },
   ];
 
-  const renderMenuItems = (items: any) => {
-    return items.map((item: any, index: number) => {
+  const renderMenuItems = (items: {name:string;path:string;icon:React.ReactNode}[]) => {
+    return items.map((item: {name:string;path:string;icon:React.ReactNode}, index: number) => {
       const isActive = location.pathname === item.path;
 
       return (

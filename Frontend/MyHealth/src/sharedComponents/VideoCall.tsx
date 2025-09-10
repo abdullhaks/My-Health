@@ -6,6 +6,7 @@ import {AudioOutlined,AudioMutedOutlined,VideoCameraOutlined, VideoCameraFilled,
   MessageOutlined, SendOutlined,SnippetsOutlined,PlusOutlined,MinusCircleOutlined, UserOutlined, CalendarOutlined, MedicineBoxOutlined, AlertOutlined, HistoryOutlined} from '@ant-design/icons';
 import { io } from "socket.io-client";
 import { getPrescriptions,submitPrescription , getUser} from "../api/doctor/doctorApi";
+import { IUser } from "../interfaces/user";
 
 interface VideoCallProps {
   role: "doctor" | "user";
@@ -20,21 +21,25 @@ interface ChatMessage {
   senderRole?: "doctor" | "user";
 }
 
-interface Prescription {
-  _id?: string;
-  appointmentId: string;
-  userId: string;
-  doctorId: string;
-  medicalCondition:string;
-  medications: {
+  interface PrescriptionValues {
+    medicalCondition:string;
+    medications:{
     name: string;
     dosage: string;
     frequency: string;
     duration: string;
     instructions?: string;
-  }[];
-  medicationPeriod:number;
-  notes?: string;
+  }[]
+    medicationPeriod:number
+    notes:string
+  }
+
+
+interface Prescription extends PrescriptionValues  {
+  _id?: string;
+  appointmentId: string;
+  userId: string;
+  doctorId: string;
   createdAt?: Date;
 };
 
@@ -74,7 +79,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
   const [form] = Form.useForm();
   const location = useLocation();
   const {appointment} = location.state;
-  const [patient,setPatient] = useState<any>({});
+  const [patient,setPatient] = useState<IUser | null>(null);
   const navigate = useNavigate();
   const [prescriptionSubmited , setPrescriptionSubmited] = useState(false);
 
@@ -85,7 +90,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
   };
 
 
-   const calculateAge = (dateOfBirth:any) => {
+   const calculateAge = (dateOfBirth:string) => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -232,7 +237,8 @@ const VideoCall = ({ role }: VideoCallProps) => {
     }
   };
 
-  const handleAddPrescription = async (values: any) => {
+
+  const handleAddPrescription = async (values:PrescriptionValues) => {
     const newPrescriptionData: Prescription = {
       appointmentId: appointmentId ||appointment._id || "",
       userId: otherParticipant?.id ||appointment.userId|| "",
@@ -611,7 +617,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
             <div className="flex items-start space-x-4">
 
               <img
-                  src={patient.profile || 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png'}
+                  src={patient?.profile?patient.profile : 'https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png'}
                   alt="Patient"
                   className="w-16 h-16 rounded-full object-cover"
                 />
@@ -619,7 +625,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-semibold text-gray-800">
-                    {patient?.fullName || patient?.name || 'Patient Name'}
+                    {patient?.fullName || 'Patient Name'}
                   </h3>
                   <Badge 
                     count={prescriptions.length} 
@@ -631,7 +637,7 @@ const VideoCall = ({ role }: VideoCallProps) => {
                 
                 <Descriptions size="small" column={2}>
                   <Descriptions.Item label="Age">
-                    {calculateAge(patient?.dob) || 'N/A'}
+                    {patient?.dob?calculateAge(patient.dob) : 'N/A'}
                   </Descriptions.Item>
                   <Descriptions.Item label="Gender">
                     {patient?.gender || 'N/A'}

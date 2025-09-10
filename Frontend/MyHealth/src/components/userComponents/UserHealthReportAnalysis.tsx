@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { createOneTimePayment, directFileUpload } from "../../api/user/userApi";
 import { message } from "antd";
 import { useSelector } from "react-redux";
+import { IUserData } from "../../interfaces/user";
+import { reportAnalysisData } from "../../interfaces/reportAnalysis";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -14,11 +16,11 @@ const UserHealthReportAnalysis = () => {
   const { state, search } = useLocation();
   const navigate = useNavigate();
   const doctor = state?.doctor || null;
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
   const [concerns, setConcerns] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [reports, setReports] = useState<any[]>([]);
+  const [reports, setReports] = useState<reportAnalysisData[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const maxFiles = 5;
@@ -46,7 +48,7 @@ const UserHealthReportAnalysis = () => {
   //     const res = await axios.get("/api/user/reports", {
   //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   //     });
-  //     setReports(res.data.reports.filter((report: any) => report.doctorId === doctor._id));
+  //     setReports(res.data.reports.filter((report) => report.doctorId === doctor._id));
   //   } catch (error) {
   //     toast.error("Failed to load reports.");
   //   } finally {
@@ -299,7 +301,7 @@ const UserHealthReportAnalysis = () => {
                     <p className="text-sm text-gray-600">
                       Submitted on: {new Date(report.createdAt).toLocaleDateString()}
                     </p>
-                    <p className="text-sm text-gray-600">Status: {report.status}</p>
+                    <p className="text-sm text-gray-600">Status: {report.analysisStatus}</p>
                   </div>
                   <button
                     onClick={() => navigate(`/report-details/${report._id}`)}

@@ -5,10 +5,12 @@ import Button from "../../sharedComponents/Button";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useEffect, useState } from "react";
-import { verifyRecoveryPassword } from "../../api/admin/adminApi"; 
+import { verifyRecoveryPassword } from "../../api/admin/adminApi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ApiError } from "../../interfaces/error";
 
+// Define the validation schema
 const adminRecPassSchema = z.object({
   recPass: z
     .string()
@@ -19,14 +21,32 @@ const adminRecPassSchema = z.object({
     }),
 });
 
+// Define interfaces for form data and errors
+interface FormData {
+  recPass: string;
+}
+
+interface FormErrors {
+  recPass: string;
+}
+
+// Define interface for API response and error
+interface VerifyResponse {
+  msg: string;
+}
+
+interface ApiErrorResponse {
+  msg?: string;
+}
+
 function AdminRecoveryPassword() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     recPass: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     recPass: "",
   });
 
@@ -41,9 +61,9 @@ function AdminRecoveryPassword() {
   useEffect(() => {
     const result = adminRecPassSchema.safeParse(formData);
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = { recPass: "" };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        errors[err.path[0] as keyof FormErrors] = err.message;
       });
       setErrors(errors);
       setIsFormValid(false);
@@ -64,9 +84,9 @@ function AdminRecoveryPassword() {
     const result = adminRecPassSchema.safeParse(formData);
 
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = { recPass: "" };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        errors[err.path[0] as keyof FormErrors] = err.message;
       });
       setErrors(errors);
       return;
@@ -75,7 +95,7 @@ function AdminRecoveryPassword() {
     try {
       const response = await verifyRecoveryPassword({
         email,
-        recoveryCode: formData.recPass,
+        password: formData.recPass,
       });
 
       if (response?.msg === "Recovery code verified successfully") {
@@ -84,9 +104,9 @@ function AdminRecoveryPassword() {
       } else {
         toast.error("Invalid recovery code");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Verification failed:", error);
-      toast.error("Something went wrong. Please try again later.");
+      toast.error((error as ApiError).response?.data?.msg || "Something went wrong. Please try again later.");
     }
   };
 

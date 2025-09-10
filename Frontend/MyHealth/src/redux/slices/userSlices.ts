@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IUser } from '../../interfaces/user';
 
 interface AuthState {
-    user: any;
+    user: IUser | null;
   }
   
   const initialState: AuthState = {
@@ -13,14 +14,16 @@ interface AuthState {
     name: 'user',
     initialState,
     reducers: {
-      loginUser: (state, action: PayloadAction<{ user: any }>) => {
+      loginUser: (state, action: PayloadAction<{ user: IUser }>) => {
         state.user = action.payload.user;
       },
       logoutUser: (state) => {
         state.user = null;
       },
-      updateUser(state, action: PayloadAction<any>) {
+      updateUser(state, action: PayloadAction<Partial<IUser>>) {
+         if (state.user) {
         state.user = { ...state.user, ...action.payload };
+            }
       },
     },
   });

@@ -10,13 +10,13 @@ import { changePassword } from "../../api/user/userApi";
 import { updateProfileImage } from "../../api/user/userApi";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slices/userSlices";
-import { PasswordData } from "../../interfaces/user";
+import { IUserData, PasswordData } from "../../interfaces/user";
 import { userProfileData } from "../../interfaces/user";
 
 
 const UserProfile = () => {
 
-  const user = useSelector((state:any) => state.user.user);
+  const user = useSelector((state:IUserData) => state.user.user);
   const dispatch = useDispatch();
 
   const [profileData , setProfileData] = useState(user);
@@ -130,7 +130,7 @@ const UserProfile = () => {
   };
 
   // Calculate age from date of birth
-  const calculateAge = (dateOfBirth:any) => {
+  const calculateAge = (dateOfBirth:string) => {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -240,7 +240,7 @@ const UserProfile = () => {
             
             <div className="space-y-1">
               <p className="text-sm text-gray-500">Age</p>
-              <p className="text-base">{calculateAge(profileData.dob) || "not provided"}</p>
+              <p className="text-base">{profileData.dob?calculateAge(profileData.dob): "not provided"}</p>
             </div>
             
             <div className="space-y-1">
@@ -295,11 +295,11 @@ const UserProfile = () => {
         onSave={handleProfileUpdate}
         initialData={{
           fullName: profileData.fullName,
-          medicalTags:profileData.medicalTags,
-          location: profileData.location,
-          dob: profileData.dob,
-          phone: profileData.phone,
-          gender: profileData.gender
+          medicalTags:profileData.medicalTags || "",
+          location: profileData.location ?? null ,
+          dob: profileData.dob || " ",
+          phone: profileData.phone || "",
+          gender: profileData.gender || ""
         }}
       />
       

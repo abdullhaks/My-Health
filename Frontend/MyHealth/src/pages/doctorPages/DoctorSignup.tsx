@@ -5,18 +5,17 @@ import Button from "../../sharedComponents/Button";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import applogoWhite from "../../assets/applogoWhite.png";
-// import userLogin from "../../assets/userLogin.png";
-import doctorLogin from "../../assets/doctorLogin.png"
-import { signupDoctor } from "../../api/doctor/doctorApi"; // You should implement this
-// import GeoapifyAutocomplete from "../../sharedComponents/GeoapifyAutocomplete";
+import doctorLogin from "../../assets/doctorLogin.png";
+import { signupDoctor } from "../../api/doctor/doctorApi";
 import toast from "react-hot-toast";
 
-// Your validation schema
+// Validation schema
 const doctorSignupSchema = z
   .object({
     fullName: z.string().min(3, "Full name must be at least 3 characters"),
     email: z.string().email("Invalid email address"),
-    password: z.string()
+    password: z
+      .string()
       .min(8, "Password must be at least 8 characters")
       .regex(/[a-z]/, "At least one lowercase letter")
       .regex(/[A-Z]/, "At least one uppercase letter")
@@ -24,11 +23,11 @@ const doctorSignupSchema = z
       .regex(/[@$!%*?&#]/, "Include at least one special character"),
     confirmPassword: z.string(),
     graduation: z.string(),
-    graduationCertificate: z.any(),
+    graduationCertificate: z.instanceof(File).nullable(),
     category: z.string(),
-    registerNo: z.string().min(6, "not valied"),
-    registrationCertificate: z.any(),
-    verificationId: z.any(),
+    registerNo: z.string().min(6, "Not valid"),
+    registrationCertificate: z.instanceof(File).nullable(),
+    verificationId: z.instanceof(File).nullable(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -54,36 +53,36 @@ function DoctorSignup() {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof DoctorSignupData, string>>>({});
   const [touched, setTouched] = useState<Record<keyof DoctorSignupData, boolean>>(
-    Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: false }), {} as any)
+    Object.keys(formData).reduce(
+      (acc, key) => ({ ...acc, [key as keyof DoctorSignupData]: false }),
+      {} as Record<keyof DoctorSignupData, boolean>
+    )
   );
 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      ) => {
-        const { name, value, type, files } = e.target as HTMLInputElement;
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type, files } = e.target as HTMLInputElement;
 
-        if (type === "file") {
-          setFormData((prev) => ({
-            ...prev,
-            [name]: files?.[0] || null,
-          }));
-        } else {
-          setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-          }));
-        }
+    if (type === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files?.[0] || null,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
 
-        setTouched((prev) => ({
-          ...prev,
-          [name]: true,
-        }));
-      };
-
-
- 
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
 
   useEffect(() => {
     const result = doctorSignupSchema.safeParse(formData);
@@ -119,16 +118,17 @@ function DoctorSignup() {
       setErrors(fieldErrors);
       return;
     }
-  
-    setLoading(true); // Start loader
-  
+
+    setLoading(true);
+
     try {
       const formDataToSend = new FormData();
-      for (const key in formData) {
-        const value = (formData as any)[key];
-        formDataToSend.append(key, value);
-      }
-  
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) {
+          formDataToSend.append(key, value);
+        }
+      });
+
       await signupDoctor(formDataToSend)
         .then((response) => {
           console.log("Signup successful", response);
@@ -139,16 +139,14 @@ function DoctorSignup() {
           setErrors({ email: "Email already exists" });
           toast.error("Email already exists");
         });
-  
     } catch (error) {
       console.error("Doctor signup error:", error);
       toast.error("Invalid inputs. Try again.");
       setErrors({ email: "Signup failed. Try again." });
     } finally {
-      setLoading(false); // Stop loader
+      setLoading(false);
     }
   };
-  
 
   // Function to check if the current step is valid
   const isStepValid = (step: number) => {
@@ -163,14 +161,17 @@ function DoctorSignup() {
     }
     if (step === 2) {
       return (
-        
         formData.graduation.length > 0 &&
         formData.category.length > 0 &&
-        formData.graduationCertificate 
+        formData.graduationCertificate !== null
       );
     }
     if (step === 3) {
-      return formData.verificationId &&formData.registerNo.length > 5 && formData.registrationCertificate
+      return (
+        formData.verificationId !== null &&
+        formData.registerNo.length > 5 &&
+        formData.registrationCertificate !== null
+      );
     }
     return false;
   };
@@ -239,81 +240,79 @@ function DoctorSignup() {
                 )}
 
                 {step === 2 && (
-                      <>
-                        <Input
-                          id="graduation"
-                          name="graduation"
-                          label="Graduation"
-                          value={formData.graduation}
-                          onChange={handleChange}
-                          placeholder="Enter graduation"
-                          required
-                          error={touched.graduation ? errors.graduation : ""}
-                        />
-                        <Input
-                          id="graduationCertificate"
-                          name="graduationCertificate"
-                          type="file"
-                          onChange={handleChange}
-                          required
-                        />
+                  <>
+                    <Input
+                      id="graduation"
+                      name="graduation"
+                      label="Graduation"
+                      value={formData.graduation}
+                      onChange={handleChange}
+                      placeholder="Enter graduation"
+                      required
+                      error={touched.graduation ? errors.graduation : ""}
+                    />
+                    <Input
+                      id="graduationCertificate"
+                      name="graduationCertificate"
+                      type="file"
+                      onChange={handleChange}
+                      required
+                    />
 
-                        {/* Category Dropdown */}
-                        <div className="flex flex-col">
-                          <label htmlFor="category" className="mb-1 text-gray-700 font-medium">
-                            Category
-                          </label>
-                          <select
-                            id="category"
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            className="border rounded-lg p-2 focus:ring focus:ring-blue-300"
-                            required
-                          >
-                            <option value="">Select Category</option>
-                            <option value="General Physician">General Physician</option>
-                            <option value="Cardiologist">Cardiologist</option>
-                            <option value="Dermatologist">Dermatologist</option>
-                            <option value="Endocrinologist">Endocrinologist</option>
-                            <option value="Gastroenterologist">Gastroenterologist</option>
-                            <option value="Neurologist">Neurologist</option>
-                            <option value="Nephrologist">Nephrologist</option>
-                            <option value="Oncologist">Oncologist</option>
-                            <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
-                            <option value="Pediatrician">Pediatrician</option>
-                            <option value="Psychiatrist">Psychiatrist</option>
-                            <option value="Pulmonologist">Pulmonologist</option>
-                            <option value="Radiologist">Radiologist</option>
-                            <option value="Rheumatologist">Rheumatologist</option>
-                            <option value="Surgeon">Surgeon</option>
-                            <option value="Urologist">Urologist</option>
-                            <option value="ENT Specialist">ENT Specialist</option>
-                            <option value="Ophthalmologist">Ophthalmologist</option>
-                            <option value="Gynecologist">Gynecologist</option>
-                            <option value="Dentist">Dentist</option>
-                            <option value="Physiotherapist">Physiotherapist</option>
-                            <option value="Dietitian/Nutritionist">Dietitian/Nutritionist</option>
-                            <option value="Emergency Medicine">Emergency Medicine</option>
-                            <option value="Pathologist">Pathologist</option>
-                            <option value="Family Medicine">Family Medicine</option>
-                            <option value="Hematologist">Hematologist</option>
-                            <option value="Plastic Surgeon">Plastic Surgeon</option>
-                            <option value="Anesthesiologist">Anesthesiologist</option>
-                            <option value="Sports Medicine">Sports Medicine</option>
-                            <option value="Other">Other</option>
-                          </select>
-                          {touched.category && errors.category && (
-                            <span className="text-red-500 text-sm">{errors.category}</span>
-                          )}
-                        </div>
-                      </>
-                    )}
+                    <div className="flex flex-col">
+                      <label htmlFor="category" className="mb-1 text-gray-700 font-medium">
+                        Category
+                      </label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="border rounded-lg p-2 focus:ring focus:ring-blue-300"
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        <option value="General Physician">General Physician</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Endocrinologist">Endocrinologist</option>
+                        <option value="Gastroenterologist">Gastroenterologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Nephrologist">Nephrologist</option>
+                        <option value="Oncologist">Oncologist</option>
+                        <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="Psychiatrist">Psychiatrist</option>
+                        <option value="Pulmonologist">Pulmonologist</option>
+                        <option value="Radiologist">Radiologist</option>
+                        <option value="Rheumatologist">Rheumatologist</option>
+                        <option value="Surgeon">Surgeon</option>
+                        <option value="Urologist">Urologist</option>
+                        <option value="ENT Specialist">ENT Specialist</option>
+                        <option value="Ophthalmologist">Ophthalmologist</option>
+                        <option value="Gynecologist">Gynecologist</option>
+                        <option value="Dentist">Dentist</option>
+                        <option value="Physiotherapist">Physiotherapist</option>
+                        <option value="Dietitian/Nutritionist">Dietitian/Nutritionist</option>
+                        <option value="Emergency Medicine">Emergency Medicine</option>
+                        <option value="Pathologist">Pathologist</option>
+                        <option value="Family Medicine">Family Medicine</option>
+                        <option value="Hematologist">Hematologist</option>
+                        <option value="Plastic Surgeon">Plastic Surgeon</option>
+                        <option value="Anesthesiologist">Anesthesiologist</option>
+                        <option value="Sports Medicine">Sports Medicine</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      {touched.category && errors.category && (
+                        <span className="text-red-500 text-sm">{errors.category}</span>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 {step === 3 && (
                   <>
-                   
-                   <Input
+                    <Input
                       id="registerNo"
                       name="registerNo"
                       label="Register Number"
@@ -331,7 +330,6 @@ function DoctorSignup() {
                       onChange={handleChange}
                       required
                     />
-
                     <Input
                       id="verificationId"
                       name="verificationId"
@@ -340,7 +338,6 @@ function DoctorSignup() {
                       onChange={handleChange}
                       required
                     />
-
                   </>
                 )}
 
@@ -359,14 +356,14 @@ function DoctorSignup() {
                       text="Next"
                       className="bg-blue-600 text-white hover:bg-blue-700"
                       onClick={nextStep}
-                      disabled={!isStepValid(step)} // Disable if step isn't valid
+                      disabled={!isStepValid(step)}
                     />
                   ) : (
                     <Button
                       type="submit"
                       text={loading ? "Signing up..." : "Signup"}
                       className="bg-blue-600 text-white hover:bg-blue-700"
-                      disabled={!isStepValid(step)} // Disable if last step isn't valid
+                      disabled={!isStepValid(step)}
                     />
                   )}
                 </div>

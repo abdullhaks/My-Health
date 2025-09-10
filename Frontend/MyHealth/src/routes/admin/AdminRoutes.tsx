@@ -6,7 +6,7 @@ import { lazy } from 'react';
 
 
 const AdminLogin = lazy(() => import ( "../../pages/adminPages/AdminLogin"));
-const AdminForgetPassword = lazy(() => import ( "../../pages/adminPages/AdminForgetPassword"));
+const AdminForgetPassword = lazy(() => import (  "../../pages/adminPages/AdminForgetPassword"));
 const AdminRcoveryPassword = lazy(() => import ( "../../pages/adminPages/AdminRecoveryPassword"));
 // const AdminResetPassword = lazy(() => import ( "../../pages/adminPages/"));
 const AdminMain = lazy(() => import ( "../../pages/adminPages/AdminMain"));

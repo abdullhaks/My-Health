@@ -1,6 +1,8 @@
 interface ApiErrorResponse {
   data?: {
     message?: string;
+    msg?:string;
+    status?:number
   };
 }
 

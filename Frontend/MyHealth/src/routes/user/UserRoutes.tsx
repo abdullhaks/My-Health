@@ -21,7 +21,7 @@ const UserAppointmentConfirmation = lazy(() => import ( "../../components/userCo
 const UserPaymentSuccess = lazy(() => import ( "../../components/userComponents/UserPaymentSuccess"));
 const UserPaymentCancelled = lazy(() => import ( "../../components/userComponents/UserPaymentCancelled"));
 const UserAppointments = lazy(() => import ( "../../components/userComponents/UserAppointments"));
-const UserVideoCall = lazy(() => import ( "../../components/userComponents/UserVideoCall"));
+// const UserVideoCall = lazy(() => import ( "../../components/userComponents/UserVideoCall"));
 const AiHealthStatusGenerator = lazy(() => import ( "../../components/userComponents/AiHealthStatus"));
 const UserHealthReportAnalysis = lazy(() => import ( "../../components/userComponents/UserHealthReportAnalysis"));
 const VideoCall = lazy(() => import ( "../../sharedComponents/VideoCall"));

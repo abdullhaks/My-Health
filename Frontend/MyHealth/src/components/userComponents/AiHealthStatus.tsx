@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"; 
 import { FaHeartbeat, FaInfoCircle, FaSpinner } from "react-icons/fa";
 import { GoogleGenerativeAI } from "@google/generative-ai"; 
+import { ApiError } from "../../interfaces/error";
 
 const AiHealthStatusGenerator = () => {
   const [height, setHeight] = useState<string>("");
@@ -70,10 +71,14 @@ const AiHealthStatusGenerator = () => {
     try {
       const generatedText = await run(prompt);
       setHealthStatus(generatedText);
-    } catch (err: any) {
+    } catch (err ) {
       console.error("Error generating health status:", err);
       setError(
-        `Failed to generate health status: ${err.message || "An unknown error occurred."} Please check your Gemini API key and quota.`
+        `Failed to generate health status: ${
+          typeof err === "object" && err !== null && "message" in err
+            ? (err as { message?: string }).message
+            : "An unknown error occurred."
+        } Please check your Gemini API key and quota.`
       );
     } finally {
       setLoading(false);

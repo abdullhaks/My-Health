@@ -421,7 +421,7 @@ export const getBlogs = async (search: string, page: number, limit: number) => {
   }
 };
 
-export const getDashboardContent = async (days:number,userId: string,latitude:number,longitude:number) => {
+export const getDashboardContent = async (days:number,userId: string,latitude:number | null,longitude:number | null) => {
   try {
 
     console.log("lati and longi ... are ...",latitude,longitude);

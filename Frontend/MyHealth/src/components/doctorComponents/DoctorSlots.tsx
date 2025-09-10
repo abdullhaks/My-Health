@@ -33,6 +33,7 @@ import {
 } from "../../api/doctor/doctorApi";
 import axios from "axios";
 import {sessionData as Session}  from "../../interfaces/session"
+import { IDoctorData } from "../../interfaces/doctor";
 
 
 interface Appointment {
@@ -86,7 +87,7 @@ const defaultSession: Session = {
 };
 
 const DoctorSlots = () => {
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const doctorId = doctor._id;
   const [sessions, setSessions] = useState<Session[]>([]);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
@@ -99,11 +100,18 @@ const DoctorSlots = () => {
   const [validationError, setValidationError] = useState<string>("");
   const socketRef = useRef<Socket | null>(null);
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
-  const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
+  const [unAvailableSessions, setUnAvailableSessions] = useState<{ day: string; sessionId: string }[]>([]);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const minDate = new Date();
 
-  const notify = async (cancels: any) => {
+  const notify = async (cancels: {
+        appointmentId: string;
+        userId: string;
+        doctorName: string;
+        date: string;
+        start: Date;
+        end: Date;
+      }[]) => {
     if (!cancels.length) {
       return;
     }
@@ -224,7 +232,7 @@ const DoctorSlots = () => {
 
       const unAvailableDays = await getUnavailableDays(doctorId);
       const unAvailableSessions = await getUnavailableSessions(doctorId);
-      const BookedSlots: any = await getBookedSlots(doctorId, localDate);
+      const BookedSlots = await getBookedSlots(doctorId, localDate);
       console.log("BookedSlots are/......", BookedSlots);
       console.log("unAvailableDays are/......", unAvailableDays);
       setBookedSlots(BookedSlots);
@@ -277,10 +285,10 @@ const DoctorSlots = () => {
         })
         .map((us) => us.sessionId);
       const availableSessions = allDaySessions.filter(
-        (s) => !unavailableIds.includes(s._id)
+        (s) => !unavailableIds.includes(s._id || "")
       );
       const unavailableSessions = allDaySessions.filter((s) =>
-        unavailableIds.includes(s._id)
+        unavailableIds.includes(s._id || "")
       );
       setUnavailableDaySessions(unavailableSessions);
 
@@ -1058,7 +1066,7 @@ const DoctorSlots = () => {
                             bgClass: "",
                             textClass: "",
                             borderClass: "",
-                            icon: null as any,
+                            icon: null as React.ReactNode,
                           };
 
                           switch (slot.status) {

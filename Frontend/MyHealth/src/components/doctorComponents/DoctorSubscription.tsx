@@ -54,10 +54,15 @@ const DoctorSubscriptionPlans = () => {
     if (isPremium) {
       toast.info('You are already a premium member');
       return;
+    };
+
+    if(!doctor||!doctor._id){
+      toast.info('Subscription failed');
+      return;
     }
     try {
       const data = await handlePayment(priceId, {
-        doctorId: doctor._id,
+        doctorId: doctor?._id,
         type: 'subscription',
         role: 'doctor',
       });

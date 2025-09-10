@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchingDoctors } from '../../api/user/userApi';
 import { useNavigate } from 'react-router-dom';
+import { IDoctor } from '../../interfaces/doctor';
 
 const Doctors = () => {
   const [doctors, setDoctors] = useState([]);
@@ -44,7 +45,7 @@ const Doctors = () => {
     }
   };
 
-  const handleDoctorClick = (doctor: any) => {
+  const handleDoctorClick = (doctor: IDoctor) => {
     navigate(`/user/doctor-details/${doctor._id}`, { state: { doctor } });
   };
 
@@ -120,7 +121,7 @@ const Doctors = () => {
           ) : doctors.length === 0 ? (
             <p>No doctors found.</p>
           ) : (
-            doctors.map((doc: any) => (
+            doctors.map((doc: IDoctor) => (
               <div
                 key={doc._id}
                 className="flex items-center gap-4 p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50 transition"

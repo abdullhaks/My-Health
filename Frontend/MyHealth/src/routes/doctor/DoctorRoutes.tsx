@@ -17,7 +17,7 @@ const DoctorProfile = lazy(() => import ( "../../components/doctorComponents/Doc
 const DoctorChat = lazy(() => import ( "../../components/doctorComponents/DoctorChat"));
 const DoctorSlots = lazy(() => import ( "../../components/doctorComponents/DoctorSlots"));
 const DoctorAppointments = lazy(() => import ( "../../components/doctorComponents/DoctorAppointments"));
-const DoctorVideoCall = lazy(() => import ( "../../components/doctorComponents/DoctorVideoCall"));
+// const DoctorVideoCall = lazy(() => import ( "../../components/doctorComponents/DoctorVideoCall"));
 const VideoCall = lazy(() => import ( "../../sharedComponents/VideoCall"));
 const DoctorReportAnalysis  = lazy(() => import ( "../../components/doctorComponents/DoctorReportAnalysis"));
 const DoctorSubscriptionPlans = lazy(() => import ( "../../components/doctorComponents/DoctorSubscription"));

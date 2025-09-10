@@ -7,7 +7,7 @@ import {
   } from '../../api/doctor/doctorApi';
 import { useSelector } from 'react-redux';
 import { advertisement } from '../../interfaces/advertisement';
-import { IUserData } from '../../interfaces/user';
+import { IDoctorData } from '../../interfaces/doctor';
 
 // Blog Card Component
 const AddCard = memo(({ add, onView, onEdit, onDelete }: {
@@ -73,7 +73,7 @@ const AddCard = memo(({ add, onView, onEdit, onDelete }: {
 
 const DoctorAdds = () => {
 
-  const Doctor = useSelector((state: IUserData) => state.doctor.doctor);
+  const Doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
   const [adds, setAdds] = useState<advertisement[]>([]);
   const [selectedAdd,setSelectedAdd] = useState(null)
   const [page, setPage] = useState(1);

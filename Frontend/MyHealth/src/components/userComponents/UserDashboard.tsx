@@ -4,6 +4,7 @@ import { getDashboardContent, getLatestPrescription } from '../../api/user/userA
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { message } from 'antd';
+import { IUserData } from '../../interfaces/user';
 
 interface Blog {
   _id: string;
@@ -53,10 +54,13 @@ const UserDashboard = () => {
   const [isHovering, setIsHovering] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const navigate = useNavigate();
-  const user = useSelector((state: any) => state.user.user);
-  const [location, setLocation] = useState<any>(null);
-  const [latitude, setLatitude] = useState<any>(null);
-  const [longitude, setLongitude] = useState<any>(null);
+  const user = useSelector((state: IUserData) => state.user.user);
+  const [location, setLocation] = useState<{
+        latitude: number,
+        longitude:number,
+      } | null >(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [latestPrescription, setLatestPrescription] = useState<Prescription | null>(null);
 
   const fetchDashboardContent = async () => {
@@ -187,7 +191,7 @@ const UserDashboard = () => {
       return;
     }
 
-    const successHandler = (position: any) => {
+    const successHandler = (position: GeolocationPosition) => {
       console.log("location is ...", position);
       setLocation({
         latitude: position.coords.latitude,
@@ -197,8 +201,8 @@ const UserDashboard = () => {
       setLongitude(position.coords.longitude);
     };
 
-    const errorHandler = (err: any) => {
-      message.error("Location accessing failed", err);
+    const errorHandler = (err: GeolocationPositionError) => {
+      message.error(`Location accessing failed: ${err.message}`);
       setLocation(null);
       setLatitude(null);
       setLongitude(null);
@@ -237,7 +241,7 @@ const UserDashboard = () => {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-2xl font-bold text-gray-800">
-                {getGreeting()}, {user?.name || "User"}!
+                {getGreeting()}, {user.fullName || "User"}!
               </h2>
 
               {latestPrescription && (

@@ -3,6 +3,7 @@ import { getAnalysisReports, submitAnalysisReports, cancelAnalysisReports } from
 import { useSelector } from "react-redux";
 import { message, Popconfirm } from "antd";
 import { FileText, Eye, X, User, AlertCircle, CheckCircle, Clock, XCircle, Send, Plus, Stethoscope } from "lucide-react";
+import { IDoctorData } from "../../interfaces/doctor";
 
 type Report = {
   _id: string;
@@ -24,7 +25,7 @@ const DoctorReportAnalysis = ()=> {
   const [isLoading, setIsLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
-  const doctor = useSelector((state: any) => state.doctor.doctor);
+  const doctor = useSelector((state: IDoctorData) => state.doctor.doctor);
 
   const handleCancel = async (report: Report) => {
     const analysisId = report._id;
@@ -356,7 +357,7 @@ const DoctorReportAnalysis = ()=> {
                           placeholder="Enter your detailed medical analysis and recommendations here..."
                         />
                         <p className="text-sm text-gray-500">
-                          Provide a comprehensive analysis including diagnosis, recommendations, and any follow-up instructions.
+                          Provide a comprehensive analysis including diagnosis, recommendations, and follow-up instructions.
                         </p>
                       </div>
                     )}

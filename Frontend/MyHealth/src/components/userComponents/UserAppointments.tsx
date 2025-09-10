@@ -8,6 +8,8 @@ import { io, Socket } from "socket.io-client";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import axios from "axios";
 import moment from "moment";
+import { IUserData } from "../../interfaces/user";
+import { ApiError } from "../../interfaces/error";
 
 interface IAppointment {
   _id: string;
@@ -52,7 +54,7 @@ const UserAppointments = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 5;
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const socketRef = useRef<Socket | null>(null);
@@ -147,10 +149,10 @@ const UserAppointments = () => {
 
         setAppointments(response.appointments || []);
         setTotalPages(response.totalPages || 1);
-      } catch (error: any) {
+      } catch (error) {
         console.error("Error fetching appointments:", error);
         setErrorMessage(
-          error.response?.data?.message || "Failed to load appointments. Please try again."
+          (error as ApiError).response?.data?.message || "Failed to load appointments. Please try again."
         );
       } finally {
         setIsFetching(false);
@@ -221,17 +223,17 @@ const UserAppointments = () => {
       } else {
         message.error(response.message);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error cancelling appointment:", error);
       setErrorMessage(
-        error.response?.data?.message || "Failed to cancel appointment. Please try again."
+        (error as ApiError).response?.data?.message || "Failed to cancel appointment. Please try again."
       );
     } finally {
       setIsCanceling(false);
     }
   };
 
-  const handleJoin = (appointmentId: string, appointment: any) => {
+  const handleJoin = (appointmentId: string, appointment: IAppointment) => {
     navigate(`/user/video-call/${appointmentId}`, { state: { appointment } });
   };
 
@@ -271,7 +273,7 @@ const UserAppointments = () => {
     {
       title: "Date & Time",
       key: "dateTime",
-      render: (_: any, record: IAppointment) =>
+      render: (_: IAppointment, record: IAppointment) =>
         `${moment(record.start).format("MMM DD, YYYY h:mm A")} - ${moment(record.end).format("h:mm A")}`,
     },
     {
@@ -295,7 +297,7 @@ const UserAppointments = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: IAppointment) => (
+      render: (_: IAppointment, record: IAppointment) => (
         <div className="flex gap-2">
           {record.appointmentStatus === "booked" && (
             <button

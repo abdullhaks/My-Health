@@ -69,7 +69,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
         setNotifications((prev) => {
               const existingIds = new Set(prev.map((n) => n._id));
               const newNotifications = response
-                .map((n: any) => ({
+                .map((n: Notification) => ({
                   ...n,
                   date: new Date(n.createdAt),
                   createdAt: new Date(n.createdAt),
@@ -80,7 +80,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
               );
             });
 
-        const unreadCount = response.filter((n: any) => !n.isRead).length;
+        const unreadCount = response.filter((n: Notification) => !n.isRead).length;
         setNotificationCount(unreadCount);
           }
       } catch (error) {
@@ -305,6 +305,10 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
   };
 
   const markAllAsRead = async () => {
+    if(!doctor||!doctor._id){
+         
+          return;
+        }
     try {
       await axios.put(
         `http://localhost:3000/api/doctor/notifications/read-all`,
@@ -573,7 +577,7 @@ const Layout: React.FC<DoctorLayoutProps> = ({ children }) => {
                 <button className="flex items-center focus:outline-none">
                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-purple-600">
                     <img
-                      src={doctor.profile || "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
+                      src={doctor?.profile?doctor.profile : "https://myhealth-app-storage.s3.ap-south-1.amazonaws.com/users/profile-images/avatar.png"}
                       alt="Doctor Profile"
                       className="w-full h-full object-cover"
                     />

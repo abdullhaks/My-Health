@@ -4,5 +4,4 @@ export interface transactionsFilter {
         paymentFor?: string;
         startDate?: string;
         endDate?: string;
-}
-
+};

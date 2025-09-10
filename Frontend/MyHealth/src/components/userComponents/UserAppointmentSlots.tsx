@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { getSessions, getBookedSlots, getUnavailableDays, getUnavailableSessions } from "../../api/user/userApi";
+import { IAppointmentData } from "../../interfaces/appointment";
 
 interface Session {
   _id?: string;
@@ -37,7 +38,7 @@ const UserAppointmentSlots = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]); 
   const [unAvailableDays, setUnAvailableDays] = useState<string[]>([]);
-  const [unAvailableSessions, setUnAvailableSessions] = useState<any[]>([]);
+  const [unAvailableSessions, setUnAvailableSessions] = useState<{ day: string; sessionId: string }[]>([]);
 
   const minDate = new Date();
   const maxDate = new Date();
@@ -92,7 +93,7 @@ const UserAppointmentSlots = () => {
         console.log("unAvailableSessions are/......", unavailableSessionsResponse);
         setUnAvailableDays(unavailableDaysResponse || []);
         setUnAvailableSessions(unavailableSessionsResponse || []);
-        setBookedSlots(bookedResponse.map((slot: any) => slot.slotId) || []);
+        setBookedSlots(bookedResponse.map((slot: IAppointmentData) => slot.slotId) || []);
      
       } catch (error) {
         console.error("Error fetching data:", error);

@@ -8,19 +8,39 @@ import { useEffect, useState } from "react";
 import { forgetPassword } from "../../api/admin/adminApi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ApiError } from "../../interfaces/error";
 
+// Define the validation schema
 const adminEmailSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+// Define interfaces for form data and errors
+interface FormData {
+  email: string;
+}
+
+interface FormErrors {
+  email: string;
+}
+
+// Define interface for API response and error
+interface ForgetPasswordResponse {
+  email: string;
+}
+
+interface ApiErrorResponse {
+  msg?: string;
+}
+
 function AdminForgetPassword() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     email: "",
   });
 
@@ -33,9 +53,13 @@ function AdminForgetPassword() {
   useEffect(() => {
     const result = adminEmailSchema.safeParse(formData);
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = {
+        email: "",
+      };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        if (err.path[0] === "email") {
+          errors.email = err.message;
+        }
       });
       setErrors(errors);
       setIsFormValid(false);
@@ -56,12 +80,16 @@ function AdminForgetPassword() {
 
     const result = adminEmailSchema.safeParse(formData);
     if (!result.success) {
-      const errors: any = {};
+      const errors: FormErrors = {
+        email: "",
+      };
       result.error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
+        if (err.path[0] === "email") {
+          errors.email = err.message;
+        }
       });
       setErrors(errors);
-      return;
+      return; // Exit early if validation fails
     }
 
     try {
@@ -76,9 +104,9 @@ function AdminForgetPassword() {
       localStorage.setItem("adminEmail", response.email);
       toast.info("Check your email to reset your password.");
       navigate("/admin/resetPassword");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Forgot password failed:", error);
-      toast.error("Something went wrong. Please try again later.");
+      toast.error((error as ApiError).response?.data?.msg || "Something went wrong. Please try again later.");
       setErrors({ ...errors, email: "Invalid email address" });
     }
   };
@@ -122,8 +150,6 @@ function AdminForgetPassword() {
                   }`}
                 />
               </form>
-
-              
             </div>
           </div>
         </div>

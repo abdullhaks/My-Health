@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getDoctor, createOneTimePayment ,walletPayment } from "../../api/user/userApi";
 import { loadStripe } from "@stripe/stripe-js";
 import { useSelector } from "react-redux";
+import { IUserData } from "../../interfaces/user";
 
 interface AppointmentSlot {
   id: string;
@@ -38,7 +39,7 @@ const UserAppointmentConfirmation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
-  const user =  useSelector((state: any) => state.user.user);
+  const user =  useSelector((state: IUserData) => state.user.user);
  
 
   useEffect(() => {

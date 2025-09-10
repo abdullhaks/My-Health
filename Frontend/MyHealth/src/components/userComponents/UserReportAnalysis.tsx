@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { message, Popconfirm } from "antd";
 import { updateUser } from "../../redux/slices/userSlices";
 import { FileText, Eye, X,User,AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
+import { IUserData } from "../../interfaces/user";
 
 type Report = {
   _id: string;
@@ -23,7 +24,7 @@ const UserReportAnalysis = ()=> {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
   const dispatch = useDispatch();
 
   const handleCancel = async (report: Report) => {

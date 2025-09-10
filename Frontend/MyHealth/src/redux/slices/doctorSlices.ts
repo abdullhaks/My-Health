@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IDoctor } from '../../interfaces/doctor';
 
 interface AuthState {
-    doctor: any;
+    doctor: IDoctor | null;
   }
   
   const initialState: AuthState = {
@@ -13,14 +14,16 @@ interface AuthState {
     name: 'doctor',
     initialState,
     reducers: {
-      loginDoctor: (state, action: PayloadAction<{ doctor: any }>) => {
+      loginDoctor: (state, action: PayloadAction<{ doctor: IDoctor }>) => {
         state.doctor = action.payload.doctor;
       },
       logoutDoctor: (state) => {
         state.doctor = null;
       },
-      updateDoctor(state, action: PayloadAction<any>) {
+      updateDoctor(state, action: PayloadAction<Partial<IDoctor>>) {
+        if (state.doctor) {
         state.doctor = { ...state.doctor, ...action.payload };
+            }
       },
     },
   });

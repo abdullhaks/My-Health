@@ -15,7 +15,7 @@ function DoctorOtpVerification() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let interval: any;
+    let interval:NodeJS.Timeout 
 
     if (resendDisabled && timer > 0) {
       interval = setInterval(() => {
@@ -36,8 +36,8 @@ function DoctorOtpVerification() {
       await resendDoctorOtp(email);
       toast.success("OTP resent to your email.");
       setResendDisabled(true);
-    } catch (err: any) {
-      toast.error(err.toString());
+    } catch (err: string | unknown) {
+      toast.error(err?err.toString():"resent otp failed");
     }
   };
 

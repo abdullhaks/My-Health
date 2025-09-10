@@ -1,2 +1,9 @@
 node_modules/
 .env
+
+
+# Ignore all log files
+*.log
+
+# Ignore logs directory
+Backend/src/utils/logs/

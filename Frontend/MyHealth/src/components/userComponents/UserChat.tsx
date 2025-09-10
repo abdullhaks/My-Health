@@ -9,7 +9,8 @@ import { message } from "antd";
 import axios from "axios";
 import doodle from "../../assets/bg_print.png";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AnyZodTuple } from "zod";
+import { IUserData } from "../../interfaces/user";
+import { ApiError } from "../../interfaces/error";
 
 interface Message {
   _id: string;
@@ -25,7 +26,7 @@ interface Message {
 
 interface Conversation {
   _id: string;
-  members: { _id: string; name: string; avatar: string }[];
+  members: { _id: string;userId:string; name: string; avatar: string }[];
 }
 
 interface User {
@@ -34,7 +35,7 @@ interface User {
 }
 
 const UserChat = () => {
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: IUserData) => state.user.user);
   const userId = user?._id;
   const [doctorId,setDoctorId] =  useState ('');
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -71,10 +72,10 @@ const UserChat = () => {
     }
   };
 
-  const settingCurrentChat = (c: any) => {
+  const settingCurrentChat = (c: Conversation) => {
   setCurrentChat(c);
   // Find the member who is NOT the logged-in user (assumed to be the doctor)
-  const doctor = c.members.find((m: any) => m._id !== userId);
+  const doctor = c.members.find((m: { _id: string;userId:string; name: string; avatar: string }) => m._id !== userId);
   if (doctor) {
     setDoctorId(doctor._id || doctor.userId); // Use _id or userId based on API structure
   } else {
@@ -331,7 +332,12 @@ useEffect(() => {
   const handleSendMessage = async () => {
     if (!currentChat || (!newMessage.trim() && !docMessage)) return;
 
-    let messageData: any;
+    let messageData: {
+          senderId: string,
+          conversationId: string,
+          type:string,
+          content: string,
+          fileName?: string,};
     let tempMessage: Message;
 
     try {
@@ -391,9 +397,9 @@ useEffect(() => {
       }
 
       socketRef.current?.emit("sendMessage", { ...messageData, _id: tempMessage._id });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Message send failed:", error);
-      message.error(error.response?.data?.message || "Failed to send message");
+      message.error((error as ApiError).response?.data?.message || "Failed to send message");
       setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
     }
   };

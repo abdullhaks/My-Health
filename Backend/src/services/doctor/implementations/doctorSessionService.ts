@@ -396,7 +396,7 @@ async makeSessionsAvailable(doctorId:string, day:Date, sessionId:string):Promise
 
 }
  
-async getUnavailablSessions(doctorId:string):Promise<{ day: String; sessionId: string }[] | [] |null>{
+async getUnavailablSessions(doctorId:string):Promise<{ day: string; sessionId: string }[] | [] |null>{
     try{
         console.log("doctorId and day from service....:", doctorId);
         let today = new Date();
@@ -410,7 +410,7 @@ async getUnavailablSessions(doctorId:string):Promise<{ day: String; sessionId: s
         const response = await this._unAvailableSessionRepository.findAll({doctorId:doctorId,day:{$gte:nDate}})
 
         let sessions = response.map((item)=> {
-            let sess: { day: String; sessionId: string } = { day: item.day, sessionId: item.sessionId.toString() };
+            let sess: { day: string; sessionId: string } = { day: item.day.toString(), sessionId: item.sessionId.toString() };
             return sess;
         });
 

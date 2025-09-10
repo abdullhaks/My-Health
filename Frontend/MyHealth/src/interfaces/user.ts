@@ -4,11 +4,8 @@ export interface ISpecializations{
     certificate:string;
 }
 
-
-export interface IUserData {
-
-  doctor:{
-    doctor: {
+export interface IUser {
+  
     _id:string;
     fullName:string;
     email:string;
@@ -19,34 +16,22 @@ export interface IUserData {
     dob?:string;
     isBlocked:boolean;
     isVerified:boolean;
-    premiumMembership:boolean;
-    subscriptionId?:string;
-    adminVerified:number;
-    rejectionReason?:string;
-    graduation:string;
-    graduationCertificate:string;
-    category:string;
-    registerNo:string;
-    registrationCertificate:string;
-    experience:number;
-    reportAnalysisFees:number;
-    specializations:ISpecializations[]|[];
-    verificationId:string;
+    bmi?:string;
+    medicalTags?:string;
+    latestHealthSummary?:string;
     walletBalance:number;
-    bankAccNo?:string,
-    bankAccHolderName?:string,
-    bankIfscCode?:string,
+    tags:string[];
     createdAt:Date;
     updatedAt:Date
 
 }
+
+export interface IUserData {
+
+  user:{
+    user:IUser
+  }
 }
-
-   
-
-}
-
-
 
 
 export interface userSignupData {
@@ -92,7 +77,7 @@ interface ILocation {
 export interface userProfileData {
   fullName: string;
   medicalTags:string,
-  location: ILocation;
+  location: ILocation| null;
   dob: string;
   phone: string;
   gender: string;
